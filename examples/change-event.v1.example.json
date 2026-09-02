@@ -1,0 +1,13 @@
+{
+  "id": "evt_01jf8w2c9km3q7xz5r0v4t6y8b",
+  "type": "repo-adopted",
+  "occurredAt": "2027-03-14T10:00:00Z",
+  "payload": {
+    "nodeId": "R_kgDOAbc123",
+    "owner": "acme",
+    "name": "widget-engine",
+    "state": "verified",
+    "licenseVersion": "1.0",
+    "recordUrl": "https://api.purposesource.org/v1/registry/repo/R_kgDOAbc123.json"
+  }
+}

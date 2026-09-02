@@ -1,0 +1,41 @@
+{
+  "cid": "cert_01jf8w2c9km3q7xz5r0v4t6y8a",
+  "typ": "supporter",
+  "variant": "entitlement",
+  "sub": "Example Industries AG",
+  "subId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
+  "subjectKind": "company",
+  "scope": {
+    "kind": "project",
+    "repos": ["R_kgDOAbc123"]
+  },
+  "band": "10-100M",
+  "amountMinor": 40000,
+  "cur": "USD",
+  "amountKind": "fee-paid",
+  "period": {
+    "validFrom": "2027-01-01",
+    "validUntil": "2027-12-31"
+  },
+  "iat": 1798761600,
+  "iss": "https://api.purposesource.org",
+  "scheduleVersion": "v1",
+  "claimKitVersion": "kit-1.0",
+  "verify": "https://purposesource.org/verify/cert_01jf8w2c9km3q7xz5r0v4t6y8a",
+  "factRefs": {
+    "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d"
+  },
+  "supersedes": null,
+  "claims": {
+    "kitVersion": "kit-1.0",
+    "permitted": [
+      "holds a Project Entitlement of the Purpose Source Network; Purpose Fee amount: $400; period: 2027; categories: climate, health"
+    ],
+    "prohibited": [
+      "we support charity",
+      "we give back",
+      "any unquantified social-impact framing"
+    ],
+    "binding": "public claims about this certificate are governed by the enclosed claim-language kit"
+  }
+}

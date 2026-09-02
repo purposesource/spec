@@ -1,0 +1,1939 @@
+openapi: 3.1.0
+
+info:
+  title: Purpose Source Network — public read API
+  version: 1.0.0
+  summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
+  description: |
+    Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
+    API key to request, no account to create, and no rate plan to negotiate — an OSPO or
+    an SCA scanner can consume this API the way it consumes a static file, because that is
+    essentially what it is.
+
+    ## The one architectural rule
+
+    These endpoints serve **only published artifacts**. The workers behind them hold no
+    database path by construction, which is what makes the public surface cost almost
+    nothing at idle and shrug at a hundredfold traffic spike. Freshness is therefore
+    **eventually consistent by design**: the published propagation bound for
+    coverage-relevant state is five minutes worldwide, and nothing here promises real
+    time.
+
+    Every artifact response carries an `ETag` and a `Last-Modified` equal to the
+    artifact's own `generatedAt`, and honours `If-None-Match` with `304`. Polling with
+    `If-None-Match` is the intended usage pattern, not an abuse of it.
+
+    ## Errors
+
+    Every failure answers with the same envelope and a stable, lowercase machine `code`:
+
+    ```json
+    { "error": { "code": "repo_not_registered", "message": "…", "traceId": "…" } }
+    ```
+
+    Codes are additive-only. A breaking change means a new versioned URL, never an
+    in-place mutation of this one.
+
+    ## Phase availability
+
+    Not every route is live yet. Each operation carries `x-psn-phase`:
+
+    - `P-M2` — live in the first public version.
+    - `P-M3` — the computed coverage endpoint. At P-M2 the coverage proof is the
+      published entitlement JWS plus the human verify page; the endpoint activates later
+      with no schema change.
+    - `P-M4` — the change feed and the sandbox tenant, both demand-gated.
+
+    ## Machine-readable schemas
+
+    Every artifact body is described by a JSON Schema published alongside this document
+    at `https://purposesource.org/spec/schemas/`. The schemas are the authority on
+    artifact content; this document is the authority on routes, status codes and caching.
+
+    ## Apex aliases
+
+    A few canonical endpoints are also mounted on the apex domain by the same worker:
+    `/registry.json` (the bulk registry export), `/transparency.json` (the latest ledger
+    export), `/schedule.json` (the current fee-schedule version), `/stats.json`,
+    `/jwks.json` and `/ct/*`. They serve byte-identical bodies.
+  contact:
+    name: Purpose Source Network
+    url: https://purposesource.org/trust/api
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+
+servers:
+  - url: https://api.purposesource.org
+    description: Production. The only production host.
+
+# Deliberately empty: every route is unauthenticated and keyless. There is no scheme to
+# declare because there is nothing to authenticate — an OSPO consumes this API the way it
+# consumes a static file. Stated explicitly rather than omitted, so a reader can tell the
+# difference between "no security" and "security we forgot to document".
+security: []
+
+tags:
+  - name: coverage
+    description: The coverage answer — is this organisation covered for this repository?
+  - name: certificates
+    description: Certificate verification and the transparency log.
+  - name: keys
+    description: Signing-key publication (JWKS).
+  - name: registry
+    description: The registry of adopting repositories.
+  - name: entitlements
+    description: Signed organisation entitlement records.
+  - name: ledger
+    description: The append-only allocation ledger and its hash chain.
+  - name: badges
+    description: README badge endpoints in the shields.io endpoint format.
+  - name: counters
+    description: Public counters, with an explicit state machine so an absent number is a documented state.
+  - name: changes
+    description: The change-event feed — the sync primitive for integrators.
+  - name: forms
+    description: No-storage intake routes for contact, abuse and data-subject requests.
+  - name: meta
+    description: Deployment self-description and diagnostics.
+
+paths:
+  /v1/coverage:
+    get:
+      operationId: getCoverage
+      summary: Coverage answer for an organisation and a repository
+      description: |
+        Answers with one of exactly eight values, plus a `basis` block naming what
+        produced the answer and a `proof` pointing at the signed artifact that backs it.
+
+        **GET accepts an opaque company ULID only.** A domain in the `company` parameter
+        is rejected with `invalid_company_ref`, because a third-party organisation's
+        identifier must never appear in a shareable, CDN-cached, log-visible URL. Use
+        `POST` for a domain-keyed lookup.
+
+        Absence of a record for the organisation is `no`, never an error — legibility for
+        scanners matters more than a pedantic 404. An unregistered *repository*, by
+        contrast, is `repo_not_registered`: the question cannot be asked about a
+        repository that never adopted.
+
+        The answer is computed by a published, versioned pure function (`cov-v1`) over
+        three signed or published inputs. Its source and its frozen test vectors are in
+        the same repository as this document, and the running deployment publishes its own
+        module digest at `/v1/meta` — so the code that answered your query is checkable
+        against the code we published.
+      tags: [coverage]
+      x-psn-phase: P-M3
+      parameters:
+        - name: company
+          in: query
+          required: true
+          description: The organisation's platform ULID. A domain here is `invalid_company_ref` — use POST.
+          schema:
+            type: string
+            pattern: '^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$'
+          example: co_01jf8w2c9km3q7xz5r0v4t6y8b
+        - name: repo
+          in: query
+          required: true
+          description: The repository's GitHub node id. Names and owners are display caches and are not accepted.
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9_-]{4,128}$'
+          example: R_kgDOAbc123
+      responses:
+        '200':
+          description: The coverage answer. Edge-cached for 300 s and purged on every entitlement or waiver publish batch.
+          headers:
+            Cache-Control:
+              description: Edge cache policy for this route.
+              schema:
+                type: string
+              example: public, s-maxage=300
+            ETag:
+              description: Strong validator. Send it back as `If-None-Match`.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoverageResponse'
+              examples:
+                yesViaPass:
+                  summary: Covered by an active Pass
+                  value:
+                    answer: yes-via-pass
+                    basis:
+                      algoVersion: cov-v1
+                      company:
+                        coId: co_01jf8w2c9km3q7xz5r0v4t6y8b
+                        verification: domain-verified
+                      repo:
+                        nodeId: R_kgDOAbc123
+                        repoState: verified
+                      entitlement:
+                        entId: ent_01jf8w2c9km3q7xz5r0v4t6y9b
+                        lane: pass
+                        periodStart: '2027-01-01T00:00:00Z'
+                        periodEnd: '2028-01-01T00:00:00Z'
+                    asOf: '2027-06-01T12:00:00Z'
+                    proof:
+                      type: entitlement-jws
+                      url: https://api.purposesource.org/v1/entitlements/co_01jf8w2c9km3q7xz5r0v4t6y8b.jws
+                      sha256: b1946ac92492d2347c6235b4d2611184b1946ac92492d2347c6235b4d2611184
+                lapsedInGrace:
+                  summary: Term ended, inside the 30-day grace window
+                  value:
+                    answer: lapsed-in-grace
+                    basis:
+                      algoVersion: cov-v1
+                      company:
+                        coId: co_01jr7f1n8wx2a6gj4b9e3c5h7m
+                        verification: officer-attested
+                      repo:
+                        nodeId: R_kgDOAbc123
+                        repoState: verified
+                      entitlement:
+                        entId: ent_01jn4c8j5st9x3df1y6b0z2e5h
+                        lane: project
+                    asOf: '2027-06-01T12:00:00Z'
+                    dates:
+                      periodEnd: '2027-05-15T00:00:00Z'
+                      graceEnd: '2027-06-14T00:00:00Z'
+                    proof:
+                      type: entitlement-jws
+                      url: https://api.purposesource.org/v1/entitlements/co_01jr7f1n8wx2a6gj4b9e3c5h7m.jws
+                      sha256: b1946ac92492d2347c6235b4d2611184b1946ac92492d2347c6235b4d2611184
+                underThreshold:
+                  summary: Under the licence threshold — no entitlement required
+                  value:
+                    answer: no-entitlement-required-under-threshold
+                    basis:
+                      algoVersion: cov-v1
+                      company:
+                        coId: co_01jn4c8j5st9x3df1y6b0z2e4h
+                        verification: officer-attested
+                      repo:
+                        nodeId: R_kgDOAbc123
+                        repoState: verified
+                    asOf: '2027-06-01T12:00:00Z'
+                    dates:
+                      selfCertifiedAt: '2027-03-10T09:00:00Z'
+                    proof:
+                      type: entitlement-jws
+                      url: https://api.purposesource.org/v1/entitlements/co_01jn4c8j5st9x3df1y6b0z2e4h.jws
+                yesViaWaiver:
+                  summary: Covered by a gratis waiver granted by the project admin
+                  value:
+                    answer: yes-via-waiver
+                    basis:
+                      algoVersion: cov-v1
+                      company:
+                        coId: co_01jk2a6g3qr7v1bd9w4z8x0c2f
+                        verification: unverified
+                      repo:
+                        nodeId: R_kgDOAbc123
+                        repoState: verified
+                      waiver:
+                        wvrId: wvr_01jk2a6g3qr7v1bd9w4z8x0c3f
+                        grantedAt: '2027-04-01T00:00:00Z'
+                    asOf: '2027-06-01T12:00:00Z'
+                    proof:
+                      type: waiver-record
+                      url: https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f
+                noRecord:
+                  summary: No record for this organisation — `no`, and no proof
+                  value:
+                    answer: no
+                    basis:
+                      algoVersion: cov-v1
+                      company: null
+                      note: no registry record for this organization
+                      repo:
+                        nodeId: R_kgDOAbc123
+                        repoState: verified
+                    asOf: '2027-06-01T12:00:00Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+    post:
+      operationId: postCoverage
+      summary: Coverage answer, accepting a verified domain
+      description: |
+        Identical semantics and identical response schema to the GET form. It exists for
+        one reason: a domain-keyed lookup must not travel in a URL. POST bodies are not
+        cached, not shared in links, and not written to access logs the way query strings
+        are.
+
+        `company` accepts either a platform ULID or a domain that has been
+        **domain-verified** for exactly one organisation. A domain mapping to more than
+        one organisation answers `company_ambiguous` and lists nothing — the caller must
+        use a ULID.
+
+        Never cached. It computes from the same cached artifacts the GET form uses, so it
+        costs the same.
+      tags: [coverage]
+      x-psn-phase: P-M3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [company, repo]
+              properties:
+                company:
+                  type: string
+                  maxLength: 253
+                  description: A `co_` ULID or a verified domain.
+                repo:
+                  type: string
+                  pattern: '^[A-Za-z0-9_-]{4,128}$'
+                  description: The repository's GitHub node id.
+            examples:
+              byDomain:
+                summary: Domain-keyed lookup
+                value:
+                  company: example.com
+                  repo: R_kgDOAbc123
+      responses:
+        '200':
+          description: The coverage answer. Never cached.
+          headers:
+            Cache-Control:
+              description: POST responses are never cached.
+              schema:
+                type: string
+              example: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoverageResponse'
+              examples:
+                yesViaProject:
+                  summary: Covered by a Project term that declared this repository
+                  value:
+                    answer: yes-via-project
+                    basis:
+                      algoVersion: cov-v1
+                      company:
+                        coId: co_01jh0y4e1np5s9zb7t2x6v8a0d
+                        verification: domain-verified
+                      repo:
+                        nodeId: R_kgDOAbc123
+                        repoState: verified
+                      entitlement:
+                        entId: ent_01jh0y4e1np5s9zb7t2x6v8a1d
+                        lane: project
+                        periodStart: '2027-03-20T00:00:00Z'
+                        periodEnd: '2028-03-19T00:00:00Z'
+                    asOf: '2027-06-01T12:00:00Z'
+                    proof:
+                      type: entitlement-jws
+                      url: https://api.purposesource.org/v1/entitlements/co_01jh0y4e1np5s9zb7t2x6v8a0d.jws
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/verify/{certId}:
+    get:
+      operationId: getCertificateRecord
+      summary: Verify record for one certificate
+      description: |
+        Passthrough of the published certificate record. The human verify page is the
+        canonical place a certificate is checked; this route serves the same artifact to
+        machines.
+
+        Read the `ct` block carefully. A certificate whose signature verifies while its
+        hash is **absent** from the transparency log must be treated as UNVERIFIED, not as
+        a soft warning — that absence is exactly what a rogue issuance looks like. `ct:
+        null` means signed-but-not-yet-logged.
+
+        The record never contains more subject data than the certificate itself displays.
+        Individual-subject records are unlisted: reachable only by their unguessable id,
+        excluded from every index and sitemap, and served with `X-Robots-Tag: noindex`.
+      tags: [certificates]
+      x-psn-phase: P-M2
+      parameters:
+        - name: certId
+          in: path
+          required: true
+          description: Certificate id — a prefixed ULID, non-guessable by construction.
+          schema:
+            type: string
+            pattern: '^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$'
+          example: cert_01jf8w2c9km3q7xz5r0v4t6y8a
+      responses:
+        '200':
+          description: The certificate record. Cached 300 s, purged on issue and on revocation.
+          headers:
+            X-Robots-Tag:
+              description: Individual-subject records are never indexed.
+              schema:
+                type: string
+              example: noindex
+            ETag:
+              description: Strong validator.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/certificate-record.v1.json'
+              examples:
+                revoked:
+                  summary: A revoked corporate supporter certificate
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-03-02T10:00:00Z'
+                    cid: cert_01jf8w2c9km3q7xz5r0v4t6y8a
+                    status: revoked
+                    typ: supporter
+                    variant: entitlement
+                    sub: Example Industries AG
+                    scope:
+                      kind: project
+                      repos: [R_kgDOAbc123]
+                    band: 10-100M
+                    period:
+                      validFrom: '2027-01-01'
+                      validUntil: '2027-12-31'
+                    issuedAt: '2027-01-01T09:00:00Z'
+                    kid: psn-prod-2027-1
+                    ct:
+                      seq: 118234
+                      segment: 11
+                    revocation:
+                      reasonClass: project-delisting
+                      at: '2027-03-01T12:00:00Z'
+                    supersedes: null
+                    supersededBy: null
+                    verifyUrl: https://purposesource.org/verify/cert_01jf8w2c9km3q7xz5r0v4t6y8a
+                    jws: eyJhbGciOiJFUzI1NiIsImtpZCI6InBzbi1wcm9kLTIwMjctMSJ9.eyJjaWQiOiJjZXJ0XzAxamY4dzJjOWttM3E3eHo1cjB2NHQ2eThhIn0.MEUCIQDexampleSignatureBytesHereOnlyForDocumentation
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /jwks.json:
+    get:
+      operationId: getJwks
+      summary: Production signing keys (JWKS)
+      description: |
+        The production key set. Retired keys **stay here forever** with their validity
+        windows, so a certificate issued years ago still verifies — key rotation must never
+        invalidate what it signed.
+
+        The same key set is committed to this contract repository with signed commits, so
+        substituting keys on the website alone cannot forge trust. If the two copies
+        disagree, do not trust either: say so publicly.
+
+        Sandbox keys are a **disjoint set** published only at the sandbox path. A
+        production route refuses sandbox key material outright.
+      tags: [keys]
+      x-psn-phase: P-M2
+      responses:
+        '200':
+          description: The key set. Cached 3600 s, purged on rotation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jwks'
+              examples:
+                oneActiveKey:
+                  summary: One active key, one retired
+                  value:
+                    keys:
+                      - kty: EC
+                        crv: P-256
+                        x: f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU
+                        y: x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0
+                        kid: psn-prod-2027-1
+                        use: sig
+                        alg: ES256
+                        "psn:status": active
+                        "psn:validityWindow":
+                          notBefore: '2027-01-01T00:00:00Z'
+                          notAfter: null
+                      - kty: EC
+                        crv: P-256
+                        x: MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4
+                        y: 4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM
+                        kid: psn-prod-2026-1
+                        use: sig
+                        alg: ES256
+                        "psn:status": retired
+                        "psn:validityWindow":
+                          notBefore: '2026-01-01T00:00:00Z'
+                          notAfter: '2027-01-01T00:00:00Z'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /sandbox/jwks.json:
+    get:
+      operationId: getSandboxJwks
+      summary: Sandbox signing keys (JWKS) — never production
+      description: |
+        The integrator test-mode key set, documented as non-production. Sandbox
+        certificates sign with these keys, are marked as sandbox in every response body
+        and header, and **never enter the transparency log**. No route ever merges this
+        set with the production set.
+      tags: [keys]
+      x-psn-phase: P-M4
+      responses:
+        '200':
+          description: The sandbox key set. Cached 3600 s.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jwks'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /badge/{nodeId}.json:
+    get:
+      operationId: getBadge
+      summary: README badge (shields.io endpoint format)
+      description: |
+        The body a shields.io endpoint badge renders.
+
+        Two behaviours are deliberate and may look odd from the outside. First, an
+        **unknown repository answers 200**, with `isError: true` and the message "not
+        registered" — shields renders errors from bodies, not from status codes, so a 404
+        here would show a reader nothing at all. Second, a **suspended, quit or delisted**
+        repository renders the neutral form: a stale cached badge must never keep
+        asserting registration, so the worker serves neutral whenever the registry index
+        contradicts the cached artifact.
+
+        No money figure appears on any badge before real money has moved.
+      tags: [badges]
+      x-psn-phase: P-M2
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          description: The repository's GitHub node id.
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9_-]{4,128}$'
+          example: R_kgDOAbc123
+      responses:
+        '200':
+          description: |
+            The badge body — including for an unknown repository, which returns the
+            error-shaped body at 200. Cached 3600 s, stale-while-revalidate 24 h,
+            stale-if-error 7 days.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/badge.v1.json'
+              examples:
+                registered:
+                  summary: A verified repository
+                  value:
+                    schemaVersion: 1
+                    label: purpose source
+                    message: registered
+                    color: brightgreen
+                    cacheSeconds: 3600
+                neutral:
+                  summary: Suspended, quit or delisted — never keeps asserting registration
+                  value:
+                    schemaVersion: 1
+                    label: purpose source
+                    message: 'status: see registry'
+                    color: lightgrey
+                    cacheSeconds: 3600
+                unknown:
+                  summary: Unknown repository — 200 with an error-shaped body
+                  value:
+                    schemaVersion: 1
+                    isError: true
+                    label: purpose source
+                    message: not registered
+                    color: inactive
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          description: |
+            Only when no cached copy exists anywhere. Wherever one does, this route serves
+            stale rather than failing — a badge outage on someone's README is our problem,
+            not theirs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /stats.json:
+    get:
+      operationId: getStats
+      summary: Public counters
+      description: |
+        The counters shown on the site, with an explicit three-state machine so that a
+        missing number is a documented state rather than a bug.
+
+        In `pre-launch` every numeric field is `null`. In `launched-pre-disbursement` the
+        registry counts are real while the money figure stays `null` and
+        `firstDisbursementScheduledFor` names the date. Only in `post-first-franc` is the
+        money figure a number. "CHF 0" is never rendered — not as an achievement and not
+        as an embarrassment.
+
+        `state` is computed from real registry and ledger facts and is never set by hand.
+      tags: [counters]
+      x-psn-phase: P-M2
+      responses:
+        '200':
+          description: The counters. Regenerated daily, cached 3600 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/stats.v1.json'
+              examples:
+                preLaunch:
+                  summary: Before launch — mechanism copy only
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2026-09-01T05:00:00Z'
+                    state: pre-launch
+                    projectsRegistered: null
+                    contributorsClaimed: null
+                    companiesCovered: null
+                    chfRoutedMinor: null
+                    cur: CHF
+                    firstDisbursementScheduledFor: null
+                    loi: null
+                    detectedUnclaimed: null
+                    smallnessThresholds:
+                      projects: 25
+                      contributors: 50
+                      companies: 10
+                launched:
+                  summary: Launched, before the first disbursement
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-04-01T05:00:00Z'
+                    state: launched-pre-disbursement
+                    projectsRegistered: 12
+                    contributorsClaimed: null
+                    companiesCovered: 6
+                    chfRoutedMinor: null
+                    cur: CHF
+                    firstDisbursementScheduledFor: '2027-07-15'
+                    loi: null
+                    detectedUnclaimed: 3
+                    smallnessThresholds:
+                      projects: 25
+                      contributors: 50
+                      companies: 10
+                    links:
+                      registry: https://purposesource.org/registry
+                      ledger: https://purposesource.org/ledger
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/meta:
+    get:
+      operationId: getMeta
+      summary: Deployment self-description
+      description: |
+        What this deployment is running. Two fields matter to an auditor: the coverage
+        module's digest, which must equal the digest of the published reference
+        implementation, and the answer enumeration, which must be exactly the eight frozen
+        values.
+
+        Continuous integration checks the first equality on every deploy. This endpoint
+        lets anybody else check it too, at any time, without asking us.
+      tags: [meta]
+      x-psn-phase: P-M2
+      responses:
+        '200':
+          description: The deployment's own description.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Meta'
+              examples:
+                deployed:
+                  summary: A production deployment
+                  value:
+                    edgeVersion: 2027.06.01-3
+                    coverage:
+                      algoVersion: cov-v1
+                      moduleSha256: 3b1c9e0a5d7f2846bb14c0e9a7d3f5028c6b4a19e7d2f80315a9c4b6e8d0f2a4
+                    contracts:
+                      answerEnum:
+                        - yes-via-pass
+                        - yes-via-project
+                        - yes-via-portfolio
+                        - yes-via-waiver
+                        - yes-via-donation
+                        - 'no'
+                        - lapsed-in-grace
+                        - no-entitlement-required-under-threshold
+                      schemaVersions:
+                        repo-record: 1
+                        entitlement-record: 1
+                        certificate-record: 1
+                        badge: 1
+                        stats: 1
+                    routes:
+                      coverage: false
+                      changes: false
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /v1/registry/index/meta.json:
+    get:
+      operationId: getRegistryIndexMeta
+      summary: Registry index table of contents
+      description: |
+        The shard list, registry-wide counts, and the delisted set the badge route uses as
+        a guard against stale caches. Fetch this first; fetch only the shards you need.
+
+        Detected-but-unclaimed repositories are **counted here and listed nowhere**. A
+        repository that adopted the licence without claiming has made a licensing
+        decision, not a publicity decision.
+      tags: [registry]
+      x-psn-phase: P-M2
+      responses:
+        '200':
+          description: The index meta document. Cached 21600 s, stale-while-revalidate 24 h.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/registry-index-meta.v1.json'
+              examples:
+                small:
+                  summary: A small registry, honestly small
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-06-01T05:00:00Z'
+                    shards:
+                      - shard: w
+                        url: https://api.purposesource.org/v1/registry/index/w.json
+                        count: 2
+                      - shard: z
+                        url: https://api.purposesource.org/v1/registry/index/z.json
+                        count: 1
+                    exportUrl: https://api.purposesource.org/v1/registry/export.json
+                    totals:
+                      listed: 3
+                      verified: 2
+                      suspended: 0
+                      quit: 0
+                      delisted: 1
+                      detected: 4
+                    delisted: [R_kgDODel456]
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/registry/index/{shard}.json:
+    get:
+      operationId: getRegistryIndexShard
+      summary: One shard of the registry index
+      description: |
+        Repositories whose name starts with the shard character (`0` collects
+        non-alphabetic names). Entries carry the minimum a browse page or a scanner needs
+        plus the URL of the full record.
+      tags: [registry]
+      x-psn-phase: P-M2
+      parameters:
+        - name: shard
+          in: path
+          required: true
+          description: A single lowercase alphanumeric shard key, from the index meta document.
+          schema:
+            type: string
+            pattern: '^[a-z0-9]$'
+          example: w
+      responses:
+        '200':
+          description: The shard document. Cached 21600 s, stale-while-revalidate 24 h.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/registry-index.v1.json'
+              examples:
+                shardW:
+                  summary: Shard `w`
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-06-01T05:00:00Z'
+                    shard: w
+                    count: 1
+                    entries:
+                      - nodeId: R_kgDOAbc123
+                        owner: acme
+                        name: widget-engine
+                        state: verified
+                        weightClass: standard
+                        licenseId: PurposeSource-1.0
+                        licenseVersion: '1.0'
+                        adoptedAt: '2027-03-14'
+                        apacheConversionDate: '2031-01-15'
+                        language: Rust
+                        recordUrl: https://api.purposesource.org/v1/registry/repo/R_kgDOAbc123.json
+                        badgeUrl: https://api.purposesource.org/badge/R_kgDOAbc123.json
+                        pageUrl: https://purposesource.org/registry/acme/widget-engine
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/registry/export.json:
+    get:
+      operationId: getRegistryExport
+      summary: Bulk registry export
+      description: |
+        Every listed repository in one document, in the same shape as a shard with
+        `shard: "export"`. Also mounted on the apex as `/registry.json`.
+
+        This exists so that nobody has to scrape the browse pages. Enumerating the
+        registry is a supported operation, not a tolerated one.
+      tags: [registry]
+      x-psn-phase: P-M2
+      responses:
+        '200':
+          description: The full export. Cached 3600 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/registry-index.v1.json'
+              examples:
+                export:
+                  summary: The bulk document
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-06-01T05:00:00Z'
+                    shard: export
+                    count: 1
+                    entries:
+                      - nodeId: R_kgDOAbc123
+                        owner: acme
+                        name: widget-engine
+                        state: verified
+                        weightClass: standard
+                        licenseId: PurposeSource-1.0
+                        adoptedAt: '2027-03-14'
+                        recordUrl: https://api.purposesource.org/v1/registry/repo/R_kgDOAbc123.json
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/registry/repo/{nodeId}.json:
+    get:
+      operationId: getRepoRecord
+      summary: Full record for one repository
+      description: |
+        Licence version and its fixed conversion date, adoption date, weight class,
+        manifest status, waiver pointer and badge data — one of the three inputs the
+        coverage function reads.
+
+        A quit or delisted repository still has a record. Coverage that was bought stays
+        bought; the registry simply stops listing and the badge goes neutral.
+      tags: [registry]
+      x-psn-phase: P-M2
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          description: The repository's GitHub node id.
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9_-]{4,128}$'
+          example: R_kgDOAbc123
+      responses:
+        '200':
+          description: The repo record. Cached 300 s, purged on any registry publish.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/repo-record.v1.json'
+              examples:
+                verified:
+                  summary: A verified repository with no manifest — defaults apply, none needed
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-06-01T05:00:00Z'
+                    nodeId: R_kgDOAbc123
+                    owner:
+                      login: acme
+                      orgId: O_kgDOAcme001
+                      type: Organization
+                    name: widget-engine
+                    defaultBranch: main
+                    state: verified
+                    stateChangedAt: '2027-03-14T00:00:00Z'
+                    weightClass: standard
+                    license:
+                      id: PurposeSource-1.0
+                      version: '1.0'
+                      publishedAt: '2027-01-15'
+                      apacheConversionDate: '2031-01-15'
+                      adoptedAt: '2027-03-14'
+                      textSha256: 9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f
+                    manifest:
+                      present: false
+                      rejections: []
+                    waivers:
+                      count: 0
+                      url: https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json
+                    badge:
+                      url: https://api.purposesource.org/badge/R_kgDOAbc123.json
+                      state: registered
+                    links:
+                      repository: https://github.com/acme/widget-engine
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/waivers/{nodeId}.json:
+    get:
+      operationId: getRepoWaivers
+      summary: Waivers granted for one repository
+      description: |
+        Waivers are gratis and are granted by the project's own admin, never by us and
+        never for a fee. An **empty array is the expected state** for most repositories
+        and means no waiver exists — not that data is missing.
+
+        `coolingEndsAt` is a vesting input, not a coverage one: a waiver inside its
+        72-hour cooling window covers the beneficiary exactly like any other.
+      tags: [registry]
+      x-psn-phase: P-M2
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          description: The repository's GitHub node id.
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9_-]{4,128}$'
+          example: R_kgDOAbc123
+      responses:
+        '200':
+          description: The repository's waiver list. Cached 300 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/waiver.v1.json'
+              examples:
+                oneWaiver:
+                  summary: One live waiver
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-06-01T05:00:00Z'
+                    scope: repo
+                    nodeId: R_kgDOAbc123
+                    waivers:
+                      - wvrId: wvr_01jk2a6g3qr7v1bd9w4z8x0c3f
+                        beneficiary:
+                          coId: co_01jk2a6g3qr7v1bd9w4z8x0c2f
+                          name: Kleinbetrieb GmbH
+                        grantedAt: '2027-04-01T00:00:00Z'
+                        coolingEndsAt: '2027-04-04T00:00:00Z'
+                        revokedAt: null
+                        grantedBy: repo-admin
+                empty:
+                  summary: The honest empty state
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-06-01T05:00:00Z'
+                    scope: repo
+                    nodeId: R_kgDOAbc123
+                    waivers: []
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/waivers/all.json:
+    get:
+      operationId: getAllWaivers
+      summary: Every waiver, across all repositories
+      description: |
+        The global waiver registry. Each entry carries `repoNodeId`. Published so that a
+        waiver cannot be a private favour: if it exists, it is visible here.
+      tags: [registry]
+      x-psn-phase: P-M2
+      responses:
+        '200':
+          description: All waivers. Cached 300 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/waiver.v1.json'
+              examples:
+                all:
+                  summary: The global list
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-06-01T05:00:00Z'
+                    scope: all
+                    waivers:
+                      - wvrId: wvr_01jk2a6g3qr7v1bd9w4z8x0c3f
+                        repoNodeId: R_kgDOAbc123
+                        beneficiary:
+                          coId: co_01jk2a6g3qr7v1bd9w4z8x0c2f
+                          name: Kleinbetrieb GmbH
+                        grantedAt: '2027-04-01T00:00:00Z'
+                        coolingEndsAt: '2027-04-04T00:00:00Z'
+                        grantedBy: repo-admin
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/entitlements/{coId}.jws:
+    get:
+      operationId: getEntitlementRecord
+      summary: Signed entitlement record for one organisation
+      description: |
+        A compact ES256 JWS, served as `application/jose`. **This is the scanner-facing
+        proof of coverage**, and at v0 it is the *only* machine proof: the computed
+        coverage endpoint arrives later, and this record does not wait for it.
+
+        Verify the signature against the production key set before trusting the payload.
+        The payload's schema is published alongside this document.
+
+        The record verifies whether or not the organisation chose to be named publicly —
+        directory listing is opt-in and defaults to unnamed, and a payer's proof does not
+        depend on advertising.
+      tags: [entitlements]
+      x-psn-phase: P-M2
+      parameters:
+        - name: coId
+          in: path
+          required: true
+          description: The organisation's platform ULID.
+          schema:
+            type: string
+            pattern: '^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$'
+          example: co_01jf8w2c9km3q7xz5r0v4t6y8b
+      responses:
+        '200':
+          description: The compact JWS. Purged on purchase, renewal, lapse, suspension or void.
+          content:
+            application/jose:
+              schema:
+                type: string
+                pattern: '^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$'
+                description: JWS compact serialisation. Decode the payload against entitlement-record.v1.json.
+              examples:
+                compact:
+                  summary: A compact JWS (truncated for documentation)
+                  value: eyJhbGciOiJFUzI1NiIsImtpZCI6InBzbi1wcm9kLTIwMjctMSJ9.eyJjb0lkIjoiY29fMDFqZjh3MmM5a20zcTd4ejVyMHY0dDZ5OGIifQ.MEUCIQDexampleSignatureBytesHereOnlyForDocumentation
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/entitlements/domain-index.json:
+    get:
+      operationId: getDomainIndex
+      summary: Verified domain to organisation index
+      description: |
+        Maps **domain-verified** domains to organisation ULIDs. This is what makes a
+        domain-keyed coverage lookup possible without a database. Unverified and
+        officer-attested organisations do not appear: an unverified domain claim is not
+        evidence of anything.
+      tags: [entitlements]
+      x-psn-phase: P-M3
+      responses:
+        '200':
+          description: The index. Regenerated on any company verification change.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainIndex'
+              examples:
+                index:
+                  summary: Two verified domains
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-06-01T05:00:00Z'
+                    domains:
+                      example.com: co_01jf8w2c9km3q7xz5r0v4t6y8b
+                      portfolio.example: co_01jj1z5f2pq6t0ac8v3y7w9b1e
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/ledger/{month}.json:
+    get:
+      operationId: getLedgerMonth
+      summary: One month of the ledger
+      description: |
+        The month's rows, its totals, and the hash-chain heads that bracket it. A closed
+        month is immutable: regeneration may only ever re-emit byte-identical content, and
+        a divergence is an alert rather than a fix.
+
+        Corrections are **forward-dated rows**, never edits. Narrative context is a
+        zero-amount annotation row. Disbursed quarters are never restated, and no refund
+        is ever clawed back from a charity.
+
+        The CSV twin at the same path with a `.csv` extension carries the same rows flat.
+        If the page, the JSON and the CSV ever disagree, that is a defect — please report
+        it.
+      tags: [ledger]
+      x-psn-phase: P-M2
+      parameters:
+        - name: month
+          in: path
+          required: true
+          description: Month key, `YYYY-MM`.
+          schema:
+            type: string
+            pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$'
+          example: 2027-06
+      responses:
+        '200':
+          description: The month export. Closed months cached 86400 s; `immutable` is deliberately not set, because an annotation is always possible.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/ledger-export.v1.json'
+              examples:
+                intakeOnly:
+                  summary: An open month with one intake row — the v0 shape
+                  value:
+                    schemaVersion: 1
+                    month: 2027-06
+                    generatedAt: '2027-06-02T06:00:00Z'
+                    currency: CHF
+                    locked: false
+                    lockedAt: null
+                    totals:
+                      pool: 36000
+                    rows:
+                      - ledId: led_01jm3b7h4rs8w2ce0x5a9y1d3g
+                        seq: 1
+                        type: pool-in
+                        date: '2027-06-01'
+                        amountMinor: 36000
+                        currency: CHF
+                        srcAmountMinor: 40000
+                        srcCurrency: USD
+                        fxRate: 0.9
+                        fxSource: ECB daily
+                        fxDate: '2027-06-01'
+                        repo: R_kgDOAbc123
+                        entId: ent_01jh0y4e1np5s9zb7t2x6v8a1d
+                        coId: co_01jh0y4e1np5s9zb7t2x6v8a0d
+                        lane: project
+                        holdStatus: held-M+1
+                        payerName: unnamed
+                        scheduleVersion: v1
+                        prevHash: '0000000000000000000000000000000000000000000000000000000000000000'
+                        rowHash: 4d7a1c0b9e8f2a3b5c6d7e8f90a1b2c34d7a1c0b9e8f2a3b5c6d7e8f90a1b2c3
+                    headHash: 4d7a1c0b9e8f2a3b5c6d7e8f90a1b2c34d7a1c0b9e8f2a3b5c6d7e8f90a1b2c3
+                    prevHeadHash: '0000000000000000000000000000000000000000000000000000000000000000'
+                    methodologyUrl: https://purposesource.org/trust/ledger-methodology
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/ledger/{month}.csv:
+    get:
+      operationId: getLedgerMonthCsv
+      summary: One month of the ledger, as CSV
+      description: |
+        The same rows, flat, for a spreadsheet. Content identical to the JSON twin by
+        construction — both are rendered from the same rows in the same pass.
+      tags: [ledger]
+      x-psn-phase: P-M2
+      parameters:
+        - name: month
+          in: path
+          required: true
+          description: Month key, `YYYY-MM`.
+          schema:
+            type: string
+            pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$'
+          example: 2027-06
+      responses:
+        '200':
+          description: The month export as CSV, header row first.
+          content:
+            text/csv:
+              schema:
+                type: string
+                description: RFC 4180 CSV. First row is the header.
+              examples:
+                intakeOnly:
+                  summary: Header plus one intake row
+                  value: |
+                    ledId,seq,type,date,amountMinor,currency,srcAmountMinor,srcCurrency,fxRate,repo,entId,coId,lane,holdStatus,payerName,scheduleVersion,rowHash
+                    led_01jm3b7h4rs8w2ce0x5a9y1d3g,1,pool-in,2027-06-01,36000,CHF,40000,USD,0.9,R_kgDOAbc123,ent_01jh0y4e1np5s9zb7t2x6v8a1d,co_01jh0y4e1np5s9zb7t2x6v8a0d,project,held-M+1,unnamed,v1,4d7a1c0b9e8f2a3b5c6d7e8f90a1b2c34d7a1c0b9e8f2a3b5c6d7e8f90a1b2c3
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/ledger/chain.json:
+    get:
+      operationId: getLedgerChain
+      summary: Ledger hash chain
+      description: |
+        The global chain head plus one entry per month with that month's digest. Re-walk
+        the chain and recompute the digests to detect any retroactive edit.
+
+        What this supports is a precise claim: every **recorded** allocation and
+        disbursement is independently reconcilable. It does not claim the bank and
+        intermediary legs are publicly provable end to end, because they are not, and
+        overclaiming there would be the easiest thing in the world to refute.
+      tags: [ledger]
+      x-psn-phase: P-M2
+      responses:
+        '200':
+          description: The chain document. Cached 300 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/ledger-chain.v1.json'
+              examples:
+                genesis:
+                  summary: Before any money has moved — head equals genesis
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-05-01T05:00:00Z'
+                    algorithm: sha256
+                    canonicalisation: RFC8785
+                    genesisPrevHash: '0000000000000000000000000000000000000000000000000000000000000000'
+                    headHash: '0000000000000000000000000000000000000000000000000000000000000000'
+                    rowCount: 0
+                    months: []
+                oneMonth:
+                  summary: One open month
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-06-02T06:00:00Z'
+                    algorithm: sha256
+                    canonicalisation: RFC8785
+                    genesisPrevHash: '0000000000000000000000000000000000000000000000000000000000000000'
+                    headHash: 4d7a1c0b9e8f2a3b5c6d7e8f90a1b2c34d7a1c0b9e8f2a3b5c6d7e8f90a1b2c3
+                    rowCount: 1
+                    months:
+                      - month: 2027-06
+                        monthDigest: 8e5f3a2b1c0d9e8f7a6b5c4d3e2f1a098e5f3a2b1c0d9e8f7a6b5c4d3e2f1a09
+                        headHash: 4d7a1c0b9e8f2a3b5c6d7e8f90a1b2c34d7a1c0b9e8f2a3b5c6d7e8f90a1b2c3
+                        rowCount: 1
+                        locked: false
+                        lockedAt: null
+                        exportUrl: https://api.purposesource.org/v1/ledger/2027-06.json
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /ct/latest.json:
+    get:
+      operationId: getCtLatest
+      summary: The open transparency-log segment
+      description: |
+        The current, still-growing segment of the certificate transparency log. Entries
+        carry a hash, a type, a kind, a reference and a timestamp — and nothing else. No
+        names, no email addresses, no subject data. That is what lets the log be immutable
+        forever, including through an erasure request.
+
+        A revocation is a **new entry** whose `ref` is the original entry's hash. The log
+        never edits.
+      tags: [certificates]
+      x-psn-phase: P-M2
+      responses:
+        '200':
+          description: The open segment. Cached 300 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/ct-segment.v1.json'
+              examples:
+                openSegment:
+                  summary: Segment 0, one issue entry and its revocation
+                  value:
+                    schemaVersion: 1
+                    segment: 0
+                    startSeq: 0
+                    prevSegmentSha256: null
+                    generatedAt: '2027-06-01T06:00:00Z'
+                    closed: false
+                    entries:
+                      - seq: 0
+                        h: 5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867
+                        typ: supporter
+                        kind: issue
+                        ref: null
+                        ts: '2027-03-01T09:00:00Z'
+                      - seq: 1
+                        h: 7e2b9d0c1a8f3e5d4c3b2a19087665447e2b9d0c1a8f3e5d4c3b2a1908766544
+                        typ: supporter
+                        kind: revoke
+                        ref: 5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867
+                        ts: '2027-03-01T12:00:00Z'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /ct/{segment}.json:
+    get:
+      operationId: getCtSegment
+      summary: One closed transparency-log segment
+      description: |
+        A frozen segment, chained to its predecessor by hash. Closed segments are cached
+        for a day because they can never change.
+      tags: [certificates]
+      x-psn-phase: P-M2
+      parameters:
+        - name: segment
+          in: path
+          required: true
+          description: Segment number. Segment 0 is the first, and is carried forward across every platform generation.
+          schema:
+            type: integer
+            minimum: 0
+          example: 0
+      responses:
+        '200':
+          description: The segment. Cached 86400 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/ct-segment.v1.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /ct/checkpoint-latest.json:
+    get:
+      operationId: getCtCheckpoint
+      summary: Latest signed transparency-log checkpoint
+      description: |
+        A signed commitment to the log's head, which is what makes retroactive tampering
+        provable rather than merely unlikely. Published monthly, signed with the same keys
+        as certificates, and mirrored into a public git repository — where the commit
+        history is an independent medium we do not control the timestamps of.
+      tags: [certificates]
+      x-psn-phase: P-M2
+      responses:
+        '200':
+          description: The checkpoint, as a compact JWS plus its decoded payload for convenience. Verify the signature, not the convenience copy.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CtCheckpointArtifact'
+              examples:
+                checkpoint:
+                  summary: A monthly checkpoint
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-07-01T00:05:00Z'
+                    jws: eyJhbGciOiJFUzI1NiIsImtpZCI6InBzbi1wcm9kLTIwMjctMSJ9.eyJhc09mIjoiMjAyNy0wNy0wMVQwMDowMDowMFoifQ.MEUCIQDexampleSignatureBytesHereOnlyForDocumentation
+                    payload:
+                      asOf: '2027-07-01T00:00:00Z'
+                      headSeq: 1
+                      headSegment: 0
+                      headSegmentSha256: 9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d
+                      kid: psn-prod-2027-1
+                      iss: https://api.purposesource.org
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/changes:
+    get:
+      operationId: getChanges
+      summary: Change-event feed
+      description: |
+        The sync primitive: registry state transitions in event form, so an integrator can
+        stay current without polling every artifact.
+
+        `cursor` is the last event id you saw; omit it to start from the oldest. `next` is
+        **always present**, even when `items` is empty, so a caught-up poller idles on
+        cheap conditional requests rather than on empty pages.
+
+        Personal data: none. Every payload field is public registry state, which is a
+        property of the event catalogue rather than a filter applied on the way out.
+      tags: [changes]
+      x-psn-phase: P-M4
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          description: The last event id you processed. Omit to start from the beginning.
+          schema:
+            type: string
+            pattern: '^evt_[0-9abcdefghjkmnpqrstvwxyz]{26}$'
+          example: evt_01jf8w2c9km3q7xz5r0v4t6y8b
+      responses:
+        '200':
+          description: A page of at most 200 events. Cached 60 s per cursor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeFeedPage'
+              examples:
+                page:
+                  summary: Two events
+                  value:
+                    items:
+                      - id: evt_01jf8w2c9km3q7xz5r0v4t6y8b
+                        type: repo-adopted
+                        occurredAt: '2027-03-14T10:00:00Z'
+                        payload:
+                          nodeId: R_kgDOAbc123
+                          owner: acme
+                          name: widget-engine
+                          state: verified
+                          recordUrl: https://api.purposesource.org/v1/registry/repo/R_kgDOAbc123.json
+                      - id: evt_01jh0y4e1np5s9zb7t2x6v8a0d
+                        type: waiver-granted
+                        occurredAt: '2027-04-01T00:00:00Z'
+                        payload:
+                          wvrId: wvr_01jk2a6g3qr7v1bd9w4z8x0c3f
+                          nodeId: R_kgDOAbc123
+                    next: evt_01jh0y4e1np5s9zb7t2x6v8a0d
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/forms/{kind}:
+    post:
+      operationId: postForm
+      summary: Contact, abuse or data-subject request
+      description: |
+        The site has no backend, so these three routes are the whole intake path. Each
+        verifies its anti-abuse token server-side, forwards the payload as one
+        transactional email to the steward inbox, and **stores nothing**.
+
+        That is the entire data-protection story for a form submission: there is no
+        record to breach, no record to subpoena, and no record to delete. The reply you
+        get comes from a human reading email.
+      tags: [forms]
+      x-psn-phase: P-M2
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          description: Which inbox the message is routed to.
+          schema:
+            type: string
+            enum: [contact, abuse, dsar]
+          example: contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [email, message, token]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  maxLength: 254
+                  description: Where to reply. Forwarded in the email and stored nowhere.
+                subject:
+                  type: string
+                  maxLength: 200
+                message:
+                  type: string
+                  minLength: 1
+                  maxLength: 5000
+                token:
+                  type: string
+                  maxLength: 2048
+                  description: Anti-abuse challenge token, verified server-side before anything is sent.
+            examples:
+              contact:
+                summary: A contact message
+                value:
+                  email: ospo@example.com
+                  subject: Licence question
+                  message: Does the four-year conversion date apply per release?
+                  token: 0.AbCdEf...
+      responses:
+        '202':
+          description: Accepted and forwarded. Nothing was stored.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormAck'
+              examples:
+                ack:
+                  summary: Acknowledged, with a published response target
+                  value:
+                    ack: true
+                    responseTarget: 5 business days
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          description: The anti-abuse challenge did not verify. Nothing was sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                turnstileFailed:
+                  summary: Challenge failed
+                  value:
+                    error:
+                      code: turnstile_failed
+                      message: challenge verification failed
+                      traceId: 01jf8w2c9km3q7xz5r0v4t6y8b
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+components:
+  schemas:
+    ErrorEnvelope:
+      type: object
+      additionalProperties: false
+      required: [error]
+      description: |
+        The single failure shape for every route. `code` is stable, lowercase and
+        additive-only — write your handling against `code`, never against `message`.
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message, traceId]
+          properties:
+            code:
+              type: string
+              enum:
+                - invalid_repo_id
+                - invalid_company_ref
+                - repo_not_registered
+                - company_ambiguous
+                - cert_not_found
+                - cert_not_in_ct_log
+                - cert_revoked
+                - artifact_not_found
+                - sandbox_artifact_on_prod
+                - turnstile_failed
+                - rate_limited
+                - artifacts_unavailable
+                - internal
+              description: The stable machine code.
+            message:
+              type: string
+              description: Human-readable detail. Not stable; do not parse it.
+            traceId:
+              type: string
+              description: Quote this when reporting a problem — it is the only thing that lets us find your request.
+
+    CoverageAnswer:
+      type: string
+      description: |
+        The eight coverage answers. Frozen: no ninth value will be added to `v1`, and the
+        meaning of these eight will not change under you.
+      enum:
+        - yes-via-pass
+        - yes-via-project
+        - yes-via-portfolio
+        - yes-via-waiver
+        - yes-via-donation
+        - 'no'
+        - lapsed-in-grace
+        - no-entitlement-required-under-threshold
+
+    CoverageBasis:
+      type: object
+      additionalProperties: false
+      required: [algoVersion, company, repo]
+      description: What produced the answer. Always present, including for `no`.
+      properties:
+        algoVersion:
+          type: string
+          description: The coverage function version. Its source and vectors are published.
+          example: cov-v1
+        company:
+          type: [object, 'null']
+          additionalProperties: false
+          required: [coId]
+          description: The resolved organisation, or null when none resolved.
+          properties:
+            coId:
+              type: string
+              pattern: '^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$'
+            verification:
+              type: string
+              enum: [domain-verified, officer-attested, unverified]
+        note:
+          type: string
+          description: Present when the answer needs a word of explanation, e.g. no record for the organisation.
+        repo:
+          type: object
+          additionalProperties: false
+          required: [nodeId, repoState]
+          properties:
+            nodeId:
+              type: string
+              pattern: '^[A-Za-z0-9_-]{4,128}$'
+            repoState:
+              type: string
+              enum: [verified, suspended, quit, delisted]
+              description: A quit or delisted repository still computes — coverage that was bought stays bought.
+        entitlement:
+          type: object
+          additionalProperties: false
+          required: [entId, lane]
+          properties:
+            entId:
+              type: string
+              pattern: '^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$'
+            lane:
+              type: string
+              enum: [pass, project, portfolio, donation]
+            periodStart:
+              type: string
+              format: date-time
+            periodEnd:
+              type: string
+              format: date-time
+        waiver:
+          type: object
+          additionalProperties: false
+          required: [wvrId, grantedAt]
+          properties:
+            wvrId:
+              type: string
+              pattern: '^wvr_[0-9abcdefghjkmnpqrstvwxyz]{26}$'
+            grantedAt:
+              type: string
+              format: date-time
+
+    CoverageProof:
+      type: object
+      additionalProperties: false
+      required: [type, url]
+      description: |
+        The artifact that backs the answer. Absent for `no` — there is nothing to prove.
+        `sha256` is present when the deployment computed it, and honestly omitted when it
+        did not.
+      properties:
+        type:
+          type: string
+          enum: [entitlement-jws, waiver-record]
+        url:
+          type: string
+          format: uri
+        sha256:
+          type: string
+          pattern: '^[0-9a-f]{64}$'
+
+    CoverageResponse:
+      type: object
+      additionalProperties: false
+      required: [answer, basis, asOf]
+      properties:
+        answer:
+          $ref: '#/components/schemas/CoverageAnswer'
+        basis:
+          $ref: '#/components/schemas/CoverageBasis'
+        asOf:
+          type: string
+          format: date-time
+          description: The instant the answer was computed as of. Echoed so you can re-derive it yourself.
+        dates:
+          type: object
+          additionalProperties: false
+          description: Present for the grace and under-threshold answers.
+          properties:
+            periodEnd:
+              type: string
+              format: date-time
+            graceEnd:
+              type: string
+              format: date-time
+            selfCertifiedAt:
+              type: string
+              format: date-time
+        proof:
+          $ref: '#/components/schemas/CoverageProof'
+
+    Jwks:
+      type: object
+      additionalProperties: false
+      required: [keys]
+      description: |
+        An RFC 7517 key set, plus two namespaced members per key: `psn:status` and
+        `psn:validityWindow`. Retired keys are kept forever so that old certificates keep
+        verifying.
+      properties:
+        keys:
+          type: array
+          items:
+            type: object
+            required: [kty, crv, x, y, kid, use, alg]
+            properties:
+              kty:
+                type: string
+                const: EC
+              crv:
+                type: string
+                const: P-256
+              x:
+                type: string
+                description: base64url x coordinate.
+              y:
+                type: string
+                description: base64url y coordinate.
+              kid:
+                type: string
+                pattern: '^psn-(dev|prod|sandbox)-[0-9]{4}-[0-9]+$'
+              use:
+                type: string
+                const: sig
+              alg:
+                type: string
+                const: ES256
+              "psn:status":
+                type: string
+                enum: [active, retired, compromised]
+              "psn:validityWindow":
+                type: object
+                required: [notBefore]
+                properties:
+                  notBefore:
+                    type: string
+                    format: date-time
+                  notAfter:
+                    type: [string, 'null']
+                    format: date-time
+
+    DomainIndex:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, generatedAt, domains]
+      properties:
+        schemaVersion:
+          type: integer
+          const: 1
+        generatedAt:
+          type: string
+          format: date-time
+        domains:
+          type: object
+          description: Verified domain to organisation ULID. Domain-verified organisations only.
+          additionalProperties:
+            type: string
+            pattern: '^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$'
+
+    CtCheckpointArtifact:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, generatedAt, jws, payload]
+      properties:
+        schemaVersion:
+          type: integer
+          const: 1
+        generatedAt:
+          type: string
+          format: date-time
+        jws:
+          type: string
+          pattern: '^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$'
+          description: The signed checkpoint. This is the artifact that carries trust.
+        payload:
+          $ref: '../schemas/ct-checkpoint.v1.json'
+
+    ChangeFeedPage:
+      type: object
+      additionalProperties: false
+      required: [items, next]
+      properties:
+        items:
+          type: array
+          maxItems: 200
+          items:
+            $ref: '../schemas/change-event.v1.json'
+        next:
+          type: string
+          description: Always present, even when `items` is empty. Poll with it and you idle cheaply.
+
+    Meta:
+      type: object
+      additionalProperties: false
+      required: [edgeVersion, coverage, contracts]
+      description: The deployment's self-description, so its behaviour can be checked against what was published.
+      properties:
+        edgeVersion:
+          type: string
+          description: Deployed build identifier. Also returned as a response header on every route.
+        coverage:
+          type: object
+          additionalProperties: false
+          required: [algoVersion, moduleSha256]
+          properties:
+            algoVersion:
+              type: string
+              example: cov-v1
+            moduleSha256:
+              type: string
+              pattern: '^[0-9a-f]{64}$'
+              description: Digest of the deployed coverage module. Compare it with the published reference implementation.
+        contracts:
+          type: object
+          additionalProperties: false
+          required: [answerEnum]
+          properties:
+            answerEnum:
+              type: array
+              items:
+                $ref: '#/components/schemas/CoverageAnswer'
+              description: The eight answers this deployment can produce.
+            schemaVersions:
+              type: object
+              additionalProperties:
+                type: integer
+        routes:
+          type: object
+          description: Which phase-gated routes are switched on in this deployment.
+          additionalProperties:
+            type: boolean
+
+    FormAck:
+      type: object
+      additionalProperties: false
+      required: [ack, responseTarget]
+      properties:
+        ack:
+          type: boolean
+          const: true
+        responseTarget:
+          type: string
+          description: The published response-time target. Best effort, and stated as such — there is no service level agreement.
+
+  responses:
+    BadRequest:
+      description: |
+        Malformed input. `invalid_company_ref` includes putting a domain in the GET
+        `company` parameter — that is not an oversight, it is the rule.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          examples:
+            invalidCompanyRef:
+              summary: A domain was passed to the GET form
+              value:
+                error:
+                  code: invalid_company_ref
+                  message: GET accepts a co_ ULID only; use POST for a domain-keyed lookup
+                  traceId: 01jf8w2c9km3q7xz5r0v4t6y8b
+
+    NotFound:
+      description: |
+        The addressed artifact does not exist. Note the asymmetry: an unregistered
+        *repository* is this error, while an organisation with no record is the answer
+        `no`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          examples:
+            repoNotRegistered:
+              summary: The repository never adopted
+              value:
+                error:
+                  code: repo_not_registered
+                  message: no registry record for this repository
+                  traceId: 01jf8w2c9km3q7xz5r0v4t6y8b
+            certNotFound:
+              summary: No such certificate
+              value:
+                error:
+                  code: cert_not_found
+                  message: no verify record for this certificate id
+                  traceId: 01jh0y4e1np5s9zb7t2x6v8a0d
+
+    Conflict:
+      description: The reference is genuinely ambiguous and we will not guess.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          examples:
+            companyAmbiguous:
+              summary: A domain maps to more than one organisation
+              value:
+                error:
+                  code: company_ambiguous
+                  message: this domain resolves to more than one organisation; use a co_ id
+                  traceId: 01jj1z5f2pq6t0ac8v3y7w9b1e
+
+    RateLimited:
+      description: |
+        Per-IP limit tripped. Limits are published in the trust centre, and conditional
+        requests with `If-None-Match` are cheap by design — polling correctly will not
+        get you here.
+      headers:
+        Retry-After:
+          description: Seconds to wait.
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          examples:
+            rateLimited:
+              summary: Slow down
+              value:
+                error:
+                  code: rate_limited
+                  message: per-IP rate limit exceeded
+                  traceId: 01jk2a6g3qr7v1bd9w4z8x0c2f
+
+    ArtifactsUnavailable:
+      description: |
+        Both the edge mirror and the origin were unreachable and the serve-stale window
+        was exhausted. This is the only shape a total outage takes on this API; routes
+        that can serve stale will do so instead of returning this.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          examples:
+            unavailable:
+              summary: Serve-stale exhausted
+              value:
+                error:
+                  code: artifacts_unavailable
+                  message: published artifact temporarily unreadable
+                  traceId: 01jm3b7h4rs8w2ce0x5a9y1d3g

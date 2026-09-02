@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/registry-v0-record.v1.json",
+  "title": "registry-v0 record — one curated YAML file per registered repository",
+  "description": "The P-M2-only, PR-curated registry source of truth: one file `repos/{node_id}.yml` in the public registry-v0 repository (FS-02 §7 FS02-060). Validated by that repository's CI on every pull request against THIS schema (FS02-061), and consumed by the index-build-lite job that renders the published artifacts (VS-04). Two hard constraints carry legal weight: (1) there is NO `waivers` field and there never will be — waivers are issued only by a claimed admin from the platform dashboard (D14), so no waiver can enter the registry by pull request; (2) the YAML file is a CACHE of display facts, while the repository's own committed LICENSE file is the truth about adoption (D13). Filename must equal `node_id`. Frozen and archived at P-M3 with a pointer to the export endpoints (FS-00 §2).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2 only",
+    "artifactPath": "(registry-v0 repository) repos/{node_id}.yml",
+    "authoritative": false,
+    "producer": "operator-merged pull request (registry-v0)",
+    "consumers": ["registry-v0 CI (FS02-061)", "index-build-lite (FS02-062, VS-04)"],
+    "fsRefs": ["FS-02 §7 (FS02-060…FS02-064)", "FS-00 §6.1", "D13", "D14"],
+    "vsRefs": ["VS-03", "VS-04"],
+    "changelog": "CHANGELOG.md#registry-v0-recordv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "node_id", "owner", "name", "default_branch", "state", "license", "weight_class"],
+  "properties": {
+    "schema": {
+      "const": "registry-v0/1",
+      "description": "Record schema tag. A value this validator does not know must fail the pull request — a broken registry never half-publishes (FS02-063)."
+    },
+    "node_id": {
+      "$ref": "#/$defs/githubNodeId",
+      "description": "GitHub GraphQL node_id — the primary key, and the filename. Format is validated here; existence cannot be validated at v0 (P-M2 §4.2 edge case 4)."
+    },
+    "owner": {
+      "$ref": "#/$defs/githubLogin",
+      "description": "Owner login. DISPLAY CACHE ONLY — refreshed by the operator on a rename; never a key, never money-bearing (FS02-017)."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Repository name. Display cache only. Also the shard key for the published registry index (first character, FS02-062)."
+    },
+    "default_branch": { "type": "string", "minLength": 1, "maxLength": 255 },
+    "state": {
+      "$ref": "#/$defs/repoState",
+      "description": "The FS-02 §3 state enum verbatim. `detected` repositories appear in aggregate counts only — no listing, no badge (GH-014)."
+    },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "adopted", "text_sha256"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9.+-]{1,63}$",
+          "description": "Licence identifier carried by the repository's LICENSE file (working form `PurposeSource-1.0`; final string per URS §21 OPEN-20)."
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$",
+          "description": "Licence version, when tracked separately from the identifier. The per-version publication date anchors the fixed 4-year Apache-2.0 conversion clock (D9)."
+        },
+        "published": { "type": "string", "format": "date", "description": "Publication date of that licence version — the conversion-clock anchor (D9)." },
+        "adopted": { "type": "string", "format": "date", "description": "Date the LICENSE commit landed on the default branch. Adoption completes on that merge and nothing else (VIS-01)." },
+        "text_sha256": {
+          "$ref": "#/$defs/sha256",
+          "description": "SHA-256 of the committed licence text, as evidence for the canonical-text check (GH-015). A modified text is not an adoption (D10)."
+        }
+      }
+    },
+    "weight_class": {
+      "enum": ["standard", "major"],
+      "description": "Pricing weight class (D11). Set through the dashboard menu, never by the manifest (APP-029); at v0 by operator-merged pull request."
+    },
+    "inbound_family": {
+      "enum": ["permissive", "copyleft", "unknown", "none"],
+      "description": "Inbound-licence family recorded for the adoption gate (GH-043). Escrow candidates with copyleft inbound complete the consent path manually or do not qualify (P-M2 §5 item 12)."
+    },
+    "allocation_defaults": {
+      "type": "array",
+      "description": "Optional category-fund default slugs; the steward default applies when absent.",
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" }
+    },
+    "repo_url": { "type": "string", "format": "uri", "description": "Convenience display link. Derivable from owner/name; recorded so a renamed repository still resolves for a human reviewer." },
+    "canonical_of": {
+      "$ref": "#/$defs/githubNodeId",
+      "description": "Set on the canonical repository of a fork family (GH-008). Forks are linked, never registered."
+    },
+    "notes": { "type": "string", "maxLength": 500, "description": "Curation note for reviewers. Never rendered on a public page." }
+  },
+  "$defs": {
+    "repoState": { "enum": ["detected", "verified", "suspended", "quit", "delisted"] },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "githubLogin": { "type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$" },
+    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+  }
+}

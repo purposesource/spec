@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-06-01T05:00:00Z",
+  "nodeId": "R_kgDOAbc123",
+  "owner": {
+    "login": "acme",
+    "orgId": "O_kgDOAcme001",
+    "type": "Organization"
+  },
+  "name": "widget-engine",
+  "defaultBranch": "main",
+  "state": "verified",
+  "stateChangedAt": "2027-03-14T00:00:00Z",
+  "weightClass": "standard",
+  "allocationFrozen": false,
+  "license": {
+    "id": "PurposeSource-1.0",
+    "version": "1.0",
+    "publishedAt": "2027-01-15",
+    "apacheConversionDate": "2031-01-15",
+    "adoptedAt": "2027-03-14",
+    "textSha256": "9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f",
+    "canonicalTextUrl": "https://purposesource.org/license/PurposeSource-1.0.txt"
+  },
+  "manifest": {
+    "present": true,
+    "url": "https://github.com/acme/widget-engine/blob/main/PURPOSE.yml",
+    "contentSha256": "3e5b7d9f0d5f7a1c9e3b2d4f6a8c0e2b3e5b7d9f0d5f7a1c9e3b2d4f6a8c0e2b",
+    "manifestSchemaVersion": 1,
+    "rejections": [
+      {
+        "path": "allocation.defaults[1]",
+        "code": "reg.manifest_unknown_category",
+        "given": "space-exploration",
+        "bound": "one of the published curated category-fund slugs"
+      }
+    ]
+  },
+  "waivers": {
+    "count": 0,
+    "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json"
+  },
+  "badge": {
+    "url": "https://api.purposesource.org/badge/R_kgDOAbc123.json",
+    "state": "registered"
+  },
+  "allocationDefaults": ["climate"],
+  "links": {
+    "repository": "https://github.com/acme/widget-engine",
+    "projectPage": "https://purposesource.org/registry/acme/widget-engine",
+    "homepage": "https://widget-engine.example"
+  },
+  "display": {
+    "name": "Widget Engine",
+    "summary": "A deterministic layout engine for very large widget trees.",
+    "topics": ["rust", "layout"]
+  }
+}

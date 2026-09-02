@@ -1,0 +1,15 @@
+{
+  "$comment": "The ONE place the org and domain names live. FS-00 §5 codename `psn` substitutes mechanically; every script, schema $id and OpenAPI server URL is checked against these values by scripts/check-schemas.mjs and scripts/check-openapi-consistency is folded into it. Change a name here, run `npm test`, and the gates tell you every file that still disagrees.",
+  "org": "purposesource",
+  "orgUrl": "https://github.com/purposesource",
+  "apexDomain": "purposesource.org",
+  "siteBaseUrl": "https://purposesource.org",
+  "specBaseUrl": "https://purposesource.org/spec",
+  "schemaBaseUrl": "https://purposesource.org/spec/schemas",
+  "apiBaseUrl": "https://api.purposesource.org",
+  "appBaseUrl": "https://app.purposesource.org",
+  "codename": "psn",
+  "issuer": "https://api.purposesource.org",
+  "verifyStatement": "verify only at purposesource.org/verify",
+  "licenseTokenId": "PurposeSource-1.0"
+}

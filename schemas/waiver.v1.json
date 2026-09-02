@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/waiver.v1.json",
+  "title": "Waiver registry — /waivers/{node_id}.json and /waivers/all.json",
+  "description": "The published waiver registry: one document per repository, plus a global `/waivers/all.json` whose entries each carry `repoNodeId`. The second of the three cov-v1 inputs (FS-10 §4.2). Waivers are gratis and are granted only by a claimed admin from the platform dashboard (D14) — they can never enter the registry by pull request, which is why the P-M2 registry source has no waivers field at all (FS02-060). At P-M2 every document is the honest empty state `waivers: []`, and the project page says so in words rather than showing a zero (VS-18). `coolingEndsAt` (= grantedAt + 72 h, D14 as amended) is consumed by VESTING only (FS05-063): a waiver inside its cooling window is coverage-eligible exactly like any other, because cooling governs whether vesting attaches permanently, never today's coverage answer. Revocation is PROSPECTIVE: `revokedAt` in the past removes coverage from that instant onward while the certificate verify record still attests the historical window (CERT-042).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2 (honest empty state) · populated at P-M3",
+    "artifactPath": "/waivers/{node_id}.json · /waivers/all.json",
+    "authoritative": true,
+    "producer": "index-build from platform waiver grants (FS-04 §4)",
+    "consumers": ["cov-v1 (FS-10 §4.2 input 3)", "vesting generator (FS-05 §7)", "web project page waiver section", "edge passthrough (FS10-060)"],
+    "fsRefs": ["FS-00 §6.2", "FS-10 §4.2", "FS-05 §7 (FS05-063)", "D14", "CERT-042"],
+    "vsRefs": ["VS-04", "VS-18"],
+    "changelog": "CHANGELOG.md#waiverv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "waivers"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "nodeId": {
+      "$ref": "#/$defs/githubNodeId",
+      "description": "Present on a per-repository document; absent on the global `/waivers/all.json`, whose entries carry `repoNodeId` instead."
+    },
+    "scope": {
+      "enum": ["repo", "all"],
+      "description": "Which document this is. `repo` ⇒ `nodeId` is set; `all` ⇒ every entry sets `repoNodeId`."
+    },
+    "waivers": {
+      "type": "array",
+      "description": "Waiver grants. An empty array is a valid and expected state — it means no waiver exists, not that data is missing.",
+      "items": { "$ref": "#/$defs/waiver" }
+    }
+  },
+  "$defs": {
+    "waiver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wvrId", "beneficiary", "grantedAt", "coolingEndsAt"],
+      "properties": {
+        "wvrId": { "type": "string", "pattern": "^wvr_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "Waiver ULID, lowercase Crockford, `wvr_` prefixed (FS-00 §6.1)." },
+        "repoNodeId": { "$ref": "#/$defs/githubNodeId", "description": "Required in `/waivers/all.json`; redundant (and normally omitted) in a per-repository document." },
+        "beneficiary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name"],
+          "description": "Who the waiver covers. Every grant mints an UNVERIFIED `co_` stub plus a registry entry at grant time, so a beneficiary with no account and no verified domain still resolves by ULID (FS-10 §4.3 step 2 — the reachability rule). Name-only lookups are answered by this public artifact, never by cov-v1.",
+          "properties": {
+            "coId": { "$ref": "#/$defs/coId" },
+            "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+            "domain": { "$ref": "#/$defs/domain", "description": "Matched by cov-v1 only against a company's VERIFIED domains." }
+          }
+        },
+        "grantedAt": { "type": "string", "format": "date-time", "description": "Coverage starts at this instant, cooling window notwithstanding." },
+        "coolingEndsAt": { "type": "string", "format": "date-time", "description": "grantedAt + 72 h (D14 as amended). Vesting-only input (FS05-063); cov-v1 ignores it." },
+        "revokedAt": { "type": ["string", "null"], "format": "date-time", "description": "Prospective revocation instant. Absent or null ⇒ live. Revocation INSIDE the cooling window voids the waiver ab initio and no vesting ever attaches." },
+        "grantedBy": { "enum": ["repo-admin"], "description": "Only a claimed repository admin can grant a waiver (D14). Recorded so the artifact carries its own provenance; no other value is issuable." },
+        "note": { "type": "string", "maxLength": 300, "description": "Optional public note from the granting admin. Repository-side content — escaped on render." }
+      }
+    },
+    "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+    "domain": { "type": "string", "format": "hostname", "maxLength": 253 },
+    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+  }
+}

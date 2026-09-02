@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/ledger-export.v1.json",
+  "title": "Monthly ledger export — /ledger/{YYYY}-{MM}.json",
+  "description": "The published monthly ledger export (FS-07 §6.2). Immutable once written: regeneration may only re-emit byte-identical content for a locked month, and a divergence is an alert, not a fix (FS07-051). The `.csv` twin carries the same rows flat; the human ledger page generates from the same rows, and any divergence between page, JSON and CSV is a defect (VS-37, ENG-043/044).\n\nThe shadow section, when present, carries its label IN BAND so no downstream consumer can strip it accidentally: contributor votes are computed and NOT used for routing until the fairness-review gate opens (D27, FS07-052).\n\nDisplay law: pages generate exclusively from these rows; per-contributor money respects the published materiality floor; unclaimed shares appear in aggregate only; there are no leaderboards (FS07-052, D15).\n\nAt P-M2 there are no allocation rows and no `policy`/`totals` allocation figures — the export carries intake rows only, and before the first money moves the ledger page says 'no money has moved yet' in words rather than rendering a zero (FS07-100, VS-37).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2 (intake rows only)",
+    "artifactPath": "/ledger/{YYYY}-{MM}.json (+ .csv twin)",
+    "authoritative": true,
+    "producer": "index-build (P-M2: index-build-lite CI, VS-04) from the committed monthly table",
+    "consumers": ["public ledger page", "edge passthrough (FS10-060)", "auditors and reconcilers"],
+    "fsRefs": ["FS-00 §6.2", "FS-07 §6.2 (FS07-051, FS07-052)", "FS-07 §10 (FS07-100)"],
+    "vsRefs": ["VS-04", "VS-36", "VS-37"],
+    "changelog": "CHANGELOG.md#ledger-exportv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "month", "generatedAt", "currency", "rows", "headHash"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "month": { "$ref": "#/$defs/monthKey" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "currency": { "$ref": "#/$defs/currency", "description": "Reporting currency (CHF). Per-row native currency and captured FX travel on the rows." },
+    "locked": { "type": "boolean", "description": "True once the month is locked and the file is immutable. An open month may still receive intake rows." },
+    "lockedAt": { "type": ["string", "null"], "format": "date-time" },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The allocation policy in force for the month. ABSENT at P-M2 — no allocation runs before P-M3, so publishing a policy block would describe machinery that has not acted.",
+      "properties": {
+        "levyBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "capBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "commonsBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "routingMode": { "enum": ["shadow", "live"] },
+        "algoVersion": { "type": "string", "maxLength": 32 }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Month totals in minor units of `currency`. At P-M2 only `pool` is meaningful; the allocation totals arrive with the allocator at P-M3.",
+      "properties": {
+        "pool": { "type": "integer" },
+        "levy": { "type": "integer" },
+        "commons": { "type": "integer" },
+        "directed": { "type": "integer" },
+        "disbursed": { "type": "integer" }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "description": "The month's rows in canonical order. Row shape is the published ledger-row contract; this export requires the subset every public consumer needs and permits the full row.",
+      "items": { "$ref": "#/$defs/exportRow" }
+    },
+    "shadow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "rows"],
+      "description": "Shadow-mode routing data (D27). P-M3+.",
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The in-band label, carried so it cannot be stripped by a consumer. Canonical text: 'SHADOW DATA — contributor votes computed, NOT used for routing (D27)'."
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["repo", "fund", "amountMinor"],
+            "properties": {
+              "repo": { "$ref": "#/$defs/githubNodeId" },
+              "contributorRef": { "type": "string", "maxLength": 100, "description": "Login at emission; replaced with an irreversible node_id hash on account deletion (FS07-043). Money rows never reference persons (ENG-083)." },
+              "fund": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" },
+              "amountMinor": { "type": "integer" },
+              "voteSource": { "enum": ["contributor", "steward-default", "project-default"] }
+            }
+          }
+        }
+      }
+    },
+    "headHash": { "$ref": "#/$defs/sha256", "description": "Global chain head after this month's last row." },
+    "prevHeadHash": { "$ref": "#/$defs/sha256OrGenesis", "description": "Global chain head before this month's first row. Genesis is 64 zeros." },
+    "monthDigest": { "$ref": "#/$defs/sha256", "description": "Digest over this month's rows, mirrored in the chain document and in the month-lock row." },
+    "methodologyUrl": { "type": "string", "format": "uri", "description": "The published methodology: levy cap, the M+1 hold, the append-only doctrine, and annotation-never-restatement (VS-37)." }
+  },
+  "$defs": {
+    "exportRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ledId", "seq", "type", "amountMinor", "rowHash"],
+      "properties": {
+        "ledId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+        "seq": { "type": "integer", "minimum": 1 },
+        "type": {
+          "enum": [
+            "pool-in", "topup-multiplier-in", "topup-donation-in", "donation-entitlement-note",
+            "refund-out", "chargeback-out", "chargeback-reverse-in", "adjustment",
+            "levy", "commons-alloc", "directed-alloc", "directed-to-commons", "repo-pool",
+            "category-route", "category-agg", "rollforward-in", "rollforward-out",
+            "disburse", "sponsor-ops-in", "month-note", "month-lock", "annotation"
+          ]
+        },
+        "date": { "type": "string", "format": "date" },
+        "amountMinor": { "type": "integer" },
+        "currency": { "$ref": "#/$defs/currency" },
+        "srcAmountMinor": { "type": "integer" },
+        "srcCurrency": { "$ref": "#/$defs/currency" },
+        "fxRate": { "type": "number", "exclusiveMinimum": 0 },
+        "fxSource": { "type": "string", "maxLength": 64 },
+        "fxDate": { "type": "string", "format": "date" },
+        "repo": { "$ref": "#/$defs/githubNodeId" },
+        "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+        "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+        "lane": { "enum": ["pass", "project", "portfolio", "donation"] },
+        "holdStatus": { "enum": ["held-M+1", "released"] },
+        "payerName": { "type": "string", "maxLength": 200, "description": "Opted-in payer name, or the literal `unnamed`." },
+        "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$" },
+        "ppSnapshotId": { "type": "string", "maxLength": 64 },
+        "algoVersion": { "type": "string", "maxLength": 32 },
+        "categoryFundId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" },
+        "correctsLedId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+        "note": { "type": "string", "maxLength": 1000 },
+        "monthDigest": { "$ref": "#/$defs/sha256" },
+        "prevHash": { "$ref": "#/$defs/sha256OrGenesis" },
+        "rowHash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "monthKey": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "sha256OrGenesis": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+  }
+}

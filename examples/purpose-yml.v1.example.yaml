@@ -1,0 +1,76 @@
+# PURPOSE.yml — a complete, valid example exercising every optional section.
+#
+# You do not need this file. Adoption is one committed LICENSE file and is complete
+# without a manifest; when there is no manifest the published defaults apply (weight
+# class standard, steward-default allocation, no attribution overrides). This example
+# shows what is POSSIBLE, not what is expected.
+#
+# Validate it:  npx ajv validate -s schemas/purpose-yml.v1.json -d <your file>
+# or just run this repository's `npm test`, which validates this file on every push.
+
+schema: 1
+
+# INFORMATIONAL MIRROR. The committed LICENSE file decides which licence version this
+# repository carries; a mismatch here is reported and changes no legal fact.
+license:
+  id: PurposeSource-1.0
+  url: "https://purposesource.org/license/PurposeSource-1.0.txt"
+
+# Also informational, and legally inert: it grants nothing and assigns nothing.
+# Contributors keep their copyright.
+licensor:
+  name: Acme Widget Collective
+  url: "https://github.com/acme"
+
+# Cosmetic only — no gate, price, allocation or certificate reads any of this.
+display:
+  name: Widget Engine
+  summary: A deterministic layout engine for very large widget trees.
+  homepage: "https://widget-engine.example"
+  docs: "https://widget-engine.example/docs"
+  contact: "https://github.com/acme/widget-engine/discussions"
+  topics:
+    - rust
+    - layout
+
+# Optional successor designation. Recorded and displayed; legally inert until the
+# succession process closes. An empty string means "no designation".
+successor: ""
+
+# Category-fund defaults. Slugs come from the published curated menu only — free text
+# cannot enter the fund set. A dashboard-set project default overrides this.
+allocation:
+  defaults:
+    - climate
+    - health
+
+# The ONLY attribution override channels that exist. This whole section fails closed to
+# defaults if any single field is invalid or out of bounds — never partially applied.
+attribution:
+  # Weight 0 for everything these globs match. Cap: 100 globs.
+  exclude_paths:
+    - "third_party/**"
+    - "vendor/**"
+  # Removed from both halves of the computation. Cap: 50 logins.
+  exclude_users:
+    - release-bot
+  # Re-classification only. An admin may re-class a path; the class enum fixes the
+  # multipliers (code = 1.0, docs = 0.3, excluded = 0) so nobody invents their own.
+  weights:
+    - path: "docs/**"
+      class: docs
+    - path: "examples/**"
+      class: code
+    - path: "generated/**"
+      class: excluded
+  # Micro-shares for contributors git cannot see — designers, off-repo documentation.
+  # Cap: 10 entries, and 200000 micro-shares (20%) in total. Splits scale the computed
+  # shares down pro-rata to make room; they never inflate the total.
+  manual_splits:
+    - login: designer-a
+      node_id: U_kgDOabc123
+      micro_shares: 50000
+  # Merged into the blame ignore-revs input, alongside the repository's own
+  # .git-blame-ignore-revs. Formatting commits stop stealing credit.
+  ignore_revs_extra:
+    - "0d5f7a1c9e3b2d4f6a8c0e2b4d6f8a1c3e5b7d9f"

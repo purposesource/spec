@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-06-02T06:00:00Z",
+  "algorithm": "sha256",
+  "canonicalisation": "RFC8785",
+  "genesisPrevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "headHash": "8e5f3a2b1c0d9e8f7a6b5c4d3e2f1a098e5f3a2b1c0d9e8f7a6b5c4d3e2f1a09",
+  "rowCount": 2,
+  "months": [
+    {
+      "month": "2027-06",
+      "monthDigest": "b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2",
+      "headHash": "8e5f3a2b1c0d9e8f7a6b5c4d3e2f1a098e5f3a2b1c0d9e8f7a6b5c4d3e2f1a09",
+      "rowCount": 2,
+      "locked": false,
+      "lockedAt": null,
+      "exportUrl": "https://api.purposesource.org/v1/ledger/2027-06.json"
+    }
+  ]
+}

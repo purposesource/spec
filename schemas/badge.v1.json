@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/badge.v1.json",
+  "title": "Badge artifact — /badge/{node_id}.json (shields.io endpoint response)",
+  "description": "The badge body a README embeds, in the shields.io ENDPOINT schema. Two rules govern it and both are about honesty rather than looks.\n\n(1) A STALE BADGE MUST NEVER KEEP ASSERTING REGISTRATION (WEB-085). `suspended`, `quit` and `delisted` repositories all render the neutral form — label unchanged, message 'status: see registry', colour lightgrey — and the edge route serves the neutral form even against a still-cached artifact whenever the index meta's delist set contradicts it (FS10-032). An unknown node_id answers 200 with `isError: true` and 'not registered', because shields renders errors from bodies, not from 404s (FS10-033).\n\n(2) NO MONEY FIGURE BEFORE THE LEDGER. The default message is mechanism copy ('registered'); a charity band may render only after the first franc actually moves, and the band thresholds and visual design are an open decision (URS §21 OPEN-11, VS-24, MKT-042).\n\nSCHEMA-VERSION NOTE: `schemaVersion` here is shields.io's own literal `1`, which happens to satisfy the FS-00 §6.2 requirement that every artifact carry a schema version. This artifact deliberately carries NO `generatedAt` field: the body must remain a valid shields endpoint response, so freshness travels in the `ETag` and `Last-Modified` headers instead (FS10-003).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/badge/{node_id}.json",
+    "authoritative": true,
+    "producer": "index-build (P-M2: index-build-lite CI, VS-04)",
+    "consumers": ["shields.io", "README readers", "edge badge route (FS-10 §5)"],
+    "fsRefs": ["FS-00 §6.2", "FS-10 §5 (FS10-030…FS10-033)", "WEB-084", "WEB-085"],
+    "vsRefs": ["VS-04", "VS-18", "VS-24"],
+    "changelog": "CHANGELOG.md#badgev1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "label", "message", "color"],
+  "properties": {
+    "schemaVersion": { "const": 1, "description": "shields.io endpoint schema version. Must be the literal 1." },
+    "label": {
+      "const": "purpose source",
+      "description": "Fixed left-hand text. Constant across every state so a reader's eye tracks the right-hand message, and so a neutral badge is visibly the SAME badge rather than a different one."
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "Right-hand text. Canonical values: `registered` (verified), `status: see registry` (suspended/quit/delisted), `not registered` (unknown id). A money band may appear only post-first-franc (OPEN-11).",
+      "examples": ["registered", "status: see registry", "not registered"]
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^(brightgreen|green|yellowgreen|yellow|orange|red|blue|grey|gray|lightgrey|lightgray|blueviolet|success|important|critical|informational|inactive|#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6})$",
+      "description": "Canonical values: `brightgreen` (registered), `lightgrey` (neutral), `inactive` (unknown id)."
+    },
+    "labelColor": { "type": "string", "pattern": "^(brightgreen|green|yellowgreen|yellow|orange|red|blue|grey|gray|lightgrey|lightgray|blueviolet|success|important|critical|informational|inactive|#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6})$" },
+    "isError": { "type": "boolean", "description": "True only for the unknown-node_id response, which is still served with HTTP 200 (FS10-033)." },
+    "cacheSeconds": {
+      "type": "integer",
+      "minimum": 300,
+      "description": "Shields' own cache hint. Kept consistent with the edge cache policy: s-maxage 3600, stale-while-revalidate 24 h, stale-if-error 7 days (FS10-033, INF-15)."
+    },
+    "style": { "enum": ["plastic", "flat", "flat-square", "for-the-badge", "social"] }
+  }
+}

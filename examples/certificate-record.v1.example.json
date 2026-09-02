@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-03-02T10:00:00Z",
+  "cid": "cert_01jf8w2c9km3q7xz5r0v4t6y8a",
+  "status": "revoked",
+  "typ": "supporter",
+  "variant": "entitlement",
+  "sub": "Example Industries AG",
+  "scope": {
+    "kind": "project",
+    "repos": ["R_kgDOAbc123"]
+  },
+  "band": "10-100M",
+  "period": {
+    "validFrom": "2027-01-01",
+    "validUntil": "2027-12-31"
+  },
+  "issuedAt": "2027-01-01T09:00:00Z",
+  "kid": "psn-prod-2027-1",
+  "ct": {
+    "seq": 118234,
+    "segment": 11
+  },
+  "revocation": {
+    "reasonClass": "project-delisting",
+    "at": "2027-03-01T12:00:00Z",
+    "ctRef": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867"
+  },
+  "supersedes": null,
+  "supersededBy": null,
+  "verifyUrl": "https://purposesource.org/verify/cert_01jf8w2c9km3q7xz5r0v4t6y8a",
+  "jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6InBzbi1wcm9kLTIwMjctMSJ9.eyJjaWQiOiJjZXJ0XzAxamY4dzJjOWttM3E3eHo1cjB2NHQ2eThhIn0.MEUCIQDexampleSignatureBytesHereOnlyForDocumentation"
+}

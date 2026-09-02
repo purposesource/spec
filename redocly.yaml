@@ -1,0 +1,64 @@
+# Redocly lint configuration for openapi/edge-public.v1.yaml.
+#
+# Everything in `recommended` stays on except one rule, disabled deliberately and
+# explained here rather than in a commit message nobody will find.
+extends:
+  - recommended
+
+rules:
+  # DISABLED ON PURPOSE.
+  #
+  # This API serves published FILES, not routes, and several of its paths are
+  # legitimately both a literal and a template:
+  #
+  #   /v1/registry/index/meta.json   vs  /v1/registry/index/{shard}.json
+  #   /v1/waivers/all.json           vs  /v1/waivers/{nodeId}.json
+  #   /ct/latest.json                vs  /ct/{segment}.json
+  #   /ct/checkpoint-latest.json     vs  /ct/{segment}.json
+  #
+  # Redocly is right that these overlap: `{shard}` could in principle be the string
+  # "meta.json". In the real system it cannot, because a shard key is one alphanumeric
+  # character (the pattern on the parameter says so) and the literal object exists in
+  # the store under its own name. A static file store resolves the exact name first;
+  # there is no router precedence question to get wrong.
+  #
+  # Renaming the artifacts to satisfy the linter would be the wrong direction: the
+  # artifact paths are frozen contract (FS-00 §6.2) and are already published in the
+  # trust centre and in scanner documentation. The linter yields to the contract.
+  no-ambiguous-paths: off
+
+  # DISABLED, AND REPLACED BY OUR OWN GATE — not waived.
+  #
+  # This rule does exactly the right job: validate every example against its schema, so
+  # the documentation cannot drift away from the artifacts. Its validator, however,
+  # mis-scopes `unevaluatedProperties` inside `if`/`then` branches, and every
+  # conditionally-constrained artifact we publish therefore fails with one false error
+  # per field.
+  #
+  # Reproduction: take schemas/stats.v1.json, inject `unevaluatedProperties: false` into
+  # each allOf[i].then, and validate the pre-launch example. Under JSON Schema 2020-12,
+  # `unevaluatedProperties` in a subschema sees only annotations produced WITHIN that
+  # subschema, so every root-declared property becomes "unevaluated". That is precisely
+  # the error list this rule produces here.
+  #
+  # Restructuring correct schemas to satisfy an incorrect check would be the wrong
+  # direction, and simply shrugging would lose a guarantee worth having. So
+  # `npm run check:openapi-examples` re-implements the check with a conformant ajv
+  # 2020-12 instance — the same one the schema and example gates use — and runs in CI
+  # right beside this linter.
+  no-invalid-media-type-examples: off
+
+  # DISABLED for the same class of reason.
+  #
+  # Conditional rules here are written as `allOf: [{ if: ..., then: { required: [...] } }]`
+  # with each property declared once at the object root, which is the idiomatic 2020-12
+  # shape. This rule wants every conditional branch to redeclare the property it
+  # requires — which would triple the size of the certificate schema and give one field
+  # three descriptions to drift apart. Ajv's equivalent `strictRequired` is off for the
+  # same reason, and that decision is recorded in scripts/lib/spec.mjs.
+  no-required-schema-properties-undefined: off
+
+  # Everything else in `recommended` stays on. The ones that earn their keep here:
+  # security-defined (satisfied by the explicit empty root `security: []` — this API is
+  # deliberately keyless), operation-operationId-unique, operation-4xx-response,
+  # path-parameters-defined, no-unused-components.

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "segment": 0,
+  "startSeq": 0,
+  "prevSegmentSha256": null,
+  "generatedAt": "2027-06-01T06:00:00Z",
+  "closed": false,
+  "entries": [
+    {
+      "seq": 0,
+      "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+      "typ": "supporter",
+      "kind": "issue",
+      "ref": null,
+      "ts": "2027-03-01T09:00:00Z"
+    },
+    {
+      "seq": 1,
+      "h": "7e2b9d0c1a8f3e5d4c3b2a19087665447e2b9d0c1a8f3e5d4c3b2a1908766544",
+      "typ": "supporter",
+      "kind": "revoke",
+      "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+      "ts": "2027-03-01T12:00:00Z"
+    },
+    {
+      "seq": 2,
+      "h": "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90",
+      "typ": "license-status",
+      "kind": "issue",
+      "ref": null,
+      "ts": "2027-04-01T00:00:00Z"
+    }
+  ]
+}

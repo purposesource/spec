@@ -1,0 +1,43 @@
+# registry-v0/repos/{node_id}.yml — one curated registry record.
+#
+# The filename must equal `node_id`. This file is a CACHE of display facts; the
+# repository's own committed LICENSE file is the truth about adoption.
+#
+# Note what is NOT here and never will be: a `waivers` field. Waivers are granted by a
+# claimed project admin from the dashboard, so no waiver can enter the registry through
+# a pull request.
+#
+# Dates and versions are quoted on purpose — unquoted `2027-01-15` and `1.0` parse as a
+# timestamp and a float, and the schema wants strings.
+
+schema: registry-v0/1
+node_id: R_kgDOAbc123
+owner: acme
+name: widget-engine
+default_branch: main
+
+# detected | verified | suspended | quit | delisted
+state: verified
+
+license:
+  id: PurposeSource-1.0
+  version: "1.0"
+  # Publication date of that licence version — the anchor for the fixed four-year
+  # Apache-2.0 conversion clock.
+  published: "2027-01-15"
+  # The date the LICENSE commit landed on the default branch.
+  adopted: "2027-03-14"
+  # SHA-256 of the committed licence text. A modified text is not an adoption.
+  text_sha256: "9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f"
+
+# standard | major. Set from the dashboard menu, never from the manifest.
+weight_class: standard
+
+# Inbound-licence family recorded for the adoption gate.
+inbound_family: permissive
+
+# Optional; the steward default applies when absent.
+allocation_defaults:
+  - climate
+
+repo_url: "https://github.com/acme/widget-engine"

@@ -1,0 +1,8 @@
+{
+  "asOf": "2027-07-01T00:00:00Z",
+  "headSeq": 2,
+  "headSegment": 0,
+  "headSegmentSha256": "9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d",
+  "kid": "psn-prod-2027-1",
+  "iss": "https://api.purposesource.org"
+}

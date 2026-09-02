@@ -1,0 +1,12 @@
+Purpose Source Network — spec
+Copyright 2026 the Purpose Source Network steward organisation
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This repository contains contract descriptions (JSON Schema, OpenAPI) and one
+reference implementation (coverage/cov-v1.ts). It contains no third-party code and
+vendors no third-party files.
+
+The name of the steward organisation is pending clearance; every occurrence of the
+organisation and domain names in this repository derives from spec.config.json, which
+is the single substitution point.

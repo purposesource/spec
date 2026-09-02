@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/change-event.v1.json",
+  "title": "Change event (v1) — one item of the /v1/changes feed",
+  "description": "One event of the public change feed, the sync primitive for integrators who would otherwise poll every artifact (TRN-046). The feed is stored as append-only segments plus a meta document, and the read route pages with a cursor that is the last-seen event ULID; `next` is always present, so a poller that is caught up idles on 304s rather than on empty pages (FS10-070/071). Feed page envelope: `{ \"items\": [ <this schema> ], \"next\": \"evt_…\" }` — see the OpenAPI description.\n\nPERSONAL DATA: NONE. Every payload field is P0-public registry state (FS-00 §6.9). That is a structural property of the event catalogue below, not a filter applied on the way out.\n\nPhase: P-M4, demand-gated. The schema is published now so that an integrator building against this contract set can see the shape it will get, and so the feed can be switched on without a schema change (FS-00 §6.10).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M4 (demand-gated; schema published from P-M2)",
+    "artifactPath": "/changes/{n}.json segments; served by GET /v1/changes?cursor=",
+    "authoritative": true,
+    "producer": "index-build",
+    "consumers": ["integrators syncing registry state", "SCA vendors"],
+    "fsRefs": ["FS-00 §6.2", "FS-00 §6.6", "FS-10 §9 (FS10-070, FS10-071)", "TRN-046"],
+    "vsRefs": ["(not in the P-M2 build sheet — P-M2 §5 item 20)"],
+    "changelog": "CHANGELOG.md#change-eventv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "type", "occurredAt", "payload"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^evt_[0-9abcdefghjkmnpqrstvwxyz]{26}$",
+      "description": "Event ULID — sortable, which is what makes it usable as the feed cursor (FS-00 §6.1, FS10-071)."
+    },
+    "type": {
+      "enum": [
+        "repo-adopted", "repo-quit", "repo-delisted", "repo-relisted",
+        "waiver-granted", "waiver-revoked",
+        "schedule-published", "license-version-published", "jwks-changed",
+        "entitlement-recorded", "entitlement-lapsed"
+      ],
+      "description": "The complete event catalogue (FS10-070). Additive-only: a new type may be added, an existing one never redefined (WEB-112)."
+    },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "payload": {
+      "type": "object",
+      "description": "Type-dependent, P0-public fields only. The `allOf` rules below state the minimum each type carries; additional P0 fields may be added additively.",
+      "properties": {
+        "nodeId": { "$ref": "#/$defs/githubNodeId" },
+        "owner": { "type": "string", "maxLength": 39, "description": "Display cache only." },
+        "name": { "type": "string", "maxLength": 100 },
+        "state": { "enum": ["detected", "verified", "suspended", "quit", "delisted"] },
+        "wvrId": { "type": "string", "pattern": "^wvr_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+        "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+        "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+        "lane": { "enum": ["pass", "project", "portfolio", "donation"] },
+        "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$" },
+        "licenseVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+        "recordUrl": { "type": "string", "format": "uri" }
+      },
+      "$comment": "Deliberately open (additionalProperties permitted) so an additive P0 field does not require a new schema version. What is NOT permitted is any personal datum: emails, names of individuals, and money amounts attributable to a person never appear in this feed (FS-00 §6.9, D15)."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "enum": ["repo-adopted", "repo-quit", "repo-delisted", "repo-relisted"] } }, "required": ["type"] },
+      "then": { "properties": { "payload": { "required": ["nodeId"] } } }
+    },
+    {
+      "if": { "properties": { "type": { "enum": ["waiver-granted", "waiver-revoked"] } }, "required": ["type"] },
+      "then": { "properties": { "payload": { "required": ["wvrId", "nodeId"] } } }
+    },
+    {
+      "if": { "properties": { "type": { "enum": ["entitlement-recorded", "entitlement-lapsed"] } }, "required": ["type"] },
+      "then": { "properties": { "payload": { "required": ["coId"] } } }
+    }
+  ],
+  "$defs": {
+    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+  }
+}

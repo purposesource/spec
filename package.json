@@ -1,0 +1,31 @@
+{
+  "name": "@purposesource/spec",
+  "version": "0.1.0",
+  "description": "Machine-readable contracts for the Purpose Source Network: JSON Schemas for every published artifact, the public read API description, and the published reference implementation of the cov-v1 coverage function.",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "npm run check:schemas && npm run check:examples && npm run check:vectors && npm run check:module && npm run check:copy && npm run check:types && npm run test:coverage && npm run lint:openapi && npm run check:openapi-examples",
+    "check:schemas": "node scripts/check-schemas.mjs",
+    "check:module": "node scripts/check-coverage-module.mjs",
+    "check:examples": "node scripts/check-examples.mjs",
+    "check:openapi-examples": "node scripts/check-openapi-examples.mjs",
+    "check:vectors": "node scripts/check-vectors.mjs",
+    "check:copy": "node scripts/check-copy.mjs",
+    "check:types": "tsc --noEmit -p tsconfig.json",
+    "test:coverage": "node --experimental-strip-types --test coverage/cov-v1.test.ts",
+    "lint:openapi": "redocly lint openapi/edge-public.v1.yaml"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^2.51.0",
+    "@types/node": "^22.19.0",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "js-yaml": "^4.3.1",
+    "typescript": "^5.9.3"
+  }
+}

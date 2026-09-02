@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-06-01T05:00:00Z",
+  "scope": "repo",
+  "nodeId": "R_kgDOAbc123",
+  "waivers": [
+    {
+      "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+      "beneficiary": {
+        "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+        "name": "Kleinbetrieb GmbH"
+      },
+      "grantedAt": "2027-04-01T00:00:00Z",
+      "coolingEndsAt": "2027-04-04T00:00:00Z",
+      "revokedAt": null,
+      "grantedBy": "repo-admin",
+      "note": "Long-time contributor's employer; granted on request."
+    },
+    {
+      "wvrId": "wvr_01jp5d9k6tv0y4eg2z7c1a3f6j",
+      "beneficiary": {
+        "name": "Regional Health Trust",
+        "domain": "health-trust.example"
+      },
+      "grantedAt": "2027-02-10T00:00:00Z",
+      "coolingEndsAt": "2027-02-13T00:00:00Z",
+      "revokedAt": "2027-05-01T00:00:00Z",
+      "grantedBy": "repo-admin"
+    }
+  ]
+}

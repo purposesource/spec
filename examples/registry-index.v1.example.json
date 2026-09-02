@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-06-01T05:00:00Z",
+  "shard": "w",
+  "count": 2,
+  "entries": [
+    {
+      "nodeId": "R_kgDOAbc123",
+      "owner": "acme",
+      "name": "widget-engine",
+      "state": "verified",
+      "weightClass": "standard",
+      "licenseId": "PurposeSource-1.0",
+      "licenseVersion": "1.0",
+      "adoptedAt": "2027-03-14",
+      "apacheConversionDate": "2031-01-15",
+      "language": "Rust",
+      "topics": ["rust", "layout"],
+      "summary": "A deterministic layout engine for very large widget trees.",
+      "recordUrl": "https://api.purposesource.org/v1/registry/repo/R_kgDOAbc123.json",
+      "badgeUrl": "https://api.purposesource.org/badge/R_kgDOAbc123.json",
+      "pageUrl": "https://purposesource.org/registry/acme/widget-engine"
+    },
+    {
+      "nodeId": "R_kgDOWob321",
+      "owner": "northwind",
+      "name": "wobble-parser",
+      "state": "quit",
+      "weightClass": "standard",
+      "licenseId": "PurposeSource-1.0",
+      "licenseVersion": "1.0",
+      "adoptedAt": "2027-03-14",
+      "apacheConversionDate": "2031-01-15",
+      "language": null,
+      "recordUrl": "https://api.purposesource.org/v1/registry/repo/R_kgDOWob321.json",
+      "badgeUrl": "https://api.purposesource.org/badge/R_kgDOWob321.json"
+    }
+  ]
+}

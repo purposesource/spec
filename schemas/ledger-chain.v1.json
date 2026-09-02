@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/ledger-chain.v1.json",
+  "title": "Ledger hash chain — /ledger/chain.json",
+  "description": "The ledger's tamper-evidence document: the global chain head plus one entry per month carrying that month's digest and the global head at lock (FS07-040, FS07-051). Any later tampering is detectable by re-walking the global chain and recomputing the month digests — which CI does on every pull request at P-M2 (FS07-100, VS-36).\n\nThe chain is ONE GLOBAL append-ordered chain: `rowHash = SHA-256(prevHash ∥ JCS(row minus prevHash/rowHash))`, `prevHash` being the previous row in global insertion order regardless of month, genesis 64 zeros. So a month's lock never blocks a later month's intake, and the P-M3 database import continues the same chain unbroken from the v0 head (FS07-101).\n\nThe honest claim this document supports is that every RECORDED allocation and disbursement is independently reconcilable — append-only ledger, audited accounts, partner receipts. It does not claim the bank and intermediary legs are publicly provable end to end, because they are not.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/ledger/chain.json",
+    "authoritative": true,
+    "producer": "index-build (P-M2: index-build-lite CI, VS-04) from the committed monthly tables",
+    "consumers": ["chain verifier in CI", "auditors", "trust-centre methodology page"],
+    "fsRefs": ["FS-00 §6.2", "FS-07 §5.2 (FS07-040)", "FS-07 §6.1 (FS07-051)", "FS-07 §10"],
+    "vsRefs": ["VS-36", "VS-37", "VS-04"],
+    "changelog": "CHANGELOG.md#ledger-chainv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "algorithm", "canonicalisation", "genesisPrevHash", "headHash", "months"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "algorithm": { "const": "sha256", "description": "Hash function. A change here is a new schema version, never an in-place edit." },
+    "canonicalisation": { "const": "RFC8785", "description": "JSON Canonicalisation Scheme, applied to the row minus its own `prevHash`/`rowHash` before hashing." },
+    "genesisPrevHash": { "const": "0000000000000000000000000000000000000000000000000000000000000000" },
+    "headHash": { "$ref": "#/$defs/sha256", "description": "Current global chain head. Equal to `genesisPrevHash` while the ledger holds no rows — which is the honest state before the first purchase." },
+    "rowCount": { "type": "integer", "minimum": 0, "description": "Total rows in the chain." },
+    "months": {
+      "type": "array",
+      "description": "One entry per month that has rows, oldest first. `locked: false` entries are open months: their digest is a snapshot as of `generatedAt`, not a commitment.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["month", "monthDigest", "headHash", "rowCount", "locked"],
+        "properties": {
+          "month": { "$ref": "#/$defs/monthKey" },
+          "monthDigest": { "$ref": "#/$defs/sha256" },
+          "headHash": { "$ref": "#/$defs/sha256", "description": "The GLOBAL chain head at the moment this month was locked (or at `generatedAt` for an open month)." },
+          "rowCount": { "type": "integer", "minimum": 0 },
+          "locked": { "type": "boolean" },
+          "lockedAt": { "type": ["string", "null"], "format": "date-time" },
+          "exportUrl": { "type": "string", "format": "uri" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "monthKey": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

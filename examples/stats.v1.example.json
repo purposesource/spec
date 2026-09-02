@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-04-01T05:00:00Z",
+  "state": "launched-pre-disbursement",
+  "projectsRegistered": 12,
+  "contributorsClaimed": null,
+  "companiesCovered": 6,
+  "chfRoutedMinor": null,
+  "cur": "CHF",
+  "firstDisbursementScheduledFor": "2027-07-15",
+  "loi": null,
+  "detectedUnclaimed": 3,
+  "smallnessThresholds": {
+    "projects": 25,
+    "contributors": 50,
+    "companies": 10
+  },
+  "links": {
+    "registry": "https://purposesource.org/registry",
+    "ledger": "https://purposesource.org/ledger",
+    "waivers": "https://purposesource.org/waivers"
+  }
+}

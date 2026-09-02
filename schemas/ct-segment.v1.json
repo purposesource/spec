@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/ct-segment.v1.json",
+  "title": "Transparency-log segment — /ct/{n}.json and /ct/latest.json",
+  "description": "One segment of the append-only certificate transparency log. Structure for v1 is a flat signed append-only log plus checkpoints (CERT-034 default; a Merkle upgrade would add an inclusion-proof field additively — URS §21 OPEN-37). Closed segments hold exactly 10000 entries and are chained by hash; `/ct/latest.json` is the OPEN segment in the identical shape (FS08-111).\n\nEntries carry hash, type, kind, reference and timestamp and NOTHING ELSE — no names, no emails, no subject data. That is what makes the log GDPR-compatible by content and therefore immutable forever, including through an erasure request (CERT-031, CERT-045).\n\nAt P-M2 the log is exactly one committed file, `ct/0.json` at the website repository root, appended by pull request; CI rejects any diff that edits or deletes an existing entry, which makes append-only a mechanical property rather than a promise (FS08-113, VS-28). A revocation or status change is a NEW entry whose `ref` is the ORIGINAL entry's hash — the log never edits (CERT-033).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2 (single committed segment 0)",
+    "artifactPath": "/ct/{n}.json · /ct/latest.json",
+    "authoritative": true,
+    "producer": "P-M2: operator script via PR (VS-27/VS-28) · P-M3: ct-publish authors, index-build writes",
+    "consumers": ["verify page inclusion check (VS-25)", "independent auditors", "the public git mirror (CERT-032)"],
+    "fsRefs": ["FS-00 §6.2", "FS-08 §12 (FS08-110…FS08-114)", "CERT-030…CERT-034"],
+    "vsRefs": ["VS-27", "VS-28", "VS-25"],
+    "changelog": "CHANGELOG.md#ct-segmentv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "segment", "startSeq", "prevSegmentSha256", "entries"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "segment": { "type": "integer", "minimum": 0, "description": "Segment number. Segment 0 is the P-M2 committed file and is carried forward unchanged at P-M3 so v0 entries stay verifiable (FS08-113)." },
+    "startSeq": { "type": "integer", "minimum": 0, "description": "Global sequence number of this segment's first entry. Sequence is global and monotonic across segments." },
+    "prevSegmentSha256": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 of the previous segment document, or null for segment 0. Re-walking these hashes must reproduce the chain — divergence pages ops (FS08-114/135)."
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Present on the open segment (`latest.json`). A CLOSED segment is frozen byte-for-byte the moment it fills, so it deliberately carries no regeneration timestamp — its immutability is the point."
+    },
+    "closed": { "type": "boolean", "description": "True once the segment reached its fixed entry count and was frozen." },
+    "entries": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seq", "h", "typ", "kind", "ref", "ts"],
+      "description": "One log entry. `ref` is explicitly REQUIRED and nullable rather than optional, so an issue entry states plainly that it references nothing — a missing key and a null must not be distinguishable in an audit.",
+      "properties": {
+        "seq": { "type": "integer", "minimum": 0 },
+        "h": {
+          "$ref": "#/$defs/sha256",
+          "description": "For `issue`: SHA-256 of the compact JWS string (CERT-030). For `revoke`/`status`: SHA-256 of the revocation/status entry payload."
+        },
+        "typ": { "enum": ["contributor", "steward", "supporter", "license-status", "topup"], "description": "Certificate type. A type is not personal data; no subject field ever enters this log." },
+        "kind": { "enum": ["issue", "revoke", "status"] },
+        "ref": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$", "description": "The ORIGINAL entry's hash for `revoke`/`status`; null for `issue` (CERT-033)." },
+        "ts": { "type": "string", "format": "date-time" }
+      }
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

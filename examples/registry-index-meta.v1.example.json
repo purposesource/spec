@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-06-01T05:00:00Z",
+  "shards": [
+    {
+      "shard": "w",
+      "url": "https://api.purposesource.org/v1/registry/index/w.json",
+      "count": 2
+    },
+    {
+      "shard": "z",
+      "url": "https://api.purposesource.org/v1/registry/index/z.json",
+      "count": 1
+    }
+  ],
+  "exportUrl": "https://api.purposesource.org/v1/registry/export.json",
+  "totals": {
+    "listed": 3,
+    "verified": 2,
+    "suspended": 0,
+    "quit": 1,
+    "delisted": 0,
+    "detected": 4
+  },
+  "delisted": ["R_kgDOWob321"]
+}

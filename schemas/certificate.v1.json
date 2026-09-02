@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/certificate.v1.json",
+  "title": "Certificate JWS payload profile (v1)",
+  "description": "The signed payload of a certificate. Header is fixed: `{\"alg\":\"ES256\",\"kid\":\"psn-{env}-{yyyy}-{n}\",\"typ\":\"application/psn-cert+jws\",\"cty\":\"application/json\"}`; the payload is canonicalised with RFC 8785 (JCS) before signing, the compact serialisation IS the certificate, and `SHA-256(compact JWS string)` is the hash that enters the transparency log (FS08-050). Keys are born non-exportable inside the movement's own Key Vault and only one principal may sign (FS-00 §6.4, FS-00 §3).\n\nVERIFICATION ORDER (published in the Trust Center, CERT-025): resolve `kid` in the JWKS → verify ES256 over the compact JWS → check `SHA-256(jws)` appears in the transparency log → fetch the certificate record for live status. Steps 1–2 work fully offline with a JWKS copy. A signature that verifies while its hash is ABSENT from the log renders UNVERIFIED — that is the rogue-issuance detector, not a soft warning (CERT-030).\n\nFUNDING TRUTH (CERT-002/013, D14, COM-066): `amountMinor` + `cur` appear ONLY where money actually moved, and never without `amountKind`, which distinguishes a fee paid from an impact figure routed from a documented donation. One payload never conflates them. A waived organisation that funded nothing can only ever hold `license-status.waiver`.\n\nMATERIALITY (CERT-014/054, D15): a per-contributor monetary figure enters the payload only if it meets the published floor for the attested period; otherwise the payload carries `impactBelowFloor: true` and no figure at all, so a template cannot leak a gated number it never received (FS08-091). No field can express a cross-contributor ranking (CERT-015 by construction).\n\nAt P-M2 only `supporter.entitlement` and `license-status.*` are issuable, by an operator-run signing script with the same profile (FS08-040/041). Impact figures do not exist before the first disbursed ledger row (NEV-017).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2 (supporter.entitlement + license-status.* only)",
+    "artifactPath": "(compact JWS; embedded in the PDF and in the certificate record's `jws` field)",
+    "authoritative": true,
+    "producer": "FS-08 signer (P-M2: operator script tools/cert-sign, VS-27)",
+    "consumers": ["verify page (client-side validation, VS-25)", "offline verifiers with a JWKS copy", "transparency-log auditors"],
+    "signature": { "alg": "ES256", "typHeader": "application/psn-cert+jws", "ctyHeader": "application/json", "canonicalisation": "RFC 8785 (JCS) before signing" },
+    "fsRefs": ["FS-00 §6.4", "FS-08 §6 (FS08-050…FS08-053)", "FS-08 §2 (FS08-010)", "FS-08 §10", "CERT-010…CERT-015", "D17"],
+    "vsRefs": ["VS-27", "VS-29", "VS-30"],
+    "changelog": "CHANGELOG.md#certificatev1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["cid", "typ", "variant", "sub", "subId", "scope", "period", "iat", "iss", "claimKitVersion"],
+  "properties": {
+    "cid": { "type": "string", "pattern": "^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "Certificate ULID. Non-guessable by construction, and the verify route is rate-limited against scraping (CERT-010/026)." },
+    "typ": {
+      "enum": ["contributor", "steward", "supporter", "license-status", "topup"],
+      "description": "The frozen type enum (FS-00 §6.4). Not to be confused with the JWS header's `typ`, which is the media type."
+    },
+    "variant": {
+      "enum": ["participation", "registration", "impact", "entitlement", "gift-funder", "waived-funder", "donation", "waiver", "under-threshold", "gifted-pass", "x2", "x5", "x10"],
+      "description": "Additive discriminator from the FS08-010 table. Permitted combinations: contributor→participation; steward→registration|impact; supporter→entitlement|gift-funder|waived-funder|donation; license-status→waiver|under-threshold|gifted-pass; topup→x2|x5|x10. The combination is enforced by the `allOf` rules below and by issuance-time gates."
+    },
+    "sub": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Display name: a legal name for organisations, a GitHub login (or explicitly supplied legal name) for individuals. NEVER an email address (CERT-012)."
+    },
+    "subId": { "type": "string", "pattern": "^(co_[0-9abcdefghjkmnpqrstvwxyz]{26}|[A-Za-z0-9_-]{4,128})$", "description": "Subject id: a `co_` ULID for a company, otherwise a GitHub user or repository node_id." },
+    "subjectKind": { "enum": ["company", "individual", "project"] },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "description": "Structured scope — the same shape the entitlement record uses, so a certificate and its entitlement describe coverage identically.",
+      "properties": {
+        "kind": { "enum": ["project", "portfolio", "network"] },
+        "repos": { "type": "array", "minItems": 1, "maxItems": 50, "uniqueItems": true, "items": { "$ref": "#/$defs/githubNodeId" } },
+        "org": { "$ref": "#/$defs/githubNodeId" }
+      }
+    },
+    "band": {
+      "type": "string",
+      "maxLength": 32,
+      "description": "Self-certified size band, corporate types only, carrying NO currency prefix (FS08-060a). Printed as given.",
+      "examples": ["10-100M", "1-10M", "100M+"]
+    },
+    "amountMinor": { "type": "integer", "minimum": 0, "description": "Integer minor units (FS-00 §6.1). Present ONLY where funded, and only together with `cur` and `amountKind`." },
+    "cur": { "$ref": "#/$defs/currency" },
+    "amountKind": {
+      "enum": ["fee-paid", "impact-routed", "donation"],
+      "description": "What the amount IS. A fee renders as a fee, never as a donation (D17/CERT-054c); the donate-direct lane is the only place `donation` states a documented fact. Templates bind money slots only to a field carrying this label and compute nothing themselves (FS08-091)."
+    },
+    "period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["validFrom", "validUntil"],
+      "description": "Attested period. Expiry is non-destructive: an expired certificate verifies as 'was valid for period P' (CERT-041), consistent with vesting permanence (D12).",
+      "properties": {
+        "validFrom": { "type": "string", "format": "date" },
+        "validUntil": { "type": "string", "format": "date" }
+      }
+    },
+    "iat": { "type": "integer", "minimum": 0, "description": "Issued-at, seconds since the Unix epoch (RFC 7519 NumericDate)." },
+    "iss": {
+      "type": "string",
+      "format": "uri",
+      "description": "Issuer. Production certificates use the production issuer; sandbox certificates use the `/sandbox` issuer, sign with sandbox keys, publish only at the sandbox JWKS and NEVER enter the transparency log (FS08-103, COM-086).",
+      "examples": ["https://api.purposesource.org", "https://api.purposesource.org/sandbox"]
+    },
+    "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$" },
+    "claimKitVersion": {
+      "type": "string",
+      "pattern": "^kit-[0-9]+\\.[0-9]+$",
+      "description": "Pins the claim-language kit in force at issuance (D17). The kit document is published alongside this contract set and at `/kits/{version}.json`."
+    },
+    "verify": {
+      "type": "string",
+      "format": "uri",
+      "description": "The human verify URL for this certificate. The frozen exclusive-verification wording printed on every artifact is 'verify only at purposesource.org/verify' (FS-00 §6.4 as amended 2026-09-01, CERT-027): the human verify page owns that statement, and machine endpoints are documented separately, never printed as the canonical host."
+    },
+    "factRefs": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The recorded facts this certificate attests, by immutable id. No anticipatory certificates exist: a reference to a non-existent or non-settled fact fails the issuance gate (CERT-004, FS08-012).",
+      "properties": {
+        "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+        "wvrId": { "type": "string", "pattern": "^wvr_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+        "ledgerRowIds": { "type": "array", "maxItems": 500, "items": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$" } },
+        "ppsId": { "type": "string", "maxLength": 64, "description": "Purpose-Points snapshot id (P-M3+)." }
+      }
+    },
+    "supersedes": { "type": ["string", "null"], "pattern": "^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "Renewal chain (CERT-046). Payloads are never mutated: a renewal is a NEW certificate that links back." },
+    "ppAlgoVersion": { "type": "string", "maxLength": 32, "description": "Contributor payloads only (P-M3+)." },
+    "purposePoints": { "type": "integer", "minimum": 0, "description": "Contributor payloads only (P-M3+)." },
+    "percentileBand": { "type": "string", "maxLength": 32, "description": "Contributor payloads only. Purpose-Points-based, never money-based — no field in this schema can express a monetary ranking (CERT-015)." },
+    "categoryVotes": {
+      "type": "array",
+      "maxItems": 8,
+      "description": "Contributor payloads only: which category funds this contributor directed. 'Helped direct', never received (MKT-037).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["fund"],
+        "properties": {
+          "fund": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" },
+          "sharePpm": { "type": "integer", "minimum": 0, "maximum": 1000000 }
+        }
+      }
+    },
+    "impactMinor": { "type": "integer", "minimum": 0, "description": "Contributor impact figure, minor units. Present only when the materiality floor is met AND a ledger row exists; always accompanied by `cur` and `amountKind: \"impact-routed\"` (FS08-090)." },
+    "impactBelowFloor": { "type": "boolean", "description": "True when the attested period's figure is below the published materiality floor. The payload then carries NO monetary figure at all (D15/CERT-054b)." },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kitVersion", "permitted", "prohibited", "binding"],
+      "description": "The machine-readable claim-language kit block (CERT-050). Corporate types embed the kit as an integral page of the rendered PDF including the binding statement on the certificate face (CERT-053). `license-status` certificates carry the STATUS-ONLY kit variant: coverage-status wording exclusively, with no supporter or impact phrasing anywhere (CERT-052, MKT-034).",
+      "properties": {
+        "kitVersion": { "type": "string", "pattern": "^kit-[0-9]+\\.[0-9]+$" },
+        "permitted": { "type": "array", "minItems": 1, "items": { "type": "string", "maxLength": 500 } },
+        "prohibited": { "type": "array", "minItems": 1, "items": { "type": "string", "maxLength": 500 } },
+        "binding": { "type": "string", "maxLength": 500 },
+        "translations": {
+          "type": "object",
+          "description": "Counsel-approved renderings (DE/FR ship at P-M3, CERT-056). Each is marked an approved rendering with English controlling, and the renderer always includes the English kit.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "permitted": { "type": "array", "items": { "type": "string", "maxLength": 500 } },
+              "prohibited": { "type": "array", "items": { "type": "string", "maxLength": 500 } },
+              "binding": { "type": "string", "maxLength": 500 }
+            }
+          }
+        }
+      }
+    }
+  },
+  "dependentRequired": {
+    "amountMinor": ["cur", "amountKind"],
+    "cur": ["amountKind"],
+    "impactMinor": ["cur", "amountKind"]
+  },
+  "allOf": [
+    {
+      "$comment": "FS08-010 type/variant table, enforced structurally.",
+      "if": { "properties": { "typ": { "const": "contributor" } }, "required": ["typ"] },
+      "then": { "properties": { "variant": { "const": "participation" } } }
+    },
+    {
+      "if": { "properties": { "typ": { "const": "steward" } }, "required": ["typ"] },
+      "then": { "properties": { "variant": { "enum": ["registration", "impact"] } } }
+    },
+    {
+      "if": { "properties": { "typ": { "const": "supporter" } }, "required": ["typ"] },
+      "then": { "properties": { "variant": { "enum": ["entitlement", "gift-funder", "waived-funder", "donation"] } } }
+    },
+    {
+      "if": { "properties": { "typ": { "const": "license-status" } }, "required": ["typ"] },
+      "then": {
+        "properties": { "variant": { "enum": ["waiver", "under-threshold", "gifted-pass"] } },
+        "$comment": "CERT-052/D14: a status certificate attests status only. No amount may appear on it — a waived organisation that actually funded something gets a separate supporter.waived-funder certificate (COM-066).",
+        "not": { "anyOf": [{ "required": ["amountMinor"] }, { "required": ["impactMinor"] }] }
+      }
+    },
+    {
+      "if": { "properties": { "typ": { "const": "topup" } }, "required": ["typ"] },
+      "then": { "properties": { "variant": { "enum": ["x2", "x5", "x10"] } }, "required": ["amountMinor"] }
+    },
+    {
+      "$comment": "D15/CERT-054b: the below-floor flag and a monetary figure are mutually exclusive.",
+      "if": { "properties": { "impactBelowFloor": { "const": true } }, "required": ["impactBelowFloor"] },
+      "then": { "not": { "anyOf": [{ "required": ["impactMinor"] }, { "required": ["amountMinor"] }] } }
+    }
+  ],
+  "$defs": {
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+  }
+}

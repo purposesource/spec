@@ -1,0 +1,22 @@
+{
+  "$comment": "Typecheck only — this repo emits nothing. `erasableSyntaxOnly` is the load-bearing option: coverage/cov-v1.ts is published as the reference implementation and is run by Node's own type stripping (no build step, no bundler, zero dependencies), so it may only contain syntax Node can erase. A TS enum or a parameter property would typecheck fine and then fail at runtime for every consumer.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "strict": true,
+    "exactOptionalPropertyTypes": false,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["coverage/**/*.ts"]
+}

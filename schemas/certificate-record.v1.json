@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/certificate-record.v1.json",
+  "title": "Certificate verify record — /certs/{cert_id}.json",
+  "description": "The public verify record for one certificate, regenerated on issue and on every status change (FS08-060). This shape is BYTE-AUTHORITATIVE: the public verify route is a passthrough and no consumer may rename or reshape a field — same names (`cid`, `typ`, `variant`), structured `scope`, `band` with no currency prefix (FS08-060a). The record never contains more subject data than the certificate itself displays (CERT-026), individual-subject records are unlisted (unguessable ULID, excluded from every index and sitemap, served `X-Robots-Tag: noindex`, CERT-060), and the route reads this artifact only — never a database (FS08-061).\n\n`ct: null` means signed-but-not-yet-logged, and the verify page renders UNVERIFIED (CERT-030). Clients can independently re-derive inclusion from the published log segments. Erasure leaves a tombstone: `status: \"revoked\"` with the subject fields removed, hash-only log entries retained (CERT-045/031).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/certs/{cert_id}.json",
+    "authoritative": true,
+    "producer": "index-build (P-M2: operator script + PR, VS-27)",
+    "consumers": ["edge verify route (FS-10 §6)", "web verify page (VS-25, WEB-090)"],
+    "fsRefs": ["FS-00 §6.2", "FS-08 §7.1 (FS08-060, FS08-060a)", "FS-10 §6 (FS10-040…FS10-042)", "CERT-024…CERT-045"],
+    "vsRefs": ["VS-04", "VS-25", "VS-27"],
+    "changelog": "CHANGELOG.md#certificate-recordv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "cid", "status", "typ", "variant", "period", "issuedAt", "kid", "jws"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "cid": { "type": "string", "pattern": "^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+    "status": {
+      "enum": ["valid", "expired", "revoked", "superseded"],
+      "description": "CERT-040. `expired` is clock-derived from `period.validUntil` and needs no write; expiry is non-destructive and verifies as 'was valid for period P' (CERT-041)."
+    },
+    "typ": { "enum": ["contributor", "steward", "supporter", "license-status", "topup"] },
+    "variant": { "enum": ["participation", "registration", "impact", "entitlement", "gift-funder", "waived-funder", "donation", "waiver", "under-threshold", "gifted-pass", "x2", "x5", "x10"] },
+    "sub": { "type": "string", "maxLength": 200, "description": "Display name. ABSENT on a tombstoned record after an erasure request (CERT-045)." },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["project", "portfolio", "network"] },
+        "repos": { "type": "array", "minItems": 1, "maxItems": 50, "uniqueItems": true, "items": { "$ref": "#/$defs/githubNodeId" } },
+        "org": { "$ref": "#/$defs/githubNodeId" }
+      }
+    },
+    "band": { "type": "string", "maxLength": 32, "description": "Corporate types only; no currency prefix." },
+    "period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["validFrom", "validUntil"],
+      "properties": {
+        "validFrom": { "type": "string", "format": "date" },
+        "validUntil": { "type": "string", "format": "date" }
+      }
+    },
+    "issuedAt": { "type": "string", "format": "date-time" },
+    "kid": { "$ref": "#/$defs/kid" },
+    "ct": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["seq", "segment"],
+      "description": "Transparency-log position, computed at publish against the log segments. NULL for a signed-but-unlogged certificate — which the verify page must render as UNVERIFIED, not as a warning (CERT-030, FS10-041).",
+      "properties": {
+        "seq": { "type": "integer", "minimum": 0 },
+        "segment": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "revocation": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["reasonClass", "at"],
+      "description": "Present when `status` is `revoked`. Verify pages render the class LABEL only — no free-text shaming (FS08-064).",
+      "properties": {
+        "reasonClass": {
+          "enum": ["issuance-error", "subject-request", "fraud-misrepresentation", "project-delisting", "waiver-revocation", "key-compromise-reissue"],
+          "description": "The published narrow class list (CERT-043)."
+        },
+        "at": { "type": "string", "format": "date-time" },
+        "ctRef": { "$ref": "#/$defs/sha256", "description": "Hash of the revocation log entry, which itself references the original entry's hash (CERT-033)." }
+      }
+    },
+    "supersedes": { "type": ["string", "null"], "pattern": "^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+    "supersededBy": { "type": ["string", "null"], "pattern": "^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+    "coverageWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "For a waiver-derived certificate whose waiver was revoked: the ORIGINAL coverage window is retained alongside the revocation date, because revocation is prospective and the historical window remains true (CERT-042, FS08-066).",
+      "properties": {
+        "from": { "type": "string", "format": "date-time" },
+        "to": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "verifyUrl": { "type": "string", "format": "uri" },
+    "jws": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$",
+      "description": "The compact JWS — the certificate itself. Present so a client can validate the signature offline against a JWKS copy without a second fetch (CERT-025)."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "revoked" } }, "required": ["status"] },
+      "then": { "required": ["revocation"] }
+    }
+  ],
+  "$defs": {
+    "kid": { "type": "string", "pattern": "^psn-(dev|prod|sandbox)-[0-9]{4}-[0-9]+$", "description": "Frozen key-id scheme `psn-{env}-{yyyy}-{n}` (FS08-101). A prod route refuses sandbox key material outright (FS08-103)." },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+  }
+}

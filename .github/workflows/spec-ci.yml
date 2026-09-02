@@ -1,0 +1,97 @@
+name: spec-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# This workflow only reads and gates. It writes nothing, needs no secrets, and has no
+# deployment step: the contracts in this repository ARE the deliverable, served as files.
+permissions:
+  contents: read
+
+concurrency:
+  group: spec-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    name: Contracts, examples, coverage function
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci
+
+      # Ordered cheapest-and-most-fundamental first, so a broken contract fails in
+      # seconds instead of after the linter has finished parsing the API description.
+
+      - name: Schemas compile, are addressed correctly, and carry provenance
+        # Draft 2020-12 compile, $id derived from spec.config.json, no external $ref
+        # (each schema must validate on its own after a single download), and a
+        # CHANGELOG section per schema — VS-05's acceptance test, mechanised.
+        run: npm run check:schemas
+
+      - name: Every schema has an example, and every example validates
+        # These examples are the fixtures the site and registry repositories build
+        # against. An example that has drifted out of validity is worse than none,
+        # because somebody will copy it.
+        run: npm run check:examples
+
+      - name: Coverage vectors use valid published artifacts
+        # The vector suite proves the function computes the right answer; this proves it
+        # does so over inputs that are shaped like real artifacts, and that all eight
+        # answers are still covered.
+        run: npm run check:vectors
+
+      - name: Published coverage module is dependency-free and clock-free
+        # Prints moduleSha256 in the log. The deployed worker publishes the same digest
+        # at /v1/meta; the two must match, which is what makes "the published function is
+        # the function that answered you" checkable rather than merely stated.
+        run: npm run check:module
+
+      - name: Copy law
+        # A schema description is published copy. Leak guards, the rejected-overclaim
+        # list, the marked-mention rule, and the pin on the exclusive-verification
+        # sentence that gets printed on certificates.
+        run: npm run check:copy
+
+      - name: Typecheck
+        # erasableSyntaxOnly is the load-bearing option: the published module is run by
+        # Node's own type stripping, so it may only contain syntax Node can erase. A TS
+        # enum would typecheck and then fail at runtime for every consumer.
+        run: npm run check:types
+
+      - name: Coverage function — frozen vector suite
+        run: npm run test:coverage
+
+      - name: OpenAPI lints
+        # Redocly's recommended ruleset. Three rules are switched off, each with its
+        # reasoning written into redocly.yaml — and two of them are REPLACED rather than
+        # waived, by the gate in the next step.
+        run: npm run lint:openapi
+
+      - name: Every example in the API description validates against its schema
+        # The replacement for Redocly's no-invalid-media-type-examples, whose validator
+        # mis-scopes unevaluatedProperties inside if/then branches and fails every
+        # conditionally-constrained artifact we publish. Same guarantee, conformant
+        # validator, reproduction documented in the script header.
+        run: npm run check:openapi-examples
+
+      - name: Gates are not vacuous
+        # Each gate above refuses to pass on an empty input set, but only this step
+        # notices if a whole directory disappeared from the repository.
+        run: |
+          set -euo pipefail
+          count() { find "$1" -type f -name "$2" | wc -l; }
+          schemas=$(count schemas '*.json')
+          examples=$(count examples '*')
+          test "$schemas" -ge 10 || { echo "::error::only $schemas schemas found — expected the full contract set"; exit 1; }
+          test "$examples" -ge "$schemas" || { echo "::error::$examples examples for $schemas schemas — one each is the rule"; exit 1; }
+          test -f openapi/edge-public.v1.yaml || { echo "::error::the API description is missing"; exit 1; }
+          test -f coverage/cov-v1.ts || { echo "::error::the published coverage module is missing"; exit 1; }
+          echo "$schemas schemas, $examples examples, API description and coverage module all present"

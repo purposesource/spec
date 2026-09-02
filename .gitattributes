@@ -1,0 +1,14 @@
+# Every published contract must be byte-identical wherever it is fetched from: the
+# certificate JWS profile, the CT-log segment format and the cov-v1 module are all
+# hash-compared across repos (FS-10 FS10-020 mirrors this repo's coverage/ into the
+# deployed Worker bundle and fails on a hash difference). CRLF injection on a Windows
+# checkout would break that comparison silently, so text normalisation is forced.
+* text=auto eol=lf
+
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.ts text eol=lf
+*.mjs text eol=lf
+*.md text eol=lf
+LICENSE text eol=lf

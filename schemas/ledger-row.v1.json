@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/ledger-row.v1.json",
+  "title": "Ledger row (v1)",
+  "description": "One row of the append-only allocation ledger. Rows are IMMUTABLE: every correction is a forward-dated row — a negative `adjustment` against the earliest open month with `correctsLedId` pointing at the corrected row, or a zero-amount `annotation` for narrative context. No exception exists, including a charity-partner scandal: annotate, never restate (FS07-042, ENG-042/046, NEV-019). Disbursed quarters are never restated and no refund is ever clawed back from a charity (COM-053).\n\nHASH CHAIN (FS07-040): `rowHash = SHA-256(prevHash ∥ JCS(row minus prevHash/rowHash))` over RFC 8785 canonical JSON, where `prevHash` is the row hash of the immediately preceding row in GLOBAL insertion order regardless of month (genesis = 64 zeros). Intake for an open month therefore chains straight onto the current global head, and locking a month never blocks a later month's intake.\n\nMoney is always integer minor units plus an ISO currency code; reporting currency is CHF with the per-transaction FX rate captured on the row (FS-00 §6.1, ENG-037; the final currency ruling is URS §21 OPEN-26).\n\nAt P-M2 the ledger is the committed monthly table maintained by the operator script, restricted to INTAKE types (`pool-in`, `refund-out`, `chargeback-out`, `topup-*`, `month-note`) — no allocation row exists before P-M3, and CI rejects any diff that modifies a committed row (FS07-100, VS-36).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2 (intake types only)",
+    "artifactPath": "(row shape) src/data/ledger/{YYYY-MM}.json in the website repo · rows[] of /ledger/{YYYY}-{MM}.json",
+    "authoritative": true,
+    "producer": "P-M2: operator script tools/record-purchases (VS-32/VS-36) · P-M3: FS-05 intake + allocator",
+    "consumers": ["ledger export renderer", "chain verifier (CI + auditors)", "public ledger page (FS-01)"],
+    "fsRefs": ["FS-07 §5 (FS07-040…FS07-044)", "FS-07 §10 (FS07-100, FS07-101)", "FS-00 §6.1", "FS-00 §6.2"],
+    "vsRefs": ["VS-36", "VS-37", "VS-04"],
+    "changelog": "CHANGELOG.md#ledger-rowv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ledId", "month", "seq", "type", "amountMinor", "currency", "emittingJob", "createdAt", "prevHash", "rowHash"],
+  "properties": {
+    "ledId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+    "month": { "$ref": "#/$defs/monthKey", "description": "Settlement month for intake rows, allocation month for allocation rows. `(month, seq)` is unique." },
+    "seq": { "type": "integer", "minimum": 1, "description": "Position within the month. The HASH chain is global, not per-month — do not infer chain order from this field." },
+    "type": {
+      "enum": [
+        "pool-in", "topup-multiplier-in", "topup-donation-in", "donation-entitlement-note",
+        "refund-out", "chargeback-out", "chargeback-reverse-in", "adjustment",
+        "levy", "commons-alloc", "directed-alloc", "directed-to-commons", "repo-pool",
+        "category-route", "category-agg", "rollforward-in", "rollforward-out",
+        "disburse", "sponsor-ops-in", "month-note", "month-lock", "annotation"
+      ],
+      "description": "Row type (FS-07 §5.1 verbatim). The P-M2 subset is `pool-in`, `refund-out`, `chargeback-out`, `topup-multiplier-in`, `topup-donation-in`, `month-note` — an allocation type appearing in a v0 file is a scope defect, not initiative (FS07-100)."
+    },
+    "amountMinor": { "type": "integer", "description": "Integer minor units in `currency`. Negative for corrections; zero for `annotation`, `month-note` and `month-lock` rows." },
+    "currency": { "$ref": "#/$defs/currency", "description": "Reporting currency (CHF), or the row's own currency where a row is recorded natively." },
+    "monthDigest": { "$ref": "#/$defs/sha256", "description": "`month-lock` rows only: SHA-256 over that month's rows in canonical serialisation order (FS07-040)." },
+    "srcAmountMinor": { "type": "integer", "description": "Original transaction amount before conversion to the reporting currency." },
+    "srcCurrency": { "$ref": "#/$defs/currency" },
+    "fxRate": { "type": "number", "exclusiveMinimum": 0, "description": "The FX rate CAPTURED AT TRANSACTION TIME, not a rate looked up later (ENG-037)." },
+    "fxSource": { "type": "string", "maxLength": 64 },
+    "fxDate": { "type": "string", "format": "date" },
+    "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+    "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+    "repoNodeId": { "$ref": "#/$defs/githubNodeId" },
+    "ppSnapshotId": { "type": "string", "maxLength": 64 },
+    "algoVersion": { "type": "string", "maxLength": 32 },
+    "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$", "description": "Required in practice on every money-bearing reference (ENG-084)." },
+    "categoryFundId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" },
+    "batchId": { "type": "string", "maxLength": 64 },
+    "correctsLedId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "Forward correction pointer. The corrected row itself is never touched." },
+    "levyBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
+    "commonsBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
+    "routingMode": { "enum": ["shadow", "live"], "description": "Category routing is shadow-first behind a fairness-review gate (D27). A `shadow` row's money moved nowhere on contributor votes." },
+    "holdStatus": {
+      "enum": ["held-M+1", "released"],
+      "description": "The chargeback hold state of an intake row (COM-023): funds accrue and are held through month M+1 before they can be allocated. At P-M2 nothing is ever allocated, so intake simply accrues — the rule is still printed in the published methodology (VS-36/VS-37)."
+    },
+    "payerName": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "The payer's name if they OPTED IN to being named, otherwise the literal string `unnamed`. Directory naming defaults to unnamed (VS-33/VS-36) — the entitlement JWS at its own URL is the payer's proof either way."
+    },
+    "note": { "type": "string", "maxLength": 1000, "description": "Narrative text for `month-note` and `annotation` rows. Annotation is the ONLY mechanism for after-the-fact context." },
+    "emittingJob": { "type": "string", "maxLength": 64, "description": "Which component wrote the row — e.g. `tools/record-purchases` at v0. Every row states its own provenance.", "examples": ["tools/record-purchases", "jobs.allocator"] },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "prevHash": { "$ref": "#/$defs/sha256OrGenesis" },
+    "rowHash": { "$ref": "#/$defs/sha256" }
+  },
+  "dependentRequired": {
+    "srcAmountMinor": ["srcCurrency", "fxRate"],
+    "fxRate": ["fxSource", "fxDate"]
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "month-lock" } }, "required": ["type"] },
+      "then": { "required": ["monthDigest"], "properties": { "amountMinor": { "const": 0 } } }
+    },
+    {
+      "if": { "properties": { "type": { "enum": ["annotation", "month-note"] } }, "required": ["type"] },
+      "then": { "properties": { "amountMinor": { "const": 0 } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "pool-in" } }, "required": ["type"] },
+      "then": { "properties": { "amountMinor": { "exclusiveMinimum": 0 } } }
+    }
+  ],
+  "$defs": {
+    "monthKey": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "sha256OrGenesis": { "type": "string", "pattern": "^[0-9a-f]{64}$", "description": "Genesis is 64 zeros." },
+    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+  }
+}

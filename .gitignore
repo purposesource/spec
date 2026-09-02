@@ -1,0 +1,14 @@
+node_modules/
+
+# Redocly writes its telemetry/cache here when it runs.
+.redocly-cache/
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+*.swp
+
+# Nothing in this repo is generated into a dist/ — every published contract is a
+# committed file, because the artifact consumers (OSPO scanners, SCA vendors) fetch
+# these paths directly. If you find yourself adding a build output here, stop: the
+# contract set must be readable straight out of the repo.

@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/stats.v1.json",
+  "title": "Public counters — /stats.json",
+  "description": "The public counter artifact, with an explicit three-state machine so that a number's ABSENCE is a documented state rather than a bug (WEB-060/061, FS-10 §10).\n\n`state` is computed from real registry and ledger facts and is never set by hand:\n  · `pre-launch` — mechanism copy only. Every numeric field is null. No letter-of-intent counts, no progress bar.\n  · `launched-pre-disbursement` — projects, contributors and companies are real; `chfRoutedMinor` stays NULL with `firstDisbursementScheduledFor` naming the date. 'CHF 0' is never rendered, neither as an achievement nor as an embarrassment.\n  · `post-first-franc` — every figure is real and `chfRoutedMinor` is the ledger total.\n\nA field may be null in any state where the underlying thing does not yet exist: at P-M2 `contributorsClaimed` is null because there is no claim flow to claim through, and the page labels it as the structural zero it is (VS-19).\n\nRendering rules travel with the data: a `computedAt` caption, deep links to the source surfaces, no upward animation from zero, and `prefers-reduced-motion` honoured (WEB-062/063, WEB-121).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/stats.json",
+    "authoritative": true,
+    "producer": "index-build (P-M2: index-build-lite CI, VS-04) — daily",
+    "consumers": ["home page counters block", "edge stats route (KV-served, FS10-010)", "status/trust pages"],
+    "fsRefs": ["FS-00 §6.2", "FS-10 §10 (FS10-080)", "WEB-060", "WEB-061", "WEB-062"],
+    "vsRefs": ["VS-19", "VS-26", "VS-04"],
+    "changelog": "CHANGELOG.md#statsv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "state", "cur", "smallnessThresholds"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time", "description": "Rendered as the `computedAt` caption. A counter without its timestamp is a claim without a date." },
+    "state": {
+      "enum": ["pre-launch", "launched-pre-disbursement", "post-first-franc"],
+      "description": "The machine state. The prose labels S1/S2/S3 stay prose and never appear in this artifact (FS01-050)."
+    },
+    "projectsRegistered": { "type": ["integer", "null"], "minimum": 0 },
+    "contributorsClaimed": { "type": ["integer", "null"], "minimum": 0, "description": "Null until the claim flow exists — an honest structural zero, labelled as such on the page (VS-19)." },
+    "companiesCovered": { "type": ["integer", "null"], "minimum": 0 },
+    "chfRoutedMinor": { "type": ["integer", "null"], "minimum": 0, "description": "Ledger total in minor units. NULL, never 0, before the first disbursement." },
+    "cur": { "$ref": "#/$defs/currency", "description": "Reporting currency for `chfRoutedMinor` (CHF; the final ruling is URS §21 OPEN-26)." },
+    "firstDisbursementScheduledFor": { "type": ["string", "null"], "format": "date", "description": "Set in `launched-pre-disbursement` so the empty money figure has a date attached instead of a shrug." },
+    "loi": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "Letter-of-intent counts. Stays NULL unless the escrow-visibility decision resolves to public (URS §21 OPEN-17, default: silent); then it carries counts from real signed letters only.",
+      "properties": {
+        "projects": { "type": "integer", "minimum": 0 },
+        "companies": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["projects", "companies"]
+    },
+    "detectedUnclaimed": { "type": ["integer", "null"], "minimum": 0, "description": "Repositories detected but never claimed. Aggregate only — detected repositories are never listed (GH-014)." },
+    "smallnessThresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["projects", "contributors", "companies"],
+      "description": "Below these counts the page states the number in words with context rather than as a headline figure — small numbers are told, not dressed up (WEB-061).",
+      "properties": {
+        "projects": { "type": "integer", "minimum": 0 },
+        "contributors": { "type": "integer", "minimum": 0 },
+        "companies": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Deep links to the surfaces each counter comes from. A counter that cannot be traced to its source surface is not published (WEB-062).",
+      "properties": {
+        "registry": { "type": "string", "format": "uri" },
+        "ledger": { "type": "string", "format": "uri" },
+        "waivers": { "type": "string", "format": "uri" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "WEB-061 S1: in pre-launch every numeric field is null. Enforced structurally so a build cannot ship a pre-launch page with a number on it. OPEN CONFLICT FOR A HUMAN TO SETTLE: the illustrative artifact in FS-10 §10 (FS10-080) shows these fields as 0 while pre-launch, whereas VS-19 states them as null and the honesty law forbids rendering 'CHF 0' either as achievement or as embarrassment. This schema implements VS-19; if the FS-10 example is meant literally, this rule is what must change, and it must change here first. See CHANGELOG.md.",
+      "if": { "properties": { "state": { "const": "pre-launch" } }, "required": ["state"] },
+      "then": {
+        "properties": {
+          "projectsRegistered": { "const": null },
+          "contributorsClaimed": { "const": null },
+          "companiesCovered": { "const": null },
+          "chfRoutedMinor": { "const": null },
+          "detectedUnclaimed": { "const": null }
+        }
+      }
+    },
+    {
+      "$comment": "WEB-061 S2: money stays null and the first-disbursement date must be named.",
+      "if": { "properties": { "state": { "const": "launched-pre-disbursement" } }, "required": ["state"] },
+      "then": {
+        "required": ["firstDisbursementScheduledFor"],
+        "properties": {
+          "chfRoutedMinor": { "const": null },
+          "firstDisbursementScheduledFor": { "type": "string" }
+        }
+      }
+    },
+    {
+      "$comment": "WEB-061 S3: post-first-franc, the money figure is real.",
+      "if": { "properties": { "state": { "const": "post-first-franc" } }, "required": ["state"] },
+      "then": {
+        "required": ["chfRoutedMinor", "projectsRegistered", "companiesCovered"],
+        "properties": { "chfRoutedMinor": { "type": "integer" } }
+      }
+    }
+  ],
+  "$defs": {
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+  }
+}

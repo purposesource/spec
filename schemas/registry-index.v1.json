@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/registry-index.v1.json",
+  "title": "Registry index shard — /registry/index/{shard}.json (and the bulk export)",
+  "description": "One shard of the published registry index, sharded by the first character of the repository name plus a `0` shard for everything non-alphabetic (FS02-062). THE SAME DOCUMENT SHAPE serves the bulk export `/registry/export.json` (apex alias `/registry.json`, FS10-060): that document sets `shard: \"export\"` and carries every entry. Entries are the minimum a browse page or a scanner needs; the full per-repository facts live in the repo record, whose URL each entry carries. Only `verified`, `suspended`, `quit` and `delisted` repositories appear — `detected` repositories are counted, never listed (GH-014, OPEN-33 default).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/registry/index/{shard}.json · /registry/export.json",
+    "authoritative": true,
+    "producer": "index-build (P-M2: index-build-lite CI, VS-04)",
+    "consumers": ["web registry browse (WEB-070/071/073)", "edge passthrough (FS10-060)", "SCA scanners / OSPO tooling"],
+    "fsRefs": ["FS-00 §6.2", "FS-02 §7 (FS02-062)", "FS-10 §8 (FS10-060)"],
+    "vsRefs": ["VS-04", "VS-17"],
+    "changelog": "CHANGELOG.md#registry-indexv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "shard", "count", "entries"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "shard": {
+      "type": "string",
+      "pattern": "^([a-z0-9]|export)$",
+      "description": "Shard key: a single lowercased first character of the repository name, `0` for non-alphabetic names, or the literal `export` for the bulk document."
+    },
+    "count": { "type": "integer", "minimum": 0, "description": "Number of entries in THIS document. Registry-wide totals live in the index meta document." },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nodeId", "owner", "name", "state", "weightClass", "recordUrl"],
+      "properties": {
+        "nodeId": { "$ref": "#/$defs/githubNodeId" },
+        "owner": { "$ref": "#/$defs/githubLogin", "description": "Display cache only." },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "state": { "enum": ["verified", "suspended", "quit", "delisted"] },
+        "weightClass": { "enum": ["standard", "major"] },
+        "licenseId": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9.+-]{1,63}$" },
+        "licenseVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+        "adoptedAt": { "type": "string", "format": "date", "description": "Adoption date. `recentlyRegistered` ordering on the browse landing view uses this — cold-start fairness (WEB-073)." },
+        "apacheConversionDate": { "type": "string", "format": "date" },
+        "language": { "type": ["string", "null"], "maxLength": 40, "description": "Primary language, for the browse facet (WEB-071 v0 subset). Null when GitHub reports none." },
+        "topics": { "type": "array", "maxItems": 12, "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,31}$" } },
+        "summary": { "type": "string", "maxLength": 300, "description": "Optional display summary echoed from PURPOSE.yml. Repository content — escaped on render." },
+        "recordUrl": { "type": "string", "format": "uri", "description": "URL of this repository's repo record artifact." },
+        "badgeUrl": { "type": "string", "format": "uri" },
+        "pageUrl": { "type": "string", "format": "uri" }
+      }
+    },
+    "githubLogin": { "type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$" },
+    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/entitlement-record.v1.json",
+  "title": "Company entitlement record — the decoded JWS payload of /entitlements/{co_ulid}.jws",
+  "description": "The signed, scanner-facing proof that an organisation holds coverage. Served unauthenticated as a compact ES256 JWS with `Content-Type: application/jose` (FS10-060, WEB-096); THIS schema describes the DECODED PAYLOAD, not the compact serialisation. The signing key is born non-exportable in the movement's own Key Vault and the `kid` sits in the JWS header (FS-00 §6.4). A consumer MUST verify the signature against the published JWKS before trusting anything here — the coverage function treats a record that fails verification as `no` (FS-10 §4.2). At P-M2 this record IS the coverage proof: there is no coverage route at v0 (FS-00 §6.10 as amended), and the record doubles as the vesting snapshot (VS-33/COM-015).\n\nRECONCILIATION NOTE (a human must ratify this, see CHANGELOG): the FS-00 §6.2 amendment note of 2026-09-01 states the payload as the single entitlement object `{entId, lane, scope, status, periodStart, periodEnd, graceEnd?, scheduleVersion, vestedWindows[], thresholdRegistration?}`, while FS-10 §4.2 (the consumer contract, and the only place that specifies `domains[]`/`verification`/domain resolution) states the payload as a COMPANY record carrying `entitlements[]` of exactly that object. This schema implements FS-10 §4.2: the company wrapper, whose `entitlements[]` items are the frozen field list verbatim and closed to additions. Both texts are then satisfied — the frozen object is unchanged, it simply appears in the array. One organisation, one record, one URL, however many terms it holds.\n\nPublished `status` is a PROJECTION of the internal state machine onto `active | suspended | void` (FS05-052): `pending` is never published, `revoked` publishes as `void`, and grace/lapse are NEVER published statuses — cov-v1 derives them from the dates (`now ≤ periodEnd` → active window; `periodEnd < now ≤ graceEnd` → lapsed-in-grace; beyond `graceEnd` → no contribution).\n\nVESTING (D12 as amended, 5th collision): each element of `vestedWindows[]` records one paid term `{from, to}` and the test is `version publication date ≤ to` — the back catalogue at activation vests together with everything published during the term. `from` is term provenance and never a lower bound on vesting.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/entitlements/{co_ulid}.jws (decoded payload)",
+    "authoritative": true,
+    "producer": "FS-05 (P-M2: operator signing script, VS-27/VS-33)",
+    "consumers": ["cov-v1 (FS-10 §4.2 input 1)", "SCA scanners / OSPO procurement", "verify page"],
+    "signature": { "alg": "ES256", "kidHeader": true, "serialisation": "JWS compact", "canonicalisation": "RFC 8785 (JCS) before signing" },
+    "fsRefs": ["FS-00 §6.2 amendment note 2026-09-01", "FS-00 §6.4", "FS-05 §6 (FS05-052)", "FS-05 §7 (FS05-060…FS05-063)", "FS-10 §4.2", "D12", "COM-009"],
+    "vsRefs": ["VS-33", "VS-34", "VS-04"],
+    "changelog": "CHANGELOG.md#entitlement-recordv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "coId", "domains", "verification", "entitlements"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time", "description": "When this record was signed and published. Republished on every purchase, renewal, lapse, suspension or void (FS-00 §6.2)." },
+    "coId": { "$ref": "#/$defs/coId", "description": "Platform company ULID — the only company reference that may appear in a shareable, CDN-cached, log-visible GET URL (WEB-143)." },
+    "name": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Legal name. OPTIONAL and OPT-IN: directory naming defaults to unnamed, and the browsable supporter directory lists only opted-in payers. An opted-out payer's record still verifies at its own URL — the proof does not depend on being named (VS-33)."
+    },
+    "domains": {
+      "type": "array",
+      "description": "Domains associated with this organisation. Domain-keyed coverage lookups resolve ONLY through domain-verified entries (the `/entitlements/domain-index.json` artifact, FS10-024) and only over POST — a third-party organisation identifier never appears in a GET URL (WEB-143).",
+      "maxItems": 50,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/domain" }
+    },
+    "verification": {
+      "enum": ["domain-verified", "officer-attested", "unverified"],
+      "description": "Company verification state (FS-00 §6.1). A waiver grant mints an `unverified` stub so a waived organisation with no account still resolves by ULID (FS-10 §4.3 step 2)."
+    },
+    "entitlements": {
+      "type": "array",
+      "description": "Every term this organisation holds, current and past. An empty array is valid: a waiver-grant stub has no entitlement at all, and its coverage comes from the waiver registry.",
+      "items": { "$ref": "#/$defs/entitlement" }
+    },
+    "thresholdRegistration": {
+      "$ref": "#/$defs/thresholdRegistration",
+      "description": "Record-level self-certification that the organisation is under the licence's revenue/size threshold (COM-054…060). Travels inside this same signed record, which is why the under-threshold answer still carries an entitlement-JWS proof (FS-10 §4.4). Not operable at P-M2 (P-M2 §5 item 13): the licence's threshold test is self-executing, so under-threshold organisations need no registration to be covered."
+    }
+  },
+  "$defs": {
+    "entitlement": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The FROZEN entitlement object (FS-00 §6.2 amendment note 2026-09-01; producer FS-05). Closed to additions: a new field requires an FS-00 amendment, and a new meaning requires a new schema version.",
+      "required": ["entId", "lane", "scope", "status", "periodStart", "periodEnd", "scheduleVersion", "vestedWindows"],
+      "properties": {
+        "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+        "lane": {
+          "enum": ["pass", "project", "portfolio", "donation"],
+          "description": "Commercial lane. cov-v1 evaluates lanes in the COM-009 enumeration order: pass, then project, then portfolio (donation is answered after waivers). At P-M2 only `project` is purchasable — Pass and Portfolio are published schedule with honest 'not yet purchasable' copy (VS-14)."
+        },
+        "scope": { "$ref": "#/$defs/scope" },
+        "status": {
+          "enum": ["active", "suspended", "void"],
+          "description": "The PUBLISHED projection (FS05-052). `suspended` = chargeback notice stage 1, and answers `no` immediately (COM-024). `void` = refunded or upheld chargeback, void ab initio. `pending` is never published; `grace` and `lapsed` are never published — they are derived from the dates."
+        },
+        "periodStart": { "type": "string", "format": "date-time" },
+        "periodEnd": { "type": "string", "format": "date-time", "description": "End of the paid term. `now == periodEnd` is still INSIDE the term (FS10-121 boundary rule)." },
+        "graceEnd": {
+          "type": "string",
+          "format": "date-time",
+          "description": "periodEnd + 30 days (COM-042). `periodEnd < now ≤ graceEnd` derives `lapsed-in-grace`; `now == graceEnd` is still grace; beyond it the term contributes nothing. Absent means no grace window is published for this term."
+        },
+        "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$", "description": "The fee-schedule version this term was priced under. Renewals price at the then-current version (COM-041); nothing is ever repriced retroactively (D12)." },
+        "vestedWindows": {
+          "type": "array",
+          "description": "One element per paid, settled, unreversed term. Vesting test: a covered version is vested permanently iff its publication date ≤ a window's `to`. Monotonically non-decreasing except the payment-reversal void (FS05-062).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "to"],
+            "properties": {
+              "from": { "type": "string", "format": "date", "description": "Term start — provenance only. NEVER a lower bound on vesting: the back catalogue at activation is vested too (D12 as amended, 5th collision)." },
+              "to": { "type": "string", "format": "date", "description": "Term end — the operative bound. Every covered version published on or before this date is vested permanently." }
+            }
+          }
+        },
+        "thresholdRegistration": {
+          "$ref": "#/$defs/thresholdRegistration",
+          "description": "Per-term threshold self-certification, when it was recorded against a term rather than the organisation. cov-v1 reads the record-level block first, then any entitlement-level block, taking the latest `expiresAt`."
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "description": "Structured scope. `project` ⇒ `repos[]` (min 1, cap 50 declared repositories, COM-018); `portfolio` ⇒ `org`; `network` (Pass) ⇒ neither — a Pass covers every registered repository, which is why it wins the precedence order.",
+      "properties": {
+        "kind": { "enum": ["project", "portfolio", "network"] },
+        "repos": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/githubNodeId" }
+        },
+        "org": {
+          "$ref": "#/$defs/githubNodeId",
+          "description": "Owner-organisation node_id, compared against the repo record's `owner.orgId` (FS-10 §4.3 step 5c)."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "project" } }, "required": ["kind"] },
+          "then": { "required": ["repos"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "portfolio" } }, "required": ["kind"] },
+          "then": { "required": ["org"] }
+        }
+      ]
+    },
+    "thresholdRegistration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selfCertifiedAt", "expiresAt"],
+      "properties": {
+        "selfCertifiedAt": { "type": "string", "format": "date-time", "description": "One tick, no audit (D8). Echoed in the coverage answer's `dates` block." },
+        "expiresAt": { "type": "string", "format": "date-time", "description": "After this instant the registration falls through and coverage reverts toward `no` (COM-055/057)." }
+      }
+    },
+    "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+    "domain": { "type": "string", "format": "hostname", "maxLength": 253 },
+    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+  }
+}

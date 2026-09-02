@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/repo-record.v1.json",
+  "title": "Repo record — /registry/repo/{node_id}.json",
+  "description": "The published per-repository record: one of the three inputs to the cov-v1 coverage function (FS-10 §4.2) and the data behind the public project page (WEB-080). Published for repositories in state `verified`, `suspended`, `quit` or `delisted`; `detected` repositories appear in aggregate counts only (FS02-062, GH-014). A delisted or quit repository still HAS a record and still computes coverage — entitlements and vesting stand (D12) — and `state` is what the answer reports as `basis.repoState` (FS-10 §4.3 step 1). At P-M2 the `stats` block is deliberately ABSENT: Purpose-Points and charity figures do not exist before the first disbursed ledger row, and publishing a zero would be theatre (VS-18, NEV-017).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/registry/repo/{node_id}.json",
+    "authoritative": true,
+    "producer": "index-build (P-M2: index-build-lite CI, VS-04)",
+    "consumers": ["cov-v1 (FS-10 §4.2)", "web project page (FS-01 §Registry)", "edge passthrough (FS10-060)"],
+    "fsRefs": ["FS-00 §6.2", "FS-02 §7 (FS02-062)", "FS-02 §2 (FS02-010)", "FS-10 §4.2"],
+    "vsRefs": ["VS-04", "VS-17", "VS-18"],
+    "changelog": "CHANGELOG.md#repo-recordv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "nodeId", "owner", "name", "state", "weightClass", "license"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time", "description": "When this artifact was rendered. Also served as `Last-Modified` (FS10-003). Regeneration is eventually consistent by design — nothing may promise real time (FS-00 §7.5)." },
+    "nodeId": { "$ref": "#/$defs/githubNodeId" },
+    "owner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["login"],
+      "properties": {
+        "login": { "$ref": "#/$defs/githubLogin", "description": "Display cache only (FS02-017)." },
+        "orgId": {
+          "$ref": "#/$defs/githubNodeId",
+          "description": "Owner organisation node_id. THIS is what a Portfolio-lane entitlement's `scope.org` is compared against (FS-10 §4.3 step 5c) — a transfer changes portfolio matching from the next publish, never the repository key."
+        },
+        "type": { "enum": ["User", "Organization"] }
+      }
+    },
+    "name": { "type": "string", "minLength": 1, "maxLength": 100, "description": "Display cache only. First character is the registry index shard key (FS02-062)." },
+    "defaultBranch": { "type": "string", "minLength": 1, "maxLength": 255 },
+    "state": { "$ref": "#/$defs/repoState" },
+    "stateChangedAt": { "type": "string", "format": "date-time" },
+    "weightClass": { "enum": ["standard", "major"], "description": "Pricing weight class as of publication (D11). Never applied retroactively to a purchased term (FS02-016, D12)." },
+    "allocationFrozen": { "type": "boolean", "description": "Orthogonal flag: allocation skips this repository while true (FS-02 F2). Never changes `state`." },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "adoptedAt"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9.+-]{1,63}$" },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+        "publishedAt": { "type": "string", "format": "date", "description": "Publication date of the licence version this repository carries — the conversion-clock anchor (D9)." },
+        "apacheConversionDate": { "type": "string", "format": "date", "description": "The fixed date this version becomes plain Apache-2.0: publication + 4 years, guaranteed by the licence text itself (D9). Rendered on the project page (WEB-080)." },
+        "adoptedAt": { "type": "string", "format": "date" },
+        "textSha256": { "$ref": "#/$defs/sha256", "description": "SHA-256 of the committed licence text (GH-015 canonical-text evidence)." },
+        "canonicalTextUrl": { "type": "string", "format": "uri" }
+      }
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["present"],
+      "description": "PURPOSE.yml status. `present: false` renders as 'defaults apply — no manifest, none needed' (FS01-046, VS-18): the manifest is optional and its absence is not a deficiency (D23).",
+      "properties": {
+        "present": { "type": "boolean" },
+        "url": { "type": "string", "format": "uri" },
+        "contentSha256": { "$ref": "#/$defs/sha256" },
+        "manifestSchemaVersion": { "type": ["integer", "null"] },
+        "rejections": {
+          "type": "array",
+          "description": "Published rejection records (FS02-052). A non-attribution field carries `path`; the attribution section fails closed as a whole and is reported as one record with `path: \"attribution\"`.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "code"],
+            "properties": {
+              "path": { "type": "string", "maxLength": 200 },
+              "code": { "type": "string", "pattern": "^[a-z][a-z0-9_.]{2,63}$", "description": "Machine code, lowercase snake_case (P-M2 §3.9 casing law) — e.g. `reg.manifest_out_of_bounds`, `reg.manifest_unknown_category`." },
+              "given": { "description": "The rejected value, as given. Any JSON type." },
+              "bound": { "type": "string", "maxLength": 200, "description": "The published bound that rejected it." }
+            }
+          }
+        }
+      }
+    },
+    "waivers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["count", "url"],
+      "description": "Pointer to the waiver artifact for this repository. At P-M2 `count` is 0 for every repository and the project page renders the honest empty state — waivers require the claim flow (D14, VS-18).",
+      "properties": {
+        "count": { "type": "integer", "minimum": 0 },
+        "url": { "type": "string", "format": "uri" }
+      }
+    },
+    "badge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url"],
+      "properties": {
+        "url": { "type": "string", "format": "uri", "description": "The shields.io endpoint URL, pinned verbatim to the canonical host in every embed snippet (CERT-027, WEB-084)." },
+        "state": { "enum": ["registered", "neutral"], "description": "Which badge form this repository's state produces. `suspended`, `quit` and `delisted` all render neutral — a stale badge never keeps asserting registration (WEB-085)." }
+      }
+    },
+    "allocationDefaults": {
+      "type": "array",
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" }
+    },
+    "canonicalOf": { "$ref": "#/$defs/githubNodeId" },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repository": { "type": "string", "format": "uri" },
+        "projectPage": { "type": "string", "format": "uri" },
+        "homepage": { "type": "string", "format": "uri" }
+      }
+    },
+    "display": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional display metadata echoed from PURPOSE.yml `display` (repository content — escaped, never trusted).",
+      "properties": {
+        "name": { "type": "string", "maxLength": 120 },
+        "summary": { "type": "string", "maxLength": 300 },
+        "topics": { "type": "array", "maxItems": 12, "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,31}$" } }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "P-M3+ ONLY. Absent at P-M2 by design: no Purpose-Points figures, no charity figures, no zero-CHF theatre before the first disbursed ledger row (VS-18, NEV-017, D21). Every money figure that ever appears here is ledger-derived and deep-linked.",
+      "properties": {
+        "contributorsClaimed": { "type": ["integer", "null"], "minimum": 0 },
+        "coverageCount": { "type": ["integer", "null"], "minimum": 0, "description": "Number of organisations currently answering yes for this repository." },
+        "purposePoints": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "algoVersion": { "type": "string", "maxLength": 32 },
+            "unclaimedSharePpm": { "type": ["integer", "null"], "minimum": 0, "maximum": 1000000, "description": "Unclaimed share, aggregate only — never per person (D15)." }
+          }
+        },
+        "charityProduced": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cur"],
+          "properties": {
+            "lifetimeMinor": { "type": ["integer", "null"], "minimum": 0 },
+            "lastQuarterMinor": { "type": ["integer", "null"], "minimum": 0 },
+            "cur": { "$ref": "#/$defs/currency" },
+            "ledgerUrl": { "type": "string", "format": "uri", "description": "Deep link to the ledger rows the figure comes from. A figure without its rows is a defect (ENG-043)." }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "repoState": { "enum": ["verified", "suspended", "quit", "delisted"], "description": "Published subset of the FS-02 §3 enum: `detected` repositories get no record (GH-014)." },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "githubLogin": { "type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$" },
+    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+  }
+}

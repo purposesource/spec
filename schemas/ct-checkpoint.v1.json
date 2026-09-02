@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/ct-checkpoint.v1.json",
+  "title": "Transparency-log checkpoint — the JWS payload published at /ct/checkpoint-latest.json",
+  "description": "A signed commitment to the transparency log's head, which is what makes retroactive tampering PROVABLE rather than merely unlikely (FS08-112). Signed with the same keys and JWKS as certificates — one of the signer's payload families — and published monthly at P-M2 and P-M3 (per publish batch from P-M4). At P-M2 the operator script emits it against Key Vault and commits it beside the log, together with a signed git tag on the website repository (FS08-113, VS-28).\n\nThis schema describes the DECODED payload. The published artifact at `/ct/checkpoint-latest.json` carries the compact JWS plus the decoded payload for convenience; a verifier must check the signature, not the convenience copy.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2 (monthly)",
+    "artifactPath": "/ct/checkpoint-latest.json",
+    "authoritative": true,
+    "producer": "P-M2: operator script against Key Vault (VS-28) · P-M3: signer",
+    "consumers": ["independent auditors", "verify page (advanced check)"],
+    "signature": { "alg": "ES256", "typHeader": "application/psn-ct-checkpoint+jws", "canonicalisation": "RFC 8785 (JCS) before signing" },
+    "fsRefs": ["FS-00 §6.2 amendment note 2026-09-01", "FS-08 §12 (FS08-112, FS08-113)", "CERT-032", "CERT-034"],
+    "vsRefs": ["VS-28"],
+    "changelog": "CHANGELOG.md#ct-checkpointv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["asOf", "headSeq", "headSegment", "headSegmentSha256"],
+  "properties": {
+    "asOf": { "type": "string", "format": "date-time", "description": "The instant this checkpoint commits to." },
+    "headSeq": { "type": "integer", "minimum": 0, "description": "Global sequence number of the last entry in the log at `asOf`." },
+    "headSegment": { "type": "integer", "minimum": 0 },
+    "headSegmentSha256": { "$ref": "#/$defs/sha256", "description": "SHA-256 of the head segment document as published." },
+    "kid": { "$ref": "#/$defs/kid", "description": "Echo of the JWS header `kid`, for readers of the decoded payload alone." },
+    "iss": { "type": "string", "format": "uri" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "kid": { "type": "string", "pattern": "^psn-(dev|prod|sandbox)-[0-9]{4}-[0-9]+$" }
+  }
+}

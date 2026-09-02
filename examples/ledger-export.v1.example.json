@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "month": "2027-06",
+  "generatedAt": "2027-06-02T06:00:00Z",
+  "currency": "CHF",
+  "locked": false,
+  "lockedAt": null,
+  "totals": {
+    "pool": 36000
+  },
+  "rows": [
+    {
+      "ledId": "led_01jm3b7h4rs8w2ce0x5a9y1d3g",
+      "seq": 1,
+      "type": "pool-in",
+      "date": "2027-06-01",
+      "amountMinor": 36000,
+      "currency": "CHF",
+      "srcAmountMinor": 40000,
+      "srcCurrency": "USD",
+      "fxRate": 0.9,
+      "fxSource": "ECB daily reference rate",
+      "fxDate": "2027-06-01",
+      "repo": "R_kgDOAbc123",
+      "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
+      "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
+      "lane": "project",
+      "holdStatus": "held-M+1",
+      "payerName": "unnamed",
+      "scheduleVersion": "v1",
+      "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "rowHash": "4d7a1c0b9e8f2a3b5c6d7e8f90a1b2c34d7a1c0b9e8f2a3b5c6d7e8f90a1b2c3"
+    },
+    {
+      "ledId": "led_01jn4c8j5st9x3df1y6b0z2e4h",
+      "seq": 2,
+      "type": "month-note",
+      "date": "2027-06-02",
+      "amountMinor": 0,
+      "currency": "CHF",
+      "note": "Intake accrues under the M+1 chargeback hold. No allocation runs at this stage, so no allocation rows exist for this month.",
+      "prevHash": "4d7a1c0b9e8f2a3b5c6d7e8f90a1b2c34d7a1c0b9e8f2a3b5c6d7e8f90a1b2c3",
+      "rowHash": "8e5f3a2b1c0d9e8f7a6b5c4d3e2f1a098e5f3a2b1c0d9e8f7a6b5c4d3e2f1a09"
+    }
+  ],
+  "headHash": "8e5f3a2b1c0d9e8f7a6b5c4d3e2f1a098e5f3a2b1c0d9e8f7a6b5c4d3e2f1a09",
+  "prevHeadHash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "monthDigest": "b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2",
+  "methodologyUrl": "https://purposesource.org/trust/ledger-methodology"
+}

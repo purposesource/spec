@@ -1,0 +1,23 @@
+{
+  "ledId": "led_01jm3b7h4rs8w2ce0x5a9y1d3g",
+  "month": "2027-06",
+  "seq": 1,
+  "type": "pool-in",
+  "amountMinor": 36000,
+  "currency": "CHF",
+  "srcAmountMinor": 40000,
+  "srcCurrency": "USD",
+  "fxRate": 0.9,
+  "fxSource": "ECB daily reference rate",
+  "fxDate": "2027-06-01",
+  "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
+  "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
+  "repoNodeId": "R_kgDOAbc123",
+  "scheduleVersion": "v1",
+  "holdStatus": "held-M+1",
+  "payerName": "unnamed",
+  "emittingJob": "tools/record-purchases",
+  "createdAt": "2027-06-01T14:22:00Z",
+  "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "rowHash": "4d7a1c0b9e8f2a3b5c6d7e8f90a1b2c34d7a1c0b9e8f2a3b5c6d7e8f90a1b2c3"
+}

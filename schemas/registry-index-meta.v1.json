@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/registry-index-meta.v1.json",
+  "title": "Registry index meta — /registry/index/meta.json",
+  "description": "The registry index's table of contents: the shard list, registry-wide counts, and the delist set the badge route uses as a belt-and-braces guard against a stale cached badge (FS10-032 — the edge keeps this document hot in KV as `registry-index-meta`). Counts include `detected` repositories in `totals.detected` only; they are never listed (GH-014).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/registry/index/meta.json",
+    "authoritative": true,
+    "producer": "index-build (P-M2: index-build-lite CI, VS-04)",
+    "consumers": ["web registry browse", "edge badge route delist guard (FS10-032)"],
+    "fsRefs": ["FS-00 §6.2", "FS-02 §7 (FS02-062)", "FS-10 §2 (FS10-010)", "FS-10 §5 (FS10-032)"],
+    "vsRefs": ["VS-04", "VS-17", "VS-24"],
+    "changelog": "CHANGELOG.md#registry-index-metav1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "shards", "totals"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "shards": {
+      "type": "array",
+      "description": "Every shard document that exists, with its entry count. A browse client fetches only the shards it needs.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["shard", "url", "count"],
+        "properties": {
+          "shard": { "type": "string", "pattern": "^[a-z0-9]$" },
+          "url": { "type": "string", "format": "uri" },
+          "count": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "exportUrl": { "type": "string", "format": "uri", "description": "The bulk export document (same shape as a shard, `shard: \"export\"`)." },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["listed"],
+      "properties": {
+        "listed": { "type": "integer", "minimum": 0, "description": "Repositories that appear in a shard: verified + suspended + quit + delisted." },
+        "verified": { "type": "integer", "minimum": 0 },
+        "suspended": { "type": "integer", "minimum": 0 },
+        "quit": { "type": "integer", "minimum": 0 },
+        "delisted": { "type": "integer", "minimum": 0 },
+        "detected": { "type": "integer", "minimum": 0, "description": "Detected-but-unclaimed repositories. Counted here and nowhere else (GH-014; URS §21 OPEN-33 governs whether they ever enter exports)." }
+      }
+    },
+    "delisted": {
+      "type": "array",
+      "description": "Node ids in state `delisted` or `quit`. The badge route serves the neutral form for any id in this set even if a cached badge artifact still says otherwise (FS10-032).",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/githubNodeId" }
+    }
+  },
+  "$defs": {
+    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+  }
+}
