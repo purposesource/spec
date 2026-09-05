@@ -29,6 +29,11 @@
  * Plus one pin: wherever the exclusive-verification sentence appears, it must name the
  * canonical host exactly, since that string is printed on physical certificates.
  *
+ * Before scanning, the claim rules are SELF-TESTED against the forbidden shortenings they
+ * exist to catch and against the permitted forms those are most easily confused with
+ * (D29 §6.1, §6.2). A gate that cannot fail is worse than no gate, and a pattern that also
+ * caught the approved wording would be deleted by the first author it blocked.
+ *
  * This file excludes ITSELF from the scan — a lint cannot be tripped by the patterns it
  * is built from — and that is the only exclusion.
  *
@@ -57,6 +62,9 @@ const LEAK_RULES = [
 
 // Overclaim guards. Each has a narrower permitted form; the reason is stated so the
 // failure message teaches instead of scolding.
+const UNCAPPED_CHARITY_WHY =
+  'uncapped "all of it to charity" is false once any direct cost is charged to Purpose Fees. State the D29 form instead: direct costs charged to Purpose Fees are capped and published to the invoice; any cost support is listed by name.';
+
 const CLAIM_RULES = [
   {
     pattern: /nobody\s+profits/i,
@@ -67,8 +75,19 @@ const CLAIM_RULES = [
     why: 'the bank and intermediary legs cannot be publicly proven end to end. Permitted: "every recorded allocation and disbursement is independently reconcilable".',
   },
   {
-    pattern: /100\s*%?\s*(of\s+)?(revenue\s+)?to\s+charit/i,
-    why: 'uncapped "all of it to charity" is false once any direct cost is charged to Purpose Fees. State the D29 form instead: direct costs charged to Purpose Fees are capped and published to the invoice; any cost support is listed by name.',
+    // "100% to charity", "100% of profits go to charity", "100 % of profit goes to charity":
+    // the shortening D29 §6.2 forbids by name. At most one noun (optionally preceded by
+    // "of" / "the") between the percentage and the verb, so the permitted §6.2 sentence —
+    // "100% of profit BEYOND published operating needs goes to charity …" — stays
+    // unmatched; the self-test pins both sides. An earlier form matched only "goes", so
+    // the plural sentence slipped past the gate.
+    pattern: /100\s*%\s*(?:(?:of\s+)?(?:the\s+)?\w+\s+)?(?:go(?:es)?\s+)?to\s+charit/i,
+    why: UNCAPPED_CHARITY_WHY,
+  },
+  {
+    // The same claim without the percentage.
+    pattern: /\ball\s+(?:profits?|proceeds|revenue|fees|money)\s+(?:go(?:es)?\s+)?to\s+charit/i,
+    why: UNCAPPED_CHARITY_WHY,
   },
   {
     pattern: /\bno\s+CLA\b/i,
@@ -93,6 +112,63 @@ const MENTION_RULE = {
 
 const VERIFY_PIN = /verify only at\s+([^\s"'`,;)]+)/gi;
 const expectedVerifyHost = cfg.verifyStatement.replace(/^verify only at\s+/i, '');
+
+/* ----------------------------------------------------------------------- self-test */
+
+// Prove the claim rules can fail before trusting them to pass. `mustMatch` are forbidden
+// forms; `mustNotMatch` are the PERMITTED forms they are most easily confused with — the
+// list that matters, because a rule that also caught the approved wording would be
+// quietly deleted by the first author it blocked. Only CLAIM_RULES are probed: the leak
+// and mention rules are literal identifiers with nothing to confuse them with.
+const SELF_TEST = {
+  mustMatch: [
+    'nobody profits from this',
+    'every franc is visible',
+    '100% to charity',
+    '100% of the fee goes to charity',
+    // D29 §6.2 forbids this shortening by name; "100 %" with a space is the same claim.
+    '100% of profits go to charity',
+    '100% of profit goes to charity',
+    '100 % of profits go to charity',
+    '100% revenue to charity',
+    'all profits to charity',
+    'all proceeds go to charity',
+    'no CLA, no signup',
+    'amnesty on purchase',
+    'fully traceable',
+  ],
+  mustNotMatch: [
+    // D29 §6.2 — the one permitted "goes to charity" sentence: its qualifier sits between
+    // the noun and the destination. (Its owner's name is a banned identifier here and is
+    // not part of the sentence under test.)
+    '100% of profit beyond published operating needs goes to charity and to charity programmes',
+    // The permitted forms the rules themselves point to.
+    'no distributable private profit — direct costs charged to Purpose Fees are capped and published to the invoice; any cost support is listed by name',
+    'every recorded allocation and disbursement is independently reconcilable',
+    'no copyright assignment, ever',
+    'amnesty covenants, with their scope stated',
+    'the direct costs charged to Purpose Fees are capped and published; the remainder is passed on to the intermediary',
+  ],
+};
+
+function selfTest() {
+  const found = [];
+  for (const text of SELF_TEST.mustMatch) {
+    if (!CLAIM_RULES.some((rule) => rule.pattern.test(text))) {
+      found.push(`self-test: no claim rule matches ${JSON.stringify(text)} — the gate would let it through`);
+    }
+  }
+  for (const text of SELF_TEST.mustNotMatch) {
+    const offender = CLAIM_RULES.find((rule) => rule.pattern.test(text));
+    if (offender) {
+      found.push(`self-test: claim rule ${offender.pattern} matches the PERMITTED form ${JSON.stringify(text)}`);
+    }
+  }
+  return found;
+}
+
+const selfTestProblems = selfTest();
+if (selfTestProblems.length > 0) fail(selfTestProblems, '');
 
 function walk(dir, out = []) {
   let entries;

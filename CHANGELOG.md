@@ -216,6 +216,12 @@ published *here* and would otherwise have nothing to validate against:
 
 - Initial publication. Global chain head plus per-month digests. The genesis hash is a
   constant in the schema, not a convention in a comment.
+- 2026-09-05 (movement decision D29 §6.1, §8): the description's reconciliation triad
+  "append-only ledger, audited accounts, partner receipts" becomes "append-only ledger,
+  the monthly table's evidence links (rail payout statement, invoices, supporter payments,
+  bank lines), intermediary receipts" — the proof is publication to the invoice, not an
+  auditor's signature, and the description now mirrors the ops record's VIS-01 as
+  amended. Wording only; nothing the schema validates changes, so the version stands.
 
 ## change-event.v1.json
 
