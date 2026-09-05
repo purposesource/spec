@@ -75,6 +75,20 @@ published *here* and would otherwise have nothing to validate against:
 7. **npm publication.** The package is marked private. Whether the contract set is also
    published to a package registry (and under what name) is undecided.
 
+### Planned — not built
+
+- **`cost-support.v1.json`** (P-M3; recorded 2026-09-05). The data shape of the movement's
+  monthly cost-support table, as decided in the ops record (decision D29,
+  `COST-SUPPORT-MODEL-2026-09-05.md` §3): per calendar month — Purpose Fees received net of
+  the rail's processing fee; direct costs itemised with their invoice references; cost
+  support by named supporter, the sum never exceeding the direct costs; charged to fees =
+  max(0, direct costs − support), with the running year total against the published cap;
+  passed on to the named intermediary, with date and receipt reference; every line carrying
+  an evidence link. Supporters are rows, never schema constants — the shape must be
+  identical whether the supporter list has zero rows or many. Nothing is published here yet:
+  no schema file, no example, no changelog section of its own. It lands as an additive new
+  file when P-M3 builds the transparency table.
+
 ## purpose-yml.v1.json
 
 ### 1.0.0 — unreleased
