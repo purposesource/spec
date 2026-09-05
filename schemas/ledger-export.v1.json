@@ -29,8 +29,7 @@
       "additionalProperties": false,
       "description": "The allocation policy in force for the month. ABSENT at P-M2 — no allocation runs before P-M3, so publishing a policy block would describe machinery that has not acted.",
       "properties": {
-        "levyBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
-        "capBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "capBps": { "type": "integer", "minimum": 0, "maximum": 10000, "description": "The ANNUAL cap on charged-to-fees, in basis points of the financial year's Purpose Fees net of the rail's processing fee (GOV-001; ENG-077 as amended). There is no percentage levy: a `charged-to-fees` row is one itemised direct invoice nobody supported, and the cap is tested on the year's total, never on a month (ops decision D29 §2, D31 item 6)." },
         "commonsBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
         "routingMode": { "enum": ["shadow", "live"] },
         "algoVersion": { "type": "string", "maxLength": 32 }
@@ -42,7 +41,7 @@
       "description": "Month totals in minor units of `currency`. At P-M2 only `pool` is meaningful; the allocation totals arrive with the allocator at P-M3.",
       "properties": {
         "pool": { "type": "integer" },
-        "levy": { "type": "integer" },
+        "chargedToFees": { "type": "integer", "description": "Sum of the month's `charged-to-fees` rows: direct invoices paid from the fees account and not settled by a listed supporter. Not a levy." },
         "commons": { "type": "integer" },
         "directed": { "type": "integer" },
         "disbursed": { "type": "integer" }
@@ -84,7 +83,7 @@
     "headHash": { "$ref": "#/$defs/sha256", "description": "Global chain head after this month's last row." },
     "prevHeadHash": { "$ref": "#/$defs/sha256OrGenesis", "description": "Global chain head before this month's first row. Genesis is 64 zeros." },
     "monthDigest": { "$ref": "#/$defs/sha256", "description": "Digest over this month's rows, mirrored in the chain document and in the month-lock row." },
-    "methodologyUrl": { "type": "string", "format": "uri", "description": "The published methodology: levy cap, the M+1 hold, the append-only doctrine, and annotation-never-restatement (VS-37)." }
+    "methodologyUrl": { "type": "string", "format": "uri", "description": "The published methodology: the annual cap on direct costs charged to fees; the M+1 allocation window (money is swept within 30 days of each payout; the earmark instruction follows at lock); the append-only doctrine, and annotation-never-restatement (VS-37)." }
   },
   "$defs": {
     "exportRow": {
@@ -98,7 +97,7 @@
           "enum": [
             "pool-in", "topup-multiplier-in", "topup-donation-in", "donation-entitlement-note",
             "refund-out", "chargeback-out", "chargeback-reverse-in", "adjustment",
-            "levy", "commons-alloc", "directed-alloc", "directed-to-commons", "repo-pool",
+            "charged-to-fees", "commons-alloc", "directed-alloc", "directed-to-commons", "repo-pool",
             "category-route", "category-agg", "rollforward-in", "rollforward-out",
             "disburse", "sponsor-ops-in", "month-note", "month-lock", "annotation"
           ]
@@ -115,7 +114,7 @@
         "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "lane": { "enum": ["pass", "project", "portfolio", "donation"] },
-        "holdStatus": { "enum": ["held-M+1", "released"] },
+        "holdStatus": { "enum": ["open-M+1", "released"], "description": "Allocation-window state of an intake row (COM-023, ENG-025 as read by ops decision D31): `open-M+1` while the row's settlement month is still open for allocation, `released` once the month locks. A state of the allocation data only, never of money — the fee money is swept to the named intermediary within 30 days of the rail payout, and the earmark instruction follows at month lock." },
         "payerName": { "type": "string", "maxLength": 200, "description": "Opted-in payer name, or the literal `unnamed`." },
         "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$" },
         "ppSnapshotId": { "type": "string", "maxLength": 64 },

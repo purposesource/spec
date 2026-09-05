@@ -25,7 +25,7 @@
       "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
       "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
       "lane": "project",
-      "holdStatus": "held-M+1",
+      "holdStatus": "open-M+1",
       "payerName": "unnamed",
       "scheduleVersion": "v1",
       "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
@@ -38,7 +38,7 @@
       "date": "2027-06-02",
       "amountMinor": 0,
       "currency": "CHF",
-      "note": "Intake accrues under the M+1 chargeback hold. No allocation runs at this stage, so no allocation rows exist for this month.",
+      "note": "Intake is recorded; allocation waits for the M+1 window (a state of the allocation data — the fee money is swept within 30 days of the rail payout, and the earmark instruction follows at lock). No allocation runs at this stage, so no allocation rows exist for this month.",
       "prevHash": "4d7a1c0b9e8f2a3b5c6d7e8f90a1b2c34d7a1c0b9e8f2a3b5c6d7e8f90a1b2c3",
       "rowHash": "8e5f3a2b1c0d9e8f7a6b5c4d3e2f1a098e5f3a2b1c0d9e8f7a6b5c4d3e2f1a09"
     }

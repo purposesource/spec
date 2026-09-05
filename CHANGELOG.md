@@ -200,6 +200,11 @@ published *here* and would otherwise have nothing to validate against:
   fields, the hold status, and the global hash-chain fields.
 - Zero-amount rows (annotation, month note, month lock) are constrained to zero by the
   schema, so a correction can never be smuggled in as a narrative row.
+- 2026-09-05 — pre-release rename, together with `ledger-export.v1.json` (ops decision
+  D31 item 6, `COST-SUPPORT-MODEL-2026-09-05.md` §14): row type `levy` becomes
+  `charged-to-fees`; the row-level `levyBps` is dropped, because no percentage levy
+  exists; `holdStatus` `held-M+1` becomes `open-M+1`, described as the allocation-window
+  state of intake data — the money itself is swept within 30 days of the rail payout.
 
 ## ledger-export.v1.json
 
@@ -209,6 +214,16 @@ published *here* and would otherwise have nothing to validate against:
   blocks are optional and absent in the first version, because no allocation runs yet.
 - The shadow-routing label is a required member of its own section, so no consumer can
   strip it while keeping the numbers.
+- 2026-09-05 — pre-release rename (ops decision D31 item 6, `COST-SUPPORT-MODEL-2026-09-05.md`
+  §14; the ledger's M+1 hold is a hold of allocation data, never of money — the fees
+  account is swept to the named intermediary within 30 days of each rail payout and the
+  earmark instruction follows at month lock). There is no percentage levy: `policy.levyBps`
+  is dropped; `policy.capBps` stays and is the ANNUAL cap on charged-to-fees;
+  `totals.levy` becomes `totals.chargedToFees`; row type `levy` becomes `charged-to-fees`
+  (one row per direct invoice nobody supported); `holdStatus` `held-M+1` becomes
+  `open-M+1`; the `methodologyUrl` description names the annual cap and the M+1
+  allocation window in place of a levy cap and a hold. The website's sample ledger and
+  registry-v0 carry the same names, so the three agree byte for byte.
 
 ## ledger-chain.v1.json
 

@@ -14,7 +14,7 @@
   "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
   "repoNodeId": "R_kgDOAbc123",
   "scheduleVersion": "v1",
-  "holdStatus": "held-M+1",
+  "holdStatus": "open-M+1",
   "payerName": "unnamed",
   "emittingJob": "tools/record-purchases",
   "createdAt": "2027-06-01T14:22:00Z",

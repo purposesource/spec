@@ -25,7 +25,7 @@
       "enum": [
         "pool-in", "topup-multiplier-in", "topup-donation-in", "donation-entitlement-note",
         "refund-out", "chargeback-out", "chargeback-reverse-in", "adjustment",
-        "levy", "commons-alloc", "directed-alloc", "directed-to-commons", "repo-pool",
+        "charged-to-fees", "commons-alloc", "directed-alloc", "directed-to-commons", "repo-pool",
         "category-route", "category-agg", "rollforward-in", "rollforward-out",
         "disburse", "sponsor-ops-in", "month-note", "month-lock", "annotation"
       ],
@@ -48,12 +48,11 @@
     "categoryFundId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" },
     "batchId": { "type": "string", "maxLength": 64 },
     "correctsLedId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "Forward correction pointer. The corrected row itself is never touched." },
-    "levyBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
     "commonsBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
     "routingMode": { "enum": ["shadow", "live"], "description": "Category routing is shadow-first behind a fairness-review gate (D27). A `shadow` row's money moved nowhere on contributor votes." },
     "holdStatus": {
-      "enum": ["held-M+1", "released"],
-      "description": "The chargeback hold state of an intake row (COM-023): funds accrue and are held through month M+1 before they can be allocated. At P-M2 nothing is ever allocated, so intake simply accrues — the rule is still printed in the published methodology (VS-36/VS-37)."
+      "enum": ["open-M+1", "released"],
+      "description": "Allocation-window state of an intake row (COM-023, ENG-025 as read by ops decision D31): `open-M+1` while the row's settlement month is still open for allocation, `released` once the month locks. A state of the allocation data only, never of money — the fee money is swept to the named intermediary within 30 days of the rail payout, and the earmark instruction follows at month lock. At P-M2 nothing is ever allocated, so intake simply accrues — the rule is still printed in the published methodology (VS-36/VS-37)."
     },
     "payerName": {
       "type": "string",
