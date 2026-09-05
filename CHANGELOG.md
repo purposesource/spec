@@ -223,7 +223,11 @@ published *here* and would otherwise have nothing to validate against:
   (one row per direct invoice nobody supported); `holdStatus` `held-M+1` becomes
   `open-M+1`; the `methodologyUrl` description names the annual cap and the M+1
   allocation window in place of a levy cap and a hold. The website's sample ledger and
-  registry-v0 carry the same names, so the three agree byte for byte.
+  registry-v0 carry the same names — registry-v0's `ledger-month.v1` renamed its
+  `hold_status` value `held` to `open-M+1` in its own commit later the same day (its real
+  ledger held no row, so no committed row changed and the fixture chain was rehashed) —
+  so the three agree on every name they share. *(Corrected the same day: as first written
+  this line claimed agreement before registry-v0's rename had landed.)*
 
 ## ledger-chain.v1.json
 
