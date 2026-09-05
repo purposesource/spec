@@ -60,7 +60,7 @@ const LEAK_RULES = [
 const CLAIM_RULES = [
   {
     pattern: /nobody\s+profits/i,
-    why: 'processors, intermediaries and contractors are paid — the claim is one invoice away from a gotcha. Permitted: "no distributable private profit — operating costs are capped and published".',
+    why: 'processors, intermediaries and contractors are paid — the claim is one invoice away from a gotcha. Permitted: "no distributable private profit — direct costs charged to Purpose Fees are capped and published to the invoice; any cost support is listed by name" (D29).',
   },
   {
     pattern: /every\s+(franc|dollar|euro)\b/i,
@@ -68,7 +68,7 @@ const CLAIM_RULES = [
   },
   {
     pattern: /100\s*%?\s*(of\s+)?(revenue\s+)?to\s+charit/i,
-    why: 'uncapped "all of it to charity" is false once any operating cost exists. State the capped, published split instead.',
+    why: 'uncapped "all of it to charity" is false once any direct cost is charged to Purpose Fees. State the D29 form instead: direct costs charged to Purpose Fees are capped and published to the invoice; any cost support is listed by name.',
   },
   {
     pattern: /\bno\s+CLA\b/i,
