@@ -72,7 +72,7 @@ const CLAIM_RULES = [
   },
   {
     pattern: /every\s+(franc|dollar|euro)\b/i,
-    why: 'the bank and intermediary legs cannot be publicly proven end to end. Permitted: "every recorded allocation and disbursement is independently reconcilable".',
+    why: 'the bank legs to the listed recipients cannot be publicly proven end to end (D33: no intermediary). Permitted: "every recorded allocation and disbursement is independently reconcilable".',
   },
   {
     // "100% to charity", "100% of profits go to charity", "100 % of profit goes to charity":
