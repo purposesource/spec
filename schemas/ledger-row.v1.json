@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://purposesource.org/spec/schemas/ledger-row.v1.json",
   "title": "Ledger row (v1)",
-  "description": "One row of the append-only allocation ledger. Rows are IMMUTABLE: every correction is a forward-dated row — a negative `adjustment` against the earliest open month with `correctsLedId` pointing at the corrected row, or a zero-amount `annotation` for narrative context. No exception exists, including a charity-partner scandal: annotate, never restate (FS07-042, ENG-042/046, NEV-019). Disbursed quarters are never restated and no refund is ever clawed back from a charity (COM-053).\n\nHASH CHAIN (FS07-040): `rowHash = SHA-256(prevHash ∥ JCS(row minus prevHash/rowHash))` over RFC 8785 canonical JSON, where `prevHash` is the row hash of the immediately preceding row in GLOBAL insertion order regardless of month (genesis = 64 zeros). Intake for an open month therefore chains straight onto the current global head, and locking a month never blocks a later month's intake.\n\nMoney is always integer minor units plus an ISO currency code; reporting currency is CHF with the per-transaction FX rate captured on the row (FS-00 §6.1, ENG-037; the final currency ruling is URS §21 OPEN-26).\n\nAt P-M2 the ledger is the committed monthly table maintained by the operator script, restricted to INTAKE types (`pool-in`, `refund-out`, `chargeback-out`, `topup-*`, `month-note`) — no allocation row exists before P-M3, and CI rejects any diff that modifies a committed row (FS07-100, VS-36).",
+  "description": "One row of the append-only allocation ledger. Rows are IMMUTABLE: every correction is a forward-dated row — a negative `adjustment` against the earliest open month with `correctsLedId` pointing at the corrected row, or a zero-amount `annotation` for narrative context. No exception exists, including a listed recipient's scandal: annotate, never restate (FS07-042, ENG-042/046, NEV-019). Transferred months are never restated and nothing is ever clawed back from a recipient (COM-053; ops decision D33 item 4).\n\nFOUR OUTGOING LINES (ops decision D34 item 5, 2026-09-06), each capped, each published: `charged-to-fees` (one row per direct invoice nobody supported, within the annual cap), `reserve-retention` (the operations reserve's retention, at most a published share of the month's fees until the reserve holds its target — D34 item 4), `hardship-pay` (the steward hardship pay to the one essential operating role, only under the published rule, two caps of which the lower governs — D34 item 3), and `disburse` (one transfer per listed recipient, carrying `recipientId` — D33 item 1). The two D34 lines are their own rows even at zero, with their rule in `note`.\n\nHASH CHAIN (FS07-040): `rowHash = SHA-256(prevHash ∥ JCS(row minus prevHash/rowHash))` over RFC 8785 canonical JSON, where `prevHash` is the row hash of the immediately preceding row in GLOBAL insertion order regardless of month (genesis = 64 zeros). Intake for an open month therefore chains straight onto the current global head, and locking a month never blocks a later month's intake.\n\nMoney is always integer minor units plus an ISO currency code; reporting currency is CHF with the per-transaction FX rate captured on the row (FS-00 §6.1, ENG-037; the final currency ruling is URS §21 OPEN-26).\n\nAt P-M2 the ledger is the committed monthly table maintained by the operator script, restricted to INTAKE types (`pool-in`, `refund-out`, `chargeback-out`, `topup-*`, `month-note`) — no allocation row exists before P-M3, and CI rejects any diff that modifies a committed row (FS07-100, VS-36).",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M2 (intake types only)",
     "artifactPath": "(row shape) src/data/ledger/{YYYY-MM}.json in the website repo · rows[] of /ledger/{YYYY}-{MM}.json",
     "authoritative": true,
@@ -25,13 +25,14 @@
       "enum": [
         "pool-in", "topup-multiplier-in", "topup-donation-in", "donation-entitlement-note",
         "refund-out", "chargeback-out", "chargeback-reverse-in", "adjustment",
-        "charged-to-fees", "commons-alloc", "directed-alloc", "directed-to-commons", "repo-pool",
+        "charged-to-fees", "reserve-retention", "hardship-pay",
+        "commons-alloc", "directed-alloc", "directed-to-commons", "repo-pool",
         "category-route", "category-agg", "rollforward-in", "rollforward-out",
         "disburse", "sponsor-ops-in", "month-note", "month-lock", "annotation"
       ],
-      "description": "Row type (FS-07 §5.1 verbatim). The P-M2 subset is `pool-in`, `refund-out`, `chargeback-out`, `topup-multiplier-in`, `topup-donation-in`, `month-note` — an allocation type appearing in a v0 file is a scope defect, not initiative (FS07-100)."
+      "description": "Row type (FS-07 §5.1 verbatim, plus `reserve-retention` and `hardship-pay` added 2026-09-06 by ops decision D34 item 9). The P-M2 subset is `pool-in`, `refund-out`, `chargeback-out`, `topup-multiplier-in`, `topup-donation-in`, `month-note` — an allocation type appearing in a v0 file is a scope defect, not initiative (FS07-100)."
     },
-    "amountMinor": { "type": "integer", "description": "Integer minor units in `currency`. Negative for corrections; zero for `annotation`, `month-note` and `month-lock` rows." },
+    "amountMinor": { "type": "integer", "description": "Integer minor units in `currency`. Negative for corrections and for money leaving the fees account (`charged-to-fees`, `reserve-retention`, `hardship-pay`, `disburse`); zero for `annotation`, `month-note` and `month-lock` rows, and for a `reserve-retention` or `hardship-pay` row whose rule produced nothing this month." },
     "currency": { "$ref": "#/$defs/currency", "description": "Reporting currency (CHF), or the row's own currency where a row is recorded natively." },
     "monthDigest": { "$ref": "#/$defs/sha256", "description": "`month-lock` rows only: SHA-256 over that month's rows in canonical serialisation order (FS07-040)." },
     "srcAmountMinor": { "type": "integer", "description": "Original transaction amount before conversion to the reporting currency." },
@@ -45,14 +46,15 @@
     "ppSnapshotId": { "type": "string", "maxLength": 64 },
     "algoVersion": { "type": "string", "maxLength": 32 },
     "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$", "description": "Required in practice on every money-bearing reference (ENG-084)." },
-    "categoryFundId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" },
+    "categoryFundId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$", "description": "One of the seven published categories — since ops decision D33 item 1 (2026-09-06) the basket of the listed recipients in that category, nothing else." },
+    "recipientId": { "type": "string", "pattern": "^rcp_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "The listed recipient a `disburse` row transferred to (ops decision D33 item 1; the Recipient List is the published, versioned annex to the statutes). Platform-minted ULID, `rcp_` prefix, lowercase Crockford base32. Money rows name organisations on the published list, never persons (ENG-083); the one person ever paid from Purpose Fees is the essential operating role under `hardship-pay`, which carries no recipient id." },
     "batchId": { "type": "string", "maxLength": 64 },
     "correctsLedId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "Forward correction pointer. The corrected row itself is never touched." },
     "commonsBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
     "routingMode": { "enum": ["shadow", "live"], "description": "Category routing is shadow-first behind a fairness-review gate (D27). A `shadow` row's money moved nowhere on contributor votes." },
     "holdStatus": {
       "enum": ["open-M+1", "released"],
-      "description": "Allocation-window state of an intake row (COM-023, ENG-025 as read by ops decision D31): `open-M+1` while the row's settlement month is still open for allocation, `released` once the month locks. A state of the allocation data only, never of money — the fee money is swept to the named intermediary within 30 days of the rail payout, and the earmark instruction follows at month lock. At P-M2 nothing is ever allocated, so intake simply accrues — the rule is still printed in the published methodology (VS-36/VS-37)."
+      "description": "Allocation state of an intake row (COM-023, ENG-025 as amended by ops decisions D31 and D33): `open-M+1` while the row's settlement month has not locked, `released` once it has. A state of the allocation data only, never of money. Since D33 item 4 (2026-09-06) the rule is LOCK BEFORE SWEEP: a month's allocation is computed at the lock, no later than the twentieth day after the month's last rail payout, and each listed recipient's share is transferred directly from the fees account on or before the thirtieth day — no intermediary, no earmark. The token keeps its D31 name for contract stability (additive-only policy: a published value is never renamed); the rule it names is the lock-before-sweep rule. At P-M2 nothing is ever allocated, so intake simply accrues — the rule is still printed in the published methodology (VS-36/VS-37)."
     },
     "payerName": {
       "type": "string",
@@ -81,6 +83,10 @@
     {
       "if": { "properties": { "type": { "const": "pool-in" } }, "required": ["type"] },
       "then": { "properties": { "amountMinor": { "exclusiveMinimum": 0 } } }
+    },
+    {
+      "if": { "properties": { "type": { "enum": ["reserve-retention", "hardship-pay"] } }, "required": ["type"] },
+      "then": { "properties": { "amountMinor": { "maximum": 0 } }, "required": ["note"] }
     }
   ],
   "$defs": {

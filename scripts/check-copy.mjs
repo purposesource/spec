@@ -147,7 +147,7 @@ const SELF_TEST = {
     'every recorded allocation and disbursement is independently reconcilable',
     'no copyright assignment, ever',
     'amnesty covenants, with their scope stated',
-    'the direct costs charged to Purpose Fees are capped and published; the remainder is passed on to the intermediary',
+    'the direct costs charged to Purpose Fees are capped and published; the remainder is passed on directly to the listed recipients',
   ],
 };
 

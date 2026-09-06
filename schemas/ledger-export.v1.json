@@ -4,7 +4,7 @@
   "title": "Monthly ledger export — /ledger/{YYYY}-{MM}.json",
   "description": "The published monthly ledger export (FS-07 §6.2). Immutable once written: regeneration may only re-emit byte-identical content for a locked month, and a divergence is an alert, not a fix (FS07-051). The `.csv` twin carries the same rows flat; the human ledger page generates from the same rows, and any divergence between page, JSON and CSV is a defect (VS-37, ENG-043/044).\n\nThe shadow section, when present, carries its label IN BAND so no downstream consumer can strip it accidentally: contributor votes are computed and NOT used for routing until the fairness-review gate opens (D27, FS07-052).\n\nDisplay law: pages generate exclusively from these rows; per-contributor money respects the published materiality floor; unclaimed shares appear in aggregate only; there are no leaderboards (FS07-052, D15).\n\nAt P-M2 there are no allocation rows and no `policy`/`totals` allocation figures — the export carries intake rows only, and before the first money moves the ledger page says 'no money has moved yet' in words rather than rendering a zero (FS07-100, VS-37).",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M2 (intake rows only)",
     "artifactPath": "/ledger/{YYYY}-{MM}.json (+ .csv twin)",
     "authoritative": true,
@@ -29,7 +29,11 @@
       "additionalProperties": false,
       "description": "The allocation policy in force for the month. ABSENT at P-M2 — no allocation runs before P-M3, so publishing a policy block would describe machinery that has not acted.",
       "properties": {
-        "capBps": { "type": "integer", "minimum": 0, "maximum": 10000, "description": "The ANNUAL cap on charged-to-fees, in basis points of the financial year's Purpose Fees net of the rail's processing fee (GOV-001; ENG-077 as amended). There is no percentage levy: a `charged-to-fees` row is one itemised direct invoice nobody supported, and the cap is tested on the year's total, never on a month (ops decision D29 §2, D31 item 6)." },
+        "capBps": { "type": "integer", "minimum": 0, "maximum": 10000, "description": "The ANNUAL cap on charged-to-fees, in basis points of the financial year's Purpose Fees net of the rail's processing fee (GOV-001; ENG-077 as amended). There is no percentage levy: a `charged-to-fees` row is one itemised direct invoice nobody supported — including the transfer charges on the outbound transfers to the listed recipients (ops decision D33 item 5) — and the cap is tested on the year's total, never on a month (ops decision D29 §2, D31 item 6)." },
+        "reserveRetentionBpsMax": { "type": "integer", "minimum": 0, "maximum": 10000, "description": "Ops decision D34 item 4: the operations reserve retains at most this share of each month's Purpose Fees, in basis points, until the reserve holds its published target; above target nothing is retained. An annex value, proposed until the founding assembly confirms it; it can only fall." },
+        "reserveTargetMinor": { "type": "integer", "minimum": 0, "description": "The reserve's published target in minor units of the reporting currency (D34 item 4: six months of the essential role's ceiling). Annex value; can only fall." },
+        "hardshipCeilingMinor": { "type": "integer", "minimum": 0, "description": "Ops decision D34 item 3: the monthly ceiling on the steward hardship pay in total employer cost, minor units. Annex value; can only fall." },
+        "hardshipBpsTrailing12": { "type": "integer", "minimum": 0, "maximum": 10000, "description": "D34 item 3: the hardship pay's second cap — at most this share of the trailing twelve months' Purpose Fees, in basis points; the lower of the two caps governs. Annex value; can only fall." },
         "commonsBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
         "routingMode": { "enum": ["shadow", "live"] },
         "algoVersion": { "type": "string", "maxLength": 32 }
@@ -42,9 +46,11 @@
       "properties": {
         "pool": { "type": "integer" },
         "chargedToFees": { "type": "integer", "description": "Sum of the month's `charged-to-fees` rows: direct invoices paid from the fees account and not settled by a listed supporter. Not a levy." },
+        "reserveRetention": { "type": "integer", "minimum": 0, "description": "Sum of the month's `reserve-retention` rows, as a positive figure (ops decision D34 item 4). Zero is a published state: the rule applied and produced nothing." },
+        "hardshipPay": { "type": "integer", "minimum": 0, "description": "Sum of the month's `hardship-pay` rows, as a positive figure (ops decision D34 item 3). Zero is a published state: no episode was active." },
         "commons": { "type": "integer" },
         "directed": { "type": "integer" },
-        "disbursed": { "type": "integer" }
+        "disbursed": { "type": "integer", "description": "Sum of the month's `disburse` rows, as a positive figure: transferred directly to the listed recipients, one row per recipient (ops decision D33 item 1)." }
       }
     },
     "rows": {
@@ -83,7 +89,7 @@
     "headHash": { "$ref": "#/$defs/sha256", "description": "Global chain head after this month's last row." },
     "prevHeadHash": { "$ref": "#/$defs/sha256OrGenesis", "description": "Global chain head before this month's first row. Genesis is 64 zeros." },
     "monthDigest": { "$ref": "#/$defs/sha256", "description": "Digest over this month's rows, mirrored in the chain document and in the month-lock row." },
-    "methodologyUrl": { "type": "string", "format": "uri", "description": "The published methodology: the annual cap on direct costs charged to fees; the M+1 allocation window (money is swept within 30 days of each payout; the earmark instruction follows at lock); the append-only doctrine, and annotation-never-restatement (VS-37)." }
+    "methodologyUrl": { "type": "string", "format": "uri", "description": "The published methodology: the annual cap on direct costs charged to fees; the lock-before-sweep rule (ops decision D33 item 4 — the allocation is computed at the lock, no later than twenty days after the month's last rail payout, and each listed recipient's share is transferred directly on or before the thirtieth day); the two capped lines of D34 (the reserve retention and the steward hardship pay); the append-only doctrine, and annotation-never-restatement (VS-37)." }
   },
   "$defs": {
     "exportRow": {
@@ -97,7 +103,8 @@
           "enum": [
             "pool-in", "topup-multiplier-in", "topup-donation-in", "donation-entitlement-note",
             "refund-out", "chargeback-out", "chargeback-reverse-in", "adjustment",
-            "charged-to-fees", "commons-alloc", "directed-alloc", "directed-to-commons", "repo-pool",
+            "charged-to-fees", "reserve-retention", "hardship-pay",
+            "commons-alloc", "directed-alloc", "directed-to-commons", "repo-pool",
             "category-route", "category-agg", "rollforward-in", "rollforward-out",
             "disburse", "sponsor-ops-in", "month-note", "month-lock", "annotation"
           ]
@@ -114,12 +121,13 @@
         "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "lane": { "enum": ["pass", "project", "portfolio", "donation"] },
-        "holdStatus": { "enum": ["open-M+1", "released"], "description": "Allocation-window state of an intake row (COM-023, ENG-025 as read by ops decision D31): `open-M+1` while the row's settlement month is still open for allocation, `released` once the month locks. A state of the allocation data only, never of money — the fee money is swept to the named intermediary within 30 days of the rail payout, and the earmark instruction follows at month lock." },
+        "holdStatus": { "enum": ["open-M+1", "released"], "description": "Allocation state of an intake row (COM-023, ENG-025 as amended by ops decisions D31 and D33): `open-M+1` while the row's settlement month has not locked, `released` once it has. A state of the allocation data only, never of money: under the lock-before-sweep rule (D33 item 4) the allocation is computed at the lock, no later than twenty days after the month's last rail payout, and each listed recipient's share is transferred directly on or before the thirtieth day. The token keeps its D31 name for contract stability." },
         "payerName": { "type": "string", "maxLength": 200, "description": "Opted-in payer name, or the literal `unnamed`." },
         "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$" },
         "ppSnapshotId": { "type": "string", "maxLength": 64 },
         "algoVersion": { "type": "string", "maxLength": 32 },
         "categoryFundId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" },
+        "recipientId": { "type": "string", "pattern": "^rcp_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "The listed recipient a `disburse` row transferred to (ops decision D33 item 1)." },
         "correctsLedId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "note": { "type": "string", "maxLength": 1000 },
         "monthDigest": { "$ref": "#/$defs/sha256" },

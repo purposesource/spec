@@ -83,10 +83,14 @@ published *here* and would otherwise have nothing to validate against:
   the rail's processing fee; direct costs itemised with their invoice references; cost
   support by named supporter, the sum never exceeding the direct costs; charged to fees =
   max(0, direct costs − support), with the running year total against the published cap;
-  passed on to the named intermediary, with date and receipt reference; every line carrying
-  an evidence link. Supporters are rows, never schema constants — the shape must be
-  identical whether the supporter list has zero rows or many. Nothing is published here yet:
-  no schema file, no example, no changelog section of its own. It lands as an additive new
+  passed on directly to the listed recipients, one line per recipient with date and receipt
+  reference *(amended 2026-09-06, D33; as first recorded: "passed on to the named
+  intermediary, with date and receipt reference")*; every line carrying an evidence link.
+  Since D34 item 5 (2026-09-06) the table carries four outgoing lines — charged to fees, the
+  reserve retention, the steward hardship pay, and the transfers — each capped, each
+  published. Supporters are rows, never schema constants — the shape must be identical
+  whether the supporter list has zero rows or many. Nothing is published here yet: no
+  schema file, no example, no changelog section of its own. It lands as an additive new
   file when P-M3 builds the transparency table.
 
 ## purpose-yml.v1.json
@@ -206,6 +210,26 @@ published *here* and would otherwise have nothing to validate against:
   exists; `holdStatus` `held-M+1` becomes `open-M+1`, described as the allocation-window
   state of intake data — the money itself is swept within 30 days of the rail payout.
 
+### 1.1.0 — unreleased (2026-09-06; ops decisions D33 and D34)
+
+- Additive. Two row types join the enum: `reserve-retention` (the operations reserve's
+  retention, at most a published share of the month's fees until the reserve holds its
+  target — D34 item 4) and `hardship-pay` (the steward hardship pay to the one essential
+  operating role, only under the published rule, two caps of which the lower governs — D34
+  item 3). Each is its own row even at zero, with its rule in `note`; the schema constrains
+  both to non-positive amounts and requires the note.
+- Additive. `recipientId` (`^rcp_[0-9abcdefghjkmnpqrstvwxyz]{26}$`): the listed recipient
+  a `disburse` row transferred to. What is passed on goes directly, from the fees account,
+  to the organisations on the published Recipient List — no intermediary, no pooled fund,
+  no earmark (D33 items 1 and 4). `categoryFundId` is described as the basket of listed
+  recipients in that category.
+- Wording. `holdStatus` keeps both tokens — a published value is never renamed under the
+  additive-only policy — and its description now states the rule the pending token names:
+  lock before sweep (D33 item 4), the allocation computed at the lock no later than twenty
+  days after the month's last rail payout, each recipient's share transferred on or before
+  the thirtieth day. The intermediary and the earmark instruction leave every description;
+  the file description names the four outgoing lines (D34 item 5).
+
 ## ledger-export.v1.json
 
 ### 1.0.0 — unreleased
@@ -229,6 +253,22 @@ published *here* and would otherwise have nothing to validate against:
   so the three agree on every name they share. *(Corrected the same day: as first written
   this line claimed agreement before registry-v0's rename had landed.)*
 
+### 1.1.0 — unreleased (2026-09-06; ops decisions D33 and D34)
+
+- Additive, mirroring `ledger-row.v1` 1.1.0: the row enum gains `reserve-retention` and
+  `hardship-pay`; export rows gain `recipientId`.
+- Additive. `totals` gains `reserveRetention` and `hardshipPay` (positive sums of the two
+  D34 lines; zero is a published state), and `disbursed` is described as the sum of the
+  per-recipient transfers (D33 item 1). `policy` gains the published caps as optional
+  fields — `reserveRetentionBpsMax`, `reserveTargetMinor`, `hardshipCeilingMinor`,
+  `hardshipBpsTrailing12` — every one an annex value proposed until the founding assembly
+  confirms it, and every one able only to fall.
+- Wording. `capBps` names the transfer charges on the outbound transfers as a direct-cost
+  class (D33 item 5); `methodologyUrl` and `holdStatus` describe the lock-before-sweep rule
+  in place of the M+1 window and the earmark instruction; the example's month note says the
+  same. The website's sample ledger and registry-v0 take the same names in their own
+  commits of the same day.
+
 ## ledger-chain.v1.json
 
 ### 1.0.0 — unreleased
@@ -241,6 +281,9 @@ published *here* and would otherwise have nothing to validate against:
   bank lines), intermediary receipts" — the proof is publication to the invoice, not an
   auditor's signature, and the description now mirrors the ops record's VIS-01 as
   amended. Wording only; nothing the schema validates changes, so the version stands.
+- 2026-09-06 (ops decision D33 items 1 and 2f): the reconciliation triad's last member
+  becomes "the listed recipients' receipts" and the honest limit becomes "the bank legs to
+  the recipients" — there is no intermediary. Wording only; the version stands.
 
 ## change-event.v1.json
 
