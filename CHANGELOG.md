@@ -284,6 +284,12 @@ published *here* and would otherwise have nothing to validate against:
 - 2026-09-06 (ops decision D33 items 1 and 2f): the reconciliation triad's last member
   becomes "the listed recipients' receipts" and the honest limit becomes "the bank legs to
   the recipients" — there is no intermediary. Wording only; the version stands.
+- 2026-09-06, later the same day (ops decision D33 item 1): the same honest limit in the
+  API description of `GET /v1/ledger/chain.json` (`openapi/edge-public.v1.yaml`,
+  `getLedgerChain`) was missed in the pass above and now reads "the bank legs to the
+  listed recipients", with the transfer-per-recipient pointer *(superseded: "the bank and
+  intermediary legs")*. Wording only, in the API description; no schema and no version
+  changes.
 
 ## change-event.v1.json
 

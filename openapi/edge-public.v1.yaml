@@ -1206,9 +1206,11 @@ paths:
         the chain and recompute the digests to detect any retroactive edit.
 
         What this supports is a precise claim: every **recorded** allocation and
-        disbursement is independently reconcilable. It does not claim the bank and
-        intermediary legs are publicly provable end to end, because they are not, and
-        overclaiming there would be the easiest thing in the world to refute.
+        disbursement is independently reconcilable. It does not claim the bank legs to
+        the listed recipients are publicly provable end to end, because they are not, and
+        overclaiming there would be the easiest thing in the world to refute (ops decision
+        D33 item 1, 2026-09-06: the fees account transfers to each listed recipient
+        directly; there is no intermediary leg).
       tags: [ledger]
       x-psn-phase: P-M2
       responses:
