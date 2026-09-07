@@ -4,7 +4,7 @@
   "title": "Monthly ledger export — /ledger/{YYYY}-{MM}.json",
   "description": "The published monthly ledger export (FS-07 §6.2). Immutable once written: regeneration may only re-emit byte-identical content for a locked month, and a divergence is an alert, not a fix (FS07-051). The `.csv` twin carries the same rows flat; the human ledger page generates from the same rows, and any divergence between page, JSON and CSV is a defect (VS-37, ENG-043/044).\n\nThe shadow section, when present, carries its label IN BAND so no downstream consumer can strip it accidentally: contributor votes are computed and NOT used for routing until the fairness-review gate opens (D27, FS07-052).\n\nDisplay law: pages generate exclusively from these rows; per-contributor money respects the published materiality floor; unclaimed shares appear in aggregate only; there are no leaderboards (FS07-052, D15).\n\nAt P-M2 there are no allocation rows and no `policy`/`totals` allocation figures — the export carries intake rows only, and before the first money moves the ledger page says 'no money has moved yet' in words rather than rendering a zero (FS07-100, VS-37).",
   "x-psn": {
-    "specVersion": "1.2.0",
+    "specVersion": "1.2.1",
     "phase": "P-M2 (intake rows only)",
     "artifactPath": "/ledger/{YYYY}-{MM}.json (+ .csv twin)",
     "authoritative": true,
@@ -130,7 +130,7 @@
         "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$" },
         "ppSnapshotId": { "type": "string", "maxLength": 64 },
         "algoVersion": { "type": "string", "maxLength": 32 },
-        "categoryFundId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$", "description": "One of the seven published categories — since ops decision D33 item 1 the basket of the listed recipients in that category, nothing else. The closed menu of the seven is enumerated once, in the published `recipient-list.v1` (`$defs.categorySlug`); this contract set may not `$ref` across files — each schema must validate on its own after a single download — so this field constrains the vocabulary by pattern and names the enumerating file instead of carrying a second copy of the enum." },
+        "categoryFundId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$", "description": "One of the seven published categories — since ops decision D33 item 1 the basket of the listed recipients in that category, nothing else. The closed menu of the seven is published once, in `category-menu.v1` (`$defs.slug`); this contract set may not `$ref` across files — each schema must validate on its own after a single download — so this field constrains the vocabulary by pattern and names the published menu instead of carrying a copy of the enum. Where a copy is carried, `check:menu` asserts it is identical to the published one." },
         "recipientId": { "type": "string", "pattern": "^rcp_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "The listed recipient a `disburse` row transferred to (ops decision D33 item 1)." },
         "correctsLedId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "note": { "type": "string", "maxLength": 1000 },

@@ -79,7 +79,7 @@
       "properties": {
         "defaults": {
           "type": "array",
-          "description": "Slugs from the published category menu ONLY (`category-menu.v1.json` — the seven categories of the statutes' Art. 7; ENG-033). An unknown slug is rejected field-level with `reg.manifest_unknown_category` — free text can never enter the set.",
+          "description": "Slugs from the published category menu ONLY (`category-menu.v1.json` — the seven categories of the statutes' Art. 7; ENG-033). An unknown slug is rejected field-level with `reg.manifest_unknown_category` — free text can never enter the set. `maxItems` stays 8, one more than the menu holds, ON PURPOSE: this is untrusted repository content validated by shape, so eight distinct pattern-valid slugs are representable here and must be REJECTED by name at parse time rather than by an array bound that would fail the whole field with a length error and tell the author nothing. The sibling contract, which validates operator-merged data against the closed enum, correctly caps at 7.",
           "minItems": 1,
           "maxItems": 8,
           "uniqueItems": true,

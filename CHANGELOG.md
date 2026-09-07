@@ -21,6 +21,17 @@ cannot ship without a written history.
 4. **Nothing here is retroactive.** An artifact already published stays valid under the
    schema version it was published against. That is the entire reason the version is in
    the filename.
+5. **Before a contract's first publication, it may change in place.** Rules 1 and 2 protect
+   consumers, and a contract nothing has ever been published under has none. So until a
+   file's first published artifact exists, it may lose a property, tighten a type, or close
+   an open pattern to an enum — with a **minor** bump and a section entry that labels the
+   change `pre-release` and says what moved and why. From first publication the new-file
+   rule binds absolutely, and rule 4 makes that boundary permanent: whatever was published
+   stays valid under the version it was published against, so the freedom above can never
+   reach back and invalidate it. This clause is written down because the history below
+   already relies on it twice — `ledger-row.v1`'s 2026-09-05 rename of a row type, and
+   `registry-v0-record.v1` 1.1.0 — and a rule a repository quietly departs from is worse
+   than a narrower rule it keeps.
 
 ## 0.1.0 — unreleased
 
@@ -173,6 +184,10 @@ The entry as first recorded, kept as history:
   this file is untrusted repository content whose unknown values are rejected field by
   field against the menu at parse time, so pinning the enum here would republish the
   manifest contract on every menu change.
+- Wording. `allocation.defaults` says why `maxItems` stays 8 while the menu holds seven and
+  the sibling record contract caps at 7: untrusted input validated by shape must be refused
+  by NAME at parse time, with the offending slug quoted, not by an array bound that fails the
+  whole field with a length error. The bound is a decision, and it now reads as one.
 
 ## registry-v0-record.v1.json
 
@@ -375,6 +390,16 @@ remembering the same rule.
   schema here may `$ref` another, a named pointer is the only form the self-containment rule
   allows. Nothing the schema validates changes.
 
+### 1.2.1 — unreleased (2026-09-07, later)
+
+- Wording only, `pre-release`. The category menu is now PUBLISHED in its own contract
+  (`category-menu.v1.json`, added the same day), so this file's pointer names that
+  publication instead of `recipient-list.v1`, which had declared itself the one
+  enumerating file while no such contract existed. Nothing about the vocabulary changed —
+  the same seven categories of the statutes' Art. 7 — and no constraint moved. `check:menu`
+  now holds every copy of the enum identical to the published one, which is what a
+  cross-file `$ref` would have done had self-containment allowed one.
+
 ## ledger-export.v1.json
 
 ### 1.0.0 — unreleased
@@ -439,6 +464,16 @@ remembering the same rule.
 - Wording. The export row's `categoryFundId` gains a description — it carried none at all — with
   the same pointer to the file that enumerates the seven-category menu. Nothing it validates
   changes.
+
+### 1.2.1 — unreleased (2026-09-07, later)
+
+- Wording only, `pre-release`. The category menu is now PUBLISHED in its own contract
+  (`category-menu.v1.json`, added the same day), so this file's pointer names that
+  publication instead of `recipient-list.v1`, which had declared itself the one
+  enumerating file while no such contract existed. Nothing about the vocabulary changed —
+  the same seven categories of the statutes' Art. 7 — and no constraint moved. `check:menu`
+  now holds every copy of the enum identical to the published one, which is what a
+  cross-file `$ref` would have done had self-containment allowed one.
 
 ## ledger-chain.v1.json
 
@@ -519,6 +554,16 @@ remembering the same rule.
   (`feesNetMinor`, `yearToDateChargedPct`, `capPct`, `passedOn`); it is a v0 rendering source,
   not a published contract, and it aligns when the producer is built.
 
+### 1.0.1 — unreleased (2026-09-07, later)
+
+- Wording only, `pre-release`. The category menu is now PUBLISHED in its own contract
+  (`category-menu.v1.json`, added the same day), so this file's pointer names that
+  publication instead of `recipient-list.v1`, which had declared itself the one
+  enumerating file while no such contract existed. Nothing about the vocabulary changed —
+  the same seven categories of the statutes' Art. 7 — and no constraint moved. `check:menu`
+  now holds every copy of the enum identical to the published one, which is what a
+  cross-file `$ref` would have done had self-containment allowed one.
+
 ## recipient-list.v1.json
 
 ### 1.0.0 — unreleased (2026-09-07; ops decision D33)
@@ -591,6 +636,18 @@ remembering the same rule.
   association under its own law (item 2(b)), and which sanctions regimes its screening must
   clear. The sample dataset carries country NAMES; the machine contract carries the code, and
   the rendering surface prints the name from it.
+
+### 1.0.1 — unreleased (2026-09-07, later)
+
+- Wording only, `pre-release`. `$defs.categorySlug` no longer claims to be the one file in
+  the contract set that enumerates the menu: the menu is PUBLISHED in `category-menu.v1.json`
+  (`$defs.slug`, with its example as the menu itself), added the same day, and the enum here
+  is a copy of it. The values are unchanged and nothing about the vocabulary moved. The note
+  that `purpose-yml.v1` had not been aligned is gone because it has been — and the reason its
+  `categorySlug` stays a PATTERN is stated instead: a manifest is untrusted repository content
+  whose unknown slugs are rejected field by field at parse time. Self-containment still forbids
+  a cross-file `$ref`; `check:menu` asserts every copy is identical to the publication, which
+  is the guarantee the `$ref` would have given.
 
 ## change-event.v1.json
 
