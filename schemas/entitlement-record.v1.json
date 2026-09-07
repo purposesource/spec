@@ -11,7 +11,7 @@
     "producer": "FS-05 (P-M2: operator signing script, VS-27/VS-33)",
     "consumers": ["cov-v1 (FS-10 §4.2 input 1)", "SCA scanners / OSPO procurement", "verify page"],
     "signature": { "alg": "ES256", "kidHeader": true, "serialisation": "JWS compact", "canonicalisation": "RFC 8785 (JCS) before signing" },
-    "fsRefs": ["FS-00 §6.2 amendment note 2026-09-01", "FS-00 §6.4", "FS-05 §6 (FS05-052)", "FS-05 §7 (FS05-060…FS05-063)", "FS-10 §4.2", "D12", "COM-009"],
+    "fsRefs": ["FS-00 §6.2 amendment note 2026-09-01", "FS-00 §6.2 amendment note 2026-09-07", "FS-00 §6.4", "FS-05 §6 (FS05-052)", "FS-05 §7 (FS05-060…FS05-063)", "FS-10 §4.2", "D12", "COM-009"],
     "vsRefs": ["VS-33", "VS-34", "VS-04"],
     "changelog": "CHANGELOG.md#entitlement-recordv1json"
   },
