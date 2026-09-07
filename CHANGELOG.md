@@ -24,14 +24,14 @@ cannot ship without a written history.
 
 ## 0.1.0 — unreleased
 
-Initial scaffold of the contract set. Nineteen schemas, the public read API description,
+Initial scaffold of the contract set. Twenty schemas, the public read API description,
 and the published reference implementation of the coverage function with its frozen test
-vectors. Two of the nineteen are the money contracts of 2026-09-07 — `cost-support.v1.json`
+vectors. Two of the twenty are the money contracts of 2026-09-07 — `cost-support.v1.json`
 and `recipient-list.v1.json` — which close the planned-but-unbuilt entry below.
 
 ### Contracts published beyond the initially-scoped ten
 
-Six schemas were added because another repository's acceptance test names a schema
+Seven schemas were added because another repository's acceptance test names a schema
 published *here* and would otherwise have nothing to validate against:
 
 | Schema | Needed by |
@@ -42,6 +42,7 @@ published *here* and would otherwise have nothing to validate against:
 | `ledger-export.v1.json` | the published monthly ledger export (VS-04, VS-37) |
 | `registry-index.v1.json` + `registry-index-meta.v1.json` | the published registry index and the browse surface (VS-04, VS-17); the badge route's delist guard (VS-24) |
 | `registry-v0-record.v1.json` | the curated registry repository's validation CI, which validates "against the JSON Schema published in spec" (VS-03, FS02-061) |
+| `category-menu.v1.json` | the one publication of the seven public-benefit categories, vendored by the curated registry repository and read by every allocation surface (VS-03, VS-05; ops decision D33 item 1, 2026-09-07) |
 
 ### Open questions a human must settle
 
@@ -125,6 +126,30 @@ The entry as first recorded, kept as history:
 >   schema file, no example, no changelog section of its own. It lands as an additive new
 >   file when P-M3 builds the transparency table.
 
+## category-menu.v1.json
+
+### 1.0.0 — unreleased (2026-09-07; ops decision D33 item 1)
+
+- Initial publication. The seven public-benefit categories of the statutes' Art. 7 —
+  health, education, poverty relief, humanitarian aid, environment, animal welfare,
+  research — as the one place the vocabulary is written down. `examples/category-menu.v1.example.json`
+  IS the menu, not an illustration of one; the curated registry repository vendors it
+  byte-identically and checks the bytes against the published copy on every run.
+- Exactly seven rows: the count is constitutional, not a configuration bound. `provisional`
+  stays true until the Recipient List — the named organisations inside each category — is
+  adopted and published as the versioned annex to the statutes. The category NAMES are
+  published now; the recipients are a separate contract and deliberately not part of this
+  file.
+- `category_id` is the ledger's `cat-{slug}` spelling of the same category. JSON Schema
+  cannot express that derivation, so `check:menu` asserts it, together with the equality
+  of every in-schema copy of the slug enum. The copies exist because a published schema
+  here must validate on its own download, so no schema carries an external `$ref`; the
+  gate is the other half of that trade.
+- It replaces a six-slug menu (`climate`, `health`, `education`, `water-sanitation`,
+  `food-security`, `digital-access`) that predated the decision and survived in the
+  curated registry's configuration and in four examples. Nothing had been published under
+  it.
+
 ## purpose-yml.v1.json
 
 ### 1.0.0 — unreleased
@@ -139,6 +164,16 @@ The entry as first recorded, kept as history:
   JSON Schema and is enforced by the platform parser. Said out loud rather than left as a
   surprise.
 
+### 1.0.1 — unreleased (2026-09-07)
+
+- Wording only. `allocation.defaults` and `$defs.categorySlug` name the published menu
+  (`category-menu.v1.json`, ops decision D33 item 1) and the illustrative slugs are two of
+  the seven categories that exist; one of them used to be a slug the menu no longer
+  contains. `categorySlug` stays a PATTERN rather than the closed enum, and now says why:
+  this file is untrusted repository content whose unknown values are rejected field by
+  field against the menu at parse time, so pinning the enum here would republish the
+  manifest contract on every menu change.
+
 ## registry-v0-record.v1.json
 
 ### 1.0.0 — unreleased
@@ -147,6 +182,50 @@ The entry as first recorded, kept as history:
   pull-request-curated registry that exists only through the first public version.
 - No `waivers` field, permanently: a waiver can only be granted by a claimed project
   admin, so it can never arrive by pull request.
+
+### 1.1.0 — unreleased (2026-09-07)
+
+This file becomes the ONE record contract. The curated registry repository used to
+validate its pull requests against a second schema of its own, addressed in a different
+URL family; it now holds a byte-identical vendored copy of this file and its CI fails on
+any byte difference. Everything below is that schema's field set folded in — so a record
+that passes one validator passes the other by construction, rather than by two authors
+remembering the same rule.
+
+- Additive. `example` (`const: true`, a seeded demonstration record that is excluded from
+  every published artifact), `state_note` (the public reason CLASS on a `quit`/`delisted`
+  tombstone, WEB-075), `weight_class_approval_ref` (the steward-approval reference a
+  `major` class needs, FS02-071), `contacts` (`admin_logins` required; the patterns make an
+  e-mail address structurally unrepresentable — this is a public data class and a GitHub
+  login is the only person-identifying value permitted, D15), `curation` (`source`,
+  `recorded_at`, optional `review_ref` — how the record reached the registry, FS-02 §4),
+  and `license.version` / `license.published` (the per-version publication date is the
+  four-year Apache-2.0 conversion anchor, D9).
+- Pre-release rename, on the same footing as the 2026-09-05 `ledger-row` rename:
+  `allocation_defaults` becomes **`impact_category_defaults`**, the name the data already
+  validates under. FS-02 §7's `allocation_defaults` is the chapter's earlier spelling.
+- Its slugs are now a closed enum — the seven categories of the statutes' Art. 7
+  (`$defs.categorySlug`, ops decision D33 item 1) — replacing an open `^[a-z][a-z0-9-]{1,31}$`
+  pattern that accepted any slug, including one no menu contains. `maxItems` drops from 8 to
+  7: a record cannot pick more categories than exist. The enum is a copy of
+  `category-menu.v1.json#/$defs/slug` because schemas here carry no external `$ref`;
+  `check:menu` asserts every copy is identical.
+- Pre-release tightening. `inbound_family` and `contacts` join `required`, and
+  `license.required` gains `version` and `published`. A record without an inbound-licence
+  family cannot be put through the FS-09 adoption gate, and one without a curation contact
+  or a conversion-clock anchor is not reviewable — the registry has always been validated
+  this way, and this file said otherwise.
+- Pre-release tightening. `node_id` and `canonical_of` narrow to the two GitHub repository
+  node_id forms that exist (`R_…` and the legacy base64 of `010:Repository<n>`) instead of
+  any opaque token; `name` and `default_branch` gain the patterns that keep a filename
+  usable. This is the FS02-095 one-node_id-one-registration key, so a user or organisation
+  id must not pass.
+- Wording. The artifact path is `registry/{owner}--{name}.yml`, which is what the curated
+  registry actually uses: an opaque `R_kgDO…` filename makes a curation pull request
+  unreviewable at a glance, while `node_id` stays the key in every artifact and every
+  reference. FS-02 §7's `repos/{node_id}.yml` is recorded as the chapter's earlier form.
+  The description also states the D15 public-data rule and the two forbidden-key blocks
+  (waivers; money, entitlements, shares, manifest, private flags) now travel with the file.
 
 ## registry-index.v1.json
 

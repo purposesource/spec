@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/category-menu.v1.json",
+  "title": "category menu — the seven published public-benefit categories",
+  "description": "THE category vocabulary, published once. The seven public-benefit categories of the association's statutes, Art. 7 (ops decision D33 item 1, confirmed at the founding assembly): health, education, poverty relief, humanitarian aid, environment, animal welfare, research. Nothing anywhere may name a category outside this list — a registry record's `impact_category_defaults`, a manifest's `allocation.defaults`, a ledger row's `category_fund_id` and every public surface resolve against this menu and nothing else, so free text is structurally impossible (ENG-033, D16). A category is the basket of listed recipients assigned to it and nothing else; the recipients themselves are NOT part of this contract — the Recipient List is published separately as the versioned annex to the statutes, which is why `provisional` stays true until that annex exists. `category_id` carries the `cat-*` form the ledger's `category_fund_id` column uses and must equal `cat-{slug}`; JSON Schema cannot express that agreement, so the publishing repository's gate asserts it and so does the curated registry repository's, which vendors this menu byte-identically and checks the bytes against the published copy on every run.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "(this repository) examples/category-menu.v1.example.json — vendored byte-identically as config/category-funds.json in the curated registry repository",
+    "authoritative": true,
+    "producer": "the statutes, Art. 7 (steward-published; not derived from any build)",
+    "consumers": ["registry-v0-record.v1 (`impact_category_defaults`)", "purpose-yml.v1 (`allocation.defaults`)", "ledger-row.v1 (`categoryFundId`)", "the curated registry repository's validation CI (FS02-061)", "index-build-lite (FS02-062, VS-04)"],
+    "fsRefs": ["FS-02 §7 (FS02-060)", "FS-02 §6 (FS02-050)", "FS-07 §5.2", "ENG-033", "D16", "D33 item 1"],
+    "vsRefs": ["VS-03", "VS-05"],
+    "changelog": "CHANGELOG.md#category-menuv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "provisional", "categories"],
+  "properties": {
+    "schemaVersion": {
+      "const": 1,
+      "description": "Artifact schema version (FS-00 §6.2). This file is a committed source, not a build product, so it carries no `generatedAt` — there is no build instant to record."
+    },
+    "_comment": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "A human note, the way a JSON file carries one. Consumers ignore it. It exists because this file is vendored: the copy a reader finds in another repository must explain, in place, where the canonical copy lives and what keeps the two level."
+    },
+    "provisional": {
+      "type": "boolean",
+      "description": "True while the Recipient List — the named organisations inside each category — is not yet adopted and published as the annex to the statutes. The category NAMES are published either way; `provisional` says nothing about them. A surface that renders a recipient must state that no recipient is listed yet while this is true (honesty rule, FS-00 §6.8)."
+    },
+    "categories": {
+      "type": "array",
+      "description": "The seven categories, in the order Art. 7 lists them. Exactly seven: the count is constitutional, not a configuration bound, and a menu of six or eight is a defect rather than a variation. `uniqueItems` rejects a duplicated ROW; a duplicated slug across two differing rows is caught by the gates, which assert this list against the published slug set.",
+      "minItems": 7,
+      "maxItems": 7,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["slug", "category_id", "name"],
+        "properties": {
+          "slug": {
+            "$ref": "#/$defs/slug",
+            "description": "The stable machine token. It is what a registry record and a manifest name, so it never changes: a renamed slug would silently invalidate every record that used the old one."
+          },
+          "category_id": {
+            "$ref": "#/$defs/categoryId",
+            "description": "The ledger's identifier for the same category (`category_fund_id`), always `cat-{slug}`. Two spellings exist because the money side was named before the menu was; they are asserted equal rather than assumed."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60,
+            "description": "The published display name. Public copy: it appears on the allocation surfaces verbatim, so it is not a place for a synonym."
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "enum": [
+        "animal-welfare",
+        "education",
+        "environment",
+        "health",
+        "humanitarian-aid",
+        "poverty-relief",
+        "research"
+      ],
+      "description": "The closed slug set, alphabetical here so a diff of the enum is readable; the published ORDER is the one `categories` carries. Every other contract in this set that accepts a category slug carries a copy of this enum, because a published schema must validate on its own download (no external `$ref`); the publishing repository's gate asserts every copy is identical."
+    },
+    "categoryId": {
+      "enum": [
+        "cat-animal-welfare",
+        "cat-education",
+        "cat-environment",
+        "cat-health",
+        "cat-humanitarian-aid",
+        "cat-poverty-relief",
+        "cat-research"
+      ],
+      "description": "The same seven, in the ledger's `cat-*` spelling."
+    }
+  }
+}

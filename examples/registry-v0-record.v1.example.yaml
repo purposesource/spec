@@ -1,11 +1,14 @@
-# registry-v0/repos/{node_id}.yml — one curated registry record.
+# The curated registry: one record per registered repository, at
+# registry/{owner}--{name}.yml.
 #
-# The filename must equal `node_id`. This file is a CACHE of display facts; the
-# repository's own committed LICENSE file is the truth about adoption.
+# The filename is derived from `owner` and `name` — an opaque `R_kgDO…` filename makes a
+# curation pull request unreviewable at a glance — while `node_id` stays the key in every
+# artifact and every reference. This file is a CACHE of display facts; the repository's own
+# committed LICENSE file is the truth about adoption.
 #
 # Note what is NOT here and never will be: a `waivers` field. Waivers are granted by a
 # claimed project admin from the dashboard, so no waiver can enter the registry through
-# a pull request.
+# a pull request. Nor an e-mail address: the contact patterns make one unrepresentable.
 #
 # Dates and versions are quoted on purpose — unquoted `2027-01-15` and `1.0` parse as a
 # timestamp and a float, and the schema wants strings.
@@ -30,14 +33,29 @@ license:
   # SHA-256 of the committed licence text. A modified text is not an adoption.
   text_sha256: "9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f"
 
-# standard | major. Set from the dashboard menu, never from the manifest.
+# standard | major. Set from the dashboard menu, never from the manifest. `major` also
+# needs a `weight_class_approval_ref`.
 weight_class: standard
 
 # Inbound-licence family recorded for the adoption gate.
 inbound_family: permissive
 
-# Optional; the steward default applies when absent.
-allocation_defaults:
-  - climate
+# Optional; the steward default applies when absent. Slugs come from the published
+# category menu only (category-menu.v1.json) — free text cannot enter the set.
+impact_category_defaults:
+  - environment
+  - education
+
+# Logins and URLs only. This is a public data file.
+contacts:
+  admin_logins:
+    - acme-maintainer
+  public_contact_url: "https://example.org/widget-engine/contact"
+
+# How the record reached the registry, and when. Discovery is a safety net, never the
+# primary channel.
+curation:
+  source: self-registration
+  recorded_at: "2027-03-15T10:20:00Z"
 
 repo_url: "https://github.com/acme/widget-engine"

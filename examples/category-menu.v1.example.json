@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "_comment": [
+    "THE CATEGORY MENU — the seven published public-benefit categories of the statutes,",
+    "Art. 7 (ops decision D33 item 1), confirmed at the founding assembly. This is the ONLY",
+    "category vocabulary a registry record, an artifact or a public surface may name: a",
+    "category that is not on this list would be a fabricated fact about where money goes. A",
+    "category is the basket of listed recipients assigned to it and nothing else, which is",
+    "why the word to prefer is \"category\" rather than \"fund\".",
+    "",
+    "PUBLISHED ONCE, VENDORED. The canonical copy is examples/category-menu.v1.example.json",
+    "in the contract repository, validated there against schemas/category-menu.v1.json and",
+    "against the slug set of schemas/registry-v0-record.v1.json. The curated registry",
+    "repository holds a BYTE-IDENTICAL vendored copy at config/category-funds.json, so that",
+    "repository validates with nothing but its own checkout, and its CI checks out the public",
+    "contract repository and fails on any byte difference. Vendor, then assert equality — one",
+    "list, never two kept level by convention.",
+    "",
+    "`category_id` keeps the `cat-*` form the ledger's `category_fund_id` column uses and must",
+    "equal `cat-{slug}` for every entry. JSON Schema cannot express that agreement, so both",
+    "repositories' gates assert it.",
+    "",
+    "PROVISIONAL. The category NAMES are published. `provisional` stays true because the",
+    "Recipient List — the named organisations inside each category — is adopted at the founding",
+    "assembly and published as the versioned annex to the statutes; no recipient is listed yet.",
+    "Flip it to false when that annex is published, and never before."
+  ],
+  "provisional": true,
+  "categories": [
+    { "slug": "health", "category_id": "cat-health", "name": "Health" },
+    { "slug": "education", "category_id": "cat-education", "name": "Education" },
+    { "slug": "poverty-relief", "category_id": "cat-poverty-relief", "name": "Poverty relief" },
+    { "slug": "humanitarian-aid", "category_id": "cat-humanitarian-aid", "name": "Humanitarian aid" },
+    { "slug": "environment", "category_id": "cat-environment", "name": "Environment" },
+    { "slug": "animal-welfare", "category_id": "cat-animal-welfare", "name": "Animal welfare" },
+    { "slug": "research", "category_id": "cat-research", "name": "Research" }
+  ]
+}

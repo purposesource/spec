@@ -17,10 +17,10 @@ a procurement reviewer can consume all of it the way they consume a static file.
 
 | Directory | Contents |
 |---|---|
-| `schemas/` | 19 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own. |
+| `schemas/` | 20 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v1.ts`, the published coverage function, with `vectors.json` (frozen test vectors) and its test suite. Zero dependencies. |
-| `examples/` | One valid instance per schema. These are the fixtures the other repositories build against. |
+| `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in one case, `category-menu.v1.example.json`, the example IS the published artifact. |
 | `scripts/` | The CI gates. Each one refuses to pass on an empty input set. |
 | `spec.config.json` | The organisation and domain names, in one place. Every `$id`, server URL and printed host derives from it, and the gates name any file that disagrees. |
 
@@ -32,17 +32,18 @@ npm test
 ```
 
 That runs, in order: schemas compile and are addressed correctly; every example validates
-against its schema; the coverage vectors use valid artifacts and still cover all eight
-answers; the coverage module is dependency-free and clock-free (and its SHA-256 is
-printed); the copy law holds; the published module typechecks under `erasableSyntaxOnly`;
-the frozen vector suite passes; the OpenAPI lints; and every example inside the API
-description validates too.
+against its schema; the category menu is a single list whose every copy is identical; the
+coverage vectors use valid artifacts and still cover all eight answers; the coverage module
+is dependency-free and clock-free (and its SHA-256 is printed); the copy law holds; the
+published module typechecks under `erasableSyntaxOnly`; the frozen vector suite passes; the
+OpenAPI lints; and every example inside the API description validates too.
 
 Individual gates:
 
 ```sh
 npm run check:schemas           # compile, $id, self-containment, provenance, changelog section
 npm run check:examples          # one example per schema, each valid
+npm run check:menu              # the category menu is one list; every copy of it is identical
 npm run check:vectors           # vector inputs are valid artifacts; all eight answers covered
 npm run check:module            # coverage module: no imports, no clock, no I/O; prints its digest
 npm run check:copy              # claim rules and leak guards over published copy
@@ -67,8 +68,9 @@ needs a toolchain is not really published.
 
 | Schema | Artifact | Live from |
 |---|---|---|
+| `category-menu.v1.json` | `examples/category-menu.v1.example.json` — the seven published categories, vendored by the curated registry repository | first public version |
 | `purpose-yml.v1.json` | `PURPOSE.yml` at a repository root — **optional** | first public version |
-| `registry-v0-record.v1.json` | `repos/{node_id}.yml` in the curated registry repository | first public version only |
+| `registry-v0-record.v1.json` | `registry/{owner}--{name}.yml` in the curated registry repository | first public version only |
 | `registry-index.v1.json` | `/registry/index/{shard}.json` and `/registry/export.json` | first public version |
 | `registry-index-meta.v1.json` | `/registry/index/meta.json` | first public version |
 | `repo-record.v1.json` | `/registry/repo/{node_id}.json` | first public version |
@@ -169,6 +171,11 @@ the statutes' annex      ─────┼──────► recipient-list.
                                    coverage/cov-v1.ts  ── the pure function over
                                                           entitlement + repo + waivers
 ```
+
+`category-menu.v1` sits underneath all of it: the seven public-benefit categories, written
+down once here, copied into every schema that accepts a category slug (self-containment
+forbids a cross-file `$ref`) and vendored byte-identically by the curated registry
+repository. `check:menu` is what makes "once" mechanical rather than aspirational.
 
 ## Versioning
 

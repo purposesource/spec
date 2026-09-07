@@ -41,7 +41,7 @@ successor: ""
 # cannot enter the fund set. A dashboard-set project default overrides this.
 allocation:
   defaults:
-    - climate
+    - environment
     - health
 
 # The ONLY attribution override channels that exist. This whole section fails closed to

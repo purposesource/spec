@@ -9,10 +9,11 @@
     "node": ">=22.18"
   },
   "scripts": {
-    "test": "npm run check:schemas && npm run check:examples && npm run check:vectors && npm run check:module && npm run check:copy && npm run check:types && npm run test:coverage && npm run lint:openapi && npm run check:openapi-examples",
+    "test": "npm run check:schemas && npm run check:examples && npm run check:menu && npm run check:vectors && npm run check:module && npm run check:copy && npm run check:types && npm run test:coverage && npm run lint:openapi && npm run check:openapi-examples",
     "check:schemas": "node scripts/check-schemas.mjs",
     "check:module": "node scripts/check-coverage-module.mjs",
     "check:examples": "node scripts/check-examples.mjs",
+    "check:menu": "node scripts/check-menu.mjs",
     "check:openapi-examples": "node scripts/check-openapi-examples.mjs",
     "check:vectors": "node scripts/check-vectors.mjs",
     "check:copy": "node scripts/check-copy.mjs",
