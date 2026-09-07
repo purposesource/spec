@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "month": "2027-06",
+  "generatedAt": "2027-07-21T06:00:00Z",
+  "currency": "CHF",
+  "closed": true,
+  "financialYear": "2027",
+  "purposeFeesNetMinor": 36000,
+  "directCosts": [
+    {
+      "invoiceRef": "INV-EDGE-2027-06-0001",
+      "class": "dns-hosting-cdn-edge-storage",
+      "description": "DNS, edge compute and object storage for the movement's own properties, on the movement's own account.",
+      "amountMinor": 2400,
+      "paidOn": "2027-06-08",
+      "evidence": [{ "kind": "invoice", "ref": "INV-EDGE-2027-06-0001", "label": "Edge and storage, June 2027" }]
+    },
+    {
+      "invoiceRef": "INV-DOMAIN-2027-06-0002",
+      "class": "domains-and-marks",
+      "description": "Annual renewal of the movement's own domain.",
+      "amountMinor": 1900,
+      "paidOn": "2027-06-14",
+      "evidence": [{ "kind": "invoice", "ref": "INV-DOMAIN-2027-06-0002" }]
+    },
+    {
+      "invoiceRef": "INV-TRANSFER-2027-06-0003",
+      "class": "transfer-charges",
+      "description": "Bank-transfer and currency-conversion charges on the month's outbound transfers to the listed recipients.",
+      "amountMinor": 700,
+      "supporter": "SAMPLE — supporting activity of the Association",
+      "paidOn": "2027-06-30",
+      "evidence": [
+        { "kind": "invoice", "ref": "INV-TRANSFER-2027-06-0003" },
+        { "kind": "supporter-payment", "ref": "SUP-2027-06-0001", "label": "Settled in place of the fees account" }
+      ]
+    }
+  ],
+  "directCostsTotalMinor": 5000,
+  "supporters": [
+    {
+      "name": "SAMPLE — supporting activity of the Association",
+      "amountMinor": 700,
+      "invoiceRefs": ["INV-TRANSFER-2027-06-0003"],
+      "note": "Settled the month's transfer charges in place of the fees account; the payment never entered the fees account.",
+      "evidence": [{ "kind": "supporter-payment", "ref": "SUP-2027-06-0001" }]
+    }
+  ],
+  "supportTotalMinor": 700,
+  "chargedToFeesMinor": 4300,
+  "yearRunningTotalMinor": 12800,
+  "capBps": null,
+  "reserveRetentionMinor": 1800,
+  "reserveRetentionNote": "Retained at the published share of the month's Purpose Fees: the operations reserve is below its published target. Above target nothing is retained.",
+  "hardshipPayMinor": 0,
+  "hardshipSourceDeclaration": "Not activated — the earlier sources sufficed and no Purpose Fees paid the essential operating role this month.",
+  "passedOnMinor": 29900,
+  "transfers": [
+    {
+      "recipientId": "rcp_f5cc8xgz81c00nrve04pdahejb",
+      "category": "health",
+      "amountMinor": 9967,
+      "status": "transferred",
+      "date": "2027-07-20",
+      "receiptRef": "RCPT-2027-06-HEALTH-1",
+      "endToEndId": "psn-2027-06-rcp_f5cc8xgz81c00nrve04pdahejb",
+      "evidence": [
+        { "kind": "bank-line", "ref": "STMT-2027-07-0114" },
+        { "kind": "recipient-receipt", "ref": "RCPT-2027-06-HEALTH-1" }
+      ]
+    },
+    {
+      "recipientId": "rcp_0svacmgratb4f4q0syghrz8ym4",
+      "category": "education",
+      "amountMinor": 9967,
+      "status": "transferred",
+      "date": "2027-07-20",
+      "receiptRef": "RCPT-2027-06-EDUCATION-1",
+      "endToEndId": "psn-2027-06-rcp_0svacmgratb4f4q0syghrz8ym4",
+      "evidence": [
+        { "kind": "bank-line", "ref": "STMT-2027-07-0115" },
+        { "kind": "recipient-receipt", "ref": "RCPT-2027-06-EDUCATION-1" }
+      ]
+    },
+    {
+      "recipientId": "rcp_bnpt0deptzcjgsm50wpvmrw7kn",
+      "category": "environment",
+      "amountMinor": 9966,
+      "status": "transferred",
+      "date": "2027-07-20",
+      "receiptRef": "RCPT-2027-06-ENVIRONMENT-1",
+      "endToEndId": "psn-2027-06-rcp_bnpt0deptzcjgsm50wpvmrw7kn",
+      "note": "The month's smallest share by one minor unit: largest-remainder rounding, ties broken by list order, so the three shares sum exactly to what was passed on.",
+      "evidence": [
+        { "kind": "bank-line", "ref": "STMT-2027-07-0116" },
+        { "kind": "recipient-receipt", "ref": "RCPT-2027-06-ENVIRONMENT-1" }
+      ]
+    }
+  ],
+  "reserve": {
+    "balanceMinor": 1800,
+    "targetMinor": null,
+    "note": "One movement this month: the retention above. The target is an annex value and is published once the founding assembly confirms it.",
+    "movements": [
+      {
+        "amountMinor": 1800,
+        "kind": "retention-from-fees",
+        "date": "2027-07-20",
+        "note": "The month's reserve retention, moved to the reserve account — which is not the fees account.",
+        "evidence": [{ "kind": "reserve-movement", "ref": "STMT-RES-2027-07-0003" }]
+      }
+    ]
+  },
+  "recipientListVersion": "v1",
+  "evidence": [{ "kind": "rail-payout-statement", "ref": "PAYOUT-2027-06", "label": "The month's rail payout statement, net of the processing fee" }],
+  "methodologyUrl": "https://purposesource.org/trust/money"
+}

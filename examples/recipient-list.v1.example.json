@@ -1,0 +1,714 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-20T09:00:00Z",
+  "version": "v1",
+  "status": "draft",
+  "effectiveFrom": "2027-01",
+  "noticeGivenAt": null,
+  "standardUrl": "https://purposesource.org/trust/recipient-standard",
+  "categories": [
+    {
+      "slug": "health",
+      "name": "Health",
+      "fundId": "cat-health"
+    },
+    {
+      "slug": "education",
+      "name": "Education",
+      "fundId": "cat-education"
+    },
+    {
+      "slug": "poverty-relief",
+      "name": "Poverty relief",
+      "fundId": "cat-poverty-relief"
+    },
+    {
+      "slug": "humanitarian-aid",
+      "name": "Humanitarian aid",
+      "fundId": "cat-humanitarian-aid"
+    },
+    {
+      "slug": "environment",
+      "name": "Environment",
+      "fundId": "cat-environment"
+    },
+    {
+      "slug": "animal-welfare",
+      "name": "Animal welfare",
+      "fundId": "cat-animal-welfare"
+    },
+    {
+      "slug": "research",
+      "name": "Research",
+      "fundId": "cat-research"
+    }
+  ],
+  "recipients": [
+    {
+      "recipientId": "rcp_f5cc8xgz81c00nrve04pdahejb",
+      "name": "SAMPLE — Health recipient 1",
+      "country": "KE",
+      "category": "health",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-1",
+      "address": "SAMPLE — published address of a fictional organisation, KE",
+      "registrationRef": "SAMPLE-REGISTER-KE-0001",
+      "standard": {
+        "accountsYears": 4,
+        "accountsRef": "SAMPLE-ACCOUNTS-F5CC8XGZ-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of KE",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-F5CC8XGZ-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-F5CC8XGZ-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-F5CC8XGZ-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-F5CC8XGZ-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-F5CC8XGZ",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-F5CC8XGZ-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_tg8g3ps3smxzdpy1zt0zesjnx9",
+      "name": "SAMPLE — Health recipient 2",
+      "country": "CH",
+      "category": "health",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-2",
+      "address": "SAMPLE — published address of a fictional organisation, CH",
+      "registrationRef": "SAMPLE-REGISTER-CH-0002",
+      "standard": {
+        "accountsYears": 5,
+        "accountsRef": "SAMPLE-ACCOUNTS-TG8G3PS3-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of CH",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-TG8G3PS3-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-TG8G3PS3-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-TG8G3PS3-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-TG8G3PS3-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-TG8G3PS3",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-TG8G3PS3-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_0svacmgratb4f4q0syghrz8ym4",
+      "name": "SAMPLE — Education recipient 1",
+      "country": "IN",
+      "category": "education",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-3",
+      "address": "SAMPLE — published address of a fictional organisation, IN",
+      "registrationRef": "SAMPLE-REGISTER-IN-0003",
+      "standard": {
+        "accountsYears": 6,
+        "accountsRef": "SAMPLE-ACCOUNTS-0SVACMGR-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of IN",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-0SVACMGR-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-0SVACMGR-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-0SVACMGR-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-0SVACMGR-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-0SVACMGR",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-0SVACMGR-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_8jf9xfejcgadg7cgyag0hmkcxb",
+      "name": "SAMPLE — Education recipient 2",
+      "country": "BR",
+      "category": "education",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-4",
+      "address": "SAMPLE — published address of a fictional organisation, BR",
+      "registrationRef": "SAMPLE-REGISTER-BR-0004",
+      "standard": {
+        "accountsYears": 3,
+        "accountsRef": "SAMPLE-ACCOUNTS-8JF9XFEJ-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of BR",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-8JF9XFEJ-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-8JF9XFEJ-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-8JF9XFEJ-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-8JF9XFEJ-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-8JF9XFEJ",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-8JF9XFEJ-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_r8m8v0kcyttv527jz2m5rha2ps",
+      "name": "SAMPLE — Poverty-relief recipient 1",
+      "country": "BD",
+      "category": "poverty-relief",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-5",
+      "address": "SAMPLE — published address of a fictional organisation, BD",
+      "registrationRef": "SAMPLE-REGISTER-BD-0005",
+      "standard": {
+        "accountsYears": 4,
+        "accountsRef": "SAMPLE-ACCOUNTS-R8M8V0KC-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of BD",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-R8M8V0KC-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-R8M8V0KC-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-R8M8V0KC-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-R8M8V0KC-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-R8M8V0KC",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-R8M8V0KC-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_zyjz8xjhrede9fhzq9hf84wc0w",
+      "name": "SAMPLE — Poverty-relief recipient 2",
+      "country": "PE",
+      "category": "poverty-relief",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-6",
+      "address": "SAMPLE — published address of a fictional organisation, PE",
+      "registrationRef": "SAMPLE-REGISTER-PE-0006",
+      "standard": {
+        "accountsYears": 5,
+        "accountsRef": "SAMPLE-ACCOUNTS-ZYJZ8XJH-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of PE",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-ZYJZ8XJH-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-ZYJZ8XJH-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-ZYJZ8XJH-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-ZYJZ8XJH-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-ZYJZ8XJH",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-ZYJZ8XJH-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_92tq7q30k6a0gjvjrps04weeek",
+      "name": "SAMPLE — Humanitarian-aid recipient 1",
+      "country": "JO",
+      "category": "humanitarian-aid",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-7",
+      "address": "SAMPLE — published address of a fictional organisation, JO",
+      "registrationRef": "SAMPLE-REGISTER-JO-0007",
+      "standard": {
+        "accountsYears": 6,
+        "accountsRef": "SAMPLE-ACCOUNTS-92TQ7Q30-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of JO",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-92TQ7Q30-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-92TQ7Q30-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-92TQ7Q30-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-92TQ7Q30-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-92TQ7Q30",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-92TQ7Q30-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_28h7pz5ynzcftzy0pjrhjqsqmk",
+      "name": "SAMPLE — Humanitarian-aid recipient 2",
+      "country": "GB",
+      "category": "humanitarian-aid",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-8",
+      "address": "SAMPLE — published address of a fictional organisation, GB",
+      "registrationRef": "SAMPLE-REGISTER-GB-0008",
+      "standard": {
+        "accountsYears": 3,
+        "accountsRef": "SAMPLE-ACCOUNTS-28H7PZ5Y-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of GB",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-28H7PZ5Y-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-28H7PZ5Y-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-28H7PZ5Y-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-28H7PZ5Y-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-28H7PZ5Y",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-28H7PZ5Y-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_bnpt0deptzcjgsm50wpvmrw7kn",
+      "name": "SAMPLE — Environment recipient 1",
+      "country": "ID",
+      "category": "environment",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-9",
+      "address": "SAMPLE — published address of a fictional organisation, ID",
+      "registrationRef": "SAMPLE-REGISTER-ID-0009",
+      "standard": {
+        "accountsYears": 4,
+        "accountsRef": "SAMPLE-ACCOUNTS-BNPT0DEP-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of ID",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-BNPT0DEP-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-BNPT0DEP-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-BNPT0DEP-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-BNPT0DEP-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-BNPT0DEP",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-BNPT0DEP-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_wrfhyk9jj3awrx8dknj7r6yjcn",
+      "name": "SAMPLE — Environment recipient 2",
+      "country": "CA",
+      "category": "environment",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-10",
+      "address": "SAMPLE — published address of a fictional organisation, CA",
+      "registrationRef": "SAMPLE-REGISTER-CA-0010",
+      "standard": {
+        "accountsYears": 5,
+        "accountsRef": "SAMPLE-ACCOUNTS-WRFHYK9J-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of CA",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-WRFHYK9J-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-WRFHYK9J-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-WRFHYK9J-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-WRFHYK9J-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-WRFHYK9J",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-WRFHYK9J-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_66ss8w31jg95dd6vc2kn7t5f8y",
+      "name": "SAMPLE — Animal-welfare recipient 1",
+      "country": "ZA",
+      "category": "animal-welfare",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-11",
+      "address": "SAMPLE — published address of a fictional organisation, ZA",
+      "registrationRef": "SAMPLE-REGISTER-ZA-0011",
+      "standard": {
+        "accountsYears": 6,
+        "accountsRef": "SAMPLE-ACCOUNTS-66SS8W31-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of ZA",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-66SS8W31-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-66SS8W31-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-66SS8W31-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-66SS8W31-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-66SS8W31",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-66SS8W31-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_bdzk8dv1s58eyavk3g0m8g2ncj",
+      "name": "SAMPLE — Animal-welfare recipient 2",
+      "country": "DE",
+      "category": "animal-welfare",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-12",
+      "address": "SAMPLE — published address of a fictional organisation, DE",
+      "registrationRef": "SAMPLE-REGISTER-DE-0012",
+      "standard": {
+        "accountsYears": 3,
+        "accountsRef": "SAMPLE-ACCOUNTS-BDZK8DV1-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of DE",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-BDZK8DV1-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-BDZK8DV1-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-BDZK8DV1-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-BDZK8DV1-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-BDZK8DV1",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-BDZK8DV1-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_vztv7dk7w3wjbehnz4zr7vd9yz",
+      "name": "SAMPLE — Research recipient 1",
+      "country": "GH",
+      "category": "research",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-13",
+      "address": "SAMPLE — published address of a fictional organisation, GH",
+      "registrationRef": "SAMPLE-REGISTER-GH-0013",
+      "standard": {
+        "accountsYears": 4,
+        "accountsRef": "SAMPLE-ACCOUNTS-VZTV7DK7-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of GH",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-VZTV7DK7-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-VZTV7DK7-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-VZTV7DK7-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-VZTV7DK7-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-VZTV7DK7",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-VZTV7DK7-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_814sdk80b8hzejd1wx7h12ea1s",
+      "name": "SAMPLE — Research recipient 2",
+      "country": "NL",
+      "category": "research",
+      "shareBps": 5000,
+      "website": "https://example.org/sample-recipient-14",
+      "address": "SAMPLE — published address of a fictional organisation, NL",
+      "registrationRef": "SAMPLE-REGISTER-NL-0014",
+      "standard": {
+        "accountsYears": 5,
+        "accountsRef": "SAMPLE-ACCOUNTS-814SDK80-2023-2025",
+        "foreignReceiptEvidence": "SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of NL",
+        "screening": [
+          {
+            "list": "SECO",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-814SDK80-SECO-2026-11-15"
+          },
+          {
+            "list": "EU",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-814SDK80-EU-2026-11-15"
+          },
+          {
+            "list": "UN",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-814SDK80-UN-2026-11-15"
+          },
+          {
+            "list": "OFAC",
+            "checkedAt": "2026-11-15",
+            "result": "clear",
+            "ref": "SAMPLE-SCREEN-814SDK80-OFAC-2026-11-15"
+          }
+        ],
+        "independenceDeclared": true,
+        "bankTransferOnly": true,
+        "grantLetterRef": "SAMPLE-GRANT-LETTER-814SDK80",
+        "annualStatementRef": "SAMPLE-ANNUAL-REPORT-814SDK80-2025"
+      },
+      "activeFrom": "2027-01",
+      "sample": true
+    }
+  ],
+  "shareRule": {
+    "mode": "equal-per-recipient-in-category",
+    "rounding": "largest-remainder",
+    "tiebreak": "list-order",
+    "status": "proposed",
+    "note": "Proposed default [OPERATOR: confirm]: every listed recipient of a category takes an equal share of that category's amount for the month, apportioned by largest remainder with ties broken by the order of this list, so the shares sum exactly to the category's amount. A recipient removed for cause has no share, and its share for that month goes to the other recipients of its category."
+  },
+  "note": "SAMPLE LIST — not a Recipient List. Fourteen fictional organisations, two per category, in countries chosen to show that a real list is worldwide; every entry is marked `sample` and named so. No real organisation is named before the founding assembly adopts the first list, and no transfer is ever made against a draft. This fixture mirrors the sample dataset the pre-launch site renders, so the two agree entry for entry."
+}

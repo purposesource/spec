@@ -24,9 +24,10 @@ cannot ship without a written history.
 
 ## 0.1.0 — unreleased
 
-Initial scaffold of the contract set. Seventeen schemas, the public read API description,
+Initial scaffold of the contract set. Nineteen schemas, the public read API description,
 and the published reference implementation of the coverage function with its frozen test
-vectors.
+vectors. Two of the nineteen are the money contracts of 2026-09-07 — `cost-support.v1.json`
+and `recipient-list.v1.json` — which close the planned-but-unbuilt entry below.
 
 ### Contracts published beyond the initially-scoped ten
 
@@ -100,21 +101,29 @@ with what settled them, because a contract's history is part of the contract.
 
 ### Planned — not built
 
-- **`cost-support.v1.json`** (P-M3; recorded 2026-09-05). The data shape of the movement's
-  monthly cost-support table, as decided in the ops record (decision D29,
-  `COST-SUPPORT-MODEL-2026-09-05.md` §3): per calendar month — Purpose Fees received net of
-  the rail's processing fee; direct costs itemised with their invoice references; cost
-  support by named supporter, the sum never exceeding the direct costs; charged to fees =
-  max(0, direct costs − support), with the running year total against the published cap;
-  passed on directly to the listed recipients, one line per recipient with date and receipt
-  reference *(amended 2026-09-06, D33; as first recorded: "passed on to the named
-  intermediary, with date and receipt reference")*; every line carrying an evidence link.
-  Since D34 item 5 (2026-09-06) the table carries four outgoing lines — charged to fees, the
-  reserve retention, the steward hardship pay, and the transfers — each capped, each
-  published. Supporters are rows, never schema constants — the shape must be identical
-  whether the supporter list has zero rows or many. Nothing is published here yet: no
-  schema file, no example, no changelog section of its own. It lands as an additive new
-  file when P-M3 builds the transparency table.
+**CLOSED 2026-09-07.** The one entry this section held is built: `cost-support.v1.json` is
+published with its own schema, example and changelog section below, and the Recipient List it
+depended on is published beside it as `recipient-list.v1.json`. No other contract is recorded
+here as planned-but-unbuilt. The next contracts arrive with the P-M3 platform, and a schema
+lands here when the rule it encodes is decided — never before.
+
+The entry as first recorded, kept as history:
+
+> - **`cost-support.v1.json`** (P-M3; recorded 2026-09-05). The data shape of the movement's
+>   monthly cost-support table, as decided in the ops record (decision D29,
+>   `COST-SUPPORT-MODEL-2026-09-05.md` §3): per calendar month — Purpose Fees received net of
+>   the rail's processing fee; direct costs itemised with their invoice references; cost
+>   support by named supporter, the sum never exceeding the direct costs; charged to fees =
+>   max(0, direct costs − support), with the running year total against the published cap;
+>   passed on directly to the listed recipients, one line per recipient with date and receipt
+>   reference *(amended 2026-09-06, D33; as first recorded: "passed on to the named
+>   intermediary, with date and receipt reference")*; every line carrying an evidence link.
+>   Since D34 item 5 (2026-09-06) the table carries four outgoing lines — charged to fees, the
+>   reserve retention, the steward hardship pay, and the transfers — each capped, each
+>   published. Supporters are rows, never schema constants — the shape must be identical
+>   whether the supporter list has zero rows or many. Nothing is published here yet: no
+>   schema file, no example, no changelog section of its own. It lands as an additive new
+>   file when P-M3 builds the transparency table.
 
 ## purpose-yml.v1.json
 
@@ -258,6 +267,30 @@ with what settled them, because a contract's history is part of the contract.
   the thirtieth day. The intermediary and the earmark instruction leave every description;
   the file description names the four outgoing lines (D34 item 5).
 
+### 1.2.0 — unreleased (2026-09-07; ops decisions D27, D29 §2 and D34 — the money contracts settled)
+
+- `routingMode` takes the canonical enum of the record: `project_default | shadow |
+  contributor_active` (URS MIL-014(e), GOV-038, ENG-032; FS-07 FS07-027 and FS-04 use exactly
+  these three names, per ops decision D27 as amended at the fifth collision). It carried
+  `shadow | live`, a pair no builder could satisfy against the record — and since the URS wins
+  on WHAT, the URS enum governs what a published value means. `live` had no counterpart in any
+  chapter: the three-tier hierarchy has a mode in which the contributor tier is not computed at
+  all (`project_default`) and a mode in which it routes money (`contributor_active`), and a
+  two-value field could express neither. *(Superseded, kept as history: `shadow | live`.)*
+- `sponsor-ops-in` is REMOVED from the row-type enum. Sponsorship is not a ledger revenue
+  class: a sponsor is a supporter (URS GOV-008 as noted by ops decision D29) which settles a
+  listed direct invoice IN PLACE OF the fees account, by name and amount, published for the
+  period — support never enters the fees account (D29 §2, invariant I4), an account that
+  receives every Purpose Fee payout and nothing else and carries exactly the four outgoing lines
+  of D34 item 5. Cost support is published in `cost-support.v1`, never as a ledger row.
+  *(Superseded, kept as history: the row type `sponsor-ops-in`.)*
+- Both are recorded as PRE-RELEASE changes. The additive-only policy governs a PUBLISHED
+  version, and nothing in this repository has been released: no producer ever emitted
+  `sponsor-ops-in` (the P-M2 intake subset never contained it and no allocation row exists
+  before P-M3) and no artifact was ever published carrying `routingMode: "live"`. Had either
+  value been published, the policy's answer would have been a new file beside this one rather
+  than an edit — that is the rule, and this is the window in which it does not bite.
+
 ## ledger-export.v1.json
 
 ### 1.0.0 — unreleased
@@ -297,6 +330,29 @@ with what settled them, because a contract's history is part of the contract.
   same. The website's sample ledger and registry-v0 take the same names in their own
   commits of the same day.
 
+### 1.2.0 — unreleased (2026-09-07; ops decisions D27 and D34)
+
+- Mirroring `ledger-row.v1` 1.2.0: `policy.routingMode` takes the canonical enum
+  `project_default | shadow | contributor_active`, and `sponsor-ops-in` leaves the export row
+  enum. Both pre-release, on the reasoning recorded in that section.
+- Additive. `policy.hardshipEpisodeMonths` — ops decision D34 item 3(e): an episode of the
+  steward hardship rule lasts at most twelve months and is renewed only by a members' vote. The
+  rule was decided on 2026-09-06 and no field carried it, so a published policy block could
+  state the month's two hardship caps and stay silent about the limit that ends the episode.
+  The constitutional ceiling of twelve is the schema maximum; the published figure is an annex
+  value [OPERATOR: confirm at the founding assembly] and, like every cap in the block, can only
+  fall.
+- Field names, reconciled once and recorded here so the FS-07 re-spec has one place to read the
+  answer from. The FS-07 amendment banner of 2026-09-06 names the policy constants
+  `reserve_pct_bps`, `reserve_target_minor`, `hardship_ceiling_minor`,
+  `hardship_pct_trailing12_bps` and `hardship_episode_months`, and the export totals
+  `reserveMinor` and `hardshipMinor`. The published contract keeps its own names —
+  `policy.reserveRetentionBpsMax`, `policy.reserveTargetMinor`, `policy.hardshipCeilingMinor`,
+  `policy.hardshipBpsTrailing12`, `policy.hardshipEpisodeMonths`, `totals.reserveRetention` and
+  `totals.hardshipPay` — because those are the names a consumer validates against, and a
+  chapter describing the schema is not the schema. The re-spec states the contract as published;
+  the banner's forms are the record's own prose and stay as they are.
+
 ## ledger-chain.v1.json
 
 ### 1.0.0 — unreleased
@@ -318,6 +374,113 @@ with what settled them, because a contract's history is part of the contract.
   listed recipients", with the transfer-per-recipient pointer *(superseded: "the bank and
   intermediary legs")*. Wording only, in the API description; no schema and no version
   changes.
+
+## cost-support.v1.json
+
+### 1.0.0 — unreleased (2026-09-07; ops decisions D29 §3, D33 and D34)
+
+- Initial publication, closing the planned-but-unbuilt entry above. ONE DOCUMENT PER CALENDAR
+  MONTH: Purpose Fees received net of the rail's processing fee; the direct costs itemised to
+  the invoice, each with its eligible class and, where one settled it, its named supporter;
+  cost support by supporter; charged to fees as max(0, C − S) with the financial year's running
+  total against the annual cap; the reserve retention with its note; the steward hardship pay
+  with its source declaration; and what was passed on — one row per listed recipient (D33
+  item 1), never one row per category fund.
+- SUPPORTERS ARE ROWS, never schema constants, and an empty month is the same document with
+  empty arrays, zero amounts and its notes. That invariance is the contract, not a convenience:
+  when a supporter stops, its row goes to zero and falls off, and no heading, no rule text and
+  no published claim changes (D29 §3, invariant I8).
+- The identities a reader checks are stated in the schema description, because JSON Schema
+  cannot express a sum across items: charged to fees is max(0, C − S); S ≤ C; passed on is
+  F − charged − reserve retention − hardship pay; and the transfers sum to passed on. The two
+  totals are written rather than derived, so the arithmetic can be checked against the file it
+  is published in — the same treatment `purpose-yml.v1` gives its micro-share bound.
+- `capBps` is `["integer","null"]` and REQUIRED. Null until the cap number is set with counsel
+  and written into the constitution: the number is an open row of the record (URS §21 OPEN-05
+  owns it; proposed default 15%, i.e. 1500 bps, an annex value [OPERATOR: confirm at the
+  founding assembly]), and nothing renders a figure nobody has approved. Required-and-nullable
+  rather than optional, on the `ct-segment.v1` reasoning: in an audit a missing key and an
+  explicit null must not be distinguishable.
+- `transfers[].status` is `scheduled | transferred`, and `date`, `receiptRef` and `evidence`
+  are required only once it is `transferred`. The lock-before-sweep rule (D33 item 4) leaves a
+  real published state between the lock, no later than the twentieth day after the month's last
+  rail payout, and the sweep on or before the thirtieth: the share is computed and the money
+  has not moved. The distinction is in the contract so that a scheduled share can never be
+  rendered as a transfer.
+- `$defs.directCostClass` enumerates the seven eligible classes of D29 §2.1, `transfer-charges`
+  among them (D33 item 5). The *kind* rule is constitutional; the list itself is board-amendable
+  with publication, so the enum may gain a class additively.
+- Every line carries `evidence[]`, and an evidence link is `{kind, ref}` with an OPTIONAL `url`.
+  Not every piece of evidence is a public URL — a statement line is a line — and a reference a
+  reader can ask for by name is better than a link that pretends the document is online.
+- Two things this contract deliberately does not have. NO ROUTE: the artifact is a published
+  file that the transparency page renders, so `openapi/edge-public.v1.yaml` gains nothing and
+  was not touched. NO CATALOGUED PATH: FS-00 §6.2 catalogues no artifact for this table (that
+  deferral is deliberate), so `x-psn.artifactPath` says so and names the hand-maintained v0
+  home instead of inventing a URL the record has not fixed.
+- For the P-M3 producer: the names in THIS contract govern. The v0 table is hand-maintained in
+  the website repository as one file with a `periods[]` member and carries earlier field names
+  (`feesNetMinor`, `yearToDateChargedPct`, `capPct`, `passedOn`); it is a v0 rendering source,
+  not a published contract, and it aligns when the producer is built.
+
+## recipient-list.v1.json
+
+### 1.0.0 — unreleased (2026-09-07; ops decision D33)
+
+- Initial publication. Until now the Recipient List had no data home in any repository, while
+  two published contracts already pointed at it: `ledger-row.v1.recipientId` and the transfers
+  of `cost-support.v1` both resolve against a list nothing described. One document per published
+  version: `version`, `status`, `effectiveFrom`, `noticeGivenAt`, the seven categories, the
+  recipients with their Recipient Standard evidence, and the share rule.
+- THE LEGAL INSTRUMENT IS THE ANNEX, NOT THIS FILE. The list is the published, versioned annex
+  to the statutes, adopted by the members; this artifact is its machine-readable form, so
+  `x-psn.authoritative` is FALSE — as it is for `purpose-yml.v1` and `registry-v0-record.v1`,
+  the other two contracts something else governs. Where the two disagree the annex governs.
+- Part of the Recipient Standard (D33 item 2) is ENFORCED rather than described:
+  `standard.accountsYears` has minimum 3 (item 2(a)), `standard.bankTransferOnly` and
+  `standard.independenceDeclared` are `const: true` (items 2(e) and 2(d)), `standard.screening`
+  needs at least four records so all four lists appear (item 2(c)), and `website` plus `address`
+  are required (item 2(g)). The rest travel as required references, because a validator can
+  prove that evidence was recorded and only a human can prove that it is true. The Standard's
+  minimum is constitutional and may only be tightened, so these floors can only rise.
+- `noticeGivenAt` is required and nullable. A version that adds or removes a recipient gives
+  thirty days' public notice before its `effectiveFrom` month; the two cases with no notice
+  period — the first adopted list, which nothing preceded, and a removal for cause, which takes
+  effect at once — are an explicit null rather than an absent key (D33 item 3).
+- The ten-to-fifteen range of D33 item 1 is STATED, NOT ENFORCED. A removal for cause takes
+  effect at once and can leave a version briefly outside the range, and a contract that cannot
+  express the true published state is worse than none.
+- `status` (`draft | adopted`) is in the artifact because the honesty rule needs it there: no
+  page can tell an adopted list from a proposal by looking at the recipients, and no transfer is
+  ever made against a draft. `recipients[].sample` marks a fixture entry by entry, and a
+  production list carries none.
+- `shareRule` is published as PROPOSED, not decided [OPERATOR: confirm]: equal shares per listed
+  recipient of a category, apportioned by largest remainder (FS-07 FS07-030) with ties broken by
+  the order of the published list — which is what the sample dataset already assumes. An
+  undecided question is an open row of the record (URS §21), never a resolution invented in a
+  schema, so the proposal ships with its status in the data. Note what the rule is NOT: it does
+  not touch how much each CATEGORY receives (the allocation rule of FS-07 does) and it does not
+  touch the annual cap on direct costs (URS §21 OPEN-05 owns that).
+- THE CATEGORY MENU IS ENUMERATED HERE, ONCE: `$defs.categorySlug` is the closed seven-value
+  enum of the movement's published categories (statutes Art. 7; D33 item 1). No schema in this
+  repository may `$ref` another — each must validate on its own after a single download — so
+  the other fields carrying the vocabulary (`ledger-row.v1.categoryFundId`, the export rows,
+  `cost-support.v1.transfers[].category`, `purpose-yml.v1`'s own `categorySlug`) constrain it by
+  pattern and point here, rather than repeating the enum and forking it at the next amendment.
+  Two alignments belong to the category-menu work and are deliberately NOT made here:
+  `purpose-yml.v1`'s `categorySlug` description still says "5–8 funds" and offers `climate` as
+  an example, which is not one of the seven; and the curated registry's own record schema pins
+  its category defaults to a pre-D33 fund set. Both are named in the record's own list of what
+  is still to align.
+- The example is the SAMPLE list and nothing else: fourteen fictional organisations, two per
+  category, every entry `sample: true` and named so, mirroring the sample dataset the pre-launch
+  site renders so the two fixtures agree entry for entry. No real organisation is named in this
+  repository before the founding assembly adopts the first list.
+- Country is ISO 3166-1 alpha-2, a code rather than a name, because the two facts that hang on
+  it are jurisdictional: whether the organisation may lawfully receive funds from a Swiss
+  association under its own law (item 2(b)), and which sanctions regimes its screening must
+  clear. The sample dataset carries country NAMES; the machine contract carries the code, and
+  the rendering surface prints the name from it.
 
 ## change-event.v1.json
 

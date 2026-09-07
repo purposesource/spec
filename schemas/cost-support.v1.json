@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/cost-support.v1.json",
+  "title": "Monthly cost-support table (v1)",
+  "description": "One calendar month of the published cost-support table: what the movement's running costs were, who paid them, and what the fees account passed on to the listed recipients (ops decision D29 §3, as amended 2026-09-06 by D33 and D34).\n\nONE DOCUMENT PER CALENDAR MONTH, AND THE SHAPE IS IDENTICAL IN EVERY MONTH — that invariance is the contract. Supporters are ROWS, never schema constants: when a supporter stops, its row goes to zero and falls off, and no heading, no rule text and no published claim changes (D29 §3). An empty month is the same document with empty arrays, zero amounts and its notes — never a month left out, and never a zero dressed up as a result.\n\nFOUR OUTGOING LINES AND NOTHING ELSE (D34 item 5; invariant I1): the direct invoices nobody supported, the reserve retention, the steward hardship pay, and one transfer per listed recipient. The fees account receives every Purpose Fee payout and nothing else; cost support NEVER passes through it (invariant I4) — a supporter settles a listed direct invoice IN PLACE OF the fees account, by name and amount, or the support did not happen (I5). The full bill is published even when support covers all of it (I6). No person other than the holder of the one essential operating role is ever paid from Purpose Fees, and only under the published hardship rule with its source declaration (I9, D34 item 3).\n\nTHE ARITHMETIC A READER CHECKS, stated here because JSON Schema cannot express a sum across items — the same treatment `purpose-yml.v1` gives its micro-share bound: (1) `chargedToFeesMinor` = max(0, `directCostsTotalMinor` − `supportTotalMinor`); (2) `supportTotalMinor` ≤ `directCostsTotalMinor` — whatever a supporter wants to give beyond the month's direct costs is that supporter's own donation, in its own name, and is not part of this model; (3) `passedOnMinor` = `purposeFeesNetMinor` − `chargedToFeesMinor` − `reserveRetentionMinor` − `hardshipPayMinor`; (4) the `transfers[]` amounts sum to `passedOnMinor`; (5) `directCostsTotalMinor` is the sum of `directCosts[]` and `supportTotalMinor` the sum of `supporters[]`. Both totals are written rather than derived so a reader can check the arithmetic against the file it is published in.\n\nEVERY LINE CARRIES ITS EVIDENCE: the rail payout statement, the invoice, the supporter's payment, the bank line, each listed recipient's receipt (D29 §3, URS GOV-072). The proof is publication to the invoice, not a signature (D29 §8).\n\nMoney is integer minor units plus an ISO currency code, never a float; the period is one calendar month, the same unit as the sweep, and the annual report aggregates months without ever restating them. Every cap here is an annex value, proposed until the founding assembly confirms it, and every cap can only ever fall (invariant I7). A closed month is never edited: a correction is a forward-dated `annotations[]` line, on the same never-restate doctrine as the ledger (FS07-042).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (producer). At v0 the table is hand-maintained and no calendar month with a Purpose Fee payout has closed, so nothing is published yet and the page says so.",
+    "artifactPath": "no path in the FS-00 §6.2 catalogue yet — deliberately deferred; at v0 one hand-maintained file (`src/data/cost-support/index.json` in the website repo, one entry per closed month) rendered on the transparency page. The published per-month path is fixed when FS-00 §6.2 adopts this artifact.",
+    "authoritative": true,
+    "producer": "v0: the operator, from the fees account's own statement and the invoices · P-M3: `jobs.ledger-publish`, beside the monthly ledger export",
+    "consumers": ["the public transparency page (FS-01)", "the annual transparency report, which aggregates months and never restates them", "reconcilers and reviewers"],
+    "fsRefs": ["FS-07 amendment banner (D29 §3; D33; D34) — re-specified at P-M3 with cost-support.v1", "FS-00 §6.2", "URS GOV-001, GOV-070…GOV-072, GOV-075, GOV-076"],
+    "vsRefs": ["VS-05", "VS-37"],
+    "changelog": "CHANGELOG.md#cost-supportv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "month",
+    "generatedAt",
+    "currency",
+    "purposeFeesNetMinor",
+    "directCosts",
+    "directCostsTotalMinor",
+    "supporters",
+    "supportTotalMinor",
+    "chargedToFeesMinor",
+    "yearRunningTotalMinor",
+    "capBps",
+    "reserveRetentionMinor",
+    "reserveRetentionNote",
+    "hardshipPayMinor",
+    "hardshipSourceDeclaration",
+    "passedOnMinor",
+    "transfers",
+    "reserve",
+    "evidence"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "month": { "$ref": "#/$defs/monthKey", "description": "The calendar month this table covers. The period is always one calendar month — the same unit as the sweep (D29 §2)." },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "currency": { "$ref": "#/$defs/currency", "description": "Reporting currency (CHF). Every `*Minor` field in this document is in this currency." },
+    "closed": { "type": "boolean", "description": "True once the month is closed and the table is final. An open month may still receive invoices and supporter payments; a CLOSED month is never edited — a correction is an `annotations[]` line (D29 §3, FS07-042)." },
+    "financialYear": { "type": "string", "pattern": "^[0-9]{4}$", "description": "The financial year `yearRunningTotalMinor` accumulates over, when it is not read from `month`. The annual cap test is a test on this year (GOV-001)." },
+    "purposeFeesNetMinor": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "F — the Purpose Fees the payment rail paid out to the Association in the month, NET of the rail's processing fee (D29 §2). The processing fee is published in the fee stack; it is not a cost of the Association and never appears in the cost line. Zero is a published state: a month with no payout."
+    },
+    "directCosts": {
+      "type": "array",
+      "description": "C, itemised — the month's direct costs, one entry per third-party invoice, complete even where a supporter settled all of it (invariant I6). A direct cost is a third-party invoice for a service that exists ONLY for the movement, billed to an account of the Association used only for the movement, in the eligible classes of the statutes annex (D29 §2.1). It is NEVER any person's remuneration, fee, expense or time and never a bill that also serves another activity: the essential operating role's hardship pay is not a direct cost — it is its own capped line (`hardshipPayMinor`), never inside C or inside the cap.",
+      "items": { "$ref": "#/$defs/directCost" }
+    },
+    "directCostsTotalMinor": { "type": "integer", "minimum": 0, "description": "The sum of `directCosts[].amountMinor`. Written, not derived, so a reader can check `chargedToFeesMinor` against this file alone." },
+    "supporters": {
+      "type": "array",
+      "description": "S, by supporter — the named supporters that settled listed direct invoices in place of the fees account this month (D29 §2, §3). Supporters are ROWS, never constants, and the list is DATA: no supporter's name appears in any statute, pledge, constant or fixed copy (invariant I8). A supporter is listed for the months in which it paid something and drops off when it stops; an empty array is a valid month, and the document's shape does not change.",
+      "items": { "$ref": "#/$defs/supporter" }
+    },
+    "supportTotalMinor": { "type": "integer", "minimum": 0, "description": "The sum of `supporters[].amountMinor`, and never more than `directCostsTotalMinor` (D29 §2: support beyond the month's direct costs is the supporter's own donation, in its own name, outside this model)." },
+    "chargedToFeesMinor": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "max(0, `directCostsTotalMinor` − `supportTotalMinor`) — the direct invoices nobody supported, paid from the fees account. There is NO percentage levy: this figure is a sum of itemised invoices, each linked to its evidence (D29 §2, ops decision D31 item 6; URS ENG-026)."
+    },
+    "yearRunningTotalMinor": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The financial year's running total of charged-to-fees, including this month. The cap test is ANNUAL and is tested here, never on a month: a month may exceed the cap (an annual domain renewal lands in one month), the year may not, and a year that would exceed it is met by dropping or deferring the service — never by charging (GOV-001, invariant ENG-077)."
+    },
+    "capBps": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 10000,
+      "description": "The annual cap on charged-to-fees, in basis points of the financial year's Purpose Fees net of the rail's processing fee. `null` until the number is set with counsel and written into the constitution — nothing renders a figure nobody has approved. The cap number is an open question of the record (URS §21 OPEN-05 owns it; proposed default 15% = 1500 bps, an annex value [OPERATOR: confirm at the founding assembly]) and it may only ever be lowered (invariant I7)."
+    },
+    "reserveRetentionMinor": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "R — what the month retained into the operations reserve (ops decision D34 item 4): at most a published share of the month's Purpose Fees until the reserve holds its published target, and nothing at all above target. Zero is a published state, and the line appears in EVERY month with its note. The reserve is an account that is not the fees account and is never a refund reserve."
+    },
+    "reserveRetentionNote": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "description": "Why the retention line reads what it reads — 'target reached', or the rule that produced the amount (D34 item 4, D29 §3). Required in every month, including a month that retained nothing: the rule applied and produced nothing is a published fact, not an absence."
+    },
+    "hardshipPayMinor": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "H — the steward hardship pay from Purpose Fees for the month, in total employer cost (ops decision D34 item 3). Paid to the holder of the one essential operating role and to nobody else, ever (invariant I9), and only when the earlier sources are exhausted: the other activity's published operating needs, then a listed supporter or sponsor, then the operations reserve, then Purpose Fees last of all. Two caps govern and the lower wins — a monthly ceiling in total employer cost, and a share of the trailing twelve months' Purpose Fees — both annex values, both able only to fall. Zero is a published state, and the line appears in EVERY month with its declaration."
+    },
+    "hardshipSourceDeclaration": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "description": "The month's source declaration (D34 items 2 and 3(a), 3(d)): which of the sources were exhausted, or that the rule was not activated because the earlier sources sufficed. Required in every month — the declaration is the published proof that Purpose Fees were the last source, so its absence in a zero month would remove exactly the fact a reader came for."
+    },
+    "hardshipApprovalRef": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "The reference of the monthly approval by the board members other than the holder, the holder abstaining (D34 item 3(c), Art. 68 ZGB) — minuted and published. Required whenever `hardshipPayMinor` is above zero."
+    },
+    "hardshipEpisodeMonth": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12,
+      "description": "Which month of the current hardship episode this is (D34 item 3(e)): an episode lasts at most twelve months and is renewed only by a members' vote. The published episode length travels on the ledger export's `policy.hardshipEpisodeMonths`; this field is the position inside the episode. Required whenever `hardshipPayMinor` is above zero."
+    },
+    "passedOnMinor": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "What the fees account passes on for the month: `purposeFeesNetMinor` − `chargedToFeesMinor` − `reserveRetentionMinor` − `hardshipPayMinor`. It goes DIRECTLY to the organisations on the published Recipient List, in the shares the published allocation rule produces — no intermediary, no pooled vehicle, no earmark and no handling fee (ops decision D33 item 1). The `transfers[]` rows sum to this figure."
+    },
+    "transfers": {
+      "type": "array",
+      "description": "One row per listed recipient (ops decision D33 item 1), never one row per category fund. Under the lock-before-sweep rule the month's allocation is computed at the lock — no later than the twentieth day after the month's last rail payout — and each recipient's share is transferred directly from the fees account on or before the thirtieth day (D33 item 4). Every share is transferred in the month it is allocated however small: there is no roll-forward at any granularity and no minimum-wire threshold (D33 item 5). A row published between the lock and the sweep carries `status: \"scheduled\"` — a scheduled share is not a transfer, and this contract will not let one be rendered as though it were.",
+      "items": { "$ref": "#/$defs/transfer" }
+    },
+    "reserve": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["balanceMinor", "targetMinor", "note"],
+      "description": "The operations reserve's memo line (ops decision D34 item 4): movements, balance and target are published monthly. The reserve sits in an account that is NOT the fees account, is spent only on the essential operating role's pay under the hardship rule and on direct costs the cap would otherwise defer, and is never a refund reserve.",
+      "properties": {
+        "balanceMinor": { "type": "integer", "minimum": 0, "description": "The reserve's balance at the end of the month." },
+        "targetMinor": { "type": ["integer", "null"], "minimum": 0, "description": "The published target — six months of the essential operating role's ceiling. `null` until the founding assembly confirms the annex value; nothing renders a figure nobody has approved." },
+        "note": { "type": "string", "minLength": 1, "maxLength": 1000, "description": "The month's reserve narrative: the movements, or that the account holds nothing yet." },
+        "movements": {
+          "type": "array",
+          "description": "The month's movements in and out of the reserve, published one by one (D34 item 4). Inflows from a sponsor, from another activity's profit and from other unrestricted income are movements of this account, never rows of the fees account.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["amountMinor", "kind", "date"],
+            "properties": {
+              "amountMinor": { "type": "integer", "description": "Positive into the reserve, negative out of it." },
+              "kind": { "enum": ["retention-from-fees", "unrestricted-income", "hardship-pay-out", "direct-cost-out"], "description": "`retention-from-fees` is the D34 item 4 retention (and equals this month's `reserveRetentionMinor` when it is the only one). `unrestricted-income` is a sponsor, another activity's profit or other unrestricted income — the failsafe does not depend on any one of them. The two `-out` kinds are the only permitted spends." },
+              "date": { "type": "string", "format": "date" },
+              "note": { "type": "string", "maxLength": 1000 },
+              "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidenceLink" } }
+            }
+          }
+        },
+        "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidenceLink" } }
+      }
+    },
+    "recipientListVersion": {
+      "type": "string",
+      "pattern": "^v[0-9]+(\\.[0-9]+)?$",
+      "description": "The version of the Recipient List in force for the month (`recipient-list.v1`), published so a reader can resolve every `recipientId` in `transfers[]` against the list that governed the transfer (URS TRN-024 as amended). Absent while no list has been adopted — and no transfer is made before an adopted list is published."
+    },
+    "evidence": {
+      "type": "array",
+      "description": "The month's own evidence — above all the rail payout statement behind `purposeFeesNetMinor` (D29 §3). An EMPTY array is a valid month: a month with no payout has no statement, and an empty month is the same document rather than a missing one.",
+      "items": { "$ref": "#/$defs/evidenceLink" }
+    },
+    "annotations": {
+      "type": "array",
+      "description": "Forward-only narrative context. A closed month is never edited and never restated: a correction is a new annotation here, or a new month's entry, exactly as a ledger correction is a forward-dated row (FS07-042, D29 §3).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["recordedAt", "note"],
+        "properties": {
+          "recordedAt": { "type": "string", "format": "date-time" },
+          "note": { "type": "string", "minLength": 1, "maxLength": 1000 }
+        }
+      }
+    },
+    "methodologyUrl": { "type": "string", "format": "uri", "description": "The published methodology: the eligible direct-cost classes and the annual cap; what cost support is and why it never enters the fees account; the two capped lines of D34; the lock-before-sweep rule; and the never-restate doctrine." }
+  },
+  "allOf": [
+    {
+      "$comment": "D34 item 3(c) and 3(e): pay above zero exists only with the month's approval by the members other than the holder, inside a numbered episode of at most twelve months.",
+      "if": { "properties": { "hardshipPayMinor": { "exclusiveMinimum": 0 } }, "required": ["hardshipPayMinor"] },
+      "then": { "required": ["hardshipApprovalRef", "hardshipEpisodeMonth"] }
+    }
+  ],
+  "$defs": {
+    "monthKey": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "directCost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["invoiceRef", "class", "amountMinor", "evidence"],
+      "properties": {
+        "invoiceRef": { "type": "string", "minLength": 1, "maxLength": 200, "description": "The invoice's own reference. One entry per invoice: the cost line is itemised to the invoice, never summarised into a rate." },
+        "class": { "$ref": "#/$defs/directCostClass" },
+        "description": { "type": "string", "maxLength": 500, "description": "What the invoice was for, in the words a reader can match to the class." },
+        "amountMinor": { "type": "integer", "exclusiveMinimum": 0, "description": "The invoice amount in the document's currency. An invoice is a positive amount; a credit note is its own forward entry, never an edit." },
+        "supporter": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "The named supporter that settled THIS invoice in place of the fees account (D29 §2, invariant I5). Absent means the fees account paid it, so the invoice sits inside `chargedToFeesMinor`. Support never passes through the fees account (I4), and undisclosed support is the one thing this model forbids — it is the only thing that could make the published cost line flatter than the truth."
+        },
+        "paidOn": { "type": "string", "format": "date", "description": "When the invoice was actually paid. Charged-to-fees for a period is what the account paid in that period: an invoice for an earlier month paid late is charged in the period it is paid (D31 item 2), and the annual cap test is unaffected." },
+        "evidence": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/evidenceLink" }, "description": "At least the invoice; and where a supporter settled it, the supporter's payment as well." }
+      }
+    },
+    "directCostClass": {
+      "enum": [
+        "domains-and-marks",
+        "dns-hosting-cdn-edge-storage",
+        "transactional-email",
+        "monitoring-error-tracking-status",
+        "rail-charges",
+        "transfer-charges",
+        "scoped-review-engagement"
+      ],
+      "description": "The eligible direct-cost classes of the statutes annex (D29 §2.1, in order): the movement's own domains and marks; DNS, hosting, CDN, edge compute and storage for the movement's own properties on the movement's own accounts; transactional email for them; monitoring, error tracking and the status page for them; payment-rail charges not already netted from the payout; `transfer-charges` — the bank-transfer and currency-conversion charges on the outbound transfers to the listed recipients, one entry per transfer (ops decision D33 item 5); and the fee of a review engagement scoped SOLELY to the fees account and the routing. The *kind* rule is constitutional; the list itself is board-amendable with publication, so this enum may gain a class additively. Never eligible, by construction: bookkeeping, counsel, the Association's own filings, insurance, any person's salary, honorarium, expense claim or contractor invoice, anything used by a person, and anything on an account that also serves another activity."
+    },
+    "supporter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "amountMinor", "evidence"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 200, "description": "The supporter's name: another activity of the Association, a member, an outside sponsor or a future project. Names are data and appear only here and on the rendered table." },
+        "amountMinor": { "type": "integer", "minimum": 0, "description": "What this supporter settled in the month. Zero is representable — the row a supporter's last month leaves behind before it falls off the list — and changes nothing about the document's shape." },
+        "invoiceRefs": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 200 }, "description": "The `directCosts[].invoiceRef` values this supporter settled, so support is checkable invoice by invoice rather than in aggregate." },
+        "note": { "type": "string", "maxLength": 1000 },
+        "evidence": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/evidenceLink" }, "description": "The supporter's own payment. Support is listed with its evidence or it did not happen (invariant I5)." }
+      }
+    },
+    "transfer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recipientId", "amountMinor", "status"],
+      "properties": {
+        "recipientId": { "type": "string", "pattern": "^rcp_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "The listed recipient this share belongs to, resolvable against the Recipient List version named in `recipientListVersion` (`recipient-list.v1`). Money rows name organisations on the published list, never persons (URS ENG-083)." },
+        "category": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$", "description": "The recipient's category, from the movement's seven published categories. The closed menu is enumerated once in `recipient-list.v1` (`$defs.categorySlug`); this contract set may not `$ref` across files — each schema must validate on its own after a single download — so every other field carrying the vocabulary constrains it by pattern and names the enumerating file, as `ledger-row.v1.categoryFundId` does." },
+        "amountMinor": { "type": "integer", "minimum": 0, "description": "This recipient's share of `passedOnMinor` for the month." },
+        "status": {
+          "enum": ["scheduled", "transferred"],
+          "description": "`scheduled` between the lock and the sweep: the share is computed and published, and the money has not moved. `transferred` once it has, with its date and receipt. The distinction is the honesty rule in the contract itself — a scheduled share is never rendered as a transfer, and no impact figure exists before a real transfer row."
+        },
+        "date": { "type": "string", "format": "date", "description": "The transfer's value date. Required once `status` is `transferred`." },
+        "receiptRef": { "type": "string", "minLength": 1, "maxLength": 200, "description": "The recipient's receipt for this transfer (D33 item 2(f)). Required once `status` is `transferred`." },
+        "endToEndId": { "type": "string", "pattern": "^psn-[0-9]{4}-(0[1-9]|1[0-2])-rcp_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "The credit transfer's end-to-end identifier, `psn-{month}-{recipientId}` (ops decision D33 item 4), so a bank line and a published row can be matched by anyone holding both." },
+        "note": { "type": "string", "maxLength": 1000, "description": "Narrative for this row — for instance that a recipient removed for cause mid-month has no row and its share went to the other recipients of its category (D33 item 3)." },
+        "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidenceLink" }, "description": "The bank line and the recipient's receipt. Required once `status` is `transferred`: a transfer nobody can check is not a published transfer." }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "transferred" } }, "required": ["status"] },
+          "then": { "required": ["date", "receiptRef", "evidence"] }
+        }
+      ]
+    },
+    "evidenceLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref"],
+      "description": "One piece of evidence behind one line. Every line of this table carries at least one (D29 §3, URS GOV-072).",
+      "properties": {
+        "kind": {
+          "enum": ["rail-payout-statement", "invoice", "supporter-payment", "bank-line", "recipient-receipt", "reserve-movement", "approval-minute"],
+          "description": "The classes of evidence the record names for this table: the rail payout statement, the invoice, the supporter's payment, the bank line, each listed recipient's receipt (D29 §3), the reserve's published movements (D34 item 4) and the minuted monthly approval of a hardship payment (D34 item 3(c))."
+        },
+        "ref": { "type": "string", "minLength": 1, "maxLength": 200, "description": "The evidence's own reference — invoice number, statement line, payout id, receipt number, minute number. A reference a reader can ask for by name, present even where the document itself is not published in full." },
+        "label": { "type": "string", "maxLength": 200 },
+        "url": { "type": "string", "format": "uri", "description": "Where the document is published, when it is. Absent is honest: not every piece of evidence is a public URL, and a missing link must not be indistinguishable from a missing document." }
+      }
+    }
+  }
+}

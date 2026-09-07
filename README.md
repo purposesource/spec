@@ -17,7 +17,7 @@ a procurement reviewer can consume all of it the way they consume a static file.
 
 | Directory | Contents |
 |---|---|
-| `schemas/` | 17 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own. |
+| `schemas/` | 19 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v1.ts`, the published coverage function, with `vectors.json` (frozen test vectors) and its test suite. Zero dependencies. |
 | `examples/` | One valid instance per schema. These are the fixtures the other repositories build against. |
@@ -81,6 +81,8 @@ needs a toolchain is not really published.
 | `ledger-row.v1.json` | one ledger row | first public version |
 | `ledger-export.v1.json` | `/ledger/{YYYY}-{MM}.json` (+ CSV twin) | first public version |
 | `ledger-chain.v1.json` | `/ledger/chain.json` | first public version |
+| `cost-support.v1.json` | one calendar month of the published cost-support table | P-M3 producer, v0 hand-maintained |
+| `recipient-list.v1.json` | one published version of the Recipient List (the statutes' annex) | P-M3 producer, v0 hand-maintained |
 | `badge.v1.json` | `/badge/{node_id}.json` (shields.io endpoint) | first public version |
 | `stats.v1.json` | `/stats.json` | first public version |
 | `change-event.v1.json` | one item of `/v1/changes` | later, demand-gated |
@@ -88,6 +90,13 @@ needs a toolchain is not really published.
 Each schema carries an `x-psn` block naming its artifact path, its milestone, the spec
 clauses it implements, and its changelog section. CI fails if any of that is missing —
 a contract cannot ship here without provenance.
+
+The `cost-support.v1` and `recipient-list.v1` rows are the money contracts of 2026-09-07. Both describe artifacts the frozen
+artifact catalogue does not yet name — that deferral is deliberate — so each says so in its
+`x-psn.artifactPath` rather than claiming a URL: at v0 the cost-support table is
+hand-maintained and rendered on the transparency page, and the Recipient List is the published
+annex to the statutes. Neither adds a route: they are published files, and the schema is the
+contract whether the producer is a job or a person.
 
 ## The coverage function
 
@@ -148,6 +157,8 @@ operator signing script  ─────┼──────► certificate.v1 
 committed ledger table   ─────┼──────► ledger-row.v1          │     (openapi/edge-public.v1)
                               ├──────► ledger-export.v1       │
                               ├──────► ledger-chain.v1        │
+fees account + invoices  ─────┼──────► cost-support.v1        │
+the statutes' annex      ─────┼──────► recipient-list.v1      │
                               ├──────► entitlement-record.v1  │
                               ├──────► waiver.v1              │
                               ├──────► badge.v1               │
