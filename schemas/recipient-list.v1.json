@@ -45,8 +45,16 @@
       "type": "array",
       "minItems": 7,
       "maxItems": 7,
-      "uniqueItems": true,
-      "description": "The movement's seven published categories (statutes Art. 7; D33 item 1: the seven stay, and a 'category fund' is from now on nothing but the basket of listed recipients in that category). All seven are carried in every version, including one whose recipients have all been removed for cause, because the menu is the movement's and not the list's; with a closed seven-value slug enum, seven unique entries are the whole menu.",
+      "description": "The movement's seven published categories (statutes Art. 7; D33 item 1: the seven stay, and a 'category fund' is from now on nothing but the basket of listed recipients in that category). All seven are carried in every version, including one whose recipients have all been removed for cause, because the menu is the movement's and not the list's. EXACTLY ONE ENTRY PER SLUG, enforced: seven items, and one `contains` clause per slug of `$defs.categorySlug`. `uniqueItems` would not do this job — on an array of objects it compares whole objects, so seven entries all slugged `health` with distinct names would pass it, and a published version could claim seven categories while six of the movement's seven were silently absent.",
+      "allOf": [
+        { "contains": { "properties": { "slug": { "const": "health" } }, "required": ["slug"] } },
+        { "contains": { "properties": { "slug": { "const": "education" } }, "required": ["slug"] } },
+        { "contains": { "properties": { "slug": { "const": "poverty-relief" } }, "required": ["slug"] } },
+        { "contains": { "properties": { "slug": { "const": "humanitarian-aid" } }, "required": ["slug"] } },
+        { "contains": { "properties": { "slug": { "const": "environment" } }, "required": ["slug"] } },
+        { "contains": { "properties": { "slug": { "const": "animal-welfare" } }, "required": ["slug"] } },
+        { "contains": { "properties": { "slug": { "const": "research" } }, "required": ["slug"] } }
+      ],
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -94,7 +102,7 @@
     "monthKey": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" },
     "categorySlug": {
       "enum": ["health", "education", "poverty-relief", "humanitarian-aid", "environment", "animal-welfare", "research"],
-      "description": "The movement's seven published public-benefit categories (statutes Art. 7; ops decision D33 item 1). THIS IS THE ONE FILE IN THE CONTRACT SET THAT ENUMERATES THE MENU. Every schema here must validate on its own after a single download, so none may `$ref` another; the other fields carrying the same vocabulary — `ledger-row.v1.categoryFundId`, `ledger-export.v1`'s export rows, `cost-support.v1.transfers[].category` and `purpose-yml.v1`'s own `categorySlug` — constrain it by pattern and point here, rather than repeating the enum and forking it at the next amendment. A category that is not on this list would be a fabricated fact about where money goes: free-text categories and free-text recipients are forbidden outright."
+      "description": "The movement's seven published public-benefit categories (statutes Art. 7; ops decision D33 item 1). THIS IS THE ONE FILE IN THE CONTRACT SET THAT ENUMERATES THE MENU. Every schema here must validate on its own after a single download, so none may `$ref` another; the other fields carrying the same vocabulary constrain it by pattern and name this file, rather than repeating the enum and forking it at the next amendment. Those pointers exist today on `ledger-row.v1.categoryFundId`, `ledger-export.v1`'s export-row `categoryFundId` and `cost-support.v1.transfers[].category`. `purpose-yml.v1`'s own `categorySlug` does NOT yet carry one: it predates this menu, still describes '5–8 funds' and offers `climate` as an example, which is not one of the seven — aligning it belongs to the category-menu work and is deliberately not done here. A category that is not on this list would be a fabricated fact about where money goes: free-text categories and free-text recipients are forbidden outright."
     },
     "recipient": {
       "type": "object",

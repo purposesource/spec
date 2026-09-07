@@ -290,6 +290,11 @@ The entry as first recorded, kept as history:
   before P-M3) and no artifact was ever published carrying `routingMode: "live"`. Had either
   value been published, the policy's answer would have been a new file beside this one rather
   than an edit — that is the rule, and this is the window in which it does not bite.
+- Wording. `categoryFundId` now NAMES the file that enumerates the seven-category menu
+  (`recipient-list.v1`, `$defs.categorySlug`). It said only "one of the seven published
+  categories", which leaves an integrator asking which seven with nowhere to look; since no
+  schema here may `$ref` another, a named pointer is the only form the self-containment rule
+  allows. Nothing the schema validates changes.
 
 ## ledger-export.v1.json
 
@@ -352,6 +357,9 @@ The entry as first recorded, kept as history:
   `totals.hardshipPay` — because those are the names a consumer validates against, and a
   chapter describing the schema is not the schema. The re-spec states the contract as published;
   the banner's forms are the record's own prose and stay as they are.
+- Wording. The export row's `categoryFundId` gains a description — it carried none at all — with
+  the same pointer to the file that enumerates the seven-category menu. Nothing it validates
+  changes.
 
 ## ledger-chain.v1.json
 
@@ -401,12 +409,21 @@ The entry as first recorded, kept as history:
   founding assembly]), and nothing renders a figure nobody has approved. Required-and-nullable
   rather than optional, on the `ct-segment.v1` reasoning: in an audit a missing key and an
   explicit null must not be distinguishable.
-- `transfers[].status` is `scheduled | transferred`, and `date`, `receiptRef` and `evidence`
-  are required only once it is `transferred`. The lock-before-sweep rule (D33 item 4) leaves a
-  real published state between the lock, no later than the twentieth day after the month's last
-  rail payout, and the sweep on or before the thirtieth: the share is computed and the money
-  has not moved. The distinction is in the contract so that a scheduled share can never be
-  rendered as a transfer.
+- `transfers[].status` is `scheduled | transferred`, and `date`, `receiptRef` and a NON-EMPTY
+  `evidence` array are required only once it is `transferred`. The lock-before-sweep rule (D33
+  item 4) leaves a real published state between the lock, no later than the twentieth day after
+  the month's last rail payout, and the sweep on or before the thirtieth: the share is computed
+  and the money has not moved. The distinction is in the contract so that a scheduled share can
+  never be rendered as a transfer. The `minItems: 1` matters as much as the required key — the
+  field's own description says a transfer nobody can check is not a published transfer, and this
+  is the one line of the table where the money actually left the account, so the branch enforces
+  what the sentence promises and matches the `minItems: 1` the invoice and supporter lines carry.
+- `transfers` says which population it covers, because "one row per listed recipient" alone did
+  not: for every category the month's allocation gave an amount to, there is one row per ACTIVE
+  listed recipient of that category, in the shares the list's `shareRule` produces; a category
+  the allocation gave nothing to has no rows at all. The example shows it — three categories
+  received, and both listed recipients of each have a row, with largest remainder giving the odd
+  minor unit to the one that comes first in the published list order.
 - `$defs.directCostClass` enumerates the seven eligible classes of D29 §2.1, `transfer-charges`
   among them (D33 item 5). The *kind* rule is constitutional; the list itself is board-amendable
   with publication, so the enum may gain a class additively.
@@ -464,18 +481,32 @@ The entry as first recorded, kept as history:
 - THE CATEGORY MENU IS ENUMERATED HERE, ONCE: `$defs.categorySlug` is the closed seven-value
   enum of the movement's published categories (statutes Art. 7; D33 item 1). No schema in this
   repository may `$ref` another — each must validate on its own after a single download — so
-  the other fields carrying the vocabulary (`ledger-row.v1.categoryFundId`, the export rows,
-  `cost-support.v1.transfers[].category`, `purpose-yml.v1`'s own `categorySlug`) constrain it by
-  pattern and point here, rather than repeating the enum and forking it at the next amendment.
-  Two alignments belong to the category-menu work and are deliberately NOT made here:
-  `purpose-yml.v1`'s `categorySlug` description still says "5–8 funds" and offers `climate` as
-  an example, which is not one of the seven; and the curated registry's own record schema pins
-  its category defaults to a pre-D33 fund set. Both are named in the record's own list of what
-  is still to align.
+  the other fields carrying the vocabulary constrain it by pattern and NAME this file, rather
+  than repeating the enum and forking it at the next amendment. Those pointers exist on
+  `ledger-row.v1.categoryFundId`, on `ledger-export.v1`'s export-row `categoryFundId` (which had
+  no description at all and now carries the same one) and on
+  `cost-support.v1.transfers[].category`. `purpose-yml.v1`'s own `categorySlug` does NOT carry
+  one: it predates this menu, still describes "5–8 funds" and offers `climate` as its example,
+  which is not one of the seven. That alignment and the curated registry's pre-D33 fund set both
+  belong to the category-menu work, are deliberately not made here, and are named in the record's
+  own list of what is still to align — the claim in the schema is scoped to the three fields that
+  really carry the pointer, so nobody is told a pointer is there when it is not.
+- `categories` holds EXACTLY ONE ENTRY PER SLUG, and that is enforced rather than asserted: seven
+  items, plus one `contains` clause per slug. `uniqueItems` was the first attempt and does not do
+  this job — on an array of objects it compares whole objects, so seven entries all slugged
+  `health` with distinct names passed it, and a published version could have claimed seven
+  categories while six of the movement's seven were silently absent. The bijection is checked
+  against the repo's own validator, along with the six-, eight- and duplicate-slug cases.
 - The example is the SAMPLE list and nothing else: fourteen fictional organisations, two per
   category, every entry `sample: true` and named so, mirroring the sample dataset the pre-launch
   site renders so the two fixtures agree entry for entry. No real organisation is named in this
   repository before the founding assembly adopts the first list.
+- The example is `adopted`, not `draft`, and deliberately so. The `cost-support.v1` example cites
+  this version for a month in which money moved, and no transfer is ever made against a draft —
+  two fixtures that resolve against each other id for id may not jointly depict a state both
+  contracts forbid. Its chronology is coherent on purpose: screened 2026-11-15, adopted
+  2026-11-19 with its minute reference, published 2026-11-20, effective from 2027-01, and
+  `noticeGivenAt` null because it is the first adopted version and nothing preceded it.
 - Country is ISO 3166-1 alpha-2, a code rather than a name, because the two facts that hang on
   it are jurisdictional: whether the organisation may lawfully receive funds from a Swiss
   association under its own law (item 2(b)), and which sanctions regimes its screening must

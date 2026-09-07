@@ -118,7 +118,7 @@
     },
     "transfers": {
       "type": "array",
-      "description": "One row per listed recipient (ops decision D33 item 1), never one row per category fund. Under the lock-before-sweep rule the month's allocation is computed at the lock — no later than the twentieth day after the month's last rail payout — and each recipient's share is transferred directly from the fees account on or before the thirtieth day (D33 item 4). Every share is transferred in the month it is allocated however small: there is no roll-forward at any granularity and no minimum-wire threshold (D33 item 5). A row published between the lock and the sweep carries `status: \"scheduled\"` — a scheduled share is not a transfer, and this contract will not let one be rendered as though it were.",
+      "description": "One row per listed recipient, never one row per category fund (ops decision D33 item 1): for every category the month's allocation gave an amount to, there is one row for each ACTIVE listed recipient of that category, in the shares the published list's `shareRule` produces. A category the allocation gave nothing to has no rows at all. Under the lock-before-sweep rule the month's allocation is computed at the lock — no later than the twentieth day after the month's last rail payout — and each recipient's share is transferred directly from the fees account on or before the thirtieth day (D33 item 4). Every share is transferred in the month it is allocated however small: there is no roll-forward at any granularity and no minimum-wire threshold (D33 item 5). A row published between the lock and the sweep carries `status: \"scheduled\"` — a scheduled share is not a transfer, and this contract will not let one be rendered as though it were.",
       "items": { "$ref": "#/$defs/transfer" }
     },
     "reserve": {
@@ -247,8 +247,12 @@
       },
       "allOf": [
         {
+          "$comment": "A transfer nobody can check is not a published transfer: the evidence array must be non-empty, not merely present. The sibling definitions carry the same minItems 1 on their own evidence.",
           "if": { "properties": { "status": { "const": "transferred" } }, "required": ["status"] },
-          "then": { "required": ["date", "receiptRef", "evidence"] }
+          "then": {
+            "required": ["date", "receiptRef", "evidence"],
+            "properties": { "evidence": { "minItems": 1 } }
+          }
         }
       ]
     },

@@ -2,9 +2,11 @@
   "schemaVersion": 1,
   "generatedAt": "2026-11-20T09:00:00Z",
   "version": "v1",
-  "status": "draft",
+  "status": "adopted",
   "effectiveFrom": "2027-01",
   "noticeGivenAt": null,
+  "adoptedAt": "2026-11-19",
+  "decisionRef": "SAMPLE-MINUTE-2026-11-19-RECIPIENT-LIST-V1",
   "standardUrl": "https://purposesource.org/trust/recipient-standard",
   "categories": [
     {
@@ -710,5 +712,5 @@
     "status": "proposed",
     "note": "Proposed default [OPERATOR: confirm]: every listed recipient of a category takes an equal share of that category's amount for the month, apportioned by largest remainder with ties broken by the order of this list, so the shares sum exactly to the category's amount. A recipient removed for cause has no share, and its share for that month goes to the other recipients of its category."
   },
-  "note": "SAMPLE LIST — not a Recipient List. Fourteen fictional organisations, two per category, in countries chosen to show that a real list is worldwide; every entry is marked `sample` and named so. No real organisation is named before the founding assembly adopts the first list, and no transfer is ever made against a draft. This fixture mirrors the sample dataset the pre-launch site renders, so the two agree entry for entry."
+  "note": "SAMPLE LIST — not a Recipient List. Fourteen fictional organisations, two per category, in countries chosen to show that a real list is worldwide; every entry is marked `sample` and named so, and no real organisation is named in this repository before the founding assembly adopts the first list. This fixture mirrors the sample dataset the pre-launch site renders, so the two agree entry for entry. It is `adopted` rather than `draft` because the `cost-support.v1` example cites this version (`v1`) for a month in which money moved, and no transfer is ever made against a draft: the two fixtures are meant to resolve against each other id for id, so they may not jointly depict a state both contracts forbid. `noticeGivenAt` is null because this is the first adopted version and nothing preceded it."
 }

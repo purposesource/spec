@@ -13,7 +13,13 @@
       "description": "DNS, edge compute and object storage for the movement's own properties, on the movement's own account.",
       "amountMinor": 2400,
       "paidOn": "2027-06-08",
-      "evidence": [{ "kind": "invoice", "ref": "INV-EDGE-2027-06-0001", "label": "Edge and storage, June 2027" }]
+      "evidence": [
+        {
+          "kind": "invoice",
+          "ref": "INV-EDGE-2027-06-0001",
+          "label": "Edge and storage, June 2027"
+        }
+      ]
     },
     {
       "invoiceRef": "INV-DOMAIN-2027-06-0002",
@@ -21,7 +27,12 @@
       "description": "Annual renewal of the movement's own domain.",
       "amountMinor": 1900,
       "paidOn": "2027-06-14",
-      "evidence": [{ "kind": "invoice", "ref": "INV-DOMAIN-2027-06-0002" }]
+      "evidence": [
+        {
+          "kind": "invoice",
+          "ref": "INV-DOMAIN-2027-06-0002"
+        }
+      ]
     },
     {
       "invoiceRef": "INV-TRANSFER-2027-06-0003",
@@ -31,8 +42,15 @@
       "supporter": "SAMPLE — supporting activity of the Association",
       "paidOn": "2027-06-30",
       "evidence": [
-        { "kind": "invoice", "ref": "INV-TRANSFER-2027-06-0003" },
-        { "kind": "supporter-payment", "ref": "SUP-2027-06-0001", "label": "Settled in place of the fees account" }
+        {
+          "kind": "invoice",
+          "ref": "INV-TRANSFER-2027-06-0003"
+        },
+        {
+          "kind": "supporter-payment",
+          "ref": "SUP-2027-06-0001",
+          "label": "Settled in place of the fees account"
+        }
       ]
     }
   ],
@@ -41,9 +59,16 @@
     {
       "name": "SAMPLE — supporting activity of the Association",
       "amountMinor": 700,
-      "invoiceRefs": ["INV-TRANSFER-2027-06-0003"],
+      "invoiceRefs": [
+        "INV-TRANSFER-2027-06-0003"
+      ],
       "note": "Settled the month's transfer charges in place of the fees account; the payment never entered the fees account.",
-      "evidence": [{ "kind": "supporter-payment", "ref": "SUP-2027-06-0001" }]
+      "evidence": [
+        {
+          "kind": "supporter-payment",
+          "ref": "SUP-2027-06-0001"
+        }
+      ]
     }
   ],
   "supportTotalMinor": 700,
@@ -59,41 +84,117 @@
     {
       "recipientId": "rcp_f5cc8xgz81c00nrve04pdahejb",
       "category": "health",
-      "amountMinor": 9967,
+      "amountMinor": 4984,
       "status": "transferred",
       "date": "2027-07-20",
       "receiptRef": "RCPT-2027-06-HEALTH-1",
       "endToEndId": "psn-2027-06-rcp_f5cc8xgz81c00nrve04pdahejb",
+      "note": "Half of the category's 9967 for the month. Largest remainder gives this row the odd minor unit because it comes first in the published list order (`recipient-list.v1` `shareRule.tiebreak`); the two shares are 4984 and 4983 and sum exactly to the category's amount.",
       "evidence": [
-        { "kind": "bank-line", "ref": "STMT-2027-07-0114" },
-        { "kind": "recipient-receipt", "ref": "RCPT-2027-06-HEALTH-1" }
+        {
+          "kind": "bank-line",
+          "ref": "STMT-2027-07-0114"
+        },
+        {
+          "kind": "recipient-receipt",
+          "ref": "RCPT-2027-06-HEALTH-1"
+        }
+      ]
+    },
+    {
+      "recipientId": "rcp_tg8g3ps3smxzdpy1zt0zesjnx9",
+      "category": "health",
+      "amountMinor": 4983,
+      "status": "transferred",
+      "date": "2027-07-20",
+      "receiptRef": "RCPT-2027-06-HEALTH-2",
+      "endToEndId": "psn-2027-06-rcp_tg8g3ps3smxzdpy1zt0zesjnx9",
+      "evidence": [
+        {
+          "kind": "bank-line",
+          "ref": "STMT-2027-07-0115"
+        },
+        {
+          "kind": "recipient-receipt",
+          "ref": "RCPT-2027-06-HEALTH-2"
+        }
       ]
     },
     {
       "recipientId": "rcp_0svacmgratb4f4q0syghrz8ym4",
       "category": "education",
-      "amountMinor": 9967,
+      "amountMinor": 4984,
       "status": "transferred",
       "date": "2027-07-20",
       "receiptRef": "RCPT-2027-06-EDUCATION-1",
       "endToEndId": "psn-2027-06-rcp_0svacmgratb4f4q0syghrz8ym4",
       "evidence": [
-        { "kind": "bank-line", "ref": "STMT-2027-07-0115" },
-        { "kind": "recipient-receipt", "ref": "RCPT-2027-06-EDUCATION-1" }
+        {
+          "kind": "bank-line",
+          "ref": "STMT-2027-07-0116"
+        },
+        {
+          "kind": "recipient-receipt",
+          "ref": "RCPT-2027-06-EDUCATION-1"
+        }
+      ]
+    },
+    {
+      "recipientId": "rcp_8jf9xfejcgadg7cgyag0hmkcxb",
+      "category": "education",
+      "amountMinor": 4983,
+      "status": "transferred",
+      "date": "2027-07-20",
+      "receiptRef": "RCPT-2027-06-EDUCATION-2",
+      "endToEndId": "psn-2027-06-rcp_8jf9xfejcgadg7cgyag0hmkcxb",
+      "evidence": [
+        {
+          "kind": "bank-line",
+          "ref": "STMT-2027-07-0117"
+        },
+        {
+          "kind": "recipient-receipt",
+          "ref": "RCPT-2027-06-EDUCATION-2"
+        }
       ]
     },
     {
       "recipientId": "rcp_bnpt0deptzcjgsm50wpvmrw7kn",
       "category": "environment",
-      "amountMinor": 9966,
+      "amountMinor": 4983,
       "status": "transferred",
       "date": "2027-07-20",
       "receiptRef": "RCPT-2027-06-ENVIRONMENT-1",
       "endToEndId": "psn-2027-06-rcp_bnpt0deptzcjgsm50wpvmrw7kn",
-      "note": "The month's smallest share by one minor unit: largest-remainder rounding, ties broken by list order, so the three shares sum exactly to what was passed on.",
+      "note": "The category's 9966 divides evenly between its two listed recipients, so both take 4983 and no remainder is distributed.",
       "evidence": [
-        { "kind": "bank-line", "ref": "STMT-2027-07-0116" },
-        { "kind": "recipient-receipt", "ref": "RCPT-2027-06-ENVIRONMENT-1" }
+        {
+          "kind": "bank-line",
+          "ref": "STMT-2027-07-0118"
+        },
+        {
+          "kind": "recipient-receipt",
+          "ref": "RCPT-2027-06-ENVIRONMENT-1"
+        }
+      ]
+    },
+    {
+      "recipientId": "rcp_wrfhyk9jj3awrx8dknj7r6yjcn",
+      "category": "environment",
+      "amountMinor": 4983,
+      "status": "transferred",
+      "date": "2027-07-20",
+      "receiptRef": "RCPT-2027-06-ENVIRONMENT-2",
+      "endToEndId": "psn-2027-06-rcp_wrfhyk9jj3awrx8dknj7r6yjcn",
+      "evidence": [
+        {
+          "kind": "bank-line",
+          "ref": "STMT-2027-07-0119"
+        },
+        {
+          "kind": "recipient-receipt",
+          "ref": "RCPT-2027-06-ENVIRONMENT-2"
+        }
       ]
     }
   ],
@@ -107,11 +208,22 @@
         "kind": "retention-from-fees",
         "date": "2027-07-20",
         "note": "The month's reserve retention, moved to the reserve account — which is not the fees account.",
-        "evidence": [{ "kind": "reserve-movement", "ref": "STMT-RES-2027-07-0003" }]
+        "evidence": [
+          {
+            "kind": "reserve-movement",
+            "ref": "STMT-RES-2027-07-0003"
+          }
+        ]
       }
     ]
   },
   "recipientListVersion": "v1",
-  "evidence": [{ "kind": "rail-payout-statement", "ref": "PAYOUT-2027-06", "label": "The month's rail payout statement, net of the processing fee" }],
+  "evidence": [
+    {
+      "kind": "rail-payout-statement",
+      "ref": "PAYOUT-2027-06",
+      "label": "The month's rail payout statement, net of the processing fee"
+    }
+  ],
   "methodologyUrl": "https://purposesource.org/trust/money"
 }

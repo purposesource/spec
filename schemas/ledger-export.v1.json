@@ -130,7 +130,7 @@
         "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$" },
         "ppSnapshotId": { "type": "string", "maxLength": 64 },
         "algoVersion": { "type": "string", "maxLength": 32 },
-        "categoryFundId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" },
+        "categoryFundId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$", "description": "One of the seven published categories — since ops decision D33 item 1 the basket of the listed recipients in that category, nothing else. The closed menu of the seven is enumerated once, in the published `recipient-list.v1` (`$defs.categorySlug`); this contract set may not `$ref` across files — each schema must validate on its own after a single download — so this field constrains the vocabulary by pattern and names the enumerating file instead of carrying a second copy of the enum." },
         "recipientId": { "type": "string", "pattern": "^rcp_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "The listed recipient a `disburse` row transferred to (ops decision D33 item 1)." },
         "correctsLedId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "note": { "type": "string", "maxLength": 1000 },
