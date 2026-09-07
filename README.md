@@ -168,20 +168,21 @@ place of it. Full policy and per-schema history in [`CHANGELOG.md`](CHANGELOG.md
 
 ## Things a human still has to decide
 
-The changelog's "Open questions" section is the live list. The load-bearing ones:
+The changelog's "Open questions" section is the live list, and its "Settled" section keeps
+what has been answered. The load-bearing open ones:
 
-1. **Entitlement-record shape** — the frozen amendment note and the consumer chapter
-   describe the same payload two different ways. This repository implements the consumer
-   chapter (a company wrapper containing the frozen entitlement object) and needs that
-   ratified.
-2. **Counter zero-state** — an illustrative artifact shows `0` where the build sheet says
+1. **Counter zero-state** — an illustrative artifact shows `0` where the build sheet says
    `null`. The schema enforces `null`, on the honesty rule. Confirm or overturn.
-3. **The manifest's `display` section** — published here as explicitly cosmetic, but the
+2. **The manifest's `display` section** — published here as explicitly cosmetic, but the
    registry chapter's permitted-key list does not yet include it.
-4. **Organisation and domain names** — everything derives from `spec.config.json` and is
+3. **Organisation and domain names** — everything derives from `spec.config.json` and is
    subject to final clearance.
-5. **Package publication** — the npm package is marked private; whether the contract set
+4. **Package publication** — the npm package is marked private; whether the contract set
    is also published to a registry is undecided.
+
+Settled since: the **entitlement-record shape**. The payload is ratified as the company
+wrapper carrying the frozen entitlement object (FS-00 §6.2 amendment note of 2026-09-07) —
+which is what `entitlement-record.v1.json` has published all along, so nothing here changed.
 
 ## Licence
 

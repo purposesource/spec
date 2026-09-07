@@ -44,36 +44,52 @@ published *here* and would otherwise have nothing to validate against:
 
 ### Open questions a human must settle
 
-1. **Entitlement-record shape.** The FS-00 §6.2 amendment note states the
-   `/entitlements/{co_ulid}.jws` payload as a single entitlement object; FS-10 §4.2 — the
-   consumer contract, and the only text that specifies `domains[]`, `verification` and
-   domain resolution — states it as a company record carrying `entitlements[]` of exactly
-   that object. This repository implements FS-10 §4.2 and leaves the frozen object
-   untouched inside the array. Needs ratifying either way.
-2. **Counter zero-state.** The illustrative artifact in FS-10 §10 shows the numeric
+A question that gets answered moves to *Settled* below, with its date and the instrument
+that settled it; nothing here is deleted.
+
+1. **Counter zero-state.** The illustrative artifact in FS-10 §10 shows the numeric
    counter fields as `0` while `state` is `pre-launch`; VS-19 states them as `null`, and
    the honesty rule forbids rendering a zero money figure as either an achievement or an
    embarrassment. `stats.v1.json` enforces `null`. If the FS-10 example is meant
    literally, this schema is what must change, and it must change here first.
-3. **Badge artifact and `generatedAt`.** FS-00 §6.2 requires every artifact to carry
+2. **Badge artifact and `generatedAt`.** FS-00 §6.2 requires every artifact to carry
    `schemaVersion` and `generatedAt`. The badge body must remain a valid shields.io
    endpoint response, so it carries shields' own `schemaVersion: 1` and deliberately no
    `generatedAt`; freshness travels in `ETag` and `Last-Modified`. Recorded as a decision,
    not an oversight.
-4. **`PURPOSE.yml` `display` section.** FS-02 §6 enumerates the permitted manifest keys
+3. **`PURPOSE.yml` `display` section.** FS-02 §6 enumerates the permitted manifest keys
    and does not include a display block, while the assignment for this repository names
    display metadata as part of the manifest contract. It is published here as an
    explicitly cosmetic, non-authoritative section. FS-02 should either adopt it or say no.
-5. **Ambiguous artifact paths.** Four literal artifact names overlap a templated path
+4. **Ambiguous artifact paths.** Four literal artifact names overlap a templated path
    (`meta.json` vs `{shard}.json`, `all.json` vs `{nodeId}.json`, `latest.json` and
    `checkpoint-latest.json` vs `{segment}.json`). Harmless for a static file store, and
    the linter rule is switched off with that reasoning written down in `redocly.yaml`. If
    these ever become real routes, the ambiguity becomes real too.
-6. **Organisation and domain names.** Every name in this repository derives from
+5. **Organisation and domain names.** Every name in this repository derives from
    `spec.config.json` and is subject to final clearance. Changing it is one edit plus a
    test run; the gates name every file that still disagrees.
-7. **npm publication.** The package is marked private. Whether the contract set is also
+6. **npm publication.** The package is marked private. Whether the contract set is also
    published to a package registry (and under what name) is undecided.
+
+### Settled
+
+Questions that were open above and have since been answered in the record. They stay here
+with what settled them, because a contract's history is part of the contract.
+
+1. **Entitlement-record shape** — settled 2026-09-07; open question 1 of the list above
+   until then. The `/entitlements/{co_ulid}.jws` payload is ratified as the company record:
+   `schemaVersion`, `generatedAt`, `coId`, `name?`, `domains[]`, `verification`,
+   `entitlements[]`, `thresholdRegistration?` — each `entitlements[]` item being the frozen
+   entitlement object verbatim and closed to additions. The instrument is a dated FS-00 §6.2
+   amendment note beside the frozen row it reconciles, and it gives the reason: FS-10 §4.2 is
+   the only text that specifies `domains[]`, `verification` and the domain-index lookup, and
+   a lone entitlement object has nowhere to carry them — one organisation, one record, one
+   URL, however many terms it holds. Nothing in this repository changed:
+   `entitlement-record.v1.json` already published exactly that shape, no property moved, no
+   version was bumped, and every example and vector still validates. *(As first recorded:
+   "This repository implements FS-10 §4.2 and leaves the frozen object untouched inside the
+   array. Needs ratifying either way.")*
 
 ### Planned — not built
 
@@ -158,7 +174,10 @@ published *here* and would otherwise have nothing to validate against:
   entitlement object closed to additions inside `entitlements[]`.
 - Vesting semantics recorded in the field descriptions: vested iff a version's publication
   date is on or before a window's term end, with `from` as provenance only.
-- See open question 1 above.
+- The company wrapper is **ratified** (2026-09-07; FS-00 §6.2 amendment note — see *Settled*
+  above). Nothing in the file changed but its reconciliation note: no property was added,
+  removed or moved, so 1.0.0 is amended in place rather than bumped. There is one shape here,
+  and there always was.
 
 ## certificate.v1.json
 
