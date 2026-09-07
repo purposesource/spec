@@ -35,10 +35,12 @@ cannot ship without a written history.
 
 ## 0.1.0 — unreleased
 
-Initial scaffold of the contract set. Twenty schemas, the public read API description,
+Initial scaffold of the contract set. Twenty-one schemas, the public read API description,
 and the published reference implementation of the coverage function with its frozen test
-vectors. Two of the twenty are the money contracts of 2026-09-07 — `cost-support.v1.json`
-and `recipient-list.v1.json` — which close the planned-but-unbuilt entry below.
+vectors. Two of the twenty-one are the money contracts of 2026-09-07 — `cost-support.v1.json`
+and `recipient-list.v1.json` — which close the planned-but-unbuilt entry below; the
+twenty-first is `certificate-policy.v1.json`, the published certificate policy of
+2026-09-07.
 
 ### Contracts published beyond the initially-scoped ten
 
@@ -48,6 +50,7 @@ published *here* and would otherwise have nothing to validate against:
 | Schema | Needed by |
 |---|---|
 | `certificate-record.v1.json` | the verify page and the verify route (VS-25); the artifact-validation gate (VS-04) |
+| `certificate-policy.v1.json` | the published certificate policy the site and the claim-language kit both read (VS-30) |
 | `ct-segment.v1.json` | the committed transparency log and its append-only CI guard (VS-27, VS-28) |
 | `ct-checkpoint.v1.json` | the monthly signed checkpoint (VS-28) |
 | `ledger-export.v1.json` | the published monthly ledger export (VS-04, VS-37) |
@@ -310,6 +313,26 @@ remembering the same rule.
   byte-authoritative — passthrough consumers render them verbatim.
 - `ct: null` is modelled explicitly, because signed-but-unlogged must be representable:
   that state is what a rogue issuance looks like, and a verifier has to be able to see it.
+
+## certificate-policy.v1.json
+
+### 1.0.0 — unreleased
+
+- Initial publication. The one published enumeration of every certificate class, its
+  variants, and the exact claims each permits and prohibits — the artifact form of the
+  published-policy obligation (COM-084, FS08-011).
+- `classes[]` is the **issuable** set at the phase named in `phase`, and a class that
+  cannot be issued is in `notIssuable[]` instead. There is deliberately no "unavailable"
+  flag inside `classes[]`: a reader who reads only that array must not be misled about what
+  can be issued.
+- The frozen `typ` tokens are carried as tokens, with the human name beside them in `name`.
+  The prose name of a class and its machine token differ on purpose — the token is frozen
+  by the architecture chapter and is never renamed to match a page.
+- `notIssuable[].typ` is nullable, and the null case is the load-bearing one: a class with
+  no token in the frozen enum cannot be issued by construction, which is a stronger
+  guarantee than a policy sentence about it.
+- `claimKitVersion` is nullable because no kit document is published yet. Null is a fact,
+  not a gap: a payload cannot pin a version that does not exist.
 
 ## ct-segment.v1.json
 

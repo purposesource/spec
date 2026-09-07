@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-07T00:00:00Z",
+  "policyVersion": 1,
+  "phase": "P-M2",
+  "binding": "public claims about this certificate are governed by the enclosed claim-language kit",
+  "claimKitVersion": null,
+  "verify": "verify only at purposesource.org/verify",
+  "classes": [
+    {
+      "typ": "supporter",
+      "name": "payment certificate",
+      "kitVariant": "supporter",
+      "attests": "A settled payment, and nothing beyond it: which Entitlement the organisation bought, the period and the scope it covers, and the revenue band the payer self-certified. It is issued after the payment settles against a recorded transaction, never in anticipation of one, and it carries no figure or claim about impact — none exists before the first disbursed ledger row.",
+      "variants": [
+        {
+          "variant": "entitlement",
+          "label": "holds a paid Entitlement of the Purpose Source Network",
+          "issuable": true,
+          "precondition": "a settled Purpose Fee payment attributable to the named organisation"
+        },
+        {
+          "variant": "gift-funder",
+          "label": "funded an Entitlement for another organisation",
+          "issuable": false,
+          "precondition": "a settled payment made on another organisation's behalf through the gift flow, which does not exist at this phase",
+          "notBefore": "P-M3, with the gift flow"
+        },
+        {
+          "variant": "waived-funder",
+          "label": "holds a waiver and funded the movement separately",
+          "issuable": false,
+          "precondition": "a granted waiver plus a settled top-up or a documented donation; neither lane exists at this phase, and without the funding a waived organisation gets a status certificate only",
+          "notBefore": "P-M3, with the top-up and donation lanes"
+        },
+        {
+          "variant": "donation",
+          "label": "funded the movement through the donate-direct lane",
+          "issuable": false,
+          "precondition": "a documented donation through the donate-direct lane, which does not exist at this phase; whether this stays a variant of this class or becomes its own is an open question in the record",
+          "notBefore": "P-M3, with the donation lane"
+        }
+      ],
+      "permitted": [
+        "holds a {Entitlement kind} of the Purpose Source Network; Purpose Fee amount: {amount as settled}; period: {period}; categories: {categories}",
+        "states the designation of the variant the certificate carries, exactly as this policy records it",
+        "states the self-certified revenue band the certificate prints",
+        "names the scope the certificate records: the repositories of a Project Entitlement, the portfolio, or every registered repository for a Pass",
+        "points a reader at the verification page so the claim can be checked independently"
+      ],
+      "prohibited": [
+        "we support charity",
+        "we give back",
+        "any unquantified social-impact framing",
+        "the Purpose Fee described as a donation, or the payer described as a donor, on the paid lane",
+        "no figure or claim about impact of any kind, and no claimed outcome the published ledger does not show",
+        "any use of the marks implying endorsement, partnership, certification of the holder's products, or membership",
+        "any verification address other than the one the certificate prints"
+      ],
+      "rules": [
+        "CERT-001",
+        "CERT-002",
+        "CERT-004",
+        "CERT-013",
+        "CERT-053",
+        "COM-030",
+        "COM-066",
+        "COM-084",
+        "MKT-003",
+        "MKT-033",
+        "MKT-035",
+        "FS08-010",
+        "FS08-041"
+      ]
+    },
+    {
+      "typ": "license-status",
+      "name": "status certificate",
+      "kitVariant": "status-only",
+      "attests": "A status this movement has already recorded, and only that: a granted waiver, a self-certified registration below the licence threshold, or coverage through a gifted Pass. It attests no payment, because none was made under it, and it carries no amount field at all.",
+      "variants": [
+        {
+          "variant": "waiver",
+          "label": "Purpose Source Licensed Organization — waiver",
+          "issuable": true,
+          "precondition": "a granted waiver recorded in the published waiver registry. The registry exists and is correctly empty: no waiver can be granted before a repository administrator can prove administrative control, so none has been granted and no waiver certificate exists yet"
+        },
+        {
+          "variant": "under-threshold",
+          "label": "Purpose Source Licensed Organization — under threshold",
+          "issuable": true,
+          "precondition": "a recorded threshold registration — the organisation's own self-certification, on one binding tick, with no audit right anywhere in the terms. The surface that records it is not built at this phase, so none is recorded yet"
+        },
+        {
+          "variant": "gifted-pass",
+          "label": "covered via gifted Pass",
+          "issuable": false,
+          "precondition": "a redeemed gifted Pass, which requires the gift flow",
+          "notBefore": "P-M3, with the gift flow"
+        }
+      ],
+      "permitted": [
+        "states the designation of the variant the certificate carries, exactly as this policy records it",
+        "states the period the recorded status covers",
+        "states that the organisation's use of the covered repositories is licensed for that period",
+        "points a reader at the verification page so the status can be checked independently"
+      ],
+      "prohibited": [
+        "every prohibition on the payment class's list, without exception",
+        "any supporter, funder or generosity phrasing: nothing was funded under this certificate",
+        "any amount, in any currency: an unfunded class has no amount field to quote",
+        "no figure or claim about impact of any kind, which for a waived organisation would be false rather than merely vague",
+        "any verification address other than the one the certificate prints"
+      ],
+      "rules": [
+        "CERT-001",
+        "CERT-004",
+        "CERT-052",
+        "CERT-053",
+        "COM-056",
+        "COM-084",
+        "APP-034",
+        "APP-076",
+        "MKT-034",
+        "NEV-025",
+        "FS08-010",
+        "FS08-041"
+      ]
+    }
+  ],
+  "notIssuable": [
+    {
+      "class": "contributor participation certificate",
+      "typ": "contributor",
+      "variants": [
+        "participation"
+      ],
+      "notBefore": "P-M3, with the claim flow",
+      "why": "It needs a claimed account, the subject's own certificate opt-in, and an attribution record to attest. None of the three exists at this phase, and a certificate about a person is never issued without that person's opt-in.",
+      "rules": [
+        "CERT-005",
+        "MIL-012",
+        "FS08-041"
+      ]
+    },
+    {
+      "class": "steward certificate",
+      "typ": "steward",
+      "variants": [
+        "registration",
+        "impact"
+      ],
+      "notBefore": "P-M3, with the claim flow; the impact variant additionally not before the project's own first ledger row",
+      "why": "The registration variant needs a proven project steward, which the claim flow establishes. The impact variant needs at least one ledger row for that project, and no ledger row exists.",
+      "rules": [
+        "CERT-006",
+        "MIL-012",
+        "FS08-041"
+      ]
+    },
+    {
+      "class": "top-up multiplier certificate",
+      "typ": "topup",
+      "variants": [
+        "x2",
+        "x5",
+        "x10"
+      ],
+      "notBefore": "P-M3, with the top-up lane",
+      "why": "The top-up lane is a later phase in its entirety: there is no way to buy a multiplier, so there is no settled payment for one to attest.",
+      "rules": [
+        "CERT-007",
+        "MIL-012",
+        "FS08-041"
+      ]
+    },
+    {
+      "class": "any certificate, figure or claim about impact",
+      "typ": null,
+      "variants": [],
+      "notBefore": "after the first disbursed ledger row exists — a later phase than this one",
+      "why": "Nothing has been disbursed, so there is nothing to attest and no figure to print. The absence is structural rather than remembered: the frozen type enum has no token for it, and the operator signing tool has no code path that could write such a field.",
+      "rules": [
+        "NEV-017",
+        "TRN-003",
+        "CERT-004",
+        "MKT-012",
+        "MIL-012"
+      ]
+    }
+  ]
+}

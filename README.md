@@ -17,7 +17,7 @@ a procurement reviewer can consume all of it the way they consume a static file.
 
 | Directory | Contents |
 |---|---|
-| `schemas/` | 20 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
+| `schemas/` | 21 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v1.ts`, the published coverage function, with `vectors.json` (frozen test vectors) and its test suite. Zero dependencies. |
 | `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in one case, `category-menu.v1.example.json`, the example IS the published artifact. |
@@ -78,6 +78,7 @@ needs a toolchain is not really published.
 | `entitlement-record.v1.json` | decoded payload of `/entitlements/{co_ulid}.jws` | first public version |
 | `certificate.v1.json` | the certificate JWS payload profile | first public version |
 | `certificate-record.v1.json` | `/certs/{cert_id}.json` | first public version |
+| `certificate-policy.v1.json` | `/certs/policy/latest.json` | first public version |
 | `ct-segment.v1.json` | `/ct/{n}.json`, `/ct/latest.json` | first public version |
 | `ct-checkpoint.v1.json` | payload published at `/ct/checkpoint-latest.json` | first public version |
 | `ledger-row.v1.json` | one ledger row | first public version |
@@ -154,9 +155,10 @@ curated registry record  ─────┼──────► purpose-yml.v1 
                               ├──────► repo-record.v1        ─┐
 operator signing script  ─────┼──────► certificate.v1         │
                               ├──────► certificate-record.v1  ├──►  artifacts published as
-                              ├──────► ct-segment.v1          │     files, served by the
-                              ├──────► ct-checkpoint.v1       │     public read API
-committed ledger table   ─────┼──────► ledger-row.v1          │     (openapi/edge-public.v1)
+the certificate policy   ─────┼──────► certificate-policy.v1  │     files, served by the
+                              ├──────► ct-segment.v1          │     public read API
+                              ├──────► ct-checkpoint.v1       │     (openapi/edge-public.v1)
+committed ledger table   ─────┼──────► ledger-row.v1          │
                               ├──────► ledger-export.v1       │
                               ├──────► ledger-chain.v1        │
 fees account + invoices  ─────┼──────► cost-support.v1        │

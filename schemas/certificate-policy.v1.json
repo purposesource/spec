@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/certificate-policy.v1.json",
+  "title": "Certificate policy — /certs/policy/latest.json",
+  "description": "The one published enumeration of every certificate class, its variants, and the exact claims each permits and prohibits (COM-084, FS08-011). It is the machine-readable half of the policy page: a reader who holds a certificate can look up its `typ` here and read what the holder is allowed to say about it, and a scanner can check a published claim against a document rather than against a marketing page.\n\nTwo properties make this a contract rather than a description. First, `classes[]` is the ISSUABLE set at the phase named in `phase` — a class absent from it cannot be issued, and `notIssuable[]` says which classes those are and what has to exist first. Second, the machine `typ` tokens are the frozen enum of the architecture chapter and are never renamed to match prose: `name` carries the human name, `typ` carries the token, and a consumer switches on the token.\n\nThe policy is not data about the world. Apart from the batch timestamp every artifact carries, it is identical on every plane and in every environment, it holds no counters and no subject data, and it changes only when the rule it encodes changes — which is what `policyVersion` records.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/certs/policy/latest.json",
+    "authoritative": true,
+    "producer": "index-build (P-M2: index-build-lite from a committed policy source)",
+    "consumers": ["the certificate policy page", "claim-language kits", "OSPO reviewers checking a published claim"],
+    "fsRefs": [
+      "FS-00 §6.2 amendment note 2026-09-01",
+      "FS-00 §6.4",
+      "FS-08 §2 (FS08-010, FS08-011, FS08-012)",
+      "FS-08 §5 (FS08-041)",
+      "FS-08 §8 (FS08-070, FS08-071)",
+      "COM-084",
+      "CERT-001",
+      "CERT-052",
+      "CERT-053",
+      "MKT-033",
+      "MKT-034",
+      "MKT-035",
+      "NEV-017",
+      "NEV-025"
+    ],
+    "vsRefs": ["VS-30"],
+    "changelog": "CHANGELOG.md#certificate-policyv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "policyVersion", "phase", "binding", "verify", "classes", "notIssuable"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "policyVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The policy's own version, incremented when a permitted or prohibited claim changes. A certificate payload's `claimKitVersion` pins the kit in force at issuance (D17); this number versions the policy that publishes the kit's classes."
+    },
+    "phase": {
+      "type": "string",
+      "minLength": 2,
+      "description": "The milestone whose issuable set `classes[]` describes. A later phase publishes a later policy version, never a rewrite of this one."
+    },
+    "binding": {
+      "type": "string",
+      "minLength": 20,
+      "description": "The CERT-053 statement that the certificate artifact carries on its face: public claims about it are governed by the claim-language kit."
+    },
+    "claimKitVersion": {
+      "type": ["string", "null"],
+      "description": "The kit version in force, or `null` while no kit document is published. `null` is a fact, not a gap: a payload cannot pin a version that does not exist (D17, FS08-070)."
+    },
+    "verify": {
+      "const": "verify only at purposesource.org/verify",
+      "description": "The frozen exclusive-verification wording (CERT-027, FS-00 §6.4 as amended 2026-09-01). Any other address offering to verify these certificates is not the movement's."
+    },
+    "classes": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The classes issuable at `phase`, one entry per frozen `typ`. A class that cannot be issued belongs in `notIssuable[]` instead — a class is never listed here with an 'unavailable' flag, because a reader who checks only this array must not be misled.",
+      "items": { "$ref": "#/$defs/certClass" }
+    },
+    "notIssuable": {
+      "type": "array",
+      "description": "Every class the type system names but this phase cannot issue, and every class that does not exist at all, each with what has to exist first. An empty array would be a claim that everything is issuable.",
+      "items": { "$ref": "#/$defs/notIssuable" }
+    }
+  },
+  "$defs": {
+    "typ": {
+      "enum": ["contributor", "steward", "supporter", "license-status", "topup"],
+      "description": "The frozen certificate type enum (FS-00 §6.4). Copied here rather than referenced: a schema must validate from one downloaded file."
+    },
+    "ruleIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 2 },
+      "description": "The requirement ids this entry implements, so a reader can go from a permitted claim to the rule that permits it."
+    },
+    "certClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["typ", "name", "attests", "kitVariant", "variants", "permitted", "prohibited", "rules"],
+      "properties": {
+        "typ": { "$ref": "#/$defs/typ" },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "description": "The human name of the class. The prose name and the machine token can differ — the token is frozen, the name is what a reader is told."
+        },
+        "attests": {
+          "type": "string",
+          "minLength": 40,
+          "description": "What the certificate attests, and by implication what it does not. Every certificate attests a fact already recorded at issuance; none is anticipatory (CERT-004)."
+        },
+        "kitVariant": {
+          "enum": ["supporter", "status-only"],
+          "description": "Which claim-language kit variant governs the class. `status-only` permits coverage-status wording exclusively (CERT-052, MKT-034)."
+        },
+        "variants": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/variant" }
+        },
+        "permitted": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 10 },
+          "description": "The wording the holder may publish. A claim outside this list is outside the kit, and the kit is contractually binding (CERT-053)."
+        },
+        "prohibited": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 5 },
+          "description": "The wording the holder may not publish, stated as prohibitions so a reviewer can match against them (FS08-070)."
+        },
+        "rules": { "$ref": "#/$defs/ruleIds" }
+      }
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["variant", "label", "issuable", "precondition"],
+      "properties": {
+        "variant": {
+          "enum": ["participation", "registration", "impact", "entitlement", "gift-funder", "waived-funder", "donation", "waiver", "under-threshold", "gifted-pass", "x2", "x5", "x10"],
+          "description": "The variant discriminator (FS08-010). Same closed set as the certificate payload and the verify record."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 5,
+          "description": "The designation this variant permits its holder to state, verbatim. For the status class these are the CERT-001(d) labels, which is why they are quoted rather than paraphrased."
+        },
+        "issuable": {
+          "type": "boolean",
+          "description": "Whether a certificate of this variant can be issued today. `false` inside an issuable class is the honest state of a class whose other variants are live."
+        },
+        "precondition": {
+          "type": "string",
+          "minLength": 10,
+          "description": "The recorded fact issuance requires, or what is missing while `issuable` is false."
+        },
+        "notBefore": {
+          "type": "string",
+          "minLength": 2,
+          "description": "The phase or event that makes a non-issuable variant issuable. Required in practice wherever `issuable` is false; a variant with neither is an unexplained absence."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "issuable": { "const": false } }, "required": ["issuable"] },
+          "then": { "required": ["notBefore"] }
+        }
+      ]
+    },
+    "notIssuable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["class", "typ", "variants", "notBefore", "why", "rules"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "minLength": 5,
+          "description": "The human name of what cannot be issued."
+        },
+        "typ": {
+          "oneOf": [{ "$ref": "#/$defs/typ" }, { "type": "null" }],
+          "description": "The frozen token, or `null` where no token exists. `null` is the load-bearing case: a class with no token in the frozen enum cannot be issued by construction, which is a stronger guarantee than a policy sentence."
+        },
+        "variants": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "The variants of that class, empty where the class has no variants because it does not exist."
+        },
+        "notBefore": {
+          "type": "string",
+          "minLength": 2,
+          "description": "The phase or the event that has to happen first, named rather than left as 'later'."
+        },
+        "why": {
+          "type": "string",
+          "minLength": 20,
+          "description": "What is missing. A reader is owed the reason, not just the refusal."
+        },
+        "rules": { "$ref": "#/$defs/ruleIds" }
+      }
+    }
+  }
+}
