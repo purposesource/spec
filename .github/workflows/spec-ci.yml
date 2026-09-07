@@ -42,6 +42,20 @@ jobs:
         # because somebody will copy it.
         run: npm run check:examples
 
+      - name: The category menu is one list, and every copy of it is identical
+        # After the examples step, because this compares the menu's SLUGS and the menu
+        # example has to be a valid instance first.
+        #
+        # The seven public-benefit categories are published once, in
+        # examples/category-menu.v1.example.json. No schema here may `$ref` another — one
+        # download must validate on its own — so every schema that accepts a category slug
+        # carries a COPY of the enum, and this step is the other half of that trade.
+        # Without it, this repository is the one place drift can be introduced and the one
+        # place with no gate against it: an eighth slug added to a `$defs` category enum
+        # compiles, validates, lints and publishes, and the curated registry's vendor check
+        # then faithfully matches bytes against a published copy that is already wrong.
+        run: npm run check:menu
+
       - name: Coverage vectors use valid published artifacts
         # The vector suite proves the function computes the right answer; this proves it
         # does so over inputs that are shaped like real artifacts, and that all eight
