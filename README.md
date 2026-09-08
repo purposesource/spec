@@ -196,7 +196,14 @@ what has been answered. The load-bearing open ones:
 2. **The manifest's `display` section** — published here as explicitly cosmetic, but the
    registry chapter's permitted-key list does not yet include it.
 3. **Organisation and domain names** — everything derives from `spec.config.json` and is
-   subject to final clearance.
+   subject to final clearance. *(Corrected 2026-09-08: the two names themselves are no
+   longer pending — the GitHub organisation `purposesource` exists and
+   `purposesource.org` is registered, and `spec.config.json` already carries both.
+   What is still undecided is the steward organisation's legal name, which this
+   repository never prints — see [`NOTICE`](NOTICE) — and the final licence identifier
+   (URS §21 OPEN-20), whose working form is `PurposeSource-1.0`. The single
+   substitution point is unchanged, and so is the property that makes it worth having:
+   settling either one is one edit plus a test run.)*
 4. **Package publication** — the npm package is marked private; whether the contract set
    is also published to a registry is undecided.
 

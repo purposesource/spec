@@ -90,7 +90,17 @@ question leaves its number behind as a one-line pointer, so a citation of
    these ever become real routes, the ambiguity becomes real too.
 6. **Organisation and domain names.** Every name in this repository derives from
    `spec.config.json` and is subject to final clearance. Changing it is one edit plus a
-   test run; the gates name every file that still disagrees.
+   test run; the gates name every file that still disagrees. *(Corrected 2026-09-08 — the
+   organisation and domain names are settled facts and no longer what this question is
+   about: the GitHub organisation `purposesource` exists and `purposesource.org` is
+   registered, and `spec.config.json` carries both. The sentence above stays as written
+   because the mechanism it describes is unchanged and still load-bearing for the two
+   names that ARE open: the steward organisation's legal name, which this repository
+   never prints — `NOTICE` records it as pending rather than substituting it — and the
+   final licence identifier, `licenseTokenId`, whose working form `PurposeSource-1.0`
+   the schema descriptions already mark as provisional (URS §21 OPEN-20). Registered is
+   not the same as resolving: the `$id` and server hosts derived from these names are
+   not served yet, which is a deployment fact and no part of this question.)*
 7. **npm publication.** The package is marked private. Whether the contract set is also
    published to a package registry (and under what name) is undecided.
 
