@@ -62,7 +62,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["supporter", "statusOnly"],
-      "description": "The kit variants, one per certificate class that embeds a kit, keyed by the same two tokens the published certificate policy uses in `classes[].kitVariant`. Both are required: a kit that published one variant and left the other out would leave a class of holder with no permitted wording at all, which is the state CERT-053 exists to prevent.",
+      "description": "The kit variants, one per certificate class that embeds a kit: `supporter` for the payment class, `statusOnly` for the licence-status class. These keys are this document's own, in the camelCase every key here uses. The published certificate policy distinguishes the SAME two classes with the `classes[].kitVariant` tokens `supporter` and `status-only`, so a consumer joining the two files maps the policy's `status-only` onto `statusOnly` — indexing this object with the policy token directly resolves to nothing for every licence-status class. Both variants are required: a kit that published one and left the other out would leave a class of holder with no permitted wording at all, which is the state CERT-053 exists to prevent.",
       "properties": {
         "supporter": { "$ref": "#/$defs/variant" },
         "statusOnly": { "$ref": "#/$defs/variant" }
@@ -95,7 +95,7 @@
             "type": "string",
             "pattern": "^(?:contributor|steward|supporter|license-status|topup)\\.(?:participation|registration|impact|entitlement|gift-funder|waived-funder|donation|waiver|under-threshold|gifted-pass|x2|x5|x10)$"
           },
-          "description": "The certificate classes this variant governs, as `{typ}.{variant}` in the frozen tokens of the type system (FS08-010). Both enums are copied here rather than referenced: no schema in this repository may `$ref` another, because one downloaded file has to validate on its own. A class absent from every variant of a published kit is a class whose holders have no permitted wording — at this phase that is the honest state of the classes the certificate policy records as not issuable."
+          "description": "The certificate classes this variant governs, as `{typ}.{variant}` in the frozen tokens of the type system (FS08-010). Both enums are copied here rather than referenced: no schema in this repository may `$ref` another, because one downloaded file has to validate on its own. A class absent from every variant of a published kit is a class whose holders have no permitted wording, and that absence is never left silent: the variant's `permittedNotes` say which classes it does not cover and what is true of them. Which classes can be issued at all is the published certificate policy's answer, not this schema's — and a class that policy records as issuable which no kit variant covers is a gap for the next kit version to close, never a licence to invent wording."
         },
         "permittedPattern": {
           "type": "string",

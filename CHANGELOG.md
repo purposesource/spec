@@ -364,14 +364,30 @@ remembering the same rule.
 - The three prohibitions FS-08 §8 names are REQUIRED MEMBERS of every variant's list, as
   three `contains` clauses. The prohibition list is the half of a kit a later edit is most
   likely to shorten, and those three are the framings that were examined and rejected.
-- Exactly two variants, and the set is closed: `supporter` and `statusOnly` — the two tokens
-  `certificate-policy.v1.json` already uses in `classes[].kitVariant`. `statusOnly` permits
+- Exactly two variants, and the set is closed: `supporter` for the payment class and
+  `statusOnly` for the licence-status class — the same two classes
+  `certificate-policy.v1.json` distinguishes with its `classes[].kitVariant` tokens
+  `supporter` and `status-only`. The keys here are camelCase, like every other key in this
+  contract, so a consumer joining the two files maps the policy's `status-only` onto
+  `statusOnly` rather than indexing the object with the token. `statusOnly` permits
   coverage-status wording exclusively: an organisation covered by a waiver funded nothing, so
   supporter or impact phrasing on its certificate would be false rather than merely vague
-  (CERT-052, MKT-034).
+  (CERT-052, MKT-034). *(Corrected the same cycle: as first written, this entry and the
+  schema's own `variants` description called the two keys the same tokens the policy uses,
+  which is true of `supporter` and false of `statusOnly` — and it read as integration guidance
+  in a public repository. The keys did not change; the sentence now states the mapping.)*
 - NO DONATION-LANE VARIANT, and the description says so rather than leaving the absence to be
   read as an oversight: the donate-direct lane is not operable at this phase, so a kit for it
   would govern claims nobody can make. Adding one later is additive.
+- `appliesTo` names the classes a variant governs, and what a variant does NOT cover is stated
+  in its own `permittedNotes` rather than left to a reader to notice. Which classes can be
+  issued at all is the certificate policy's answer and not this schema's: a class that policy
+  records as issuable which no kit variant covers is a gap for the next kit version to close,
+  never a licence to invent wording. `license-status.under-threshold` is that case today — its
+  recording surface does not exist, so no such certificate has been issued, and the pattern it
+  would need is a question for the plan's owner (PS-272). *(Corrected the same cycle: the
+  description first justified every absence as a class "the certificate policy records as not
+  issuable", which the policy example refutes for exactly that variant.)*
 - `binding` is a `const`, not a length rule. FS-08 §8's sentence is what makes the kit
   contractual, and a paraphrase on one certificate with the original on another would leave
   two different bindings in the field.
