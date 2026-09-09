@@ -48,7 +48,7 @@ const cfg = config();
 const SELF = 'scripts/check-copy.mjs';
 const ALLOW_MARKER = 'copy-lint-allow: mention';
 
-const SCAN_DIRS = ['schemas', 'openapi', 'coverage', 'examples', 'scripts', '.github'];
+const SCAN_DIRS = ['schemas', 'openapi', 'coverage', 'examples', 'kits', 'scripts', '.github'];
 const SCAN_FILES = ['README.md', 'CHANGELOG.md', 'NOTICE', 'redocly.yaml', 'spec.config.json', 'package.json'];
 const SCAN_EXTENSIONS = ['.md', '.json', '.yaml', '.yml', '.ts', '.mjs', '.txt', ''];
 

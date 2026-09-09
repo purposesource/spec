@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "kitVersion": "kit-1",
+  "permalink": "https://purposesource.org/kits/v1",
+  "publishedAt": null,
+  "language": "en",
+  "variants": {
+    "supporter": {
+      "appliesTo": [
+        "supporter.entitlement"
+      ],
+      "permittedPattern": "{organisation} holds a {lane} Entitlement of the Purpose Source Network; Purpose Fee amount: {amount}; period: {period}; categories: {categories}. verify only at purposesource.org/verify",
+      "optionalClauses": [
+        "revenue band: {band}"
+      ],
+      "permittedNotes": [
+        "Every placeholder is substituted from the certificate the claim is about, never from a marketing document: {organisation} is the subject exactly as the certificate prints it, {lane} is the Entitlement lane it records, {amount} is the Purpose Fee as settled, {period} is the period covered, and {categories} is the published category set.",
+        "The payment is the Purpose Fee. It is never described as a contribution or a donation, and the payer is never described as a donor.",
+        "The optional clause may state the revenue band the certificate prints. The band is the payer's own self-certification, and that is what the certificate records it as.",
+        "The permitted wording is what the certificate records and nothing beyond it. No figure or claim about impact may be added — no outcome, no beneficiary count, no proportion of anything: none exists before a disbursed row of the published ledger.",
+        "The closing sentence is reproduced exactly as it stands above, in a claim as on the certificate. No other verification address may be offered beside it.",
+        "This version publishes no donation-lane variant. The donate-direct lane is not operable at this phase, so a kit for it would govern claims nobody can make; a later kit version adds one when the lane exists.",
+        "The corporate classes this variant does not list — the gift-funder, waived-funder and donation variants of the payment class, and the top-up class — cannot be issued at this phase, so this version states no pattern for them."
+      ],
+      "prohibited": [
+        "we support charity",
+        "we give back",
+        "any unquantified social-impact framing",
+        "describing the Purpose Fee as a donation or the organisation as a donor",
+        "any verification address other than the one printed on the certificate"
+      ],
+      "binding": "public claims about this certificate are governed by the enclosed claim-language kit"
+    },
+    "statusOnly": {
+      "appliesTo": [
+        "license-status.waiver"
+      ],
+      "permittedPattern": "{organisation} is a Purpose Source Licensed Organization — waiver; coverage status: {status}. verify only at purposesource.org/verify",
+      "optionalClauses": [],
+      "permittedNotes": [
+        "Coverage-status wording exclusively. A status certificate attests a recorded status and no payment, so this variant permits no amount, no revenue band, no supporter designation, and no supporter or impact phrasing anywhere.",
+        "This version states a pattern for the waiver variant only. The under-threshold and gifted-pass variants of the status class carry their own designations, which the published certificate policy records; neither has been recorded for any organisation at this phase, and a later kit version states their patterns when the surfaces that record them exist.",
+        "{organisation} is the subject exactly as the certificate prints it; the designation is reproduced as the published certificate policy records it; and {status} is the coverage status the verify record carries when the claim is made, copied from that record rather than paraphrased.",
+        "An organisation covered by a waiver funded nothing. A claim implying that it did would be false rather than merely vague, which is why this variant stands apart from the supporter one instead of narrowing it.",
+        "The closing sentence is reproduced exactly as it stands above, in a claim as on the certificate. No other verification address may be offered beside it."
+      ],
+      "prohibited": [
+        "we support charity",
+        "we give back",
+        "any unquantified social-impact framing",
+        "describing the Purpose Fee as a donation or the organisation as a donor",
+        "any verification address other than the one printed on the certificate",
+        "any supporter or impact phrasing"
+      ],
+      "binding": "public claims about this certificate are governed by the enclosed claim-language kit"
+    }
+  },
+  "translations": {},
+  "translationsNote": "Empty at this phase, and that is a fact rather than a gap: a rendering nobody has approved would be a builder's own translation of a legal constraint. Counsel-approved German and French renderings ship at P-M3, each marked as an approved rendering; the English text of this document is controlling in every case."
+}

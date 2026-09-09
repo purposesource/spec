@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/claim-kit.v1.json",
+  "title": "Claim-language kit — /kits/{version}.json",
+  "description": "The exact wording an organisation may use to describe a certificate publicly, the framing that is contractually excluded, and the binding statement printed on the certificate face (CERT-050…053, FS08-070). A kit is a versioned DOCUMENT rather than a page: `kitVersion` is what a certificate payload's `claimKitVersion` pins at issuance (D17), so the wording that was in force when a certificate was issued stays readable after the wording changes.\n\nTwo properties make this a contract rather than advice. First, permitted wording is a PATTERN with braced placeholders and never a filled-in claim: a kit carrying one organisation's values would publish a single purchase's claim as if it governed every purchase, and a kit carrying a figure would put a number into a document the renderer embeds in every certificate — so no figure of any kind appears here, and every placeholder is substituted from the certificate the claim is about. Second, `prohibited` is written as prohibitions a reviewer can match a published claim against, and the three entries FS-08 §8 names are required members of every variant's list: a later edit cannot quietly drop one.\n\nExactly two variants exist, and the set is closed deliberately: `supporter` governs the payment class, and `statusOnly` governs the licence-status class, which permits coverage-status wording exclusively and no supporter or impact phrasing anywhere (CERT-052, MKT-034). There is no donation-lane variant — the donate-direct lane is not operable at this phase, so a kit for it would govern claims nobody can make; adding one is an additive change to this file, made when the lane exists.\n\nThe document carries no `generatedAt`. It is authored and published as-is: it holds no counters, no subject data and no batch timestamp, so there is nothing for one to date (the same deliberate absence as the badge contract, for a different reason). `publishedAt` is null until the document is first published at its permalink on the apex, and immutable from then on (D32, FS01-121).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/kits/{version}.json",
+    "authoritative": true,
+    "producer": "authored in this repository as kits/kit-{version}.json and published as-is (P-M2: vendored byte-identical by the website and served at its permalink; P-M3: emitted into the artifact plane by jobs.index-build)",
+    "consumers": [
+      "the certificate renderer, which embeds the kit as an integral PDF page carrying the binding statement",
+      "the kit page and its raw endpoint on the website",
+      "the checkout acknowledgment that delivers the kit at purchase",
+      "OSPO reviewers and journalists checking a published claim against the document that governs it"
+    ],
+    "fsRefs": [
+      "FS-08 §8 (FS08-070…072)",
+      "FS-05 §3.1 step 5",
+      "D17",
+      "CERT-050…053",
+      "MKT-032…035"
+    ],
+    "vsRefs": ["VS-31", "VS-30"],
+    "changelog": "CHANGELOG.md#claim-kitv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kitVersion",
+    "permalink",
+    "publishedAt",
+    "language",
+    "variants",
+    "translations",
+    "translationsNote"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kitVersion": {
+      "type": "string",
+      "pattern": "^kit-[0-9]+$",
+      "description": "The kit's identifier, in the `{family}-{n}` grammar the checkout documents share with `att-1` and `ent-terms-1`. This is the string a certificate payload pins as `claimKitVersion` (D17), so it is never reused and never renamed."
+    },
+    "permalink": {
+      "type": "string",
+      "pattern": "^https://purposesource\\.org/kits/v[0-9]+$",
+      "description": "Where this document is published for a reader, in full, permanently. `kit-{n}` is published at `/kits/v{n}`: the file name carries the document's identifier and the URL carries the site's permalink token (WEB-012, FS01-121). A gate in this repository derives both from spec.config.json, so a domain or org rename is one edit and a test run."
+    },
+    "publishedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When this document was first published at its permalink on the apex, or null while it has not been. Required and nullable rather than optional: in an audit a missing key and an explicit null must not be distinguishable, and the null is what says the text may still change in place (D32). After publication the text is immutable and a change is a new kit at a new URL."
+    },
+    "language": {
+      "const": "en",
+      "description": "The language of this document's own text. English is controlling for every kit (CERT-056); an approved rendering in another language is an entry in `translations`, never a separate document with a different `language`."
+    },
+    "variants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["supporter", "statusOnly"],
+      "description": "The kit variants, one per certificate class that embeds a kit, keyed by the same two tokens the published certificate policy uses in `classes[].kitVariant`. Both are required: a kit that published one variant and left the other out would leave a class of holder with no permitted wording at all, which is the state CERT-053 exists to prevent.",
+      "properties": {
+        "supporter": { "$ref": "#/$defs/variant" },
+        "statusOnly": { "$ref": "#/$defs/variant" }
+      }
+    },
+    "translations": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z]{2}$" },
+      "additionalProperties": { "$ref": "#/$defs/translation" },
+      "description": "Counsel-approved renderings, keyed by ISO 639-1 language code. Empty is the honest state at this phase and not a gap: a rendering nobody has approved would be a builder's own translation of a legal constraint. German and French ship at P-M3 (CERT-056), each marked as an approved rendering, and the English text of this document is controlling in every case."
+    },
+    "translationsNote": {
+      "type": "string",
+      "minLength": 40,
+      "description": "What the state of `translations` means, said in the document itself rather than only in this schema — the kit is read as a published page by people who will never open the contract."
+    }
+  },
+  "$defs": {
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["appliesTo", "permittedPattern", "optionalClauses", "permittedNotes", "prohibited", "binding"],
+      "description": "One variant: which certificates it governs, the one permitted pattern, the clauses that may be added to it, the notes that bound how it is filled in, the prohibitions, and the binding statement.",
+      "properties": {
+        "appliesTo": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^(?:contributor|steward|supporter|license-status|topup)\\.(?:participation|registration|impact|entitlement|gift-funder|waived-funder|donation|waiver|under-threshold|gifted-pass|x2|x5|x10)$"
+          },
+          "description": "The certificate classes this variant governs, as `{typ}.{variant}` in the frozen tokens of the type system (FS08-010). Both enums are copied here rather than referenced: no schema in this repository may `$ref` another, because one downloaded file has to validate on its own. A class absent from every variant of a published kit is a class whose holders have no permitted wording — at this phase that is the honest state of the classes the certificate policy records as not issuable."
+        },
+        "permittedPattern": {
+          "type": "string",
+          "minLength": 40,
+          "pattern": "(?:verify only at purposesource.org/verify)$",
+          "description": "The one permitted claim shape, with braced placeholders. It ends with the exclusive-verification sentence and the pin above requires that (CERT-027, FS-00 §6.4 as amended 2026-09-01): a claim offering any other address to verify at is outside the kit. The two dots in the pin are deliberately unescaped and the sentence deliberately wrapped in a group — this repository's copy gate reads the token that follows those words and requires it to equal the published host exactly, so an escaped dot or a bare anchor pressed against the sentence would read here as a different host being published."
+        },
+        "optionalClauses": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 5 },
+          "description": "Clauses that may be added to the pattern, each with its own placeholders. Required and possibly empty: an empty array states that this variant permits nothing beyond its pattern, where an absent key would leave a reader to decide whether silence meant permission."
+        },
+        "permittedNotes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 20 },
+          "description": "How the pattern is filled in, and what may not be added while filling it in — the part a marketing team gets wrong. These are constraints in prose, addressed to the holder; they are not commentary about the schema."
+        },
+        "prohibited": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 5 },
+          "allOf": [
+            { "contains": { "const": "we support charity" } },
+            { "contains": { "const": "we give back" } },
+            { "contains": { "const": "any unquantified social-impact framing" } }
+          ],
+          "description": "The wording the holder may not publish, stated as prohibitions so a reviewer can match a published claim against them (FS08-070). The three entries FS-08 §8 lists are required members of every variant's list: they are the examined-and-rejected framings, and a kit that dropped one would silently permit it."
+        },
+        "binding": {
+          "const": "public claims about this certificate are governed by the enclosed claim-language kit",
+          "description": "The CERT-053 statement the certificate carries on its face, pinned to FS-08 §8's sentence. A const rather than a length rule, because the sentence is what makes the kit contractual: a paraphrase on one certificate and the original on another would leave two different bindings in the field."
+        }
+      }
+    },
+    "translation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["permitted", "approvedRendering"],
+      "properties": {
+        "permitted": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 20 },
+          "description": "The permitted wording in this language, as counsel approved it (FS-08 §8)."
+        },
+        "approvedRendering": {
+          "const": true,
+          "description": "A rendering is published only once counsel has approved it. The flag is required and constant so an unapproved draft cannot be added with the field simply left out; English stays controlling either way (CERT-056)."
+        }
+      }
+    }
+  }
+}

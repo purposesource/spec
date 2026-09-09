@@ -35,12 +35,13 @@ cannot ship without a written history.
 
 ## 0.1.0 — unreleased
 
-Initial scaffold of the contract set. Twenty-one schemas, the public read API description,
+Initial scaffold of the contract set. Twenty-two schemas, the public read API description,
 and the published reference implementation of the coverage function with its frozen test
-vectors. Two of the twenty-one are the money contracts of 2026-09-07 — `cost-support.v1.json`
+vectors. Two of them are the money contracts of 2026-09-07 — `cost-support.v1.json`
 and `recipient-list.v1.json` — which close the planned-but-unbuilt entry below; the
 twenty-first is `certificate-policy.v1.json`, the published certificate policy of
-2026-09-07.
+2026-09-07; and the twenty-second is `claim-kit.v1.json` (2026-09-08), the contract for the
+claim-language kit the checkout delivers at purchase and every corporate certificate embeds.
 
 ### Contracts published beyond the initially-scoped ten
 
@@ -343,6 +344,51 @@ remembering the same rule.
   guarantee than a policy sentence about it.
 - `claimKitVersion` is nullable because no kit document is published yet. Null is a fact,
   not a gap: a payload cannot pin a version that does not exist.
+
+## claim-kit.v1.json
+
+### 1.0.0 — unreleased (2026-09-08)
+
+- Initial publication. The claim-language kit: the exact wording an organisation may use to
+  describe a certificate publicly, the framing that is contractually excluded, and the
+  binding statement printed on the certificate face (CERT-050…053, FS08-070). The document
+  itself is `kits/kit-1.json`, published at `/kits/v1`; this is the contract `check:kits`
+  validates it against.
+- THE PERMITTED WORDING IS A PATTERN with braced placeholders, never a filled-in claim, and
+  the filled-in form is refused the only way a document-wide rule can be: no currency figure
+  may appear anywhere in a kit (`check:kits`). A figure here would be a number about one
+  organisation's purchase, sitting in a document the renderer embeds into every certificate.
+- The exclusive-verification sentence is pinned by a `pattern` on every permitted pattern
+  (CERT-027), and `check:kits` asserts the same sentence against `spec.config.json` — so the
+  literal in the schema and the configured host cannot drift apart.
+- The three prohibitions FS-08 §8 names are REQUIRED MEMBERS of every variant's list, as
+  three `contains` clauses. The prohibition list is the half of a kit a later edit is most
+  likely to shorten, and those three are the framings that were examined and rejected.
+- Exactly two variants, and the set is closed: `supporter` and `statusOnly` — the two tokens
+  `certificate-policy.v1.json` already uses in `classes[].kitVariant`. `statusOnly` permits
+  coverage-status wording exclusively: an organisation covered by a waiver funded nothing, so
+  supporter or impact phrasing on its certificate would be false rather than merely vague
+  (CERT-052, MKT-034).
+- NO DONATION-LANE VARIANT, and the description says so rather than leaving the absence to be
+  read as an oversight: the donate-direct lane is not operable at this phase, so a kit for it
+  would govern claims nobody can make. Adding one later is additive.
+- `binding` is a `const`, not a length rule. FS-08 §8's sentence is what makes the kit
+  contractual, and a paraphrase on one certificate with the original on another would leave
+  two different bindings in the field.
+- `optionalClauses` is required and may be empty. An empty array states that a variant permits
+  nothing beyond its pattern, where an absent key would leave a reader deciding whether
+  silence meant permission.
+- `publishedAt` is required and nullable: null until the document is first published at its
+  permalink on the apex, after which the text is immutable and a change is a new kit at a new
+  URL (D32, FS01-121). `translations` is empty for a related reason — a rendering nobody has
+  approved would be a builder's own translation of a legal constraint, so German and French
+  ship at P-M3, each marked as an approved rendering, with English controlling (CERT-056).
+- No `generatedAt`. The document is authored rather than generated and holds no counters, no
+  subject data and no batch timestamp, so there is nothing for one to date. Recorded here as a
+  decision for the same reason `badge.v1.json`'s absence is (open question 3).
+- The example IS a published kit, byte for byte, and `check:kits` refuses one that has drifted
+  from every document in `kits/`. Kit wording is claim language; a drifted example is the file
+  somebody copies into a press release. Same precedent as `category-menu.v1.example.json`.
 
 ## ct-segment.v1.json
 
