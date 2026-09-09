@@ -4,7 +4,7 @@
   "title": "Monthly ledger export — /ledger/{YYYY}-{MM}.json",
   "description": "The published monthly ledger export (FS-07 §6.2). Immutable once written: regeneration may only re-emit byte-identical content for a locked month, and a divergence is an alert, not a fix (FS07-051). The `.csv` twin carries the same rows flat; the human ledger page generates from the same rows, and any divergence between page, JSON and CSV is a defect (VS-37, ENG-043/044).\n\nThe shadow section, when present, carries its label IN BAND so no downstream consumer can strip it accidentally: contributor votes are computed and NOT used for routing until the fairness-review gate opens (D27, FS07-052).\n\nDisplay law: pages generate exclusively from these rows; per-contributor money respects the published materiality floor; unclaimed shares appear in aggregate only; there are no leaderboards (FS07-052, D15).\n\nAt P-M2 there are no allocation rows and no `policy`/`totals` allocation figures — the export carries intake rows only, and before the first money moves the ledger page says 'no money has moved yet' in words rather than rendering a zero (FS07-100, VS-37).",
   "x-psn": {
-    "specVersion": "1.2.1",
+    "specVersion": "1.3.0",
     "phase": "P-M2 (intake rows only)",
     "artifactPath": "/ledger/{YYYY}-{MM}.json (+ .csv twin)",
     "authoritative": true,
@@ -21,6 +21,7 @@
     "schemaVersion": { "const": 1 },
     "month": { "$ref": "#/$defs/monthKey" },
     "generatedAt": { "type": "string", "format": "date-time" },
+    "source": { "enum": ["registry-v0", "sample", "fixture"], "description": "Which plane produced this artifact. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders such an artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2 production source of record — the curated registry repository the index is built from. Optional, and its absence asserts nothing: an artifact whose body cannot carry the label borrows the plane's declaration from `/registry/index/meta.json`. The enum widens additively when the P-M3 producer takes a value of its own." },
     "currency": { "$ref": "#/$defs/currency", "description": "Reporting currency (CHF). Per-row native currency and captured FX travel on the rows." },
     "locked": { "type": "boolean", "description": "True once the month is locked and the file is immutable. An open month may still receive intake rows." },
     "lockedAt": { "type": ["string", "null"], "format": "date-time" },
@@ -143,6 +144,6 @@
     "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
     "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "sha256OrGenesis": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+    "githubNodeId": { "type": "string", "pattern": "^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$", "description": "A GitHub GraphQL node_id, in either of the two forms GitHub has issued: the opaque current form (a repository's is `R_`-prefixed) and the legacy base64 form, whose decoded value begins `010:Repository` and whose `=` padding the first alternative cannot express. Widened 2026-09-08 to admit the second: `registry-v0-record.v1` accepts both, so a record the curated registry accepts is publishable in this artifact. The primary key for repositories and people throughout this contract set (FS-00 §6.1)." }
   }
 }

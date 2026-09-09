@@ -4,7 +4,7 @@
   "title": "Ledger hash chain — /ledger/chain.json",
   "description": "The ledger's tamper-evidence document: the global chain head plus one entry per month carrying that month's digest and the global head at lock (FS07-040, FS07-051). Any later tampering is detectable by re-walking the global chain and recomputing the month digests — which CI does on every pull request at P-M2 (FS07-100, VS-36).\n\nThe chain is ONE GLOBAL append-ordered chain: `rowHash = SHA-256(prevHash ∥ JCS(row minus prevHash/rowHash))`, `prevHash` being the previous row in global insertion order regardless of month, genesis 64 zeros. So a month's lock never blocks a later month's intake, and the P-M3 database import continues the same chain unbroken from the v0 head (FS07-101).\n\nThe honest claim this document supports is that every RECORDED allocation and disbursement is independently reconcilable — append-only ledger, the monthly table's evidence links (rail payout statement, invoices, supporter payments, bank lines), the listed recipients' receipts (ops decision D33 item 2f). It does not claim the bank legs to the recipients are publicly provable end to end, because they are not.",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M2",
     "artifactPath": "/ledger/chain.json",
     "authoritative": true,
@@ -20,6 +20,7 @@
   "properties": {
     "schemaVersion": { "const": 1 },
     "generatedAt": { "type": "string", "format": "date-time" },
+    "source": { "enum": ["registry-v0", "sample", "fixture"], "description": "Which plane produced this artifact. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders such an artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2 production source of record — the curated registry repository the index is built from. Optional, and its absence asserts nothing: an artifact whose body cannot carry the label borrows the plane's declaration from `/registry/index/meta.json`. The enum widens additively when the P-M3 producer takes a value of its own." },
     "algorithm": { "const": "sha256", "description": "Hash function. A change here is a new schema version, never an in-place edit." },
     "canonicalisation": { "const": "RFC8785", "description": "JSON Canonicalisation Scheme, applied to the row minus its own `prevHash`/`rowHash` before hashing." },
     "genesisPrevHash": { "const": "0000000000000000000000000000000000000000000000000000000000000000" },

@@ -4,7 +4,7 @@
   "title": "Repo record — /registry/repo/{node_id}.json",
   "description": "The published per-repository record: one of the three inputs to the cov-v1 coverage function (FS-10 §4.2) and the data behind the public project page (WEB-080). Published for repositories in state `verified`, `suspended`, `quit` or `delisted`; `detected` repositories appear in aggregate counts only (FS02-062, GH-014). A delisted or quit repository still HAS a record and still computes coverage — entitlements and vesting stand (D12) — and `state` is what the answer reports as `basis.repoState` (FS-10 §4.3 step 1). At P-M2 the `stats` block is deliberately ABSENT: Purpose-Points and charity figures do not exist before the first disbursed ledger row, and publishing a zero would be theatre (VS-18, NEV-017).",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M2",
     "artifactPath": "/registry/repo/{node_id}.json",
     "authoritative": true,
@@ -20,6 +20,7 @@
   "properties": {
     "schemaVersion": { "const": 1 },
     "generatedAt": { "type": "string", "format": "date-time", "description": "When this artifact was rendered. Also served as `Last-Modified` (FS10-003). Regeneration is eventually consistent by design — nothing may promise real time (FS-00 §7.5)." },
+    "source": { "enum": ["registry-v0", "sample", "fixture"], "description": "Which plane produced this artifact. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders such an artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2 production source of record — the curated registry repository the index is built from. Optional, and its absence asserts nothing: an artifact whose body cannot carry the label borrows the plane's declaration from `/registry/index/meta.json`. The enum widens additively when the P-M3 producer takes a value of its own." },
     "nodeId": { "$ref": "#/$defs/githubNodeId" },
     "owner": {
       "type": "object",
@@ -160,6 +161,6 @@
     "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
     "githubLogin": { "type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$" },
-    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+    "githubNodeId": { "type": "string", "pattern": "^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$", "description": "A GitHub GraphQL node_id, in either of the two forms GitHub has issued: the opaque current form (a repository's is `R_`-prefixed) and the legacy base64 form, whose decoded value begins `010:Repository` and whose `=` padding the first alternative cannot express. Widened 2026-09-08 to admit the second: `registry-v0-record.v1` accepts both, so a record the curated registry accepts is publishable in this artifact. The primary key for repositories and people throughout this contract set (FS-00 §6.1)." }
   }
 }

@@ -4,7 +4,7 @@
   "title": "Transparency-log segment — /ct/{n}.json and /ct/latest.json",
   "description": "One segment of the append-only certificate transparency log. Structure for v1 is a flat signed append-only log plus checkpoints (CERT-034 default; a Merkle upgrade would add an inclusion-proof field additively — URS §21 OPEN-37). Closed segments hold exactly 10000 entries and are chained by hash; `/ct/latest.json` is the OPEN segment in the identical shape (FS08-111).\n\nEntries carry hash, type, kind, reference and timestamp and NOTHING ELSE — no names, no emails, no subject data. That is what makes the log GDPR-compatible by content and therefore immutable forever, including through an erasure request (CERT-031, CERT-045).\n\nAt P-M2 the log is exactly one committed file, `ct/0.json` at the website repository root, appended by pull request; CI rejects any diff that edits or deletes an existing entry, which makes append-only a mechanical property rather than a promise (FS08-113, VS-28). A revocation or status change is a NEW entry whose `ref` is the ORIGINAL entry's hash — the log never edits (CERT-033).",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M2 (single committed segment 0)",
     "artifactPath": "/ct/{n}.json · /ct/latest.json",
     "authoritative": true,
@@ -31,6 +31,7 @@
       "format": "date-time",
       "description": "Present on the open segment (`latest.json`). A CLOSED segment is frozen byte-for-byte the moment it fills, so it deliberately carries no regeneration timestamp — its immutability is the point."
     },
+    "source": { "enum": ["registry-v0", "sample", "fixture"], "description": "Which plane produced this artifact. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders such an artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2 production source of record — the curated registry repository the index is built from. Optional, and its absence asserts nothing: an artifact whose body cannot carry the label borrows the plane's declaration from `/registry/index/meta.json`. The enum widens additively when the P-M3 producer takes a value of its own." },
     "closed": { "type": "boolean", "description": "True once the segment reached its fixed entry count and was frozen." },
     "entries": {
       "type": "array",

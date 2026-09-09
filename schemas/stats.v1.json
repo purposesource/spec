@@ -4,7 +4,7 @@
   "title": "Public counters — /stats.json",
   "description": "The public counter artifact, with an explicit three-state machine so that a number's ABSENCE is a documented state rather than a bug (WEB-060/061, FS-10 §10).\n\n`state` is computed from real registry and ledger facts and is never set by hand:\n  · `pre-launch` — mechanism copy only. Every numeric field is null. No letter-of-intent counts, no progress bar.\n  · `launched-pre-disbursement` — projects, contributors and companies are real; `chfRoutedMinor` stays NULL with `firstDisbursementScheduledFor` naming the date. 'CHF 0' is never rendered, neither as an achievement nor as an embarrassment.\n  · `post-first-franc` — every figure is real and `chfRoutedMinor` is the ledger total.\n\nA field may be null in any state where the underlying thing does not yet exist: at P-M2 `contributorsClaimed` is null because there is no claim flow to claim through, and the page labels it as the structural zero it is (VS-19).\n\nRendering rules travel with the data: a `computedAt` caption, deep links to the source surfaces, no upward animation from zero, and `prefers-reduced-motion` honoured (WEB-062/063, WEB-121).",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M2",
     "artifactPath": "/stats.json",
     "authoritative": true,
@@ -20,6 +20,7 @@
   "properties": {
     "schemaVersion": { "const": 1 },
     "generatedAt": { "type": "string", "format": "date-time", "description": "Rendered as the `computedAt` caption. A counter without its timestamp is a claim without a date." },
+    "source": { "enum": ["registry-v0", "sample", "fixture"], "description": "Which plane produced this artifact. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders such an artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2 production source of record — the curated registry repository the index is built from. Optional, and its absence asserts nothing: an artifact whose body cannot carry the label borrows the plane's declaration from `/registry/index/meta.json`. The enum widens additively when the P-M3 producer takes a value of its own. Two catalogued artifacts deliberately have no such member and are the borrowers above: `badge.v1` (shields.io owns the body — a foreign field would break the endpoint contract) and `certificate-policy.v1` (a rule, byte-identical on every plane, so a plane label on it would be meaningless). No signed payload carries it either: the label is a property of the build, not of what was attested." },
     "state": {
       "enum": ["pre-launch", "launched-pre-disbursement", "post-first-franc"],
       "description": "The machine state. The prose labels S1/S2/S3 stay prose and never appear in this artifact (FS01-050)."

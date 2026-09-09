@@ -4,7 +4,7 @@
   "title": "Certificate JWS payload profile (v1)",
   "description": "The signed payload of a certificate. Header is fixed: `{\"alg\":\"ES256\",\"kid\":\"psn-{env}-{yyyy}-{n}\",\"typ\":\"application/psn-cert+jws\",\"cty\":\"application/json\"}`; the payload is canonicalised with RFC 8785 (JCS) before signing, the compact serialisation IS the certificate, and `SHA-256(compact JWS string)` is the hash that enters the transparency log (FS08-050). Keys are born non-exportable inside the movement's own Key Vault and only one principal may sign (FS-00 §6.4, FS-00 §3).\n\nVERIFICATION ORDER (published in the Trust Center, CERT-025): resolve `kid` in the JWKS → verify ES256 over the compact JWS → check `SHA-256(jws)` appears in the transparency log → fetch the certificate record for live status. Steps 1–2 work fully offline with a JWKS copy. A signature that verifies while its hash is ABSENT from the log renders UNVERIFIED — that is the rogue-issuance detector, not a soft warning (CERT-030).\n\nFUNDING TRUTH (CERT-002/013, D14, COM-066): `amountMinor` + `cur` appear ONLY where money actually moved, and never without `amountKind`, which distinguishes a fee paid from an impact figure routed from a documented donation. One payload never conflates them. A waived organisation that funded nothing can only ever hold `license-status.waiver`.\n\nMATERIALITY (CERT-014/054, D15): a per-contributor monetary figure enters the payload only if it meets the published floor for the attested period; otherwise the payload carries `impactBelowFloor: true` and no figure at all, so a template cannot leak a gated number it never received (FS08-091). No field can express a cross-contributor ranking (CERT-015 by construction).\n\nAt P-M2 only `supporter.entitlement` and `license-status.*` are issuable, by an operator-run signing script with the same profile (FS08-040/041). Impact figures do not exist before the first disbursed ledger row (NEV-017).",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M2 (supporter.entitlement + license-status.* only)",
     "artifactPath": "(compact JWS; embedded in the PDF and in the certificate record's `jws` field)",
     "authoritative": true,
@@ -183,6 +183,6 @@
   ],
   "$defs": {
     "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
-    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+    "githubNodeId": { "type": "string", "pattern": "^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$", "description": "A GitHub GraphQL node_id, in either of the two forms GitHub has issued: the opaque current form (a repository's is `R_`-prefixed) and the legacy base64 form, whose decoded value begins `010:Repository` and whose `=` padding the first alternative cannot express. Widened 2026-09-08 to admit the second: `registry-v0-record.v1` accepts both, so a record the curated registry accepts is publishable in this artifact. The primary key for repositories and people throughout this contract set (FS-00 §6.1)." }
   }
 }

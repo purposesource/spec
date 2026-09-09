@@ -4,7 +4,7 @@
   "title": "PURPOSE.yml v1 — optional operational manifest",
   "description": "The OPTIONAL manifest a project may commit at the repository root. Adoption of the Purpose Source License is one committed LICENSE file and is complete without this file (FS-00 §6.10 as amended 2026-08-31-B; D23). Nothing in this manifest is required for adoption, listing, claiming, allocation or certificates. When the file is absent — or wholly unparseable — the published defaults apply: weight class `standard`, steward-default allocation, no attribution overrides, no successor (FS-02 §6 FS02-050). The `license` and `licensor` blocks are INFORMATIONAL MIRRORS and are never authoritative: the committed LICENSE file is the only source of truth for adoption and for which licence version a repository carries (D13). A mismatch between `license.id` here and the detected LICENSE text is reported as `reg.manifest_license_mismatch` and changes no legal fact. Handling of an out-of-bounds value differs by section: non-attribution fields are rejected FIELD BY FIELD (the offending field is ignored, its default applies, and a rejection record is published in the repo record's `manifest.rejections` block — FS02-052), while ANY invalid field inside `attribution` fails that WHOLE section closed to defaults, never partially applied (FS-06 FS06-061). Bounds that JSON Schema cannot express — the sum of `attribution.manual_splits[].micro_shares` must be ≤ 200000 (20%), and each split target must resolve to a real GitHub account not on the exclusion list — are enforced by the platform parser (FS06-062). Parser limits: file ≤ 64 KiB, YAML safe-load, ≤ 1000 nodes (FS02-055).",
   "x-psn": {
-    "specVersion": "1.0.1",
+    "specVersion": "1.1.0",
     "phase": "P-M2",
     "artifactPath": "(repository root) PURPOSE.yml",
     "authoritative": false,
@@ -163,8 +163,8 @@
     },
     "githubNodeId": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9_-]{4,128}$",
-      "description": "An opaque GitHub GraphQL node_id. The primary key for repositories and people throughout this contract set (FS-00 §6.1)."
+      "pattern": "^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$",
+      "description": "A GitHub GraphQL node_id, in either of the two forms GitHub has issued: the opaque current form (a repository's is `R_`-prefixed) and the legacy base64 form, whose decoded value begins `010:Repository` and whose `=` padding the first alternative cannot express. Widened 2026-09-08 to admit the second: `registry-v0-record.v1` accepts both, so a record the curated registry accepts is publishable in this artifact. The primary key for repositories and people throughout this contract set (FS-00 §6.1)."
     }
   }
 }

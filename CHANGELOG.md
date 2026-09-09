@@ -108,7 +108,12 @@ question leaves its number behind as a one-line pointer, so a citation of
 ### Settled
 
 Questions that were open above and have since been answered in the record. They stay here
-with what settled them, because a contract's history is part of the contract.
+with what settled them, because a contract's history is part of the contract. *(2026-09-08:
+the list now also carries a question the record settled that was never numbered above — entry 2,
+which the artifact-validation gates raised rather than this file. An entry's number is its
+position in THIS list and nothing else; entry 1 happens to also be the open question of that
+number and says so, entry 2 has no counterpart, and open question 2 — the counter zero-state —
+is still open.)*
 
 1. **Entitlement-record shape** — settled 2026-09-07; open question 1 of the list above,
    whose number stays there as a pointer to this entry. The `/entitlements/{co_ulid}.jws`
@@ -124,6 +129,28 @@ with what settled them, because a contract's history is part of the contract.
    example and vector still validates. *(As first recorded: "This repository implements
    FS-10 §4.2 and leaves the frozen object untouched inside the array. Needs ratifying
    either way.")*
+
+2. **Which side is authoritative — the emitted artifact plane or the published schema?** —
+   settled 2026-09-07 by the recorded ruling **Q b0443041**; the instrument is a dated FS-00
+   §6.2 amendment note of 2026-09-08, written beside the artifact catalog it governs: the
+   published profile governs the artifact shapes, and `index-build` conforms. The question was
+   not raised here — the two artifact-validation gates that measure an emitted plane against
+   these files found nine artifact classes whose emitted bytes were a different contract from
+   the schema, and recorded every signature rather than choosing a side.
+   **What it settles.** The schemas in this repository ARE the shape of every catalogued
+   artifact. A builder emitting a member no schema admits, or omitting one a schema requires,
+   has a defect in the builder; the schema does not move to meet it. Where the divergence
+   exposes a defect in a contract published HERE, that contract is fixed here first and the
+   plane follows — under this file's own versioning policy, additively inside `v1` (§1), or in
+   place with a `pre-release` entry while nothing has been published under the file (§5).
+   Never the other way round.
+   **What it does not settle.** Paths and cadence. Which artifacts exist, at which URLs, and
+   how often each is regenerated is FS-00 §6.2's to say; `$id` and `x-psn.artifactPath` record
+   that catalog, they do not define it, and no URL moves because of this. Nor does it settle
+   whether an artifact that has no schema here should have one — a schema lands when the rule
+   it encodes is decided, never before.
+   The first changes it authorises are the optional `source` member and the widened
+   `githubNodeId` of 2026-09-08, written per file below.
 
 ### Planned — not built
 
@@ -203,6 +230,19 @@ The entry as first recorded, kept as history:
   by NAME at parse time, with the offending slug quoted, not by an array bound that fails the
   whole field with a length error. The bound is a decision, and it now reads as one.
 
+### 1.1.0 — unreleased (2026-09-08)
+
+- Additive. `$defs.githubNodeId` widens to
+  `^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$`, and gains the description
+  that says why: the second alternative is the legacy repository node_id form that
+  `registry-v0-record.v1` 1.1.0 already accepts, whose `=` padding the first alternative cannot
+  express — so a record the curated registry accepts is publishable in this artifact. Pure
+  widening; every value that validated still validates. Eleven files define this `$def` and all
+  eleven move in one step, `registry-v0-record.v1` being the twelfth that already published the
+  two-form pattern and therefore the model. It is NOT closed to that file's narrower first
+  alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
+  instrument from this one.
+
 ## registry-v0-record.v1.json
 
 ### 1.0.0 — unreleased
@@ -263,12 +303,52 @@ remembering the same rule.
 - Initial publication. One shard document; the same shape serves the bulk export with
   `shard: "export"`, so enumerating the registry needs no second contract.
 
+### 1.1.0 — unreleased (2026-09-08)
+
+- Additive. Optional `source` — `registry-v0` | `sample` | `fixture` — the envelope's plane
+  label. `sample` and `fixture` declare a NON-PRODUCTION plane: a page rendering such an
+  artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0
+  note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2
+  production source of record. Optional, so nothing already valid becomes invalid, and the
+  enum widens additively when the P-M3 producer takes a value of its own. Authority:
+  **Settled 2** above.
+- Additive. `$defs.githubNodeId` widens to
+  `^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$`, and gains the description
+  that says why: the second alternative is the legacy repository node_id form that
+  `registry-v0-record.v1` 1.1.0 already accepts, whose `=` padding the first alternative cannot
+  express — so a record the curated registry accepts is publishable in this artifact. Pure
+  widening; every value that validated still validates. Eleven files define this `$def` and all
+  eleven move in one step, `registry-v0-record.v1` being the twelfth that already published the
+  two-form pattern and therefore the model. It is NOT closed to that file's narrower first
+  alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
+  instrument from this one.
+
 ## registry-index-meta.v1.json
 
 ### 1.0.0 — unreleased
 
 - Initial publication. Shard list, registry-wide totals, and the delisted set the badge
   route uses to override a stale cached badge.
+
+### 1.1.0 — unreleased (2026-09-08)
+
+- Additive. Optional `source` — `registry-v0` | `sample` | `fixture` — the envelope's plane
+  label. `sample` and `fixture` declare a NON-PRODUCTION plane: a page rendering such an
+  artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0
+  note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2
+  production source of record. Optional, so nothing already valid becomes invalid, and the
+  enum widens additively when the P-M3 producer takes a value of its own. Authority:
+  **Settled 2** above.
+- Additive. `$defs.githubNodeId` widens to
+  `^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$`, and gains the description
+  that says why: the second alternative is the legacy repository node_id form that
+  `registry-v0-record.v1` 1.1.0 already accepts, whose `=` padding the first alternative cannot
+  express — so a record the curated registry accepts is publishable in this artifact. Pure
+  widening; every value that validated still validates. Eleven files define this `$def` and all
+  eleven move in one step, `registry-v0-record.v1` being the twelfth that already published the
+  two-form pattern and therefore the model. It is NOT closed to that file's narrower first
+  alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
+  instrument from this one.
 
 ## repo-record.v1.json
 
@@ -280,6 +360,26 @@ remembering the same rule.
 - The `stats` block is optional and absent in the first version: no attribution or charity
   figure exists before the first disbursed ledger row.
 
+### 1.1.0 — unreleased (2026-09-08)
+
+- Additive. Optional `source` — `registry-v0` | `sample` | `fixture` — the envelope's plane
+  label. `sample` and `fixture` declare a NON-PRODUCTION plane: a page rendering such an
+  artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0
+  note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2
+  production source of record. Optional, so nothing already valid becomes invalid, and the
+  enum widens additively when the P-M3 producer takes a value of its own. Authority:
+  **Settled 2** above.
+- Additive. `$defs.githubNodeId` widens to
+  `^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$`, and gains the description
+  that says why: the second alternative is the legacy repository node_id form that
+  `registry-v0-record.v1` 1.1.0 already accepts, whose `=` padding the first alternative cannot
+  express — so a record the curated registry accepts is publishable in this artifact. Pure
+  widening; every value that validated still validates. Eleven files define this `$def` and all
+  eleven move in one step, `registry-v0-record.v1` being the twelfth that already published the
+  two-form pattern and therefore the model. It is NOT closed to that file's narrower first
+  alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
+  instrument from this one.
+
 ## waiver.v1.json
 
 ### 1.0.0 — unreleased
@@ -289,6 +389,26 @@ remembering the same rule.
 - FS-10 §4.2 shows the waiver registry as a bare array. Published here as the standard
   artifact envelope with a `waivers[]` member, because FS-00 §6.2 requires every artifact
   to carry `schemaVersion` and `generatedAt` and a bare array cannot.
+
+### 1.1.0 — unreleased (2026-09-08)
+
+- Additive. Optional `source` — `registry-v0` | `sample` | `fixture` — the envelope's plane
+  label. `sample` and `fixture` declare a NON-PRODUCTION plane: a page rendering such an
+  artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0
+  note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2
+  production source of record. Optional, so nothing already valid becomes invalid, and the
+  enum widens additively when the P-M3 producer takes a value of its own. Authority:
+  **Settled 2** above.
+- Additive. `$defs.githubNodeId` widens to
+  `^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$`, and gains the description
+  that says why: the second alternative is the legacy repository node_id form that
+  `registry-v0-record.v1` 1.1.0 already accepts, whose `=` padding the first alternative cannot
+  express — so a record the curated registry accepts is publishable in this artifact. Pure
+  widening; every value that validated still validates. Eleven files define this `$def` and all
+  eleven move in one step, `registry-v0-record.v1` being the twelfth that already published the
+  two-form pattern and therefore the model. It is NOT closed to that file's narrower first
+  alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
+  instrument from this one.
 
 ## entitlement-record.v1.json
 
@@ -305,6 +425,19 @@ remembering the same rule.
   version, policy 3 above makes a description fix a patch bump. There is one shape here, and
   there always was.
 
+### 1.1.0 — unreleased (2026-09-08)
+
+- Additive. `$defs.githubNodeId` widens to
+  `^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$`, and gains the description
+  that says why: the second alternative is the legacy repository node_id form that
+  `registry-v0-record.v1` 1.1.0 already accepts, whose `=` padding the first alternative cannot
+  express — so a record the curated registry accepts is publishable in this artifact. Pure
+  widening; every value that validated still validates. Eleven files define this `$def` and all
+  eleven move in one step, `registry-v0-record.v1` being the twelfth that already published the
+  two-form pattern and therefore the model. It is NOT closed to that file's narrower first
+  alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
+  instrument from this one.
+
 ## certificate.v1.json
 
 ### 1.0.0 — unreleased
@@ -316,6 +449,19 @@ remembering the same rule.
 - Materiality enforced by the schema: the below-floor flag and a monetary figure are
   mutually exclusive.
 
+### 1.1.0 — unreleased (2026-09-08)
+
+- Additive. `$defs.githubNodeId` widens to
+  `^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$`, and gains the description
+  that says why: the second alternative is the legacy repository node_id form that
+  `registry-v0-record.v1` 1.1.0 already accepts, whose `=` padding the first alternative cannot
+  express — so a record the curated registry accepts is publishable in this artifact. Pure
+  widening; every value that validated still validates. Eleven files define this `$def` and all
+  eleven move in one step, `registry-v0-record.v1` being the twelfth that already published the
+  two-form pattern and therefore the model. It is NOT closed to that file's narrower first
+  alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
+  instrument from this one.
+
 ## certificate-record.v1.json
 
 ### 1.0.0 — unreleased
@@ -324,6 +470,26 @@ remembering the same rule.
   byte-authoritative — passthrough consumers render them verbatim.
 - `ct: null` is modelled explicitly, because signed-but-unlogged must be representable:
   that state is what a rogue issuance looks like, and a verifier has to be able to see it.
+
+### 1.1.0 — unreleased (2026-09-08)
+
+- Additive. Optional `source` — `registry-v0` | `sample` | `fixture` — the envelope's plane
+  label. `sample` and `fixture` declare a NON-PRODUCTION plane: a page rendering such an
+  artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0
+  note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2
+  production source of record. Optional, so nothing already valid becomes invalid, and the
+  enum widens additively when the P-M3 producer takes a value of its own. Authority:
+  **Settled 2** above.
+- Additive. `$defs.githubNodeId` widens to
+  `^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$`, and gains the description
+  that says why: the second alternative is the legacy repository node_id form that
+  `registry-v0-record.v1` 1.1.0 already accepts, whose `=` padding the first alternative cannot
+  express — so a record the curated registry accepts is publishable in this artifact. Pure
+  widening; every value that validated still validates. Eleven files define this `$def` and all
+  eleven move in one step, `registry-v0-record.v1` being the twelfth that already published the
+  two-form pattern and therefore the model. It is NOT closed to that file's narrower first
+  alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
+  instrument from this one.
 
 ## certificate-policy.v1.json
 
@@ -415,6 +581,16 @@ remembering the same rule.
 - `ref` is required and nullable rather than optional: in an audit, a missing key and an
   explicit null must not be distinguishable.
 
+### 1.1.0 — unreleased (2026-09-08)
+
+- Additive. Optional `source` — `registry-v0` | `sample` | `fixture` — the envelope's plane
+  label. `sample` and `fixture` declare a NON-PRODUCTION plane: a page rendering such an
+  artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0
+  note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2
+  production source of record. Optional, so nothing already valid becomes invalid, and the
+  enum widens additively when the P-M3 producer takes a value of its own. Authority:
+  **Settled 2** above.
+
 ## ct-checkpoint.v1.json
 
 ### 1.0.0 — unreleased
@@ -495,6 +671,19 @@ remembering the same rule.
   now holds every copy of the enum identical to the published one, which is what a
   cross-file `$ref` would have done had self-containment allowed one.
 
+### 1.3.0 — unreleased (2026-09-08)
+
+- Additive. `$defs.githubNodeId` widens to
+  `^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$`, and gains the description
+  that says why: the second alternative is the legacy repository node_id form that
+  `registry-v0-record.v1` 1.1.0 already accepts, whose `=` padding the first alternative cannot
+  express — so a record the curated registry accepts is publishable in this artifact. Pure
+  widening; every value that validated still validates. Eleven files define this `$def` and all
+  eleven move in one step, `registry-v0-record.v1` being the twelfth that already published the
+  two-form pattern and therefore the model. It is NOT closed to that file's narrower first
+  alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
+  instrument from this one.
+
 ## ledger-export.v1.json
 
 ### 1.0.0 — unreleased
@@ -570,6 +759,26 @@ remembering the same rule.
   now holds every copy of the enum identical to the published one, which is what a
   cross-file `$ref` would have done had self-containment allowed one.
 
+### 1.3.0 — unreleased (2026-09-08)
+
+- Additive. Optional `source` — `registry-v0` | `sample` | `fixture` — the envelope's plane
+  label. `sample` and `fixture` declare a NON-PRODUCTION plane: a page rendering such an
+  artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0
+  note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2
+  production source of record. Optional, so nothing already valid becomes invalid, and the
+  enum widens additively when the P-M3 producer takes a value of its own. Authority:
+  **Settled 2** above.
+- Additive. `$defs.githubNodeId` widens to
+  `^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$`, and gains the description
+  that says why: the second alternative is the legacy repository node_id form that
+  `registry-v0-record.v1` 1.1.0 already accepts, whose `=` padding the first alternative cannot
+  express — so a record the curated registry accepts is publishable in this artifact. Pure
+  widening; every value that validated still validates. Eleven files define this `$def` and all
+  eleven move in one step, `registry-v0-record.v1` being the twelfth that already published the
+  two-form pattern and therefore the model. It is NOT closed to that file's narrower first
+  alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
+  instrument from this one.
+
 ## ledger-chain.v1.json
 
 ### 1.0.0 — unreleased
@@ -591,6 +800,16 @@ remembering the same rule.
   listed recipients", with the transfer-per-recipient pointer *(superseded: "the bank and
   intermediary legs")*. Wording only, in the API description; no schema and no version
   changes.
+
+### 1.1.0 — unreleased (2026-09-08)
+
+- Additive. Optional `source` — `registry-v0` | `sample` | `fixture` — the envelope's plane
+  label. `sample` and `fixture` declare a NON-PRODUCTION plane: a page rendering such an
+  artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0
+  note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2
+  production source of record. Optional, so nothing already valid becomes invalid, and the
+  enum widens additively when the P-M3 producer takes a value of its own. Authority:
+  **Settled 2** above.
 
 ## cost-support.v1.json
 
@@ -754,6 +973,19 @@ remembering the same rule.
   integrator building against this contract set should be able to see the shape it will
   eventually receive.
 
+### 1.1.0 — unreleased (2026-09-08)
+
+- Additive. `$defs.githubNodeId` widens to
+  `^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$`, and gains the description
+  that says why: the second alternative is the legacy repository node_id form that
+  `registry-v0-record.v1` 1.1.0 already accepts, whose `=` padding the first alternative cannot
+  express — so a record the curated registry accepts is publishable in this artifact. Pure
+  widening; every value that validated still validates. Eleven files define this `$def` and all
+  eleven move in one step, `registry-v0-record.v1` being the twelfth that already published the
+  two-form pattern and therefore the model. It is NOT closed to that file's narrower first
+  alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
+  instrument from this one.
+
 ## badge.v1.json
 
 ### 1.0.0 — unreleased
@@ -769,3 +1001,20 @@ remembering the same rule.
 - Initial publication. The three-state counter machine, with the pre-launch null rule
   enforced structurally so a build cannot ship a pre-launch page carrying numbers.
 - See open question 2 above.
+
+### 1.1.0 — unreleased (2026-09-08)
+
+- Additive. Optional `source` — `registry-v0` | `sample` | `fixture` — the envelope's plane
+  label. `sample` and `fixture` declare a NON-PRODUCTION plane: a page rendering such an
+  artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0
+  note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2
+  production source of record. Optional, so nothing already valid becomes invalid, and the
+  enum widens additively when the P-M3 producer takes a value of its own. Authority:
+  **Settled 2** above.
+- Where the two exceptions are written down. `badge.v1` and `certificate-policy.v1`
+  deliberately do NOT gain `source`: shields.io owns the badge body, so a member of ours would
+  break the endpoint contract, and the certificate policy is a rule that is byte-identical on
+  every plane, so a plane label on it would assert nothing. Both borrow the declaration on
+  `/registry/index/meta.json`, which is how the production guard already reads them. No signed
+  payload takes the member either (`certificate.v1`, `entitlement-record.v1`,
+  `ct-checkpoint.v1`) — the label is a property of the build, not of what was attested.

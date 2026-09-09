@@ -4,7 +4,7 @@
   "title": "Change event (v1) — one item of the /v1/changes feed",
   "description": "One event of the public change feed, the sync primitive for integrators who would otherwise poll every artifact (TRN-046). The feed is stored as append-only segments plus a meta document, and the read route pages with a cursor that is the last-seen event ULID; `next` is always present, so a poller that is caught up idles on 304s rather than on empty pages (FS10-070/071). Feed page envelope: `{ \"items\": [ <this schema> ], \"next\": \"evt_…\" }` — see the OpenAPI description.\n\nPERSONAL DATA: NONE. Every payload field is P0-public registry state (FS-00 §6.9). That is a structural property of the event catalogue below, not a filter applied on the way out.\n\nPhase: P-M4, demand-gated. The schema is published now so that an integrator building against this contract set can see the shape it will get, and so the feed can be switched on without a schema change (FS-00 §6.10).",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M4 (demand-gated; schema published from P-M2)",
     "artifactPath": "/changes/{n}.json segments; served by GET /v1/changes?cursor=",
     "authoritative": true,
@@ -67,6 +67,6 @@
     }
   ],
   "$defs": {
-    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+    "githubNodeId": { "type": "string", "pattern": "^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$", "description": "A GitHub GraphQL node_id, in either of the two forms GitHub has issued: the opaque current form (a repository's is `R_`-prefixed) and the legacy base64 form, whose decoded value begins `010:Repository` and whose `=` padding the first alternative cannot express. Widened 2026-09-08 to admit the second: `registry-v0-record.v1` accepts both, so a record the curated registry accepts is publishable in this artifact. The primary key for repositories and people throughout this contract set (FS-00 §6.1)." }
   }
 }

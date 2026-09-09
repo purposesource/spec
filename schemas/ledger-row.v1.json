@@ -4,7 +4,7 @@
   "title": "Ledger row (v1)",
   "description": "One row of the append-only allocation ledger. Rows are IMMUTABLE: every correction is a forward-dated row — a negative `adjustment` against the earliest open month with `correctsLedId` pointing at the corrected row, or a zero-amount `annotation` for narrative context. No exception exists, including a listed recipient's scandal: annotate, never restate (FS07-042, ENG-042/046, NEV-019). Transferred months are never restated and nothing is ever clawed back from a recipient (COM-053; ops decision D33 item 4).\n\nFOUR OUTGOING LINES (ops decision D34 item 5, 2026-09-06), each capped, each published: `charged-to-fees` (one row per direct invoice nobody supported, within the annual cap), `reserve-retention` (the operations reserve's retention, at most a published share of the month's fees until the reserve holds its target — D34 item 4), `hardship-pay` (the steward hardship pay to the one essential operating role, only under the published rule, two caps of which the lower governs — D34 item 3), and `disburse` (one transfer per listed recipient, carrying `recipientId` — D33 item 1). The two D34 lines are their own rows even at zero, with their rule in `note`.\n\nHASH CHAIN (FS07-040): `rowHash = SHA-256(prevHash ∥ JCS(row minus prevHash/rowHash))` over RFC 8785 canonical JSON, where `prevHash` is the row hash of the immediately preceding row in GLOBAL insertion order regardless of month (genesis = 64 zeros). Intake for an open month therefore chains straight onto the current global head, and locking a month never blocks a later month's intake.\n\nMoney is always integer minor units plus an ISO currency code; reporting currency is CHF with the per-transaction FX rate captured on the row (FS-00 §6.1, ENG-037; the final currency ruling is URS §21 OPEN-26).\n\nAt P-M2 the ledger is the committed monthly table maintained by the operator script, restricted to INTAKE types (`pool-in`, `refund-out`, `chargeback-out`, `topup-*`, `month-note`) — no allocation row exists before P-M3, and CI rejects any diff that modifies a committed row (FS07-100, VS-36).",
   "x-psn": {
-    "specVersion": "1.2.1",
+    "specVersion": "1.3.0",
     "phase": "P-M2 (intake types only)",
     "artifactPath": "(row shape) src/data/ledger/{YYYY-MM}.json in the website repo · rows[] of /ledger/{YYYY}-{MM}.json",
     "authoritative": true,
@@ -97,6 +97,6 @@
     "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
     "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "sha256OrGenesis": { "type": "string", "pattern": "^[0-9a-f]{64}$", "description": "Genesis is 64 zeros." },
-    "githubNodeId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" }
+    "githubNodeId": { "type": "string", "pattern": "^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$", "description": "A GitHub GraphQL node_id, in either of the two forms GitHub has issued: the opaque current form (a repository's is `R_`-prefixed) and the legacy base64 form, whose decoded value begins `010:Repository` and whose `=` padding the first alternative cannot express. Widened 2026-09-08 to admit the second: `registry-v0-record.v1` accepts both, so a record the curated registry accepts is publishable in this artifact. The primary key for repositories and people throughout this contract set (FS-00 §6.1)." }
   }
 }
