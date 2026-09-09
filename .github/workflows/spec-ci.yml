@@ -30,6 +30,13 @@ jobs:
       # Ordered cheapest-and-most-fundamental first, so a broken contract fails in
       # seconds instead of after the linter has finished parsing the API description.
 
+      - name: Nothing from the private recording store is in this repository (VS-35)
+        # Cheapest of all and the most fundamental: the private store holds rail transaction
+        # exports, attestations and sanctions-screening results, classified P2/P3 and
+        # retained ten years, and its requirement is that it never reaches a public
+        # repository. This one is public. `npm test` runs the same gate first.
+        run: npm run check:no-records
+
       - name: Schemas compile, are addressed correctly, and carry provenance
         # Draft 2020-12 compile, $id derived from spec.config.json, no external $ref
         # (each schema must validate on its own after a single download), and a
