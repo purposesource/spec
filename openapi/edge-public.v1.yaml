@@ -1193,8 +1193,8 @@ paths:
                 intakeOnly:
                   summary: Header plus one intake row
                   value: |
-                    ledId,month,seq,type,date,amountMinor,currency,srcAmountMinor,srcCurrency,fxRate,repoNodeId,entId,coId,lane,holdStatus,payerName,scheduleVersion,emittingJob,createdAt,rowHash
-                    led_01jm3b7h4rs8w2ce0x5a9y1d3g,2027-06,1,pool-in,2027-06-01,36000,CHF,40000,USD,0.9,R_kgDOAbc123,ent_01jh0y4e1np5s9zb7t2x6v8a1d,co_01jh0y4e1np5s9zb7t2x6v8a0d,project,open-M+1,unnamed,v1,tools/record-purchases,2027-06-01T14:22:00Z,4d7a1c0b9e8f2a3b5c6d7e8f90a1b2c34d7a1c0b9e8f2a3b5c6d7e8f90a1b2c3
+                    ledId,month,seq,type,date,amountMinor,currency,srcAmountMinor,srcCurrency,fxRate,fxSource,fxDate,repoNodeId,entId,coId,lane,holdStatus,payerName,scheduleVersion,emittingJob,createdAt,prevHash,rowHash
+                    led_01jm3b7h4rs8w2ce0x5a9y1d3g,2027-06,1,pool-in,2027-06-01,36000,CHF,40000,USD,0.9,ECB daily,2027-06-01,R_kgDOAbc123,ent_01jh0y4e1np5s9zb7t2x6v8a1d,co_01jh0y4e1np5s9zb7t2x6v8a0d,project,open-M+1,unnamed,v1,tools/record-purchases,2027-06-01T14:22:00Z,0000000000000000000000000000000000000000000000000000000000000000,4d7a1c0b9e8f2a3b5c6d7e8f90a1b2c34d7a1c0b9e8f2a3b5c6d7e8f90a1b2c3
         '404':
           $ref: '#/components/responses/NotFound'
         '503':
