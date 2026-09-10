@@ -501,6 +501,33 @@ creating one.
   alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
   instrument from this one.
 
+### 1.2.0 — unreleased (2026-09-10), **pre-release** change under versioning policy 5
+
+- `claimKitVersion` and `claims.kitVersion` tighten from `^kit-[0-9]+\.[0-9]+$` to
+  `^kit-[0-9]+$`. **This contract is the stale side of a disagreement about one string, and it
+  is the side that moves.** The kit naming grammar is already decided — the P-M2 checkout plan
+  of 2026-09-07, item 9: "the kit's identifier is `kit-1` (the `{family}-{n}` grammar shared
+  with `att-1` and `ent-terms-1`) … FS-08's `kit-1.0` example is the older form". Every
+  surface that publishes the string already carries `kit-1`: `claim-kit.v1.json` pins
+  `^kit-[0-9]+$` on the document's own `kitVersion` and says it "is never reused and never
+  renamed"; `kits/kit-1.json` and its vendored copy declare `kit-1`; and on the site the kit
+  page, its raw artifact, the checkout attestation the buyer ticks and the entitlement terms
+  all name `kit-1`. Only this file still demanded a dotted form, and because it is the file
+  the signer validates a payload against **before** signing, no certificate could carry the
+  version the buyer acknowledges: the signer refused every payload the site's own documents
+  describe. Found by a dry run that had to substitute `kit-1.0` to get past it.
+- Tightening rather than widening, deliberately: admitting both forms would publish two
+  grammars for one identifier and leave a consumer to decide whether `kit-1` and `kit-1.0`
+  are the same kit. There is one grammar.
+- Permitted in place by policy 5 because **no certificate has ever been issued**, so this
+  contract has no published artifact and no consumer to protect. `claims.kitVersion` moves in
+  the same step as `claimKitVersion`: the embedded claim block's version and the payload's pin
+  are the same string, and a file that tightened one and not the other would still refuse a
+  payload built from its own example.
+- `examples/certificate.v1.example.json` moves with it (`kit-1.0` → `kit-1`, both fields).
+  FS-08 §8's two `kit-1.0` examples are the FS owner's one-line dated note, recorded
+  separately; this entry does not touch the record.
+
 ## certificate-record.v1.json
 
 ### 1.0.0 — unreleased

@@ -20,14 +20,14 @@
   "iat": 1798761600,
   "iss": "https://api.purposesource.org",
   "scheduleVersion": "v1",
-  "claimKitVersion": "kit-1.0",
+  "claimKitVersion": "kit-1",
   "verify": "https://purposesource.org/verify/cert_01jf8w2c9km3q7xz5r0v4t6y8a",
   "factRefs": {
     "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d"
   },
   "supersedes": null,
   "claims": {
-    "kitVersion": "kit-1.0",
+    "kitVersion": "kit-1",
     "permitted": [
       "holds a Project Entitlement of the Purpose Source Network; Purpose Fee amount: $400; period: 2027; categories: environment, health"
     ],

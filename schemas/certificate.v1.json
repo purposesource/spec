@@ -4,7 +4,7 @@
   "title": "Certificate JWS payload profile (v1)",
   "description": "The signed payload of a certificate. Header is fixed: `{\"alg\":\"ES256\",\"kid\":\"psn-{env}-{yyyy}-{n}\",\"typ\":\"application/psn-cert+jws\",\"cty\":\"application/json\"}`; the payload is canonicalised with RFC 8785 (JCS) before signing, the compact serialisation IS the certificate, and `SHA-256(compact JWS string)` is the hash that enters the transparency log (FS08-050). Keys are born non-exportable inside the movement's own Key Vault and only one principal may sign (FS-00 §6.4, FS-00 §3).\n\nVERIFICATION ORDER (published in the Trust Center, CERT-025): resolve `kid` in the JWKS → verify ES256 over the compact JWS → check `SHA-256(jws)` appears in the transparency log → fetch the certificate record for live status. Steps 1–2 work fully offline with a JWKS copy. A signature that verifies while its hash is ABSENT from the log renders UNVERIFIED — that is the rogue-issuance detector, not a soft warning (CERT-030).\n\nFUNDING TRUTH (CERT-002/013, D14, COM-066): `amountMinor` + `cur` appear ONLY where money actually moved, and never without `amountKind`, which distinguishes a fee paid from an impact figure routed from a documented donation. One payload never conflates them. A waived organisation that funded nothing can only ever hold `license-status.waiver`.\n\nMATERIALITY (CERT-014/054, D15): a per-contributor monetary figure enters the payload only if it meets the published floor for the attested period; otherwise the payload carries `impactBelowFloor: true` and no figure at all, so a template cannot leak a gated number it never received (FS08-091). No field can express a cross-contributor ranking (CERT-015 by construction).\n\nAt P-M2 only `supporter.entitlement` and `license-status.*` are issuable, by an operator-run signing script with the same profile (FS08-040/041). Impact figures do not exist before the first disbursed ledger row (NEV-017).",
   "x-psn": {
-    "specVersion": "1.1.0",
+    "specVersion": "1.2.0",
     "phase": "P-M2 (supporter.entitlement + license-status.* only)",
     "artifactPath": "(compact JWS; embedded in the PDF and in the certificate record's `jws` field)",
     "authoritative": true,
@@ -79,8 +79,8 @@
     "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$" },
     "claimKitVersion": {
       "type": "string",
-      "pattern": "^kit-[0-9]+\\.[0-9]+$",
-      "description": "Pins the claim-language kit in force at issuance (D17). The kit document is published alongside this contract set and at `/kits/{version}.json`."
+      "pattern": "^kit-[0-9]+$",
+      "description": "Pins the claim-language kit in force at issuance (D17). The kit document is published alongside this contract set and at `/kits/{version}.json`. The identifier is `kit-{n}`, the `{family}-{n}` grammar the checkout documents share with `att-1` and `ent-terms-1`, and `claim-kit.v1.json` pins the same grammar on the document's own `kitVersion`: the two strings are one string, so the patterns match exactly rather than merely overlapping."
     },
     "verify": {
       "type": "string",
@@ -124,7 +124,7 @@
       "required": ["kitVersion", "permitted", "prohibited", "binding"],
       "description": "The machine-readable claim-language kit block (CERT-050). Corporate types embed the kit as an integral page of the rendered PDF including the binding statement on the certificate face (CERT-053). `license-status` certificates carry the STATUS-ONLY kit variant: coverage-status wording exclusively, with no supporter or impact phrasing anywhere (CERT-052, MKT-034).",
       "properties": {
-        "kitVersion": { "type": "string", "pattern": "^kit-[0-9]+\\.[0-9]+$" },
+        "kitVersion": { "type": "string", "pattern": "^kit-[0-9]+$" },
         "permitted": { "type": "array", "minItems": 1, "items": { "type": "string", "maxLength": 500 } },
         "prohibited": { "type": "array", "minItems": 1, "items": { "type": "string", "maxLength": 500 } },
         "binding": { "type": "string", "maxLength": 500 },
