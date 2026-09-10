@@ -1737,9 +1737,10 @@ components:
           type: string
           format: date-time
           description: |
-            When the publishing build produced this key set; also the artifact's
-            `Last-Modified`. Absent only from a minted answer whose deployment carries no
-            build instant to state — never guessed.
+            When the publishing build produced this key set. On the published artifact it is
+            also the response's `Last-Modified`; a minted answer carries no `Last-Modified`,
+            and omits this member entirely when the deployment has no build instant to
+            state — never a guessed one.
         source:
           enum: [registry-v0, sample, fixture]
           description: |
