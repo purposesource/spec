@@ -644,6 +644,29 @@ creating one.
   which is what keeps the log immutable through an erasure request (CERT-031, CERT-045):
   a family is not personal data.
 
+### 1.2.1 — unreleased (2026-09-10)
+
+- Wording, and the value it fixes was already required. `$defs.entry.h` has said since its
+  first publication that a `revoke`/`status` entry's hash is "SHA-256 of the
+  revocation/status entry payload", while `ref` is "the ORIGINAL entry's hash" — two
+  members, two documents. What the file never wrote down is what that payload IS, and a
+  producer reading the silence as "reuse the revoked token's hash" emits `h === ref`,
+  which logs one object twice and fails the log's own distinct-hash rule. So the
+  description now spells it: the payload is the entry's own members other than `seq` and
+  `h`, in RFC 8785 (JCS) canonical JSON —
+  `{"kind":"revoke","ref":"<the original entry's h>","ts":"<RFC 3339>","typ":"<family>"}`
+  — and `h` is the lowercase-hex SHA-256 of its UTF-8 bytes.
+- `seq` is excluded deliberately: the log assigns it at append time, so hashing it would
+  make an entry's identity depend on where it landed, and would make every revocation
+  trivially distinct — emptying the one rule that catches the same revocation logged
+  twice. Two revocations of one token at different instants still differ, in `ts`.
+- Not a new signed family. A signed revocation object is P-M3 work; at v0 the entry's own
+  canonical bytes are what exists, and minting a second signing path on the one artifact
+  that can never be corrected is not a description change. Additive by construction:
+  nothing already valid becomes invalid, because no published log holds a revocation.
+- `ct-segment.v1.example.json`'s revocation entry now carries the hash this rule computes,
+  so the example demonstrates the sentence instead of contradicting it.
+
 ## ct-checkpoint.v1.json
 
 ### 1.0.0 — unreleased

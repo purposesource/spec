@@ -4,7 +4,7 @@
   "title": "Transparency-log segment — /ct/{n}.json and /ct/latest.json",
   "description": "One segment of the append-only certificate transparency log. Structure for v1 is a flat signed append-only log plus checkpoints (CERT-034 default; a Merkle upgrade would add an inclusion-proof field additively — URS §21 OPEN-37). Closed segments hold exactly 10000 entries and are chained by hash; `/ct/latest.json` is the OPEN segment in the identical shape (FS08-111).\n\nEntries carry hash, type, kind, reference and timestamp and NOTHING ELSE — no names, no emails, no subject data. That is what makes the log GDPR-compatible by content and therefore immutable forever, including through an erasure request (CERT-031, CERT-045).\n\nAt P-M2 the log is exactly one committed file, `ct/0.json` at the website repository root, appended by pull request; CI rejects any diff that edits or deletes an existing entry, which makes append-only a mechanical property rather than a promise (FS08-113, VS-28). A revocation or status change is a NEW entry whose `ref` is the ORIGINAL entry's hash — the log never edits (CERT-033).",
   "x-psn": {
-    "specVersion": "1.2.0",
+    "specVersion": "1.2.1",
     "phase": "P-M2 (single committed segment 0)",
     "artifactPath": "/ct/{n}.json · /ct/latest.json",
     "authoritative": true,
@@ -49,7 +49,7 @@
         "seq": { "type": "integer", "minimum": 0 },
         "h": {
           "$ref": "#/$defs/sha256",
-          "description": "For `issue`: SHA-256 of the compact JWS string (CERT-030). For `revoke`/`status`: SHA-256 of the revocation/status entry payload."
+          "description": "For `issue`: SHA-256 of the compact JWS string (CERT-030). For `revoke`/`status`: SHA-256 of the revocation/status entry payload — at v0 that payload is THIS entry's own members other than `seq` and `h`, serialised as RFC 8785 (JCS) canonical JSON, `{\"kind\":\"revoke\",\"ref\":\"<the original entry's h>\",\"ts\":\"<RFC 3339>\",\"typ\":\"<family>\"}`, with `h` the lowercase-hex SHA-256 of its UTF-8 bytes. It is not a separately signed object: a signed revocation family is P-M3, and the entry's own bytes are what exists at v0. `seq` is excluded because the log assigns it at append time — hashing it would make an entry's identity depend on where it landed, and would make every revocation trivially distinct, emptying the distinct-hash rule that catches one revocation logged twice. So `h` and `ref` are never equal: a revocation is a NEW object (CERT-033), not a second pointer at the object it revokes."
         },
         "typ": { "enum": ["contributor", "steward", "supporter", "license-status", "topup", "entitlement-record", "ct-checkpoint"], "description": "JWS family — the first five values are the frozen certificate types (FS-00 §6.4), the last two the other signed families the log records: the entitlement record published at its own URL and the log's own checkpoint, both CT-appended by the v0 operator script (FS08-113, VS-27). A family is not personal data; no subject field ever enters this log." },
         "kind": { "enum": ["issue", "revoke", "status"] },
