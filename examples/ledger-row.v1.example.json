@@ -12,6 +12,7 @@
   "fxDate": "2027-06-01",
   "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
   "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
+  "lane": "project",
   "repoNodeId": "R_kgDOAbc123",
   "scheduleVersion": "v1",
   "holdStatus": "open-M+1",

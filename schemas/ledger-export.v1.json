@@ -60,7 +60,7 @@
     },
     "rows": {
       "type": "array",
-      "description": "The month's rows in canonical order. Row shape is the published ledger-row contract: `$defs.exportRow` is a SUPERSET of `ledger-row.v1`'s member set plus `date`, so a complete hashed row validates here unchanged and `rowHash` recomputes from the export alone — which is what the published methodology's 're-walk the chain from genesis' promise requires. It requires only the subset every public consumer needs.",
+      "description": "The month's rows in canonical order. Row shape is the published ledger-row contract: `$defs.exportRow` is `ledger-row.v1`'s member set plus exactly one export-only member, `date`, so a complete hashed row validates here unchanged. To recompute `rowHash` per FS07-040 — `SHA-256(prevHash ∥ JCS(row minus prevHash/rowHash))` — drop the export-only `date` AS WELL AS `prevHash` and `rowHash`: the hash is defined over `ledger-row.v1`, which has no `date`, so `date` was never in the hashed body. With that one exclusion the chain re-walks from the export alone, which is what the published methodology's 're-walk the chain from genesis' promise requires. The schema itself requires only the subset every public consumer needs.",
       "items": { "$ref": "#/$defs/exportRow" }
     },
     "shadow": {
@@ -115,7 +115,7 @@
             "disburse", "month-note", "month-lock", "annotation"
           ]
         },
-        "date": { "type": "string", "format": "date" },
+        "date": { "type": "string", "format": "date", "description": "The row's UTC date, rendered for this export and its CSV twin. EXPORT-ONLY, and the one member here that is not a `ledger-row.v1` key: it is therefore NOT inside the body `rowHash` is taken over, because FS07-040's hash is defined over the row contract, which has no such member. A reader recomputing `rowHash` from an export row drops `date` along with `prevHash` and `rowHash`; everything else in this object is a hashed row member." },
         "amountMinor": { "type": "integer" },
         "currency": { "$ref": "#/$defs/currency" },
         "srcAmountMinor": { "type": "integer" },

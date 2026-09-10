@@ -11,6 +11,7 @@
   "rows": [
     {
       "ledId": "led_01jm3b7h4rs8w2ce0x5a9y1d3g",
+      "month": "2027-06",
       "seq": 1,
       "type": "pool-in",
       "date": "2027-06-01",
@@ -28,17 +29,23 @@
       "holdStatus": "open-M+1",
       "payerName": "unnamed",
       "scheduleVersion": "v1",
+      "emittingJob": "tools/record-purchases",
+      "createdAt": "2027-06-01T14:22:00Z",
       "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
       "rowHash": "4d7a1c0b9e8f2a3b5c6d7e8f90a1b2c34d7a1c0b9e8f2a3b5c6d7e8f90a1b2c3"
     },
     {
       "ledId": "led_01jn4c8j5st9x3df1y6b0z2e4h",
+      "month": "2027-06",
       "seq": 2,
       "type": "month-note",
       "date": "2027-06-02",
       "amountMinor": 0,
       "currency": "CHF",
+      "holdStatus": "not-applicable",
       "note": "Intake is recorded; the month has not locked (a state of the allocation data — under the lock-before-sweep rule the allocation is computed at the lock, no later than twenty days after the month's last rail payout, and each listed recipient's share is transferred directly on or before the thirtieth day). No allocation runs at this stage, so no allocation rows exist for this month.",
+      "emittingJob": "tools/record-purchases",
+      "createdAt": "2027-06-02T06:00:00Z",
       "prevHash": "4d7a1c0b9e8f2a3b5c6d7e8f90a1b2c34d7a1c0b9e8f2a3b5c6d7e8f90a1b2c3",
       "rowHash": "8e5f3a2b1c0d9e8f7a6b5c4d3e2f1a098e5f3a2b1c0d9e8f7a6b5c4d3e2f1a09"
     }

@@ -671,6 +671,14 @@ row the new-file rule binds absolutely.
   recorded. `dependentRequired` is unchanged (`fxRate` still requires `fxSource` and
   `fxDate`), and the example moves to `"fxRate": "0.9"`. *(Superseded, kept as history: a
   JSON number.)*
+- The retype does NOT carry `exclusiveMinimum: 0` across, and the pattern admits `"0.0"`
+  where the old type refused `0`. Recorded as a decision rather than left to read as an
+  oversight: the form Q 774fe1d3 fixed is `^[0-9]+\.[0-9]{1,8}$` verbatim, and narrowing a
+  ruled-on pattern is not this change's to do. A captured rate of zero is not a meaningful
+  rate, so closing the hole is worth doing — the file is pre-release, so policy §5 still
+  permits it — but it needs an instrument that says so, and it is filed rather than taken
+  here. Nothing enforced moves meanwhile: the v0 guard has applied this exact pattern since
+  2026-09-07, so the zero string has been accepted on the producing side all along.
 - Additive. `externalKey` (≤120): the upstream event's own key, which is what makes a row
   idempotent under at-least-once delivery — money-moving handlers are keyed by the rail's
   event id against a processed-events store and a duplicate delivery is a no-op rather than
@@ -779,7 +787,9 @@ Mirroring `ledger-row.v1` 1.4.0, and `pre-release` under versioning policy §5 o
 reasoning: no month export has ever been published with a row in it.
 
 - `$defs.exportRow.fxRate` becomes the same decimal string, and the example moves to
-  `"fxRate": "0.9"` (Q 774fe1d3). *(Superseded, kept as history: a JSON number.)*
+  `"fxRate": "0.9"` (Q 774fe1d3). The `exclusiveMinimum: 0` note in the `ledger-row.v1`
+  1.4.0 section governs this member identically. *(Superseded, kept as history: a JSON
+  number.)*
 - `$defs.exportRow.holdStatus` gains `not-applicable`, as on the row.
 - **`$defs.exportRow` becomes a SUPERSET of the hashed row.** It was a lossy projection:
   measured 2026-09-08 it lacked `month`, `emittingJob`, `createdAt`, `externalKey`,
@@ -789,9 +799,16 @@ reasoning: no month export has ever been published with a row in it.
   projection would have made that promise false, so the projection is what moved: all seven
   members are added, each definition copied verbatim from `ledger-row.v1` (self-containment
   forbids a `$ref` across files, so a copy is the only form available), and `date` stays as
-  the row's UTC date. A complete hashed row now validates as an export row unchanged. The
-  audit source of record is still the committed month files; the export becomes a second
-  place the same check can run.
+  the row's UTC date. A complete hashed row now validates as an export row unchanged.
+  ONE MEMBER IS EXPORT-ONLY, and the `rows` description now says so where a reader meets it:
+  `date` is not a `ledger-row.v1` key, so it was never inside the hashed body, and
+  recomputing FS07-040 over an export row means dropping `date` as well as `prevHash` and
+  `rowHash`. `date` gains the description it never had, saying exactly that; every other
+  member of `$defs.exportRow` is a hashed row member. Both worked examples — this file's
+  and the API description's, JSON and CSV — now carry the complete row, so the one row all
+  three share with `ledger-row.v1`'s own example has a byte-identical hash body in every
+  place it is published. The audit source of record is still the committed month files; the
+  export becomes a second place the same check can run.
 - `$defs.exportRow.repo` is RENAMED `repoNodeId` (policy §5). FS-07 §5.1 rules that every
   field name in that chapter is a `ledger-row.v1` property key verbatim, and this was the
   one export member that was not — one member under two names across the two files, which
