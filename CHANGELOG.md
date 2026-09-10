@@ -1162,3 +1162,44 @@ reasoning: no month export has ever been published with a row in it.
   `/registry/index/meta.json`, which is how the production guard already reads them. No signed
   payload takes the member either (`certificate.v1`, `entitlement-record.v1`,
   `ct-checkpoint.v1`) — the label is a property of the build, not of what was attested.
+
+## openapi/edge-public.v1.yaml
+
+The API description's own section. It is not a schema file, so the per-schema rules above
+address it only by analogy: `info.version` versions the API SURFACE — routes, status codes,
+caching classes, error codes — while the component schemas under it describe response
+bodies. Nothing is published under it yet, so policy 5 governs; the levels below still say
+which kind of change each entry was.
+
+### 1.0.1 — unreleased (2026-09-08)
+
+- Additive, and a correction rather than a new capability: the two components below now
+  describe bodies that are ALREADY served that way. No route, status code, cache class or
+  error code moved, which is why this is a patch and not the minor bump rule 3 asks of an
+  additive property on a schema file. Authority: **Settled 2** above — the artifact-plane
+  authority question settled by the recorded ruling **Q b0443041**, whose instrument is the
+  dated FS-00 §6.2 amendment note; the placement of the `Jwks` part in this entry rather
+  than in the envelope entry above it is the recorded ruling **Q 3bf2f667**.
+- `Jwks` gains optional `schemaVersion` (`const: 1`) and `generatedAt` (`date-time`). These
+  are the FS-00 §6.2 envelope, and the published key set has carried them from the first
+  build — the component was `additionalProperties: false` with `required: [keys]`, so it
+  REJECTED the very document it documents, and a consumer who validated against it would
+  have refused the real `/jwks.json` and been right to. `required` stays `[keys]` alone:
+  the same body is also minted by the edge Worker from its own bundle when storage holds
+  nothing, and a key set is worth serving with fewer envelope members than not at all.
+  `generatedAt` is never guessed — a deployment with no build instant to state omits it.
+- `Jwks` gains optional `source` (the envelope enum, identical to the schema files' member)
+  and optional `sandbox` (`boolean`). `sandbox` is `true` on `/sandbox/jwks.json` and
+  nowhere else: FS08-103 requires sandbox material to be marked in every response body, and
+  until now that marker had no home in the contract. It is ABSENT rather than `false` on
+  the production set — which document a key set is decides that, and a flag asserting it
+  could be copied onto a set that is not this one.
+- `DomainIndex` gains optional `source`, the same enum. The published index has carried the
+  label since the plane began declaring it.
+- The `oneActiveKey` example gains `schemaVersion: 1` and a `generatedAt` so the envelope is
+  visible where a reader looks first; the two keys and their windows are unchanged. The
+  sandbox operation, which had no example at all, gains one that shows `sandbox: true` — the
+  marker its own description promises. Both are validated by the examples gate.
+- The `kid` pattern is untouched: `^psn-(dev|prod|sandbox)-[0-9]{4}-[0-9]+$` stands, and the
+  fixture key set was renamed to match it rather than the pattern widened to admit a retired
+  environment token.

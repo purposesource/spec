@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.0.0
+  version: 1.0.1
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -459,6 +459,8 @@ paths:
                 oneActiveKey:
                   summary: One active key, one retired
                   value:
+                    schemaVersion: 1
+                    generatedAt: '2027-01-01T00:05:00Z'
                     keys:
                       - kty: EC
                         crv: P-256
@@ -505,6 +507,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Jwks'
+              examples:
+                sandboxMarked:
+                  summary: The test-mode set, marked in the body
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-06-01T05:00:00Z'
+                    sandbox: true
+                    keys:
+                      - kty: EC
+                        crv: P-256
+                        x: gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0
+                        y: SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps
+                        kid: psn-sandbox-2026-1
+                        use: sig
+                        alg: ES256
+                        "psn:status": active
+                        "psn:validityWindow":
+                          notBefore: '2026-01-01T00:00:00Z'
+                          notAfter: null
         '429':
           $ref: '#/components/responses/RateLimited'
         '503':
@@ -1699,7 +1720,46 @@ components:
         An RFC 7517 key set, plus two namespaced members per key: `psn:status` and
         `psn:validityWindow`. Retired keys are kept forever so that old certificates keep
         verifying.
+
+        `keys` is the only REQUIRED member. The envelope below travels with the published
+        artifact, and the same document is also minted by the edge deployment from its own
+        bundle when storage holds nothing — a key set is worth serving with fewer envelope
+        members than not at all, because it is the document a client resolves a `kid`
+        against in order to check a signature.
       properties:
+        schemaVersion:
+          type: integer
+          const: 1
+          description: |
+            The contract version, as FS-00 §6.2 asks of every artifact. Optional here
+            because of the minted fallback above; the publishing build always stamps it.
+        generatedAt:
+          type: string
+          format: date-time
+          description: |
+            When the publishing build produced this key set; also the artifact's
+            `Last-Modified`. Absent only from a minted answer whose deployment carries no
+            build instant to state — never guessed.
+        source:
+          enum: [registry-v0, sample, fixture]
+          description: |
+            Which plane produced this artifact. `sample` and `fixture` declare a
+            NON-PRODUCTION plane: every page that renders such an artifact is labelled
+            sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the
+            edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2
+            production source of record — the curated registry repository the index is
+            built from. Optional, and its absence asserts nothing: an artifact whose body
+            cannot carry the label borrows the plane's declaration from
+            `/registry/index/meta.json`. The enum widens additively when the P-M3 producer
+            takes a value of its own.
+        sandbox:
+          type: boolean
+          description: |
+            `true` on `/sandbox/jwks.json` and nowhere else — the in-band marker FS08-103
+            asks for, so a client holding only the body still knows the set is test-mode
+            material. ABSENT rather than `false` on the production set: which document it
+            is decides that, and a flag saying so could be copied onto a set that is not
+            this one.
         keys:
           type: array
           items:
@@ -1752,6 +1812,18 @@ components:
         generatedAt:
           type: string
           format: date-time
+        source:
+          enum: [registry-v0, sample, fixture]
+          description: |
+            Which plane produced this artifact. `sample` and `fixture` declare a
+            NON-PRODUCTION plane: every page that renders such an artifact is labelled
+            sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the
+            edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2
+            production source of record — the curated registry repository the index is
+            built from. Optional, and its absence asserts nothing: an artifact whose body
+            cannot carry the label borrows the plane's declaration from
+            `/registry/index/meta.json`. The enum widens additively when the P-M3 producer
+            takes a value of its own.
         domains:
           type: object
           description: Verified domain to organisation ULID. Domain-verified organisations only.
