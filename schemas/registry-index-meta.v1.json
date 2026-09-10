@@ -4,7 +4,7 @@
   "title": "Registry index meta — /registry/index/meta.json",
   "description": "The registry index's table of contents: the shard list, registry-wide counts, and the delist set the badge route uses as a belt-and-braces guard against a stale cached badge (FS10-032 — the edge keeps this document hot in KV as `registry-index-meta`). Counts include `detected` repositories in `totals.detected` only; they are never listed (GH-014).",
   "x-psn": {
-    "specVersion": "1.1.0",
+    "specVersion": "1.1.1",
     "phase": "P-M2",
     "artifactPath": "/registry/index/meta.json",
     "authoritative": true,
@@ -51,7 +51,7 @@
     },
     "delisted": {
       "type": "array",
-      "description": "Node ids in state `delisted` or `quit`. The badge route serves the neutral form for any id in this set even if a cached badge artifact still says otherwise (FS10-032).",
+      "description": "Node ids of every listed repository whose state is `suspended`, `quit` or `delisted`. The badge route serves the neutral form for any id in this set even if a cached badge artifact still says otherwise (FS10-032). All three states render neutral — a stale badge never keeps asserting registration (WEB-085) — so the guard has to cover all three; the member keeps its name, which is the state a reader recognises. *(Wording corrected 2026-09-08: it said `delisted` or `quit`, and a suspended repository would have kept a registered badge alive on a cache.)*",
       "uniqueItems": true,
       "items": { "$ref": "#/$defs/githubNodeId" }
     }

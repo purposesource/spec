@@ -325,6 +325,17 @@ remembering the same rule.
 
 ## registry-index-meta.v1.json
 
+### 1.1.1 — unreleased (2026-09-08)
+
+- Wording only, and a patch under versioning policy §3 — nothing this file validates
+  changes. `delisted` said it held node ids "in state `delisted` or `quit`"; it now says
+  every listed repository whose state is `suspended`, `quit` or `delisted`. All three
+  states render the neutral badge (WEB-085), and the badge route's guard reads this set to
+  override a stale cached artifact (FS10-032) — so under the narrower reading a suspended
+  repository kept a cached badge asserting registration, which is the exact failure the
+  guard exists to prevent. The member keeps its name: it is the state a reader recognises,
+  and renaming a published member is not what a wording fix may do.
+
 ### 1.0.0 — unreleased
 
 - Initial publication. Shard list, registry-wide totals, and the delisted set the badge
@@ -351,6 +362,34 @@ remembering the same rule.
   instrument from this one.
 
 ## repo-record.v1.json
+
+### 1.2.0 — unreleased (2026-09-08)
+
+`pre-release` under versioning policy §5, three times over — a member name moves,
+`maxItems` falls from 8 to 7, and an open pattern closes to an enum; not one of those is
+additive. Nothing has ever been published under this file, and the two members below are
+exactly what both builders already emit, so the change removes a divergence rather than
+creating one.
+
+- Additive. `stateNote` (≤200): the public reason CLASS for a `suspended`, `quit` or
+  `delisted` state — the neutral published category a tombstone page prints (WEB-075).
+  A class, never a narrative: no account of events, no allegation, no person's name and no
+  third party's, because a registry tombstone is read for years. Absent when the state has
+  no published reason, which is not the same as a reason nobody may see. Both planes emit
+  the member today and no schema admitted it.
+- `allocationDefaults` is RENAMED `impactCategoryDefaults`, and its items become a closed
+  copy of the seven-slug menu (`$defs.categorySlug`, byte-identical to
+  `category-menu.v1.json#/$defs/slug` and held so by `check:menu`) with `maxItems: 7`.
+  Three defects in one member: the name was the only one in this contract set for the
+  thing — `registry-v0-record.v1` 1.1.0 validates `impact_category_defaults` and the
+  curated registry records carry it, so a builder had to translate a name for no reason;
+  the items were `^[a-z][a-z0-9-]{1,31}$`, an open pattern admitting a slug no allocation
+  surface can render, where the menu is a CLOSED set of seven (D33 item 1); and `maxItems`
+  was 8, one more than the menu has, so the bound asserted nothing. The enum sits under a
+  `$defs` name mentioning "category" deliberately: `check:menu` discovers copies by that
+  rule (`scripts/check-menu.mjs` §3), so an enum inlined at the property would have been
+  invisible to the gate and free to drift from the published menu. *(Superseded, kept as
+  history: `allocationDefaults`, an eight-item array over an open slug pattern.)*
 
 ### 1.0.0 — unreleased
 
@@ -574,6 +613,20 @@ remembering the same rule.
 
 ## ct-segment.v1.json
 
+### 1.2.0 — unreleased (2026-09-08)
+
+- Additive. `$defs.entry.typ` gains `entitlement-record` and `ct-checkpoint`, and its
+  description becomes "JWS family" instead of "certificate type". The log records three
+  signed families, not one: FS08-113 and VS-27 have the v0 operator script CT-append the
+  entitlement record published at its own URL and the log's own checkpoint alongside the
+  certificates, so a conforming producer had no value to write for two of the three things
+  it appends — the emitted `ct/0.json` of both planes carries `typ: "entitlement-record"`
+  today and no schema admitted it. Pure widening: the five frozen certificate types of
+  FS-00 §6.4 keep their meaning and remain the first five values. What does NOT change is
+  the entry's content rule — hash, family, kind, reference and timestamp and nothing else,
+  which is what keeps the log immutable through an erasure request (CERT-031, CERT-045):
+  a family is not personal data.
+
 ### 1.0.0 — unreleased
 
 - Initial publication. Append-only log segments, hash-chained. Entries carry no personal
@@ -599,6 +652,40 @@ remembering the same rule.
   provable.
 
 ## ledger-row.v1.json
+
+### 1.4.0 — unreleased (2026-09-08)
+
+Every change in this section is `pre-release` under versioning policy §5: nothing has ever
+been published under this file. No committed ledger month holds a row (FS07-100 — the v0
+table is empty), so nothing already emitted becomes invalid, and from the first published
+row the new-file rule binds absolutely.
+
+- `fxRate` becomes a DECIMAL STRING — `{"type": "string", "pattern":
+  "^[0-9]+\\.[0-9]{1,8}$"}` — where it was `{"type": "number", "exclusiveMinimum": 0}`
+  (Q 774fe1d3, supervisor ruling of 2026-09-07). FS-07 §5 stores the rate as
+  `numeric(18,8)`, and this member sits INSIDE the body `rowHash` is taken over (FS07-040,
+  RFC 8785): a binary float has no single canonical spelling across languages, so two
+  conforming implementations could hash the same row to different values, which is the one
+  thing a hash chain may not permit. The pattern is the serialisation rule made mechanical
+  — unsigned integer part, point, one to eight fractional digits, trailing zeros as
+  recorded. `dependentRequired` is unchanged (`fxRate` still requires `fxSource` and
+  `fxDate`), and the example moves to `"fxRate": "0.9"`. *(Superseded, kept as history: a
+  JSON number.)*
+- Additive. `externalKey` (≤120): the upstream event's own key, which is what makes a row
+  idempotent under at-least-once delivery — money-moving handlers are keyed by the rail's
+  event id against a processed-events store and a duplicate delivery is a no-op rather than
+  a second row (ENG-065, ENG-066). Unique across the ledger. Not personal data: an opaque
+  provider reference, never a name, an address or a payment instrument (ENG-083).
+- Additive. `lane` (`pass | project | portfolio | donation`) — the same closed set
+  `ledger-export.v1`'s export row already published and this file did not carry, so the
+  export named a member of the row that the row's own contract did not admit. The COM-009
+  enumeration order is the order `cov-v1` evaluates; at P-M2 only `project` is purchasable
+  (VS-14).
+- Additive. `holdStatus` gains `not-applicable`, a third state for the zero-amount
+  narrative rows (`annotation`, `month-note`, `month-lock`). Those rows carry no allocable
+  money, so `open-M+1` and `released` both assert something untrue about them, and leaving
+  the member off made a row outside the allocation window indistinguishable from one whose
+  state nobody recorded. Widening: neither published token changes meaning.
 
 ### 1.0.0 — unreleased
 
@@ -685,6 +772,36 @@ remembering the same rule.
   instrument from this one.
 
 ## ledger-export.v1.json
+
+### 1.4.0 — unreleased (2026-09-08)
+
+Mirroring `ledger-row.v1` 1.4.0, and `pre-release` under versioning policy §5 on the same
+reasoning: no month export has ever been published with a row in it.
+
+- `$defs.exportRow.fxRate` becomes the same decimal string, and the example moves to
+  `"fxRate": "0.9"` (Q 774fe1d3). *(Superseded, kept as history: a JSON number.)*
+- `$defs.exportRow.holdStatus` gains `not-applicable`, as on the row.
+- **`$defs.exportRow` becomes a SUPERSET of the hashed row.** It was a lossy projection:
+  measured 2026-09-08 it lacked `month`, `emittingJob`, `createdAt`, `externalKey`,
+  `batchId`, `commonsBps` and `routingMode`, so a row hashed over `ledger-row.v1`'s member
+  set (FS07-040) could not be recomputed from the export — and the published methodology
+  promises a reader can re-walk the chain from genesis. Conforming the builders to a lossy
+  projection would have made that promise false, so the projection is what moved: all seven
+  members are added, each definition copied verbatim from `ledger-row.v1` (self-containment
+  forbids a `$ref` across files, so a copy is the only form available), and `date` stays as
+  the row's UTC date. A complete hashed row now validates as an export row unchanged. The
+  audit source of record is still the committed month files; the export becomes a second
+  place the same check can run.
+- `$defs.exportRow.repo` is RENAMED `repoNodeId` (policy §5). FS-07 §5.1 rules that every
+  field name in that chapter is a `ledger-row.v1` property key verbatim, and this was the
+  one export member that was not — one member under two names across the two files, which
+  is also what stopped `rowHash` recomputing. FS-07 §6.2's illustrative block takes the one
+  token with a dated note. `shadow.rows[].repo` does NOT move: `repo` is that object's own
+  published member name (`shadow.rows[].required` is `["repo", "fund", "amountMinor"]`) and
+  renaming it would put the chapter at odds with the contract. *(Superseded, kept as
+  history: the export row member `repo`.)*
+- The `rows` description now states the superset property and what it buys, so a reader
+  does not have to diff two files to learn that a hashed row validates here.
 
 ### 1.0.0 — unreleased
 

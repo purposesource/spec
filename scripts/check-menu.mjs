@@ -8,6 +8,7 @@
  *
  *   · `schemas/category-menu.v1.json`      `$defs.slug`, `$defs.categoryId`
  *   · `schemas/registry-v0-record.v1.json` `$defs.categorySlug`
+ *   · `schemas/repo-record.v1.json`           `$defs.categorySlug`
  *   · the curated registry repository       a byte-identical vendored copy of the menu
  *
  * The copies exist because `check-schemas.mjs` forbids an external `$ref`: a published

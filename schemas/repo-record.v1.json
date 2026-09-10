@@ -4,7 +4,7 @@
   "title": "Repo record — /registry/repo/{node_id}.json",
   "description": "The published per-repository record: one of the three inputs to the cov-v1 coverage function (FS-10 §4.2) and the data behind the public project page (WEB-080). Published for repositories in state `verified`, `suspended`, `quit` or `delisted`; `detected` repositories appear in aggregate counts only (FS02-062, GH-014). A delisted or quit repository still HAS a record and still computes coverage — entitlements and vesting stand (D12) — and `state` is what the answer reports as `basis.repoState` (FS-10 §4.3 step 1). At P-M2 the `stats` block is deliberately ABSENT: Purpose-Points and charity figures do not exist before the first disbursed ledger row, and publishing a zero would be theatre (VS-18, NEV-017).",
   "x-psn": {
-    "specVersion": "1.1.0",
+    "specVersion": "1.2.0",
     "phase": "P-M2",
     "artifactPath": "/registry/repo/{node_id}.json",
     "authoritative": true,
@@ -39,6 +39,7 @@
     "defaultBranch": { "type": "string", "minLength": 1, "maxLength": 255 },
     "state": { "$ref": "#/$defs/repoState" },
     "stateChangedAt": { "type": "string", "format": "date-time" },
+    "stateNote": { "type": "string", "maxLength": 200, "description": "The public reason CLASS for a `suspended`, `quit` or `delisted` state — the neutral, published category the tombstone page prints (WEB-075). A CLASS, never a narrative: no account of events, no allegation, no person's name and no third party's, because a registry tombstone is read for years and a sentence written on a bad day is read the same way. Absent when the state has no published reason, which is not the same as a reason nobody may see." },
     "weightClass": { "enum": ["standard", "major"], "description": "Pricing weight class as of publication (D11). Never applied retroactively to a purchased term (FS02-016, D12)." },
     "allocationFrozen": { "type": "boolean", "description": "Orthogonal flag: allocation skips this repository while true (FS-02 F2). Never changes `state`." },
     "license": {
@@ -101,11 +102,12 @@
         "state": { "enum": ["registered", "neutral"], "description": "Which badge form this repository's state produces. `suspended`, `quit` and `delisted` all render neutral — a stale badge never keeps asserting registration (WEB-085)." }
       }
     },
-    "allocationDefaults": {
+    "impactCategoryDefaults": {
       "type": "array",
-      "maxItems": 8,
+      "maxItems": 7,
       "uniqueItems": true,
-      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" }
+      "items": { "$ref": "#/$defs/categorySlug" },
+      "description": "The project's own default public-benefit categories (FS02-050 tier 3), in the project's stated order. Absent means the steward default applies — a project that chose nothing is not a project that chose none. *(Renamed 2026-09-08, pre-release: the member was `allocationDefaults`, which is the name no other contract uses; `registry-v0-record.v1` 1.1.0 already validates `impact_category_defaults` and the curated registry records carry it, so one vocabulary now spans the record and the artifact built from it. Its items were `^[a-z][a-z0-9-]{1,31}$` with `maxItems: 8`; the menu is a closed set of seven, so an open pattern admitted a slug no allocation surface could render. Superseded, kept as history: `allocationDefaults`, an eight-item open-pattern array.)*"
     },
     "canonicalOf": { "$ref": "#/$defs/githubNodeId" },
     "links": {
@@ -157,6 +159,18 @@
     }
   },
   "$defs": {
+    "categorySlug": {
+      "enum": [
+        "animal-welfare",
+        "education",
+        "environment",
+        "health",
+        "humanitarian-aid",
+        "poverty-relief",
+        "research"
+      ],
+      "description": "The seven published categories of the statutes' Art. 7 (D33 item 1). A copy of `category-menu.v1.json#/$defs/slug`, asserted identical to it by the publishing repository's gate — schemas here are self-contained, so one downloaded file validates on its own and cross-file references do not exist."
+    },
     "repoState": { "enum": ["verified", "suspended", "quit", "delisted"], "description": "Published subset of the FS-02 §3 enum: `detected` repositories get no record (GH-014)." },
     "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },

@@ -44,7 +44,7 @@
     "url": "https://api.purposesource.org/badge/R_kgDOAbc123.json",
     "state": "registered"
   },
-  "allocationDefaults": ["environment"],
+  "impactCategoryDefaults": ["environment"],
   "links": {
     "repository": "https://github.com/acme/widget-engine",
     "projectPage": "https://purposesource.org/registry/acme/widget-engine",

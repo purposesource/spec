@@ -4,7 +4,7 @@
   "title": "Monthly ledger export — /ledger/{YYYY}-{MM}.json",
   "description": "The published monthly ledger export (FS-07 §6.2). Immutable once written: regeneration may only re-emit byte-identical content for a locked month, and a divergence is an alert, not a fix (FS07-051). The `.csv` twin carries the same rows flat; the human ledger page generates from the same rows, and any divergence between page, JSON and CSV is a defect (VS-37, ENG-043/044).\n\nThe shadow section, when present, carries its label IN BAND so no downstream consumer can strip it accidentally: contributor votes are computed and NOT used for routing until the fairness-review gate opens (D27, FS07-052).\n\nDisplay law: pages generate exclusively from these rows; per-contributor money respects the published materiality floor; unclaimed shares appear in aggregate only; there are no leaderboards (FS07-052, D15).\n\nAt P-M2 there are no allocation rows and no `policy`/`totals` allocation figures — the export carries intake rows only, and before the first money moves the ledger page says 'no money has moved yet' in words rather than rendering a zero (FS07-100, VS-37).",
   "x-psn": {
-    "specVersion": "1.3.0",
+    "specVersion": "1.4.0",
     "phase": "P-M2 (intake rows only)",
     "artifactPath": "/ledger/{YYYY}-{MM}.json (+ .csv twin)",
     "authoritative": true,
@@ -60,7 +60,7 @@
     },
     "rows": {
       "type": "array",
-      "description": "The month's rows in canonical order. Row shape is the published ledger-row contract; this export requires the subset every public consumer needs and permits the full row.",
+      "description": "The month's rows in canonical order. Row shape is the published ledger-row contract: `$defs.exportRow` is a SUPERSET of `ledger-row.v1`'s member set plus `date`, so a complete hashed row validates here unchanged and `rowHash` recomputes from the export alone — which is what the published methodology's 're-walk the chain from genesis' promise requires. It requires only the subset every public consumer needs.",
       "items": { "$ref": "#/$defs/exportRow" }
     },
     "shadow": {
@@ -103,6 +103,7 @@
       "required": ["ledId", "seq", "type", "amountMinor", "rowHash"],
       "properties": {
         "ledId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+        "month": { "$ref": "#/$defs/monthKey", "description": "Settlement month for intake rows, allocation month for allocation rows. `(month, seq)` is unique." },
         "seq": { "type": "integer", "minimum": 1 },
         "type": {
           "enum": [
@@ -119,22 +120,31 @@
         "currency": { "$ref": "#/$defs/currency" },
         "srcAmountMinor": { "type": "integer" },
         "srcCurrency": { "$ref": "#/$defs/currency" },
-        "fxRate": { "type": "number", "exclusiveMinimum": 0 },
+        "fxRate": { "type": "string", "pattern": "^[0-9]+\\.[0-9]{1,8}$", "description": "The rate captured at transaction time, as the DECIMAL STRING the hashed row carries (`ledger-row.v1`): FS-07 §5 stores `numeric(18,8)`, and because the member sits inside the body `rowHash` is taken over (FS07-040), one rate must have exactly one JCS serialisation or two conforming implementations disagree on the hash of the same row. *(Changed 2026-09-08, pre-release: it was `{\"type\": \"number\"}`. Superseded, kept as history: a JSON number.)*" },
         "fxSource": { "type": "string", "maxLength": 64 },
         "fxDate": { "type": "string", "format": "date" },
-        "repo": { "$ref": "#/$defs/githubNodeId" },
+        "repoNodeId": { "$ref": "#/$defs/githubNodeId" },
         "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "lane": { "enum": ["pass", "project", "portfolio", "donation"] },
-        "holdStatus": { "enum": ["open-M+1", "released"], "description": "Allocation state of an intake row (COM-023, ENG-025 as amended by ops decisions D31 and D33): `open-M+1` while the row's settlement month has not locked, `released` once it has. A state of the allocation data only, never of money: under the lock-before-sweep rule (D33 item 4) the allocation is computed at the lock, no later than twenty days after the month's last rail payout, and each listed recipient's share is transferred directly on or before the thirtieth day. The token keeps its D31 name for contract stability." },
+        "holdStatus": { "enum": ["open-M+1", "released", "not-applicable"], "description": "Allocation state of an intake row (COM-023, ENG-025 as amended by ops decisions D31 and D33): `open-M+1` while the row's settlement month has not locked, `released` once it has. A state of the allocation data only, never of money: under the lock-before-sweep rule (D33 item 4) the allocation is computed at the lock, no later than twenty days after the month's last rail payout, and each listed recipient's share is transferred directly on or before the thirtieth day. The token keeps its D31 name for contract stability. `not-applicable` is the third state, added 2026-09-08: a zero-amount narrative row (`annotation`, `month-note`, `month-lock`) carries no allocable money, so neither other value says anything true about it." },
         "payerName": { "type": "string", "maxLength": 200, "description": "Opted-in payer name, or the literal `unnamed`." },
         "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$" },
         "ppSnapshotId": { "type": "string", "maxLength": 64 },
         "algoVersion": { "type": "string", "maxLength": 32 },
         "categoryFundId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$", "description": "One of the seven published categories — since ops decision D33 item 1 the basket of the listed recipients in that category, nothing else. The closed menu of the seven is published once, in `category-menu.v1` (`$defs.slug`); this contract set may not `$ref` across files — each schema must validate on its own after a single download — so this field constrains the vocabulary by pattern and names the published menu instead of carrying a copy of the enum. Where a copy is carried, `check:menu` asserts it is identical to the published one." },
         "recipientId": { "type": "string", "pattern": "^rcp_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "The listed recipient a `disburse` row transferred to (ops decision D33 item 1)." },
+        "batchId": { "type": "string", "maxLength": 64 },
+        "externalKey": { "type": "string", "maxLength": 120, "description": "The upstream event's own key, carried so the row is idempotent under at-least-once delivery (ENG-065, ENG-066); unique across the ledger. Not personal data — an opaque provider reference, never a name or a payment instrument (ENG-083)." },
         "correctsLedId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+        "commonsBps": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "routingMode": {
+          "enum": ["project_default", "shadow", "contributor_active"],
+          "description": "The canonical routing-mode enum in force when the row was written (ops decision D27 as amended at the fifth collision; URS MIL-014(e), GOV-038, ENG-032 — FS-07 and FS-04 use exactly these three names). Semantics in full on the published `ledger-row.v1` field of the same name: `project_default` does not compute the contributor tier, `shadow` computes it without applying it, and `contributor_active` engages only once both D27 activation conditions hold."
+        },
         "note": { "type": "string", "maxLength": 1000 },
+        "emittingJob": { "type": "string", "maxLength": 64, "description": "Which component wrote the row — e.g. `tools/record-purchases` at v0. Every row states its own provenance.", "examples": ["tools/record-purchases", "jobs.allocator"] },
+        "createdAt": { "type": "string", "format": "date-time" },
         "monthDigest": { "$ref": "#/$defs/sha256" },
         "prevHash": { "$ref": "#/$defs/sha256OrGenesis" },
         "rowHash": { "$ref": "#/$defs/sha256" }

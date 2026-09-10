@@ -7,7 +7,7 @@
   "currency": "CHF",
   "srcAmountMinor": 40000,
   "srcCurrency": "USD",
-  "fxRate": 0.9,
+  "fxRate": "0.9",
   "fxSource": "ECB daily reference rate",
   "fxDate": "2027-06-01",
   "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
