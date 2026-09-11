@@ -1,0 +1,53 @@
+# The contract set is frozen-by-addition (README, "Versioning"): inside a version every change
+# is additive, and a breaking change is a NEW FILE beside the old one, which keeps being served
+# unchanged for as long as anything published under it exists. The scripts check that a schema
+# compiles, that every example validates and that the frozen coverage vectors still hold; what
+# they cannot check is whether a change is additive in MEANING. That read is a human's, and the
+# paths below are where it is owed.
+#
+# Dated note, 2026-09-11: this file is new on this date. The owner is the organisation TEAM
+# `@purposesource/stewards` (id 19450495, created 2026-09-11T11:42:17Z, two members), read back
+# read-only the same day. The members are not listed here: neither is a PUBLIC member of the
+# organisation (`orgs/purposesource/public_members` → `[]` on this date), and this is a public
+# repository, so the count is recorded and the logins stay in the private record.
+#
+# WHAT THIS FILE DOES NOT DO YET, measured read-only on 2026-09-11. Two operator acts remain,
+# IN THIS ORDER, and until the first of them these rows request review from nobody:
+#
+#   1. THE TEAM HOLDS NO REPOSITORY ACCESS. `orgs/purposesource/teams/stewards/repos` returns
+#      `[]`, and the team object reports `repos_count: 0`. GitHub resolves a TEAM as a code
+#      owner only where that team has write access to the repository — even when every member
+#      already has write individually. Granting `@purposesource/stewards` WRITE on `spec`,
+#      `registry-v0` and `license` is the first act.
+#   2. NO BRANCH CARRIES A REQUIRED REVIEW. `repos/purposesource/spec/branches/main/protection`
+#      reports `required_pull_request_reviews: null` — linear history, no force-push, no
+#      deletions, and nothing else. "Require a pull request before merging" with "require
+#      review from Code Owners" (1 approval) is the second act. Until it exists this file is
+#      advisory: it requests a review, it does not require one.
+#
+# Act 2 before act 1 produces a rule nobody can satisfy, and that locks the admins out of their
+# own repository. Grant the access, confirm on the next pull request that a review is actually
+# requested of `@purposesource/stewards`, and only then require it. Both acts are the
+# operator's, tracked as PS-O14.
+#
+# NOT LISTED, and not by oversight: `scripts/`, `examples/`, `kits/`, `redocly.yaml` and
+# `spec.config.json`. The record scoped this file to the contract and text paths, and widening
+# it is a later decision rather than a detail of this one. Nothing below is a ceiling — a path
+# added here is one line.
+
+# The frozen contracts. A change here changes what every consumer is allowed to send and to
+# expect, and the additive-only rule is enforced by the reviewer, not by a script.
+/schemas/               @purposesource/stewards
+/openapi/               @purposesource/stewards
+
+# The coverage function and its frozen vectors. A vector that changes value is a behaviour
+# change wearing a test's clothes.
+/coverage/              @purposesource/stewards
+
+# The versioning policy and the per-schema history — the file that says what the rules above
+# ARE, and the register of open questions.
+/CHANGELOG.md           @purposesource/stewards
+
+# The gates and this file. A CODEOWNERS that can be edited without its owner's review reviews
+# nothing the next day.
+/.github/               @purposesource/stewards

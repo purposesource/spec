@@ -190,6 +190,15 @@ which keeps being served unchanged for as long as anything published under it ex
 same rule governs the coverage function: `cov-v2` is created alongside `cov-v1`, never in
 place of it. Full policy and per-schema history in [`CHANGELOG.md`](CHANGELOG.md).
 
+The scripts check that a schema compiles, that every example validates and that the frozen
+vectors still hold; whether a change is additive in *meaning* is a human's read. Since
+2026-09-11 [`.github/CODEOWNERS`](.github/CODEOWNERS) names the organisation team
+`@purposesource/stewards` on `schemas/`, `openapi/`, `coverage/` and `CHANGELOG.md`, so a
+pull request touching a contract asks a steward for that read. That file records its own
+limits, measured the same day: the team holds no repository access yet and `main` carries no
+required-review rule, so the review is requested and not yet required — two operator acts,
+in that order.
+
 ## Things a human still has to decide
 
 The changelog's "Open questions" section is the live list, and its "Settled" section keeps
