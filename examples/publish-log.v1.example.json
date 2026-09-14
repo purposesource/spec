@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-06-02T04:00:00Z",
+  "source": "platform",
+  "sourceDigest": "9c4e1f7a03b8d25619ae7c03f41d8b6250a97ce3148bf20d76e5a9c3018f4b72",
+  "batches": [
+    {
+      "batchId": "evt_01jf8w2c9km3q7xz5r0v4t6y8b",
+      "generatedAt": "2027-06-01T05:00:00Z",
+      "source": "registry-v0",
+      "generator": "index-build-lite",
+      "phase": "P-M2",
+      "sources": {
+        "registryEntries": 3,
+        "ledgerMonths": 2,
+        "ledgerRows": 11,
+        "entitlementRecords": 1,
+        "certificates": 1,
+        "waivers": 0
+      },
+      "sourceDigest": "4a1d0c8e59b37f26aa0e1d4c7b93582f60de17c9a4b2803f5e6d91c07af38b24",
+      "sourceDigestInputs": {
+        "registry": 3,
+        "ledger": 2,
+        "certs": 1
+      },
+      "paths": [
+        "/registry/index/meta.json",
+        "/registry/index/w.json",
+        "/registry/repo/R_kgDOWob321.json",
+        "/badge/R_kgDOWob321.json",
+        "/stats.json"
+      ],
+      "etags": {
+        "/registry/index/meta.json": "\"6bece819a02a9a91e51705c160ddafb9\"",
+        "/registry/index/w.json": "\"4da995f67e6fd5daa7d51a47f6a076ba\"",
+        "/registry/repo/R_kgDOWob321.json": "\"179d07fc91904fe092a4a21b0b58de19\"",
+        "/badge/R_kgDOWob321.json": "\"c0e21b84f7a5d3906b1e4f8c2a7d05e3\"",
+        "/stats.json": "\"8f30a6c1d94b72e05af1c83d260be497\""
+      }
+    },
+    {
+      "batchId": "evt_01jfa4d7n2p5s8v1x3z6b9c0dq",
+      "generatedAt": "2027-06-01T11:00:00Z",
+      "source": "registry-v0",
+      "generator": "index-build-lite",
+      "phase": "P-M2",
+      "sources": {
+        "registryEntries": 4,
+        "ledgerMonths": 2,
+        "ledgerRows": 11,
+        "entitlementRecords": 1,
+        "certificates": 1,
+        "waivers": 0
+      },
+      "sourceDigest": "b73c25ae804f1d69c3a0587e2fb146d0938ce75a1024bf83d6e9c471a0538f2b",
+      "sourceDigestInputs": {
+        "registry": 4,
+        "ledger": 2,
+        "certs": 1
+      },
+      "paths": [
+        "/registry/index/meta.json",
+        "/registry/index/z.json",
+        "/registry/repo/R_kgDOQw41ab.json",
+        "/badge/R_kgDOQw41ab.json",
+        "/stats.json"
+      ],
+      "etags": {
+        "/registry/index/meta.json": "\"a1f04b7c39d268e5b0c7419af2d35e86\"",
+        "/registry/index/z.json": "\"2d6b90f3c85a147e0bd39c62f508a71d\"",
+        "/registry/repo/R_kgDOQw41ab.json": "\"5e83c02d7ab914f60c2d8e37b109a4f5\"",
+        "/badge/R_kgDOQw41ab.json": "\"79b1de40c6fa2538e07b4c91d3086af2\"",
+        "/stats.json": "\"3c95e17b208da64f1e0b7c93da528f04\""
+      }
+    },
+    {
+      "batchId": "evt_01jfcq5r8t2w4y7z0a3b6d9f1h",
+      "generatedAt": "2027-06-02T03:00:00Z",
+      "publishedAt": "2027-06-02T04:00:12Z",
+      "source": "platform",
+      "generator": "index-build",
+      "phase": "P-M3",
+      "sourceDigest": "9c4e1f7a03b8d25619ae7c03f41d8b6250a97ce3148bf20d76e5a9c3018f4b72",
+      "paths": [
+        "/registry/index/meta.json",
+        "/stats.json"
+      ],
+      "etags": {
+        "/registry/index/meta.json": "\"e4270b9a163c85df0a7b214e6c93f8d5\"",
+        "/stats.json": "\"0b6d3fa92c1854e7bd09c236f4a7e810\""
+      },
+      "edge": {
+        "kv": "done",
+        "purge": "done",
+        "r2": "not-configured"
+      }
+    }
+  ]
+}

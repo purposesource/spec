@@ -4,7 +4,7 @@
   "title": "Waiver registry — /waivers/{node_id}.json and /waivers/all.json",
   "description": "The published waiver registry: one document per repository, plus a global `/waivers/all.json` whose entries each carry `repoNodeId`. The second of the three cov-v1 inputs (FS-10 §4.2). Waivers are gratis and are granted only by a claimed admin from the platform dashboard (D14) — they can never enter the registry by pull request, which is why the P-M2 registry source has no waivers field at all (FS02-060). At P-M2 every document is the honest empty state `waivers: []`, and the project page says so in words rather than showing a zero (VS-18). `coolingEndsAt` (= grantedAt + 72 h, D14 as amended) is consumed by VESTING only (FS05-063): a waiver inside its cooling window is coverage-eligible exactly like any other, because cooling governs whether vesting attaches permanently, never today's coverage answer. Revocation is PROSPECTIVE: `revokedAt` in the past removes coverage from that instant onward while the certificate verify record still attests the historical window (CERT-042).",
   "x-psn": {
-    "specVersion": "1.1.0",
+    "specVersion": "1.2.0",
     "phase": "P-M2 (honest empty state) · populated at P-M3",
     "artifactPath": "/waivers/{node_id}.json · /waivers/all.json",
     "authoritative": true,
@@ -20,7 +20,7 @@
   "properties": {
     "schemaVersion": { "const": 1 },
     "generatedAt": { "type": "string", "format": "date-time" },
-    "source": { "enum": ["registry-v0", "sample", "fixture"], "description": "Which plane produced this artifact. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders such an artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2 production source of record — the curated registry repository the index is built from. Optional, and its absence asserts nothing: an artifact whose body cannot carry the label borrows the plane's declaration from `/registry/index/meta.json`. The enum widens additively when the P-M3 producer takes a value of its own." },
+    "source": { "enum": ["registry-v0", "sample", "fixture", "platform"], "description": "Which plane produced this artifact. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders such an artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2 production source of record — the curated registry repository the index is built from. `platform` is the P-M3 producer of record — the platform database, rendered by `jobs.index-build`. Optional, and its absence asserts nothing: an artifact whose body cannot carry the label borrows the plane's declaration from `/registry/index/meta.json`. The enum widens additively when the P-M3 producer takes a value of its own, and `platform` (2026-09-12) is that widening: `jobs.index-build` writes it in `PSN_ENV=prod` and writes `fixture` in every other environment, so a reader can still tell a production plane from a synthetic one by the label alone." },
     "nodeId": {
       "$ref": "#/$defs/githubNodeId",
       "description": "Present on a per-repository document; absent on the global `/waivers/all.json`, whose entries carry `repoNodeId` instead."

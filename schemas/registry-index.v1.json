@@ -4,7 +4,7 @@
   "title": "Registry index shard — /registry/index/{shard}.json (and the bulk export)",
   "description": "One shard of the published registry index, sharded by the first character of the repository name plus a `0` shard for everything non-alphabetic (FS02-062). THE SAME DOCUMENT SHAPE serves the bulk export `/registry/export.json` (apex alias `/registry.json`, FS10-060): that document sets `shard: \"export\"` and carries every entry. Entries are the minimum a browse page or a scanner needs; the full per-repository facts live in the repo record, whose URL each entry carries. Only `verified`, `suspended`, `quit` and `delisted` repositories appear — `detected` repositories are counted, never listed (GH-014, OPEN-33 default).",
   "x-psn": {
-    "specVersion": "1.1.0",
+    "specVersion": "1.2.0",
     "phase": "P-M2",
     "artifactPath": "/registry/index/{shard}.json · /registry/export.json",
     "authoritative": true,
@@ -20,7 +20,7 @@
   "properties": {
     "schemaVersion": { "const": 1 },
     "generatedAt": { "type": "string", "format": "date-time" },
-    "source": { "enum": ["registry-v0", "sample", "fixture"], "description": "Which plane produced this artifact. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders such an artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2 production source of record — the curated registry repository the index is built from. Optional, and its absence asserts nothing: an artifact whose body cannot carry the label borrows the plane's declaration from `/registry/index/meta.json`. The enum widens additively when the P-M3 producer takes a value of its own." },
+    "source": { "enum": ["registry-v0", "sample", "fixture", "platform"], "description": "Which plane produced this artifact. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders such an artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2 production source of record — the curated registry repository the index is built from. `platform` is the P-M3 producer of record — the platform database, rendered by `jobs.index-build`. Optional, and its absence asserts nothing: an artifact whose body cannot carry the label borrows the plane's declaration from `/registry/index/meta.json`. The enum widens additively when the P-M3 producer takes a value of its own, and `platform` (2026-09-12) is that widening: `jobs.index-build` writes it in `PSN_ENV=prod` and writes `fixture` in every other environment, so a reader can still tell a production plane from a synthetic one by the label alone." },
     "shard": {
       "type": "string",
       "pattern": "^([a-z0-9]|export)$",

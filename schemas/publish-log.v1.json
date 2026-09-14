@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/publish-log.v1.json",
+  "title": "Publish log — /meta/publish-log.json",
+  "description": "The publish batch records: the one artifact that describes the BUILD rather than the data. FS10-011 step (5) makes this document a batch's home — what was written, when, and with which ETag per path — so that a purge-by-URL can be checked against the batch it claims to cover, and a consumer can tell a REBUILD apart from a PUBLICATION without diffing the plane.\n\nTWO PRODUCERS, ONE CONTRACT. The P-M2 builder publishes the whole plane on every run and writes one batch for it. The P-M3 producer appends a batch only for a run that wrote at least one path, so an hourly rebuild over unchanged data does not grow this document. Both shapes validate here: the P-M2 members below are optional where the later producer does not carry them, and `publishedAt` and `edge` are the later producer's additions.\n\nAPPEND-ONLY (FS-00 §6.2). A batch already written is never edited; a correction is a new batch, forward only.\n\n`sourceDigest` IS OPAQUE AND IS NEVER COMPARED ACROSS PRODUCERS. It answers exactly one question — did the inputs this build read change? — and the two producers read different kinds of input: one digests the bytes of the files it read, the other the canonical form of the rows it read. A consumer compares a digest with the PREVIOUS digest of the SAME producer, and a difference between two producers' digests for one plane means nothing at all.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/meta/publish-log.json",
+    "authoritative": true,
+    "producer": "index-build (P-M2: index-build-lite CI, VS-04; P-M3: the platform's index-build job)",
+    "consumers": [
+      "the site build's plane fetch and its publish-or-not deploy gate",
+      "the edge deployment's self-description (its published-at instant)",
+      "operators auditing what was published, when, and to which paths"
+    ],
+    "fsRefs": ["FS-00 §6.2 (2026-09-01 additions)", "FS-10 §2 (FS10-011)"],
+    "vsRefs": ["VS-04"],
+    "changelog": "CHANGELOG.md#publish-logv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "batches"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time", "description": "The envelope instant of the build that last wrote this document, carried by every artifact of the batch it appended (FS-00 §6.2). It is derived from the build's INPUTS, never from the wall clock, so that unchanged data produces unchanged bytes." },
+    "source": { "enum": ["registry-v0", "sample", "fixture", "platform"], "description": "Which plane produced this artifact. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders such an artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2 production source of record — the curated registry repository the index is built from. `platform` is the P-M3 producer of record — the platform database, rendered by `jobs.index-build`. Optional, and its absence asserts nothing: an artifact whose body cannot carry the label borrows the plane's declaration from `/registry/index/meta.json`. This document is the one a consumer can always reach — it exists whenever the pipeline ran at all — which is why a page whose own artifact is empty still reads the plane label from here." },
+    "sourceDigest": { "$ref": "#/$defs/sourceDigest" },
+    "sourceDigestInputs": { "$ref": "#/$defs/countsByLabel", "description": "How many files each source label contributed to `sourceDigest`. COUNTS ONLY, never paths: this artifact is published, and a path list would describe the producer's directory layout to every reader." },
+    "batches": {
+      "type": "array",
+      "description": "The batches, oldest first. A build that wrote nothing appends nothing.",
+      "items": { "$ref": "#/$defs/batch" }
+    }
+  },
+  "$defs": {
+    "sourceDigest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "An opaque lowercase-hex SHA-256 over the inputs this build read — and opaque is the operative word. Each producer defines its own preimage over its own kind of input, so the value is meaningful only against the PREVIOUS value of the SAME producer, where a difference means the sources moved and equality means a rebuild would publish the same plane. Two producers' digests of one plane are not expected to be equal and are never compared."
+    },
+    "countsByLabel": {
+      "type": "object",
+      "description": "Counts keyed by a label the producer names. The key space is deliberately open — a producer that reads a new kind of source adds a label, which is not a contract change — and every value is a count, so nothing here can leak a path or an identifier.",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "batch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["batchId", "generatedAt", "paths"],
+      "description": "One publish batch: the FS10-011 step (5) record. The three required members are the ones that clause names — the batch's identity, the instant its artifacts carry, and what was written.",
+      "properties": {
+        "batchId": {
+          "type": "string",
+          "pattern": "^evt_[0-9abcdefghjkmnpqrstvwxyz]{26}$",
+          "description": "The batch ULID (FS-00 §6.1). Sortable, so the newest batch is the last one by identifier as well as by position."
+        },
+        "generatedAt": { "type": "string", "format": "date-time", "description": "The envelope instant every artifact of this batch carries — a fact about the DATA, derived from the inputs." },
+        "publishedAt": { "type": "string", "format": "date-time", "description": "When these bytes landed on the plane — a fact about the RUN, and therefore a wall clock, which is exactly why it is a separate member from `generatedAt`. Written by the P-M3 producer; absent on a batch from a producer that does not record it." },
+        "source": { "enum": ["registry-v0", "sample", "fixture", "platform"], "description": "The plane this batch was published to, in the envelope's own vocabulary. Present per batch as well as on the envelope because a batch is a fact of its own." },
+        "generator": { "type": "string", "minLength": 1, "description": "Which producer wrote the batch, as a plain name — `index-build-lite` for the P-M2 builder and the job's own name for the P-M3 producer. Not an enumeration: naming a producer is a deployment fact, and a third one must not need an amendment here." },
+        "phase": { "type": "string", "minLength": 1, "description": "The milestone the producer belongs to (`P-M2`, `P-M3`). Recorded per batch so a log spanning the producer swap says which side of it each batch came from." },
+        "sources": { "$ref": "#/$defs/countsByLabel", "description": "How much of each kind of source this batch was built from — registry entries, ledger months and rows, records, certificates, waivers. Counts only, and the key space is the producer's." },
+        "sourceDigest": { "$ref": "#/$defs/sourceDigest" },
+        "sourceDigestInputs": { "$ref": "#/$defs/countsByLabel", "description": "The per-label file counts behind this batch's `sourceDigest`." },
+        "paths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "Every artifact path this batch wrote, each rooted at `/`. A batch exists because something was written, so this is never empty — a run that wrote nothing appends no batch at all. This is the list a purge call is built from, which is why the paths are exact rather than patterned.",
+          "items": { "type": "string", "pattern": "^/[A-Za-z0-9._/-]+$" }
+        },
+        "etags": {
+          "type": "object",
+          "description": "Path to the ETag of the body written at it — the same set of paths as `paths`. A consumer fetching the plane verifies each body against the value here, and a cache is purged by the URL whose ETag moved.",
+          "propertyNames": { "pattern": "^/[A-Za-z0-9._/-]+$" },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^\"[0-9a-f]{32}\"$",
+            "description": "The entity-tag AS SERVED, quotes included: the first 32 lowercase hex characters of the body's SHA-256, wrapped in the double quotes HTTP's syntax requires. The quotes are part of the value on purpose — an unquoted digest here would never match the `If-None-Match` a client sends, and the mismatch would be silent."
+          }
+        },
+        "edge": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kv", "purge", "r2"],
+          "description": "What the publish handshake's edge steps did for this batch (FS10-011 steps 2 to 4). Present when the producer performs them; when it is present all three are stated, because the block exists so that a reader never has to guess whether a step ran.",
+          "properties": {
+            "kv": { "$ref": "#/$defs/edgeStep", "description": "Refreshing the hot keys the edge reads before the plane (step 3)." },
+            "purge": { "$ref": "#/$defs/edgeStep", "description": "Purging this batch's exact URLs (step 4)." },
+            "r2": { "$ref": "#/$defs/edgeStep", "description": "Copying the batch to the mirror (step 2)." }
+          }
+        }
+      }
+    },
+    "edgeStep": {
+      "enum": ["done", "skipped", "not-configured"],
+      "description": "`done` — the step ran and succeeded. `skipped` — it was available and deliberately not run for this batch. `not-configured` — the credential or identifier it needs does not exist in this deployment, which is a stated posture rather than a failure."
+    }
+  }
+}

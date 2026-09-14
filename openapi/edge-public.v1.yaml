@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.0.1
+  version: 1.0.2
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -1742,17 +1742,21 @@ components:
             and omits this member entirely when the deployment has no build instant to
             state — never a guessed one.
         source:
-          enum: [registry-v0, sample, fixture]
+          enum: [registry-v0, sample, fixture, platform]
           description: |
             Which plane produced this artifact. `sample` and `fixture` declare a
             NON-PRODUCTION plane: every page that renders such an artifact is labelled
             sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the
             edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2
             production source of record — the curated registry repository the index is
-            built from. Optional, and its absence asserts nothing: an artifact whose body
-            cannot carry the label borrows the plane's declaration from
+            built from. `platform` is the P-M3 producer of record — the platform database,
+            rendered by `jobs.index-build`. Optional, and its absence asserts nothing: an
+            artifact whose body cannot carry the label borrows the plane's declaration from
             `/registry/index/meta.json`. The enum widens additively when the P-M3 producer
-            takes a value of its own.
+            takes a value of its own, and `platform` (2026-09-12) is that widening:
+            `jobs.index-build` writes it in `PSN_ENV=prod` and writes `fixture` in every
+            other environment, so a reader can still tell a production plane from a
+            synthetic one by the label alone.
         sandbox:
           type: boolean
           description: |
@@ -1814,17 +1818,21 @@ components:
           type: string
           format: date-time
         source:
-          enum: [registry-v0, sample, fixture]
+          enum: [registry-v0, sample, fixture, platform]
           description: |
             Which plane produced this artifact. `sample` and `fixture` declare a
             NON-PRODUCTION plane: every page that renders such an artifact is labelled
             sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the
             edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2
             production source of record — the curated registry repository the index is
-            built from. Optional, and its absence asserts nothing: an artifact whose body
-            cannot carry the label borrows the plane's declaration from
+            built from. `platform` is the P-M3 producer of record — the platform database,
+            rendered by `jobs.index-build`. Optional, and its absence asserts nothing: an
+            artifact whose body cannot carry the label borrows the plane's declaration from
             `/registry/index/meta.json`. The enum widens additively when the P-M3 producer
-            takes a value of its own.
+            takes a value of its own, and `platform` (2026-09-12) is that widening:
+            `jobs.index-build` writes it in `PSN_ENV=prod` and writes `fixture` in every
+            other environment, so a reader can still tell a production plane from a
+            synthetic one by the label alone.
         domains:
           type: object
           description: Verified domain to organisation ULID. Domain-verified organisations only.
@@ -1899,11 +1907,106 @@ components:
               type: object
               additionalProperties:
                 type: integer
+            errorCodes:
+              type: array
+              items:
+                type: string
+              description: |
+                The envelope code space of THIS deployment — every `error.code` it is able
+                to return. Listing a code says the deployment can produce it, which is a
+                different statement from having produced it: `cert_revoked` is listed while
+                no certificate has ever been revoked. Codes are additive-only, so the list
+                grows and never loses a member.
         routes:
           type: object
           description: Which phase-gated routes are switched on in this deployment.
           additionalProperties:
             type: boolean
+        env:
+          type: string
+          example: prod
+          description: |
+            The environment this deployment answers as — `prod`, `preview` and `dev` are the
+            three deployed today. A plain string rather than a closed set, because naming a
+            fourth deployment is a configuration act and should not need an amendment here.
+            This is a published health key and not a debug field: the production availability
+            check on this route asserts `edgeVersion` present and `env` equal to `prod` at its
+            highest paging class, so a deployment that stopped answering with it would take
+            that check down with it.
+        api:
+          enum: [proxied, disabled, unconfigured]
+          description: |
+            The state of the authenticated family on this deployment. Every path outside the
+            public read set is proxied to the origin; this member says whether that is
+            actually happening. `proxied` is claimed only when the family is switched on AND
+            an origin is configured. `disabled` is the honest answer while the family is off.
+            `unconfigured` reports the defect — switched on with no origin — instead of
+            hiding it behind a word that sounds like it works.
+        rateLimits:
+          type: object
+          additionalProperties: false
+          description: |
+            The published limit table, in machine form. The same figures are published in
+            prose on the API documentation page and in the caption of every form section,
+            from this one table — so a client can read the limits instead of discovering
+            them. `enforced` reports the kill switch honestly: a deployment with the limiter
+            off says so here rather than advertising figures it is not applying.
+          properties:
+            keyedBy:
+              type: string
+              example: ip
+              description: What a counter counts against — the client address, taken from the header the platform writes on every request and a caller cannot forge.
+            enforced:
+              type: boolean
+              description: Whether the limiter is switched on here. `false` means the figures below are published and not applied.
+            scope:
+              type: string
+              example: per Cloudflare location
+              description: The span one counter covers. Limits are counted at the edge location that served the request, never globally.
+            classes:
+              type: object
+              description: One entry per limit class. The key space is deliberately open — a class arrives by being deployed, not by amending this contract.
+              additionalProperties:
+                type: object
+                additionalProperties: false
+                required: [limit, periodSeconds, routes]
+                properties:
+                  limit:
+                    type: integer
+                    minimum: 1
+                    description: Requests admitted per period.
+                  periodSeconds:
+                    type: integer
+                    minimum: 1
+                    description: The period the limit counts over.
+                  routes:
+                    type: array
+                    items:
+                      type: string
+                    description: The route templates this class covers.
+        verifyAt:
+          type: string
+          format: uri
+          example: https://purposesource.org/verify
+          description: |
+            Where a human verifies a certificate. Published here so that a holder of a
+            certificate naming the page can check this deployment names the same one.
+        publishedAt:
+          type: string
+          format: date-time
+          description: |
+            When the artifact plane this deployment serves was PUBLISHED — read from the
+            newest batch record of `/meta/publish-log.json`, never from an artifact's
+            `generatedAt`, which is pinned to the build's INPUTS so that unchanged data
+            produces unchanged bytes. Absent on a deployment that has read no publish log.
+            Typed here before it is served: the rule that puts it on this route is already
+            recorded, and a closed object would otherwise be amended twice for one decision.
+        stale:
+          type: boolean
+          description: |
+            Whether `publishedAt` has fallen outside the publication period plus its grace.
+            The deployment computes it so a reader does not have to know the period. Absent
+            whenever `publishedAt` is, and typed here for the same reason.
 
     FormAck:
       type: object

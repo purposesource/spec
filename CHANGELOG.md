@@ -35,13 +35,16 @@ cannot ship without a written history.
 
 ## 0.1.0 — unreleased
 
-Initial scaffold of the contract set. Twenty-two schemas, the public read API description,
+Initial scaffold of the contract set. Twenty-three schemas, the public read API description,
 and the published reference implementation of the coverage function with its frozen test
 vectors. Two of them are the money contracts of 2026-09-07 — `cost-support.v1.json`
 and `recipient-list.v1.json` — which close the planned-but-unbuilt entry below; the
 twenty-first is `certificate-policy.v1.json`, the published certificate policy of
 2026-09-07; and the twenty-second is `claim-kit.v1.json` (2026-09-08), the contract for the
-claim-language kit the checkout delivers at purchase and every corporate certificate embeds.
+claim-language kit the checkout delivers at purchase and every corporate certificate embeds;
+and the twenty-third is `publish-log.v1.json` (2026-09-12), the publish batch records the
+artifact plane has carried since the first build and the plane's own validation gate had to
+list as unschematised for want of a contract.
 
 ### Contracts published beyond the initially-scoped ten
 
@@ -323,6 +326,20 @@ remembering the same rule.
   alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
   instrument from this one.
 
+### 1.2.0 — unreleased (2026-09-12)
+
+- Additive. `source` admits a fourth value, `platform` — the P-M3 producer of record, the
+  platform database rendered by the index-build job. The enum only widens and the member
+  stays optional, so nothing that validated stops validating and `registry-v0`, `sample`
+  and `fixture` keep exactly the meanings they had. This is the widening the member's own
+  description reserved ("the enum widens additively when the P-M3 producer takes a value
+  of its own"), and that description now says so and says what a reader may conclude from
+  the value: the P-M3 producer writes `platform` in production and `fixture` in every
+  other environment, so a synthetic plane is still declared as one and the production
+  guard still refuses it. No second value was added — `dev` was considered and rejected
+  for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
+  2026-09-10, which authorises the P-M3 build.
+
 ## registry-index-meta.v1.json
 
 ### 1.0.0 — unreleased
@@ -360,6 +377,20 @@ remembering the same rule.
   repository kept a cached badge asserting registration, which is the exact failure the
   guard exists to prevent. The member keeps its name: it is the state a reader recognises,
   and renaming a published member is not what a wording fix may do.
+
+### 1.2.0 — unreleased (2026-09-12)
+
+- Additive. `source` admits a fourth value, `platform` — the P-M3 producer of record, the
+  platform database rendered by the index-build job. The enum only widens and the member
+  stays optional, so nothing that validated stops validating and `registry-v0`, `sample`
+  and `fixture` keep exactly the meanings they had. This is the widening the member's own
+  description reserved ("the enum widens additively when the P-M3 producer takes a value
+  of its own"), and that description now says so and says what a reader may conclude from
+  the value: the P-M3 producer writes `platform` in production and `fixture` in every
+  other environment, so a synthetic plane is still declared as one and the production
+  guard still refuses it. No second value was added — `dev` was considered and rejected
+  for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
+  2026-09-10, which authorises the P-M3 build.
 
 ## repo-record.v1.json
 
@@ -419,6 +450,20 @@ creating one.
   invisible to the gate and free to drift from the published menu. *(Superseded, kept as
   history: `allocationDefaults`, an eight-item array over an open slug pattern.)*
 
+### 1.3.0 — unreleased (2026-09-12)
+
+- Additive. `source` admits a fourth value, `platform` — the P-M3 producer of record, the
+  platform database rendered by the index-build job. The enum only widens and the member
+  stays optional, so nothing that validated stops validating and `registry-v0`, `sample`
+  and `fixture` keep exactly the meanings they had. This is the widening the member's own
+  description reserved ("the enum widens additively when the P-M3 producer takes a value
+  of its own"), and that description now says so and says what a reader may conclude from
+  the value: the P-M3 producer writes `platform` in production and `fixture` in every
+  other environment, so a synthetic plane is still declared as one and the production
+  guard still refuses it. No second value was added — `dev` was considered and rejected
+  for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
+  2026-09-10, which authorises the P-M3 build.
+
 ## waiver.v1.json
 
 ### 1.0.0 — unreleased
@@ -448,6 +493,20 @@ creating one.
   two-form pattern and therefore the model. It is NOT closed to that file's narrower first
   alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
   instrument from this one.
+
+### 1.2.0 — unreleased (2026-09-12)
+
+- Additive. `source` admits a fourth value, `platform` — the P-M3 producer of record, the
+  platform database rendered by the index-build job. The enum only widens and the member
+  stays optional, so nothing that validated stops validating and `registry-v0`, `sample`
+  and `fixture` keep exactly the meanings they had. This is the widening the member's own
+  description reserved ("the enum widens additively when the P-M3 producer takes a value
+  of its own"), and that description now says so and says what a reader may conclude from
+  the value: the P-M3 producer writes `platform` in production and `fixture` in every
+  other environment, so a synthetic plane is still declared as one and the production
+  guard still refuses it. No second value was added — `dev` was considered and rejected
+  for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
+  2026-09-10, which authorises the P-M3 build.
 
 ## entitlement-record.v1.json
 
@@ -556,6 +615,20 @@ creating one.
   two-form pattern and therefore the model. It is NOT closed to that file's narrower first
   alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
   instrument from this one.
+
+### 1.2.0 — unreleased (2026-09-12)
+
+- Additive. `source` admits a fourth value, `platform` — the P-M3 producer of record, the
+  platform database rendered by the index-build job. The enum only widens and the member
+  stays optional, so nothing that validated stops validating and `registry-v0`, `sample`
+  and `fixture` keep exactly the meanings they had. This is the widening the member's own
+  description reserved ("the enum widens additively when the P-M3 producer takes a value
+  of its own"), and that description now says so and says what a reader may conclude from
+  the value: the P-M3 producer writes `platform` in production and `fixture` in every
+  other environment, so a synthetic plane is still declared as one and the production
+  guard still refuses it. No second value was added — `dev` was considered and rejected
+  for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
+  2026-09-10, which authorises the P-M3 build.
 
 ## certificate-policy.v1.json
 
@@ -693,6 +766,20 @@ creating one.
   nothing already valid becomes invalid, because no published log holds a revocation.
 - `ct-segment.v1.example.json`'s revocation entry now carries the hash this rule computes,
   so the example demonstrates the sentence instead of contradicting it.
+
+### 1.3.0 — unreleased (2026-09-12)
+
+- Additive. `source` admits a fourth value, `platform` — the P-M3 producer of record, the
+  platform database rendered by the index-build job. The enum only widens and the member
+  stays optional, so nothing that validated stops validating and `registry-v0`, `sample`
+  and `fixture` keep exactly the meanings they had. This is the widening the member's own
+  description reserved ("the enum widens additively when the P-M3 producer takes a value
+  of its own"), and that description now says so and says what a reader may conclude from
+  the value: the P-M3 producer writes `platform` in production and `fixture` in every
+  other environment, so a synthetic plane is still declared as one and the production
+  guard still refuses it. No second value was added — `dev` was considered and rejected
+  for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
+  2026-09-10, which authorises the P-M3 build.
 
 ## ct-checkpoint.v1.json
 
@@ -973,6 +1060,20 @@ reasoning: no month export has ever been published with a row in it.
 - The `rows` description now states the superset property and what it buys, so a reader
   does not have to diff two files to learn that a hashed row validates here.
 
+### 1.5.0 — unreleased (2026-09-12)
+
+- Additive. `source` admits a fourth value, `platform` — the P-M3 producer of record, the
+  platform database rendered by the index-build job. The enum only widens and the member
+  stays optional, so nothing that validated stops validating and `registry-v0`, `sample`
+  and `fixture` keep exactly the meanings they had. This is the widening the member's own
+  description reserved ("the enum widens additively when the P-M3 producer takes a value
+  of its own"), and that description now says so and says what a reader may conclude from
+  the value: the P-M3 producer writes `platform` in production and `fixture` in every
+  other environment, so a synthetic plane is still declared as one and the production
+  guard still refuses it. No second value was added — `dev` was considered and rejected
+  for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
+  2026-09-10, which authorises the P-M3 build.
+
 ## ledger-chain.v1.json
 
 ### 1.0.0 — unreleased
@@ -1004,6 +1105,20 @@ reasoning: no month export has ever been published with a row in it.
   production source of record. Optional, so nothing already valid becomes invalid, and the
   enum widens additively when the P-M3 producer takes a value of its own. Authority:
   **Settled 2** above.
+
+### 1.2.0 — unreleased (2026-09-12)
+
+- Additive. `source` admits a fourth value, `platform` — the P-M3 producer of record, the
+  platform database rendered by the index-build job. The enum only widens and the member
+  stays optional, so nothing that validated stops validating and `registry-v0`, `sample`
+  and `fixture` keep exactly the meanings they had. This is the widening the member's own
+  description reserved ("the enum widens additively when the P-M3 producer takes a value
+  of its own"), and that description now says so and says what a reader may conclude from
+  the value: the P-M3 producer writes `platform` in production and `fixture` in every
+  other environment, so a synthetic plane is still declared as one and the production
+  guard still refuses it. No second value was added — `dev` was considered and rejected
+  for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
+  2026-09-10, which authorises the P-M3 build.
 
 ## cost-support.v1.json
 
@@ -1213,6 +1328,59 @@ reasoning: no month export has ever been published with a row in it.
   payload takes the member either (`certificate.v1`, `entitlement-record.v1`,
   `ct-checkpoint.v1`) — the label is a property of the build, not of what was attested.
 
+### 1.2.0 — unreleased (2026-09-12)
+
+- Additive. `source` admits a fourth value, `platform` — the P-M3 producer of record, the
+  platform database rendered by the index-build job. The enum only widens and the member
+  stays optional, so nothing that validated stops validating and `registry-v0`, `sample`
+  and `fixture` keep exactly the meanings they had. This is the widening the member's own
+  description reserved ("the enum widens additively when the P-M3 producer takes a value
+  of its own"), and that description now says so and says what a reader may conclude from
+  the value: the P-M3 producer writes `platform` in production and `fixture` in every
+  other environment, so a synthetic plane is still declared as one and the production
+  guard still refuses it. No second value was added — `dev` was considered and rejected
+  for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
+  2026-09-10, which authorises the P-M3 build.
+
+## publish-log.v1.json
+
+### 1.0.0 — unreleased (2026-09-12)
+
+- Initial publication. `/meta/publish-log.json` — the publish batch records of FS10-011
+  step (5), a path the FS-00 §6.2 amendment note of 2026-09-01 added to the catalogue —
+  has been served since the first build with no published contract, so the gate that
+  validates the artifact plane had to list it by name as unschematised and say why. This
+  closes that: the artifact now has the same standing as every other path of the plane.
+- TWO PRODUCERS, ONE CONTRACT, and that is the reason the shape is described the way it
+  is. The P-M2 builder publishes the whole plane on every run and records one batch for
+  it; the P-M3 producer appends a batch only for a run that wrote at least one path, so an
+  hourly rebuild over unchanged data does not grow the document. `publishedAt` and `edge`
+  are the second producer's additions and are optional, and the first producer's
+  `sources`, `phase` and `sourceDigestInputs` are optional for the same reason — neither
+  producer is made to carry the other's members, and both validate here.
+- The required set is FS10-011's own: the envelope's `schemaVersion` and `generatedAt`,
+  `batches`, and per batch the three that clause names — `batchId`, `generatedAt`,
+  `paths`. A batch is the record of a publication, so `paths` carries at least one entry;
+  a run that wrote nothing appends no batch rather than an empty one.
+- `sourceDigest` is typed as an opaque lowercase 64-hex string and its description says
+  what it is opaque ABOUT. Each producer defines its own preimage over its own kind of
+  input — the bytes of files read on one side, the canonical form of rows read on the
+  other — so the value answers "did MY inputs change?" against the previous value of the
+  same producer, and two producers' digests of one plane are never compared. Writing that
+  into the contract is the point of the member being typed at all.
+- ETags are typed AS SERVED, quotes included: `"` plus 32 lowercase hex characters plus
+  `"`. The quotes are part of the value because they are part of HTTP's entity-tag syntax,
+  and a producer that recorded the bare digest would publish a value that never matches
+  the `If-None-Match` a client sends — a mismatch nothing would report.
+- The `edge` block states all three handshake steps whenever it is present. It exists so a
+  reader of the log never has to guess whether a step ran, and a block that named only the
+  steps that ran would leave exactly that guess: `done`, `skipped` and `not-configured`
+  are three different facts, and the third is a stated posture rather than a failure.
+- Both the objects of counts — `sourceDigestInputs` per label and `sources` per kind — are
+  open in their keys and integers in their values. Counts only, never paths: this artifact
+  is published, and a path list would describe the producer's directory layout to every
+  reader.
+
 ## openapi/edge-public.v1.yaml
 
 The API description's own section. It is not a schema file, so the per-schema rules above
@@ -1253,3 +1421,39 @@ which kind of change each entry was.
 - The `kid` pattern is untouched: `^psn-(dev|prod|sandbox)-[0-9]{4}-[0-9]+$` stands, and the
   fixture key set was renamed to match it rather than the pattern widened to admit a retired
   environment token.
+
+### 1.0.2 — unreleased (2026-09-12)
+
+- Additive, and a patch for the same reason 1.0.1 was one: no route, status code, cache
+  class or error code moved. Two of the three changes below describe bodies that are
+  ALREADY served that way, and the third types two members a recorded decision has already
+  assigned to this route.
+- `Jwks.source` and `DomainIndex.source` admit `platform`, the P-M3 producer of record —
+  the same widening the nine schema files take in this release, in the same words, so the
+  envelope member means one thing across both halves of the contract set.
+- `Meta` gains seven OPTIONAL members and loses nothing. Five of them the deployment has
+  been publishing all along while this component, `additionalProperties: false` at every
+  level, rejected them: `env`, `api`, `rateLimits`, `verifyAt` and `contracts.errorCodes`.
+  A consumer validating a real `/v1/meta` body against the published contract refused it,
+  and was right to — the contract was wrong about the body, not the body about the
+  contract. The other two, `publishedAt` and `stale`, are put on this same route by a
+  recorded decision of 2026-09-12 and are typed before they are served: the shapes are
+  already specified, and a closed object would otherwise be amended twice for one
+  decision. `required` is untouched, so every body that validated still validates, and the
+  component's published example is unchanged and still passes the examples gate.
+- `env` is a plain string and not an enum of the three deployments that exist today. It is
+  a published health key — the production availability check on this route asserts
+  `edgeVersion` present and `env` equal to `prod`, at its highest paging class — and
+  naming a fourth deployment is a configuration act that should not need an amendment
+  here. `api` IS an enum: `proxied`, `disabled` and `unconfigured` are the contract's own
+  three states, and `unconfigured` exists so that a defect is reported rather than hidden
+  behind a word that sounds like it works.
+- `rateLimits` is closed at its own level and open in its `classes` map, which is where a
+  limit class legitimately arrives. Each class states `limit`, `periodSeconds` and
+  `routes`, the three members the published table emits — not `binding`, which names an
+  internal resource and is not published. `enforced` is typed because it is the honest
+  half of the table: a deployment with the limiter switched off publishes the figures and
+  says it is not applying them.
+- `coverage` is untouched, and `coverage.available` was deliberately NOT added. Which
+  phase-gated routes are switched on is what `routes` already carries, in the map shape
+  this component has always defined and its own example already shows.

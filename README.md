@@ -17,7 +17,7 @@ a procurement reviewer can consume all of it the way they consume a static file.
 
 | Directory | Contents |
 |---|---|
-| `schemas/` | 22 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
+| `schemas/` | 23 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v1.ts`, the published coverage function, with `vectors.json` (frozen test vectors) and its test suite. Zero dependencies. |
 | `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in two cases, `category-menu.v1.example.json` and `claim-kit.v1.example.json`, the example IS the published document, byte for byte. |
@@ -92,6 +92,7 @@ needs a toolchain is not really published.
 | `recipient-list.v1.json` | one published version of the Recipient List (the statutes' annex) | P-M3 producer, v0 hand-maintained |
 | `badge.v1.json` | `/badge/{node_id}.json` (shields.io endpoint) | first public version |
 | `stats.v1.json` | `/stats.json` | first public version |
+| `publish-log.v1.json` | `/meta/publish-log.json` | first public version |
 | `change-event.v1.json` | one item of `/v1/changes` | later, demand-gated |
 
 Each schema carries an `x-psn` block naming its artifact path, its milestone, the spec
