@@ -1442,8 +1442,8 @@ which kind of change each entry was.
   decision. `required` is untouched, so every body that validated still validates, and the
   component's published example is unchanged and still passes the examples gate.
 - `env` is a plain string and not an enum of the three deployments that exist today. It is
-  a published health key — the production availability check on this route asserts
-  `edgeVersion` present and `env` equal to `prod`, at its highest paging class — and
+  a published health key — the production availability check specified for this route
+  asserts `edgeVersion` present and `env` equal to `prod`, at its highest paging class — and
   naming a fourth deployment is a configuration act that should not need an amendment
   here. `api` IS an enum: `proxied`, `disabled` and `unconfigured` are the contract's own
   three states, and `unconfigured` exists so that a defect is reported rather than hidden

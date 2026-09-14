@@ -1930,9 +1930,9 @@ components:
             three deployed today. A plain string rather than a closed set, because naming a
             fourth deployment is a configuration act and should not need an amendment here.
             This is a published health key and not a debug field: the production availability
-            check on this route asserts `edgeVersion` present and `env` equal to `prod` at its
-            highest paging class, so a deployment that stopped answering with it would take
-            that check down with it.
+            check specified for this route asserts `edgeVersion` present and `env` equal to
+            `prod` at its highest paging class, so a deployment that stopped answering with it
+            would take that check down with it.
         api:
           enum: [proxied, disabled, unconfigured]
           description: |
