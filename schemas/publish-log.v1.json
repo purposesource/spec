@@ -67,13 +67,13 @@
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "description": "Every artifact path this batch wrote, each rooted at `/`. A batch exists because something was written, so this is never empty — a run that wrote nothing appends no batch at all. This is the list a purge call is built from, which is why the paths are exact rather than patterned.",
-          "items": { "type": "string", "pattern": "^/[A-Za-z0-9._/-]+$" }
+          "description": "Every artifact path this batch wrote, each rooted at `/`. A batch exists because something was written, so this is never empty \u2014 a run that wrote nothing appends no batch at all. This is the list a purge call is built from, which is why the paths are exact rather than patterned.\n\nWIDENED 2026-09-14 to admit `+` and `=`. Most of this plane's paths are built from a `node_id` \u2014 `/registry/repo/{node_id}.json`, `/badge/{node_id}.json`, `/waivers/{node_id}.json` \u2014 and GitHub's LEGACY node_id form is standard base64, whose alphabet includes both. `repo-record.v1` widened its own `githubNodeId` for the same reason on 2026-09-08, noting the `=` padding its first alternative could not express; this schema was written afterwards and repeated the omission, so a real plane carrying one legacy-keyed repository emitted paths its own publish log could not state. Found by the website's artifact gate on the day that gate began validating this file.",
+          "items": { "type": "string", "pattern": "^/[A-Za-z0-9._/+=-]+$" }
         },
         "etags": {
           "type": "object",
           "description": "Path to the ETag of the body written at it — the same set of paths as `paths`. A consumer fetching the plane verifies each body against the value here, and a cache is purged by the URL whose ETag moved.",
-          "propertyNames": { "pattern": "^/[A-Za-z0-9._/-]+$" },
+          "propertyNames": { "pattern": "^/[A-Za-z0-9._/+=-]+$" },
           "additionalProperties": {
             "type": "string",
             "pattern": "^\"[0-9a-f]{32}\"$",

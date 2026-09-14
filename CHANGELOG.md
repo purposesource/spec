@@ -1387,6 +1387,17 @@ reasoning: no month export has ever been published with a row in it.
   open in their keys and integers in their values. Counts only, never paths: this artifact
   is published, and a path list would describe the producer's directory layout to every
   reader.
+- AMENDED 2026-09-14, before release: the `paths` and `etags` path patterns admit `+` and
+  `=`. Most of this plane's paths are built from a `node_id` — `/registry/repo/{node_id}.json`,
+  `/badge/{node_id}.json`, `/waivers/{node_id}.json` — and GitHub's legacy node_id form is
+  standard base64, whose alphabet carries both. `repo-record.v1` widened its own
+  `githubNodeId` for exactly this on 2026-09-08 and said so in the member's description;
+  this schema was written after that and repeated the omission, so a real plane carrying one
+  legacy-keyed repository emitted artifact paths that its own publish log could not state.
+  Found the day the website's artifact-schema gate began validating this file — which is
+  what that gate is for, and why the entry is recorded here rather than baselined there. A
+  widening of a pattern admits strictly more (policy rule 1) and the version is unreleased,
+  so no number moves.
 
 ## openapi/edge-public.v1.yaml
 
