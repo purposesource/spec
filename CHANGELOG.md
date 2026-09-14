@@ -1362,6 +1362,13 @@ reasoning: no month export has ever been published with a row in it.
   `batches`, and per batch the three that clause names — `batchId`, `generatedAt`,
   `paths`. A batch is the record of a publication, so `paths` carries at least one entry;
   a run that wrote nothing appends no batch rather than an empty one.
+- ORDER IS POSITION, NOT IDENTIFIER, and `batchId`'s description says so outright rather
+  than leaving a reader to infer it. `batches` is oldest first; the identifier is typed for
+  its SHAPE alone — `evt_` and 26 lowercase Crockford characters — and no keyword can relate
+  two identifiers, so a log whose identifiers do not sort into build order validates here
+  exactly as one whose identifiers do. A consumer taking the newest batch by comparing them
+  would therefore sometimes take the wrong one. The guarantee a reader may rely on is the
+  one the document can carry: position, and the instants beside it.
 - `sourceDigest` is typed as an opaque lowercase 64-hex string and its description says
   what it is opaque ABOUT. Each producer defines its own preimage over its own kind of
   input — the bytes of files read on one side, the canonical form of rows read on the

@@ -1996,9 +1996,10 @@ components:
           format: date-time
           description: |
             When the artifact plane this deployment serves was PUBLISHED — read from the
-            newest batch record of `/meta/publish-log.json`, never from an artifact's
-            `generatedAt`, which is pinned to the build's INPUTS so that unchanged data
-            produces unchanged bytes. Absent on a deployment that has read no publish log.
+            LAST batch record of `/meta/publish-log.json`, which is the newest because that
+            array is oldest first, never from an artifact's `generatedAt`, which is pinned
+            to the build's INPUTS so that unchanged data produces unchanged bytes. Absent
+            on a deployment that has read no publish log.
             Typed here before it is served: the rule that puts it on this route is already
             recorded, and a closed object would otherwise be amended twice for one decision.
         stale:

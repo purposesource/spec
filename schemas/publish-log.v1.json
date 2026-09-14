@@ -53,7 +53,7 @@
         "batchId": {
           "type": "string",
           "pattern": "^evt_[0-9abcdefghjkmnpqrstvwxyz]{26}$",
-          "description": "The batch ULID (FS-00 §6.1). Sortable, so the newest batch is the last one by identifier as well as by position."
+          "description": "The batch identifier: `evt_` and a 26-character lowercase Crockford body (FS-00 §6.1). ORDER BY POSITION, NOT BY IDENTIFIER — `batches` is oldest first, and that position, with `generatedAt`, is the ordering this document states. The pattern here constrains the SHAPE of one identifier and no keyword can relate two of them, so a log whose identifiers do not sort into build order validates exactly as one whose identifiers do, and a consumer taking the newest batch by comparing identifiers would sometimes take the wrong one."
         },
         "generatedAt": { "type": "string", "format": "date-time", "description": "The envelope instant every artifact of this batch carries — a fact about the DATA, derived from the inputs." },
         "publishedAt": { "type": "string", "format": "date-time", "description": "When these bytes landed on the plane — a fact about the RUN, and therefore a wall clock, which is exactly why it is a separate member from `generatedAt`. Written by the P-M3 producer; absent on a batch from a producer that does not record it." },
