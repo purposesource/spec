@@ -4,7 +4,7 @@
   "title": "Repo record — /registry/repo/{node_id}.json",
   "description": "The published per-repository record: one of the three inputs to the cov-v1 coverage function (FS-10 §4.2) and the data behind the public project page (WEB-080). Published for repositories in state `verified`, `suspended`, `quit` or `delisted`; `detected` repositories appear in aggregate counts only (FS02-062, GH-014). A delisted or quit repository still HAS a record and still computes coverage — entitlements and vesting stand (D12) — and `state` is what the answer reports as `basis.repoState` (FS-10 §4.3 step 1). At P-M2 the `stats` block is deliberately ABSENT: Purpose-Points and charity figures do not exist before the first disbursed ledger row, and publishing a zero would be theatre (VS-18, NEV-017).",
   "x-psn": {
-    "specVersion": "1.3.0",
+    "specVersion": "1.3.1",
     "phase": "P-M2",
     "artifactPath": "/registry/repo/{node_id}.json",
     "authoritative": true,
@@ -30,7 +30,7 @@
         "login": { "$ref": "#/$defs/githubLogin", "description": "Display cache only (FS02-017)." },
         "orgId": {
           "$ref": "#/$defs/githubNodeId",
-          "description": "Owner organisation node_id. THIS is what a Portfolio-lane entitlement's `scope.org` is compared against (FS-10 §4.3 step 5c) — a transfer changes portfolio matching from the next publish, never the repository key."
+          "description": "Owner node_id — an organisation's `O_…` or a user account's `U_…`, taken from the curated record's `owner_node_id` (ops decision D42). THIS is what a Portfolio-lane entitlement's `scope.org` is compared against (FS-10 §4.3 step 5c) — a transfer changes portfolio matching from the next publish, never the repository key. Absent when the registry records none, and then no Portfolio term matches the repository."
         },
         "type": { "enum": ["User", "Organization"] }
       }

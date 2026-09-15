@@ -4,7 +4,7 @@
   "title": "Company entitlement record — the decoded JWS payload of /entitlements/{co_ulid}.jws",
   "description": "The signed, scanner-facing proof that an organisation holds coverage. Served unauthenticated as a compact ES256 JWS with `Content-Type: application/jose` (FS10-060, WEB-096); THIS schema describes the DECODED PAYLOAD, not the compact serialisation. The signing key is born non-exportable in the movement's own Key Vault and the `kid` sits in the JWS header (FS-00 §6.4). A consumer MUST verify the signature against the published JWKS before trusting anything here — the coverage function treats a record that fails verification as `no` (FS-10 §4.2). At P-M2 this record IS the coverage proof: there is no coverage route at v0 (FS-00 §6.10 as amended), and the record doubles as the vesting snapshot (VS-33/COM-015).\n\nRATIFIED (FS-00 §6.2 amendment note of 2026-09-07; history in the CHANGELOG's Settled list): the payload is this COMPANY record. The FS-00 §6.2 amendment note of 2026-09-01 had stated it as the single entitlement object `{entId, lane, scope, status, periodStart, periodEnd, graceEnd?, scheduleVersion, vestedWindows[], thresholdRegistration?}`, while FS-10 §4.2 (the consumer contract, and the only place that specifies `domains[]`/`verification`/domain resolution) stated it as a COMPANY record carrying `entitlements[]` of exactly that object; the 2026-09-07 note ratifies the company record and leaves the frozen object untouched inside the array, closed to additions. Both texts are then satisfied — the frozen object is unchanged, it simply appears in the array. This file was written to FS-10 §4.2 from the start and does not change: no property moved, no version was bumped. One organisation, one record, one URL, however many terms it holds.\n\nPublished `status` is a PROJECTION of the internal state machine onto `active | suspended | void` (FS05-052): `pending` is never published, `revoked` publishes as `void`, and grace/lapse are NEVER published statuses — cov-v1 derives them from the dates (`now ≤ periodEnd` → active window; `periodEnd < now ≤ graceEnd` → lapsed-in-grace; beyond `graceEnd` → no contribution).\n\nVESTING (D12 as amended, 5th collision): each element of `vestedWindows[]` records one paid term `{from, to}` and the test is `version publication date ≤ to` — the back catalogue at activation vests together with everything published during the term. `from` is term provenance and never a lower bound on vesting.",
   "x-psn": {
-    "specVersion": "1.1.0",
+    "specVersion": "1.1.1",
     "phase": "P-M2",
     "artifactPath": "/entitlements/{co_ulid}.jws (decoded payload)",
     "authoritative": true,
@@ -58,7 +58,7 @@
         "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "lane": {
           "enum": ["pass", "project", "portfolio", "donation"],
-          "description": "Commercial lane. cov-v1 evaluates lanes in the COM-009 enumeration order: pass, then project, then portfolio (donation is answered after waivers). At P-M2 only `project` is purchasable — Pass and Portfolio are published schedule with honest 'not yet purchasable' copy (VS-14)."
+          "description": "Commercial lane. cov-v1 evaluates lanes in the COM-009 enumeration order: pass, then project, then portfolio (donation is answered after waivers). Since ops decision D42 (2026-09-15) `project`, `portfolio` and `pass` are all purchasable at checkout; enabling a lane on the production payment rail still requires the provider's written pre-clearance (COM-018, D18). *(Corrected 2026-09-15: \"At P-M2 only `project` is purchasable — Pass and Portfolio are published schedule with honest 'not yet purchasable' copy (VS-14)\". Superseded, kept as history.)*"
         },
         "scope": { "$ref": "#/$defs/scope" },
         "status": {
@@ -96,7 +96,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["kind"],
-      "description": "Structured scope. `project` ⇒ `repos[]` (min 1, cap 50 declared repositories, COM-018); `portfolio` ⇒ `org`; `network` (Pass) ⇒ neither — a Pass covers every registered repository, which is why it wins the precedence order.",
+      "description": "Structured scope — the PAID COVERAGE of the term, never the usage declaration. `project` ⇒ `repos[]`, the repositories the term covers (exactly one for a Project bought under ops decision D42; the array bound of 50 is the shape's, not a purchasable quantity); `portfolio` ⇒ `org`, the owner node_id, covering every registered repository of that owner; `network` (Pass) ⇒ neither — a Pass covers every registered repository, which is why it wins the precedence order. The repositories a Pass buyer may name (D42 item 4) are private and never appear here. Sources: D16, COM-020, ENG-029, D42. *(Corrected 2026-09-15: this cited \"min 1, cap 50 declared repositories, COM-018\", which conflated coverage with the declaration and cited the payment-account requirement. Superseded, kept as history.)*",
       "properties": {
         "kind": { "enum": ["project", "portfolio", "network"] },
         "repos": {

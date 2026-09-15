@@ -124,8 +124,8 @@
     },
     {
       "id": "VEC-02-yes-via-project",
-      "description": "A Project term matches a declared repository node_id. This is the only purchasable lane at v0.",
-      "fsRef": "FS-10 §4.3 step 5b; COM-018",
+      "description": "A Project term matches a repository node_id named in its scope.",
+      "fsRef": "FS-10 §4.3 step 5b; D42",
       "now": "2027-06-01T12:00:00Z",
       "repo": "verified",
       "waivers": "emptyWaivers",
@@ -1045,8 +1045,8 @@
     },
     {
       "id": "VEC-25-project-scope-does-not-cover-undeclared-repo",
-      "description": "A Project term covers the repositories it DECLARED and no others — the declaration is the scope.",
-      "fsRef": "FS-10 §4.3 step 5b; COM-018",
+      "description": "A Project term covers the repositories its scope names and no others — the scope is the paid coverage, never the usage declaration.",
+      "fsRef": "FS-10 §4.3 step 5b; D42",
       "now": "2027-06-01T12:00:00Z",
       "repo": "otherOwner",
       "waivers": "emptyWaivers",

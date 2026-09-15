@@ -4,7 +4,7 @@
   "title": "Monthly ledger export — /ledger/{YYYY}-{MM}.json",
   "description": "The published monthly ledger export (FS-07 §6.2). Immutable once written: regeneration may only re-emit byte-identical content for a locked month, and a divergence is an alert, not a fix (FS07-051). The `.csv` twin carries the same rows flat; the human ledger page generates from the same rows, and any divergence between page, JSON and CSV is a defect (VS-37, ENG-043/044).\n\nThe shadow section, when present, carries its label IN BAND so no downstream consumer can strip it accidentally: contributor votes are computed and NOT used for routing until the fairness-review gate opens (D27, FS07-052).\n\nDisplay law: pages generate exclusively from these rows; per-contributor money respects the published materiality floor; unclaimed shares appear in aggregate only; there are no leaderboards (FS07-052, D15).\n\nAt P-M2 there are no allocation rows and no `policy`/`totals` allocation figures — the export carries intake rows only, and before the first money moves the ledger page says 'no money has moved yet' in words rather than rendering a zero (FS07-100, VS-37).",
   "x-psn": {
-    "specVersion": "1.5.0",
+    "specVersion": "1.6.0",
     "phase": "P-M2 (intake rows only)",
     "artifactPath": "/ledger/{YYYY}-{MM}.json (+ .csv twin)",
     "authoritative": true,
@@ -124,6 +124,7 @@
         "fxSource": { "type": "string", "maxLength": 64 },
         "fxDate": { "type": "string", "format": "date" },
         "repoNodeId": { "$ref": "#/$defs/githubNodeId" },
+        "scope": { "$ref": "#/$defs/scope", "description": "The paid coverage of the term the row's money arrived for, as on `ledger-row.v1` (ops decision D42). Never the usage declaration. The CSV twin carries it as the RFC 8785 canonical JSON of the object." },
         "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "lane": { "enum": ["pass", "project", "portfolio", "donation"] },
@@ -154,6 +155,20 @@
     "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
     "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "sha256OrGenesis": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-    "githubNodeId": { "type": "string", "pattern": "^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$", "description": "A GitHub GraphQL node_id, in either of the two forms GitHub has issued: the opaque current form (a repository's is `R_`-prefixed) and the legacy base64 form, whose decoded value begins `010:Repository` and whose `=` padding the first alternative cannot express. Widened 2026-09-08 to admit the second: `registry-v0-record.v1` accepts both, so a record the curated registry accepts is publishable in this artifact. The primary key for repositories and people throughout this contract set (FS-00 §6.1)." }
+    "githubNodeId": { "type": "string", "pattern": "^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$", "description": "A GitHub GraphQL node_id, in either of the two forms GitHub has issued: the opaque current form (a repository's is `R_`-prefixed) and the legacy base64 form, whose decoded value begins `010:Repository` and whose `=` padding the first alternative cannot express. Widened 2026-09-08 to admit the second: `registry-v0-record.v1` accepts both, so a record the curated registry accepts is publishable in this artifact. The primary key for repositories and people throughout this contract set (FS-00 §6.1)." },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["project", "portfolio", "network"] },
+        "repos": { "type": "array", "minItems": 1, "maxItems": 50, "uniqueItems": true, "items": { "$ref": "#/$defs/githubNodeId" } },
+        "org": { "$ref": "#/$defs/githubNodeId" }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "project" } }, "required": ["kind"] }, "then": { "required": ["repos"] } },
+        { "if": { "properties": { "kind": { "const": "portfolio" } }, "required": ["kind"] }, "then": { "required": ["org"] } }
+      ]
+    }
   }
 }

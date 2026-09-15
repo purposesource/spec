@@ -4,7 +4,7 @@
   "title": "Registry index shard — /registry/index/{shard}.json (and the bulk export)",
   "description": "One shard of the published registry index, sharded by the first character of the repository name plus a `0` shard for everything non-alphabetic (FS02-062). THE SAME DOCUMENT SHAPE serves the bulk export `/registry/export.json` (apex alias `/registry.json`, FS10-060): that document sets `shard: \"export\"` and carries every entry. Entries are the minimum a browse page or a scanner needs; the full per-repository facts live in the repo record, whose URL each entry carries. Only `verified`, `suspended`, `quit` and `delisted` repositories appear — `detected` repositories are counted, never listed (GH-014, OPEN-33 default).",
   "x-psn": {
-    "specVersion": "1.2.0",
+    "specVersion": "1.3.0",
     "phase": "P-M2",
     "artifactPath": "/registry/index/{shard}.json · /registry/export.json",
     "authoritative": true,
@@ -40,6 +40,7 @@
       "properties": {
         "nodeId": { "$ref": "#/$defs/githubNodeId" },
         "owner": { "$ref": "#/$defs/githubLogin", "description": "Display cache only." },
+        "ownerOrgId": { "$ref": "#/$defs/githubOwnerNodeId", "description": "The owner node_id the curated record carries as `owner_node_id` (`O_…` or `U_…`) — the same value `repo-record.v1` publishes as `owner.orgId`, and the key a Portfolio Entitlement's `scope.org` names (ops decision D42). On the entry so a Portfolio picker or a scanner can list an owner's repositories from the index alone. Absent when the registry records none. `owner` stays a display-cache login." },
         "name": { "type": "string", "minLength": 1, "maxLength": 100 },
         "state": { "enum": ["verified", "suspended", "quit", "delisted"] },
         "weightClass": { "enum": ["standard", "major"] },
@@ -56,6 +57,7 @@
       }
     },
     "githubLogin": { "type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$" },
-    "githubNodeId": { "type": "string", "pattern": "^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$", "description": "A GitHub GraphQL node_id, in either of the two forms GitHub has issued: the opaque current form (a repository's is `R_`-prefixed) and the legacy base64 form, whose decoded value begins `010:Repository` and whose `=` padding the first alternative cannot express. Widened 2026-09-08 to admit the second: `registry-v0-record.v1` accepts both, so a record the curated registry accepts is publishable in this artifact. The primary key for repositories and people throughout this contract set (FS-00 §6.1)." }
+    "githubNodeId": { "type": "string", "pattern": "^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$", "description": "A GitHub GraphQL node_id, in either of the two forms GitHub has issued: the opaque current form (a repository's is `R_`-prefixed) and the legacy base64 form, whose decoded value begins `010:Repository` and whose `=` padding the first alternative cannot express. Widened 2026-09-08 to admit the second: `registry-v0-record.v1` accepts both, so a record the curated registry accepts is publishable in this artifact. The primary key for repositories and people throughout this contract set (FS-00 §6.1)." },
+    "githubOwnerNodeId": { "type": "string", "pattern": "^[OU]_[A-Za-z0-9_-]{6,118}$", "description": "A GitHub GraphQL node_id of a repository OWNER in the current global-id form (`O_…` organisation, `U_…` user), as `registry-v0-record.v1` `$defs.githubOwnerNodeId` defines it. Local to this file because schemas here carry no cross-file `$ref`. Narrower than `githubNodeId` on purpose: that pattern would also admit a login such as `helvetica-tools`." }
   }
 }

@@ -16,6 +16,7 @@
 schema: registry-v0/1
 node_id: R_kgDOAbc123
 owner: acme
+owner_node_id: O_kgDOAcme001
 name: widget-engine
 default_branch: main
 

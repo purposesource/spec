@@ -23,6 +23,7 @@
       "fxSource": "ECB daily reference rate",
       "fxDate": "2027-06-01",
       "repoNodeId": "R_kgDOAbc123",
+      "scope": { "kind": "project", "repos": ["R_kgDOAbc123"] },
       "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
       "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
       "lane": "project",

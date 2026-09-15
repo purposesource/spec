@@ -11,7 +11,7 @@
       "lane": "project",
       "scope": {
         "kind": "project",
-        "repos": ["R_kgDOAbc123", "R_kgDOWob321"]
+        "repos": ["R_kgDOAbc123"]
       },
       "status": "active",
       "periodStart": "2027-03-20T00:00:00Z",

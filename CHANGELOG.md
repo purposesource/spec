@@ -299,6 +299,28 @@ remembering the same rule.
   The description also states the D15 public-data rule and the two forbidden-key blocks
   (waivers; money, entitlements, shares, manifest, private flags) now travel with the file.
 
+### 1.2.0 — unreleased (2026-09-15; ops decision D42)
+
+- Additive. Optional `owner_node_id` — the repository owner's GitHub node_id in the current
+  global-id form (`O_…` organisation, `U_…` user; `$defs.githubOwnerNodeId`). It is the key a
+  Portfolio Entitlement is bought against and matched on: index-build publishes it as
+  `repo-record.v1` `owner.orgId` and `registry-index.v1` `ownerOrgId`, and cov-v1 compares a
+  portfolio term's `scope.org` with it. Until now no record could carry one, so `owner.orgId`
+  was never published and a Portfolio term answered `no` at the edge for every repository.
+  `owner` stays a display cache and never a key, and its description now names the member that
+  is. Optional, so every record that validated still validates; a record without it can be
+  covered by a Project or the Pass, and no Portfolio can be bought for its owner.
+- The legacy base64 owner forms are deliberately not admitted; GitHub returns the current form
+  for any owner when asked with the `X-Github-Next-Global-ID: 1` header. `registry-index.v1`
+  `ownerOrgId` carries the same pattern. `repo-record.v1` `owner.orgId` and
+  `entitlement-record.v1` `scope.org` keep their broader released patterns (which would also
+  admit a login), so producers write only the `O_…`/`U_…` form. A repository node_id does not
+  pass (`R_` is neither `O_` nor `U_`), which keeps this key apart from the FS02-095
+  registration key.
+- The curated registry repository re-vendors this file byte for byte in the same change set,
+  and its validator refuses one login under two `owner_node_id` values, one `owner_node_id`
+  under two logins, and an owner whose records disagree about having one.
+
 ## registry-index.v1.json
 
 ### 1.0.0 — unreleased
@@ -339,6 +361,17 @@ remembering the same rule.
   guard still refuses it. No second value was added — `dev` was considered and rejected
   for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
   2026-09-10, which authorises the P-M3 build.
+
+### 1.3.0 — unreleased (2026-09-15; ops decision D42)
+
+- Additive. Optional `$defs.entry.ownerOrgId` — the owner node_id the curated record carries as
+  `owner_node_id`, the same value `repo-record.v1` publishes as `owner.orgId`. It is on the entry
+  because a Portfolio picker, or a scanner resolving which repositories a Portfolio covers, reads
+  the index rather than one record per repository. `owner` stays a display-cache login. Absent
+  when the registry records none.
+- Additive. `$defs.githubOwnerNodeId` (`^[OU]_[A-Za-z0-9_-]{6,118}$`), which `ownerOrgId`
+  references. The file's broad `githubNodeId` pattern would also admit a login, and the member
+  is new, so the narrower pattern constrains nothing that already validated.
 
 ## registry-index-meta.v1.json
 
@@ -464,6 +497,12 @@ creating one.
   for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
   2026-09-10, which authorises the P-M3 build.
 
+### 1.3.1 — unreleased (2026-09-15; ops decision D42)
+
+- Wording. `owner.orgId` is described as the owner node_id of either account type (`O_…` or
+  `U_…`), taken from the curated record's new `owner_node_id`, and says what its absence means:
+  no Portfolio term matches the repository. No constraint moved.
+
 ## waiver.v1.json
 
 ### 1.0.0 — unreleased
@@ -535,6 +574,30 @@ creating one.
   two-form pattern and therefore the model. It is NOT closed to that file's narrower first
   alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
   instrument from this one.
+
+### 1.1.1 — unreleased (2026-09-15; ops decision D42)
+
+- Wording. `$defs.entitlement.lane` no longer says only `project` is purchasable: since D42 the
+  buyer chooses Project, Portfolio or the Pass at checkout, and enabling a lane on the production
+  rail still waits on the provider's written pre-clearance (COM-018, D18).
+- Wording, correcting a latent ambiguity. `$defs.scope` described a Project's `repos[]` as "min 1,
+  cap 50 declared repositories, COM-018". That conflated the PAID COVERAGE with the usage
+  declaration — a tool writing the declaration into the scope would grant coverage for up to
+  fifty repositories at a one-repository price, and cov-v1 would answer accordingly — and COM-018
+  is the separate payment-account requirement, not a bound. The description now says the scope is
+  coverage, that a Project bought under D42 names exactly one repository, and that a Pass buyer's
+  named repositories never appear here; it cites D16, COM-020, ENG-029 and D42. The array bounds
+  are unchanged, so every record that validated still validates.
+- The same correction where it is not a schema. `coverage/vectors.json` VEC-02 and VEC-25 repeated
+  the conflation ("matches a declared repository node_id", "the declaration is the scope"), and
+  VEC-02 still called Project the only purchasable lane: both descriptions and both `fsRef`
+  citations (`COM-018` → `D42`) are corrected, and no input, id or answer moved. `coverage/cov-v1.ts`
+  carries the same stale wording in the doc comment of `Scope.repos` ("Declared repository
+  node_ids … min 1, cap 50 — COM-018"). It is NOT edited: the module is mirrored byte for byte
+  into the edge worker and its digest is published, so a comment edit would change both. The
+  comment is superseded by this entry and kept as history until a `cov-v2` exists.
+- `examples/entitlement-record.v1.example.json`: the first term's Project scope names one
+  repository (`R_kgDOAbc123`), so the example shows the shape a D42 Project writes.
 
 ## certificate.v1.json
 
@@ -916,6 +979,20 @@ row the new-file rule binds absolutely.
   the member off made a row outside the allocation window indistinguishable from one whose
   state nobody recorded. Widening: neither published token changes meaning.
 
+### 1.5.0 — unreleased (2026-09-15; ops decision D42)
+
+- Additive. Optional `scope` — the paid coverage of the term the row's money arrived for, in the
+  shape `entitlement-record.v1` publishes (`$defs.scope`, copied because schemas here carry no
+  cross-file `$ref`). Under D42 the published allocation rule attributes each payer's passed-on
+  share by lane and scope — a Project to its repository, a Portfolio equally across its owner's
+  active repositories, the Pass by the equal split with 1% per named repository — and a Portfolio
+  or Pass row has no single `repoNodeId`, so without this member the rule could not be
+  re-derived from the public ledger. It is never the usage declaration: the repositories a Pass
+  buyer names are private and no published member carries them. Optional: rows written before
+  the member existed carry `repoNodeId` alone, allocation rows carry none, and every row that
+  validated still validates.
+- Wording. `lane` no longer says only `project` is purchasable (D42).
+
 ## ledger-export.v1.json
 
 ### 1.0.0 — unreleased
@@ -1073,6 +1150,15 @@ reasoning: no month export has ever been published with a row in it.
   guard still refuses it. No second value was added — `dev` was considered and rejected
   for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
   2026-09-10, which authorises the P-M3 build.
+
+### 1.6.0 — unreleased (2026-09-15; ops decision D42)
+
+- Additive, mirroring `ledger-row.v1` 1.5.0: `$defs.exportRow.scope` with its `$defs.scope` copy,
+  placed after `repoNodeId` in the property order — the order that IS the CSV twin's header. The
+  CSV cell carries the RFC 8785 canonical JSON of the object, quoted per RFC 4180, so the flat
+  twin states the same scope the JSON row does. The worked example here and the API
+  description's JSON and CSV examples carry `scope` on their one intake row, which keeps that row
+  byte-identical in its hash body with `ledger-row.v1`'s own example.
 
 ## ledger-chain.v1.json
 
@@ -1475,3 +1561,12 @@ which kind of change each entry was.
 - `coverage` is untouched, and `coverage.available` was deliberately NOT added. Which
   phase-gated routes are switched on is what `routes` already carries, in the map shape
   this component has always defined and its own example already shows.
+
+### 1.0.3 — unreleased (2026-09-15; ops decision D42)
+
+- Wording and examples only; no route, status code, cache class or error code moved. The coverage
+  example `yesViaProject` is summarised as "Covered by a Project term whose scope names this
+  repository" (it said "that declared this repository", the conflation `entitlement-record.v1`
+  1.1.1 corrects). The ledger month JSON and CSV examples carry the new `scope` member of
+  `ledger-row.v1` 1.5.0 and `ledger-export.v1` 1.6.0; the CSV header gains the `scope` column
+  after `repoNodeId`.
