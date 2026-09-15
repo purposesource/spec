@@ -971,8 +971,12 @@ creating one.
 - No figure of any kind appears in a kit, no `generatedAt`, and `publishedAt` is null until first
   publication at the permalink on the apex, immutable from then on (D32) — the v1 rules, kept.
 - The first document is `kits/kit-2.json`, published at `/kits/v2`: SHA-256
-  `c60a723677d5c5508192a79ec2cd4a5bd815ef61b7a201f43e0d5f65eb4925cb` over its raw bytes (11,622
-  bytes, LF). `examples/claim-kit.v2.example.json` IS that document, byte for byte.
+  `63b6efcca1fe8278c0e71257fff4a36b6c03da72cec62e2ea1676aacd3a465c5` over its raw bytes (11,615
+  bytes, LF). `examples/claim-kit.v2.example.json` IS that document, byte for byte. *(Changed
+  before publication, 2026-09-16: the badge's EU consumer notice dates the Directive
+  "2026-09-27", the ISO form every rendered date takes, where it had said "27 September 2026";
+  the earlier SHA-256 was `c60a723677d5c5508192a79ec2cd4a5bd815ef61b7a201f43e0d5f65eb4925cb`,
+  11,622 bytes.)*
 - `check:kits` now validates each kit against the shape its `schemaVersion` names (1 is
   `claim-kit.v1`, 2 is `claim-kit.v2`, anything else is refused), runs the ending rule over v1
   patterns and over v2 lines and templates, adds the pledge-once rule and the `verify` member for

@@ -75,7 +75,7 @@
         "notes": [
           "The badge is served from the live-status endpoint, so an expired or revoked Entitlement never keeps showing as valid; {status} is valid, expired or revoked. It carries no recipient name, no figure, no heart, no cross and no mark but the Purpose Source name, and it looks the same for every lane and every amount. It is proof of licence coverage and never a mark of social or charitable merit."
         ],
-        "euConsumerNotice": "If you sell to consumers in the European Union: show the badge only beside information about the software you use and the licence it is under — never beside a claim about your social or environmental merit, and never as a trust or quality mark for your own products. From 27 September 2026, Directive (EU) 2024/825 blacklists displaying a sustainability label, environmental or social, that is not based on a certification scheme; this badge is not one, and it must not be shown as one."
+        "euConsumerNotice": "If you sell to consumers in the European Union: show the badge only beside information about the software you use and the licence it is under — never beside a claim about your social or environmental merit, and never as a trust or quality mark for your own products. From 2026-09-27, Directive (EU) 2024/825 blacklists displaying a sustainability label, environmental or social, that is not based on a certification scheme; this badge is not one, and it must not be shown as one."
       },
       "rules": [
         {
