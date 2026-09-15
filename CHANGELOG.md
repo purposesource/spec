@@ -212,6 +212,19 @@ The entry as first recorded, kept as history:
   curated registry's configuration and in four examples. Nothing had been published under
   it.
 
+### 1.0.1 — unreleased (2026-09-15; ops decisions D43 and D44)
+
+- Wording. The Recipient List is no longer "the versioned annex to the statutes", adopted "at the
+  founding assembly": since D43 item 1 it is a versioned board list outside the statutes
+  (statutes Art. 7(1) and Art. 22(7)), adopted by the board at its constituting meeting. The
+  schema description, `provisional`'s description and the example's note say so, and
+  `provisional` still stays true until the board has adopted and published a version of the
+  list. Descriptions follow ops decisions D43 items 1 and 4 (annexes out of the statutes; one
+  clock per payout); no member, type, vector or answer changes.
+- `examples/category-menu.v1.example.json` IS the menu, so its bytes changed, and the curated
+  registry repository's vendored copy (`config/category-funds.json`) takes the same bytes in the
+  same wave. The slugs, ids, order and `provisional` value are unchanged.
+
 ## purpose-yml.v1.json
 
 ### 1.0.0 — unreleased
@@ -1181,6 +1194,26 @@ row the new-file rule binds absolutely.
   validated still validates.
 - Wording. `lane` no longer says only `project` is purchasable (D42).
 
+### 1.5.1 — unreleased (2026-09-15; ops decisions D43 and D44)
+
+- Wording (D43 items 1 and 4). `holdStatus` states one clock per payout: a month's allocation is
+  locked no later than the twentieth day after the credit of the month's earliest rail payout,
+  and each listed recipient's share is transferred no later than the thirtieth day after that
+  credit, because every payout has its own deadlines. `recipientId` calls the Recipient List a
+  versioned board list outside the statutes, no longer an annex to them. Descriptions follow ops
+  decisions D43 items 1 and 4 (annexes out of the statutes; one clock per payout); no member,
+  type, vector or answer changes.
+- Wording (D44 item 5(a); the operator's default adopted 2026-09-15, which the operator may
+  overturn). `payerName` is the literal `unnamed` on every row written from 2026-09-15: a payer
+  that asked to be listed is named on the covered-organisations list (`covered-organisations.v1`),
+  and the transparency pages show that name beside its rows by joining the list on `coId` at
+  build time. No name enters the hash chain, and a change of choice, or an erasure request,
+  reaches every page. A row written earlier may carry an opted-in name and keeps it; the member's
+  type and bounds are unchanged.
+- Wording (D44 item 7). `type` says that `topup-multiplier-in` is reserved: the voluntary
+  multipliers were withdrawn before any sale, so no ledger writes it. The value stays in the
+  enum, because a published enum value is never removed.
+
 ## ledger-export.v1.json
 
 ### 1.0.0 — unreleased
@@ -1347,6 +1380,25 @@ reasoning: no month export has ever been published with a row in it.
   twin states the same scope the JSON row does. The worked example here and the API
   description's JSON and CSV examples carry `scope` on their one intake row, which keeps that row
   byte-identical in its hash body with `ledger-row.v1`'s own example.
+
+### 1.6.1 — unreleased (2026-09-15; ops decisions D43 and D44)
+
+- Wording (D43 items 1 and 4), mirroring `ledger-row.v1` 1.5.1. `holdStatus` and the methodology
+  description state one clock per payout — locked no later than the twentieth day after a
+  payout's credit, transferred no later than the thirtieth, a joint month lock meeting the
+  deadlines of the month's earliest payout. `reserveRetentionBpsMax` and `reserveTargetMinor` are
+  figures in the statutes' own text (Art. 6g(1)–(2)), no longer annex values awaiting the founding
+  assembly, and the retention applies to the Purpose Fees of each payout. The example's month
+  note follows; its hashes are illustrative, as before. Descriptions follow ops decisions D43
+  items 1 and 4 (annexes out of the statutes; one clock per payout); no member, type, vector or
+  answer changes.
+- Wording (D44 item 5(a)). `payerName` is the literal `unnamed` on every row written from
+  2026-09-15; a listed payer's name is joined from `covered-organisations.v1` at render time and
+  never written into a row.
+- Wording (D44 item 7). `type` gains a description: the same enum as `ledger-row.v1`'s `type`,
+  whose description governs, and `topup-multiplier-in` is reserved and never written because the
+  voluntary multipliers were withdrawn before any sale. No enum value is removed, and the CSV
+  twin's header is unchanged.
 
 ## ledger-chain.v1.json
 
