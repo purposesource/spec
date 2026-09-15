@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/sponsorship.v1.json",
+  "title": "Sponsor register — /sponsors.json",
+  "description": "Every sponsorship of the Purpose Source Association, by name, tier, period, amount and use (ops decision D44). ONE ROW PER SETTLED SPONSORSHIP, published once the payment has settled and never before. No row is anonymous: `name` is required and may not be a placeholder, because undisclosed support is prohibited (statutes Art. 6b(3)); a sponsor that will not be named is not invoiced.\n\nTHE ARITHMETIC A READER CHECKS, stated because JSON Schema cannot sum across items: (1) the `uses[]` amounts plus `balanceMinor` equal `amountMinor`; (2) every `cost-support` use falls in a month inside the period and appears, under the same name and `sponsorshipId`, in that month's cost-support table (`cost-support.v1`), never above that month's direct costs; (3) an `operations-reserve` use is dated after the period ends and appears as an `unrestricted-income` reserve movement with the same `sponsorshipId`, never taking the reserve above its target; (4) a `general-costs` use is dated after the period ends and is what remained. Money is integer minor units plus a currency code.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/sponsors.json",
+    "authoritative": true,
+    "producer": "hand-maintained at v0 as website/src/data/sponsors/index.json, from the general-account statement and the invoices; P-M3: the platform",
+    "consumers": [
+      "the /sponsors page",
+      "the monthly cost-support table",
+      "readers reconciling a sponsor line against the bank statement"
+    ],
+    "fsRefs": [
+      "statutes Art. 6b",
+      "Art. 6e",
+      "Art. 6g",
+      "Finanzreglement §3(4), §7(2), §9(2)",
+      "GOV-008",
+      "COM-070",
+      "WEB-133",
+      "D44"
+    ],
+    "vsRefs": [],
+    "changelog": "CHANGELOG.md#sponsorshipv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "currency",
+    "sponsors"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "enum": [
+        "registry-v0",
+        "sample",
+        "fixture",
+        "platform"
+      ],
+      "description": "Which plane produced this artifact. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders such an artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2 production source of record — the curated registry repository the index is built from. `platform` is the P-M3 producer of record — the platform database, rendered by `jobs.index-build`. Optional, and its absence asserts nothing: an artifact whose body cannot carry the label borrows the plane's declaration from `/registry/index/meta.json`. The enum widens additively when the P-M3 producer takes a value of its own, and `platform` (2026-09-12) is that widening: `jobs.index-build` writes it in `PSN_ENV=prod` and writes `fixture` in every other environment, so a reader can still tell a production plane from a synthetic one by the label alone. Two catalogued artifacts deliberately have no such member and are the borrowers above: `badge.v1` (shields.io owns the body — a foreign field would break the endpoint contract) and `certificate-policy.v1` (a rule, byte-identical on every plane, so a plane label on it would be meaningless). No signed payload carries it either: the label is a property of the build, not of what was attested."
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "sponsors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sponsor"
+      },
+      "description": "Ordered by `settledOn`, then `spnId`. Never ordered or sized by tier."
+    }
+  },
+  "$defs": {
+    "sponsor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "spnId",
+        "name",
+        "coId",
+        "scheduleVersion",
+        "tier",
+        "amountMinor",
+        "invoiceRef",
+        "settledOn",
+        "screenedOn",
+        "periodStart",
+        "periodEnd",
+        "uses",
+        "balanceMinor",
+        "certId"
+      ],
+      "properties": {
+        "spnId": {
+          "type": "string",
+          "pattern": "^spn_[0-9abcdefghjkmnpqrstvwxyz]{26}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 200,
+          "pattern": "\\S",
+          "not": {
+            "enum": [
+              "unnamed",
+              "Unnamed",
+              "anonymous",
+              "Anonymous",
+              "Anonymous sponsor",
+              "Unlisted organisation",
+              "undisclosed",
+              "Undisclosed"
+            ]
+          },
+          "description": "The sponsor as it is invoiced. Never a placeholder (Art. 6b(3))."
+        },
+        "coId": {
+          "type": "string",
+          "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$"
+        },
+        "scheduleVersion": {
+          "type": "string",
+          "pattern": "^v[0-9]+$"
+        },
+        "tier": {
+          "type": "string",
+          "pattern": "^t[0-9]$"
+        },
+        "amountMinor": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "invoiceRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "settledOn": {
+          "type": "string",
+          "format": "date"
+        },
+        "screenedOn": {
+          "type": "string",
+          "format": "date",
+          "description": "The date of the recorded sanctions screening, dated before the invoice was issued (Finanzreglement §9(2) as amended for sponsors)."
+        },
+        "periodStart": {
+          "type": "string",
+          "format": "date"
+        },
+        "periodEnd": {
+          "type": "string",
+          "format": "date"
+        },
+        "uses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "date",
+              "amountMinor"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "cost-support",
+                  "operations-reserve",
+                  "general-costs"
+                ]
+              },
+              "month": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+              },
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "amountMinor": {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              },
+              "invoiceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "note": {
+                "type": "string",
+                "maxLength": 500
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "kind": {
+                      "const": "cost-support"
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "month",
+                    "invoiceRefs"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "balanceMinor": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "What is not yet used, held in the general account."
+        },
+        "certId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$",
+          "description": "The sponsor certificate (`supporter.sponsor`), or null."
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    }
+  }
+}

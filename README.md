@@ -17,7 +17,7 @@ a procurement reviewer can consume all of it the way they consume a static file.
 
 | Directory | Contents |
 |---|---|
-| `schemas/` | 25 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
+| `schemas/` | 27 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v1.ts`, the published coverage function, with `vectors.json` (frozen test vectors) and its test suite. Zero dependencies. |
 | `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in three cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json` and `claim-kit.v2.example.json`, the example IS the published document, byte for byte. |
@@ -92,6 +92,8 @@ needs a toolchain is not really published.
 | `ledger-chain.v1.json` | `/ledger/chain.json` | first public version |
 | `cost-support.v1.json` | one calendar month of the published cost-support table | P-M3 producer, v0 hand-maintained |
 | `recipient-list.v1.json` | one published version of the Recipient List (kept by the board, outside the statutes) | P-M3 producer, v0 hand-maintained |
+| `sponsorship-schedule.v1.json` | `/sponsors/schedule/{version}.json` — the published sponsorship tiers and terms, versioned, never edited once a sponsor has paid under a version (ops decision D44) | P-M2, `draft` until the board adopts it |
+| `sponsorship.v1.json` | `/sponsors.json` — the sponsor register: every settled sponsorship by name, tier, period, amount and use (ops decision D44) | P-M3 producer, v0 hand-maintained |
 | `badge.v1.json` | `/badge/{node_id}.json` (shields.io endpoint) | first public version |
 | `stats.v1.json` | `/stats.json` | first public version |
 | `publish-log.v1.json` | `/meta/publish-log.json` | first public version |
@@ -107,6 +109,12 @@ artifact catalogue does not yet name — that deferral is deliberate — so each
 hand-maintained and rendered on the transparency page, and the Recipient List is the board's
 published list, kept outside the statutes. Neither adds a route: they are published files, and the schema is the
 contract whether the producer is a job or a person.
+
+The `sponsorship-schedule.v1` and `sponsorship.v1` rows (ops decision D44) follow the same
+pattern. Sponsorship is invoiced and paid by bank transfer, never through the checkout, so the
+schedule is a versioned document the website serves, `draft` until the board adopts it, and the
+register is hand-maintained at v0 from the general-account statement and the invoices. Every
+sponsor is named: undisclosed support is prohibited by the statutes.
 
 ## The coverage function
 

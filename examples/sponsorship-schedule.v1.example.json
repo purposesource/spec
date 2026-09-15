@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "version": "v1",
+  "permalink": "/sponsors/schedule/v1",
+  "status": "draft",
+  "adoptedAt": null,
+  "currency": "CHF",
+  "periodMonths": 12,
+  "tiers": [
+    {
+      "id": "t1",
+      "name": "Tier 1",
+      "amountMinor": 100000
+    },
+    {
+      "id": "t2",
+      "name": "Tier 2",
+      "amountMinor": 500000
+    },
+    {
+      "id": "t3",
+      "name": "Tier 3",
+      "amountMinor": 2500000
+    }
+  ],
+  "useOrder": [
+    "cost-support",
+    "operations-reserve",
+    "general-costs"
+  ],
+  "rules": [
+    {
+      "id": "invoice-only",
+      "text": "Sponsorship is invoiced by the Association and paid by bank transfer. It is never sold at checkout, through the payment provider, at renewal or beside a Purpose Fee."
+    },
+    {
+      "id": "general-account",
+      "text": "Payment goes to the Association's general account and never to the fees account or the operations-reserve account directly."
+    },
+    {
+      "id": "use-order",
+      "text": "Each month of the period, the unused balance settles that month's running-cost invoices of the Purpose Source activity that no one else supported, by name and amount, never above the month's direct costs; when the period ends, what is left moves to the operations reserve until it holds its target of CHF 27,000, and the rest stays for the Association's general costs."
+    },
+    {
+      "id": "named",
+      "text": "Every sponsor is published by name, tier, period, amount and use. There is no anonymous or unlisted sponsor, because undisclosed support is prohibited."
+    },
+    {
+      "id": "no-influence",
+      "text": "A sponsor gets no say over the allocation, the Recipient List, the schedule, waivers, listings or anything else the Association decides."
+    },
+    {
+      "id": "no-coverage",
+      "text": "Sponsorship buys no Entitlement, no coverage, no licence credential and no waiver, and none of it is passed on under the pledge."
+    },
+    {
+      "id": "not-at-checkout",
+      "text": "No sponsorship offer appears in the checkout or renewal flows."
+    },
+    {
+      "id": "screening",
+      "text": "Every sponsor is screened against the sanctions lists before an invoice is issued, and the screening is recorded."
+    }
+  ]
+}

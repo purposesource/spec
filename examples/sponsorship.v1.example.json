@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-04-05T06:00:00Z",
+  "source": "fixture",
+  "currency": "CHF",
+  "sponsors": [
+    {
+      "spnId": "spn_01jm2k3n4p5q6r7s8t9v0w1x2y",
+      "name": "Example Industries AG",
+      "coId": "co_01jm2k3n4p5q6r7s8t9v0w1x2z",
+      "scheduleVersion": "v1",
+      "tier": "t2",
+      "amountMinor": 500000,
+      "invoiceRef": "PSA-SP-2027-001",
+      "settledOn": "2027-01-18",
+      "screenedOn": "2027-01-11",
+      "periodStart": "2027-02-01",
+      "periodEnd": "2028-01-31",
+      "uses": [
+        {
+          "kind": "cost-support",
+          "month": "2027-02",
+          "date": "2027-02-28",
+          "amountMinor": 18000,
+          "invoiceRefs": [
+            "INV-HOST-2027-02"
+          ]
+        },
+        {
+          "kind": "cost-support",
+          "month": "2027-03",
+          "date": "2027-03-31",
+          "amountMinor": 18000,
+          "invoiceRefs": [
+            "INV-HOST-2027-03"
+          ]
+        }
+      ],
+      "balanceMinor": 464000,
+      "certId": "cert_01jm2k3n4p5q6r7s8t9v0w1x2y"
+    }
+  ]
+}

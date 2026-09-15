@@ -201,7 +201,7 @@
   "reserve": {
     "balanceMinor": 1800,
     "targetMinor": null,
-    "note": "One movement this month: the retention above. The target is an annex value and is published once the founding assembly confirms it.",
+    "note": "One movement this month: the retention above. The target is a figure in the statutes' own text (Art. 6g(1)) and is published with the first table after their adoption.",
     "movements": [
       {
         "amountMinor": 1800,

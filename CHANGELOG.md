@@ -48,8 +48,10 @@ list as unschematised for want of a contract.
 
 Ops decision D44 (2026-09-15) adds to the set, each addition with its own section below:
 `claim-kit.v2.json`, the second shape of the claim-language kit, beside `claim-kit.v1.json`
-rather than in place of it; and `covered-organisations.v1.json`, the one public list of
-organisations holding an Entitlement term, named only where they asked to be.
+rather than in place of it; `covered-organisations.v1.json`, the one public list of
+organisations holding an Entitlement term, named only where they asked to be; and
+`sponsorship-schedule.v1.json` and `sponsorship.v1.json`, the published sponsorship schedule and
+the sponsor register — twenty-seven schemas in all.
 
 ### Contracts published beyond the initially-scoped ten
 
@@ -1459,6 +1461,28 @@ reasoning: no month export has ever been published with a row in it.
   now holds every copy of the enum identical to the published one, which is what a
   cross-file `$ref` would have done had self-containment allowed one.
 
+### 1.1.0 — unreleased (2026-09-15; ops decisions D43 and D44)
+
+- Additive (D44). `$defs.supporter.sponsorshipId`: when a supporter line was paid from a
+  sponsorship, the id of that sponsorship in the published sponsor register (`sponsorship.v1`,
+  `/sponsors.json`), and the supporter `name` is then the sponsor's name exactly as the register
+  prints it. `reserve.movements[].sponsorshipId`: on an `unrestricted-income` movement paid from a
+  sponsorship's unused balance when its period ends. A reader can follow a named supporter line
+  or a reserve movement back to the invoice it came from. Both are optional; the existing example
+  validates unchanged, and so does the same table with a supporter line carrying the member.
+- Wording (D43 items 1, 4 and 7), descriptions only. Every cap is a figure in the statutes' own
+  text (Art. 6(3), Art. 6g(1)–(2)), no longer an annex value awaiting the founding assembly; the
+  eligible cost classes are those of the Cost Class Rules, the board rulebook under statutes
+  Art. 22(7), no longer a statutes annex; the reserve target is CHF 27,000 in the statutes' own
+  text, and the struck derivation from the essential operating role is recorded as struck; pay to
+  a board member needs the prior minuted approval of at least two other board members with no
+  interest of their own in any pay (Art. 6f(3)); and the transfers follow one clock per payout —
+  the allocation is locked no later than the twentieth day after the credit of the month's
+  earliest rail payout, and each share is transferred no later than the thirtieth day after that
+  credit. The example's reserve note follows. Descriptions follow ops decisions D43 items 1 and 4
+  (annexes out of the statutes; one clock per payout); no member, type, vector or answer changes
+  by this wording.
+
 ## recipient-list.v1.json
 
 ### 1.0.0 — unreleased (2026-09-07; ops decision D33)
@@ -1582,6 +1606,59 @@ reasoning: no month export has ever been published with a row in it.
   first (statutes Art. 8(1), (2) and (4)); the key is published before the month it applies to.
   No constraint moved: the `status` enum keeps both values, so a document carrying `proposed`
   still validates.
+
+## sponsorship-schedule.v1.json
+
+### 1.0.0 — unreleased (2026-09-15; ops decision D44)
+
+- Initial publication. `/sponsors/schedule/{version}.json`: the tiers and terms of sponsorship of
+  the Association. Sponsorship is invoiced and paid by bank transfer into the general account; it
+  is never a Purpose Fee, never sold at checkout or through the payment provider, and buys no
+  coverage, no licence credential and no influence (statutes Art. 3(6)(5), 6b, 6d and 6g; GOV-008,
+  COM-070).
+- VERSIONED, NEVER EDITED IN PLACE once a sponsor has paid under a version (the D32 reliance
+  rule): new tiers are a new version at a new permalink, and each sponsor record names the version
+  it paid under.
+- `status` is `draft` until the board adopts its sponsoring policy and the tax adviser has
+  answered on the VAT and direct-tax character (LEG-094, OPEN-41), and no invoice is issued under
+  a draft; `adoptedAt` is null until then.
+- A tier is one fixed amount for one period, the same for everyone; at most five tiers, with
+  neutral names that never rank generosity. No other amount is invoiced.
+- `useOrder` is a `const`: cost support, then the operations reserve, then general costs. Each
+  month of the period, the unused balance settles that month's running-cost invoices of the
+  Purpose Source activity that nobody else supported, by name and amount and never above the
+  month's direct costs; when the period ends, what is left moves to the reserve until it holds its
+  target, and the rest stays for the Association's general costs (D44 item 6(b)).
+- Eight rule ids are required — `invoice-only`, `general-account`, `use-order`, `named`,
+  `no-influence`, `no-coverage`, `not-at-checkout` and `screening` — so a later version cannot
+  quietly drop one. The words of each rule are the published document's.
+- The example is a `draft` with three illustrative tiers; the board adopts the real amounts, and
+  the example's rule texts stand in for the words the published schedule takes.
+
+## sponsorship.v1.json
+
+### 1.0.0 — unreleased (2026-09-15; ops decision D44)
+
+- Initial publication. `/sponsors.json`, hand-maintained at v0 on the website from the
+  general-account statement and the invoices: ONE ROW PER SETTLED SPONSORSHIP, published once the
+  payment has settled and never before, by name, tier, period, amount and use.
+- NO ROW IS ANONYMOUS. `name` is required and may not be a placeholder — `unnamed`, `anonymous`,
+  `Anonymous sponsor`, `Unlisted organisation`, `undisclosed` and their capitalised forms —
+  because undisclosed support is prohibited (statutes Art. 6b(3)); a sponsor that will not be
+  named is not invoiced. That is the opposite of `covered-organisations.v1`, where a Purpose Fee
+  payer is named only on request, and the difference is the statutes'.
+- `screenedOn` records the sanctions screening, dated before the invoice was issued (Financial
+  Regulation §9(2) as amended for sponsors).
+- THE ARITHMETIC A READER CHECKS is stated in the description, because JSON Schema cannot sum
+  across items: the uses plus `balanceMinor` equal `amountMinor`; every `cost-support` use falls in
+  a month of the period and appears, under the same name and `sponsorshipId`, in that month's
+  cost-support table, never above that month's direct costs; an `operations-reserve` use is dated
+  after the period ends and appears as an `unrestricted-income` reserve movement with the same
+  `sponsorshipId`; and a `general-costs` use is what remained. A `cost-support` use must name its
+  `month` and the invoices it settled.
+- Rows are ordered by `settledOn`, then `spnId`, never by tier or amount. `certId` names the
+  sponsor certificate (`supporter.sponsor`, `certificate.v1` 1.3.0), or is null.
+- The example is a fixture: one sponsor two months into its period.
 
 ## change-event.v1.json
 
