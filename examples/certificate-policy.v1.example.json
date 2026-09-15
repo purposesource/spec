@@ -166,8 +166,8 @@
         "x5",
         "x10"
       ],
-      "notBefore": "P-M3, with the top-up lane",
-      "why": "The top-up lane is a later phase in its entirety: there is no way to buy a multiplier, so there is no settled payment for one to attest.",
+      "notBefore": "never: the type is reserved",
+      "why": "Reserved and never issued: the voluntary multipliers were withdrawn before any sale (ops decision D44 item 7), so there is no way to buy a multiplier and no settled payment for one to attest. The token stays because the certificate type enum is frozen.",
       "rules": [
         "CERT-007",
         "MIL-012",

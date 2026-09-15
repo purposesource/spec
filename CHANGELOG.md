@@ -858,6 +858,10 @@ creating one.
 - Wording (ops decision D44 item 7). `$defs.typ` says that `topup` is reserved and never issued:
   the voluntary multipliers were withdrawn before any sale. No enum value is removed.
 - The existing example validates unchanged.
+- Example wording (2026-09-16; ops decision D44 item 7). The example's `topup` entry still said
+  the top-up lane was a later phase; it now says the type is reserved and never issued because
+  the multipliers were withdrawn before any sale, as the policy the website publishes says. No
+  schema change.
 
 ## claim-kit.v1.json
 
