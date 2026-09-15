@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 2,
+  "kitVersion": "kit-2",
+  "permalink": "https://purposesource.org/kits/v2",
+  "publishedAt": null,
+  "language": "en",
+  "verify": "verify only at purposesource.org/verify",
+  "pledge": {
+    "text": "100% of net Purpose Fee proceeds go to the listed recipients after published, capped costs — running costs charged to fees capped at 15% and the operations reserve at 5%, every cap able only to fall — and listed cost support lowers those costs, never what is passed on (every invoice, support line, reserve movement and transfer published)",
+    "source": "statutes Art. 5(5)"
+  },
+  "variants": {
+    "supporter": {
+      "appliesTo": [
+        "supporter.entitlement"
+      ],
+      "lines": [
+        {
+          "id": "holder",
+          "use": "base",
+          "text": "{organisation} holds a Purpose Source {lane} Entitlement for {period}. verify only at purposesource.org/verify"
+        },
+        {
+          "id": "give-back",
+          "use": "line",
+          "text": "Purpose Source asks the biggest users of the software it registers to give something back, and we pay the Purpose Fee it asks for. The Purpose Source Association's pledge for Purpose Fees: “{pledge}”. verify only at purposesource.org/verify"
+        },
+        {
+          "id": "give-back-short",
+          "use": "line",
+          "text": "Purpose Source asks the biggest users of the software it registers to give something back, and we pay the Purpose Fee it asks for. Where the money goes: purposesource.org/trust/money · verify only at purposesource.org/verify"
+        },
+        {
+          "id": "categories",
+          "use": "clause",
+          "text": "Categories on our certificate: {categories}."
+        },
+        {
+          "id": "amount",
+          "use": "clause",
+          "text": "Purpose Fee: {amount} for {period}."
+        },
+        {
+          "id": "band",
+          "use": "clause",
+          "text": "Revenue band, self-certified: {band}."
+        },
+        {
+          "id": "ledger",
+          "use": "gated",
+          "text": "In {period}, {figure} of the Purpose Fees attributed to our Entitlement was transferred to listed recipient organisations, as the Purpose Source Association's statement for our organisation shows. verify only at purposesource.org/verify",
+          "gate": {
+            "kind": "figure-issued-after-disbursed-row",
+            "state": "closed"
+          }
+        }
+      ],
+      "permittedNotes": [
+        "Only after the transfers it describes are published as disbursed rows of the ledger, and only with the figure the Association issues for your organisation. Never a figure you compute yourself, and never before the Association has issued it."
+      ],
+      "templates": [
+        {
+          "id": "linkedin",
+          "channel": "long-post",
+          "text": "{organisation} now holds a Purpose Source {lane} Entitlement for {period} — the credential that meets the condition the Purpose Source License sets for organisations that are not small under the licence, for the repositories it covers. Purpose Source asks the biggest users of the software it registers to give something back, and we pay the Purpose Fee it asks for. The Purpose Source Association's pledge for Purpose Fees: “{pledge}”. verify only at purposesource.org/verify"
+        },
+        {
+          "id": "short-post",
+          "channel": "short-post",
+          "text": "{organisation} holds a Purpose Source {lane} Entitlement for {period}. Purpose Source asks the biggest users of the software it registers to give something back, and we pay the Purpose Fee it asks for. Where the money goes: purposesource.org/trust/money · verify only at purposesource.org/verify"
+        }
+      ],
+      "badge": {
+        "text": "Purpose Source · {lane} Entitlement · {status}",
+        "notes": [
+          "The badge is served from the live-status endpoint, so an expired or revoked Entitlement never keeps showing as valid; {status} is valid, expired or revoked. It carries no recipient name, no figure, no heart, no cross and no mark but the Purpose Source name, and it looks the same for every lane and every amount. It is proof of licence coverage and never a mark of social or charitable merit."
+        ],
+        "euConsumerNotice": "If you sell to consumers in the European Union: show the badge only beside information about the software you use and the licence it is under — never beside a claim about your social or environmental merit, and never as a trust or quality mark for your own products. From 27 September 2026, Directive (EU) 2024/825 blacklists displaying a sustainability label, environmental or social, that is not based on a certification scheme; this badge is not one, and it must not be shown as one."
+      },
+      "rules": [
+        {
+          "id": "donation-framing",
+          "rule": "Never call the Purpose Fee a donation, a gift, a contribution, sponsorship or tax-deductible, and never call your organisation a donor.",
+          "reason": "The fee is the price of a licence credential, and the Association's terms, invoices and tax position rest on that."
+        },
+        {
+          "id": "numbers-not-printed",
+          "rule": "Print no number the Association did not print: no impact figure, outcome, beneficiary count or proportion before a disbursed row of the published ledger, and no “100%” or “80%” except inside the pledge's own words.",
+          "reason": "Nothing is presented as achieved before it is recorded, and a percentage taken out of its sentence says more than the pledge does."
+        },
+        {
+          "id": "recipients-and-emblems",
+          "rule": "Name no recipient organisation, and show no charity's logo, the red cross emblem or the words “Red Cross”; link the published Recipient List instead. Never say your fee supports a project, a maintainer or a contributor.",
+          "reason": "The names and emblems belong to others, some are protected by law, and no project or person ever receives any of the fee."
+        },
+        {
+          "id": "own-purchase-only",
+          "rule": "Speak about your own purchase only: never say that your customers' purchases, subscriptions or use support charity.",
+          "reason": "That is a charity promotion about your customers' money, which carries legal duties in several countries that this kit cannot meet for you."
+        },
+        {
+          "id": "no-environmental-claims",
+          "rule": "Make no green, climate or sustainability claim about your organisation, your products or this purchase.",
+          "reason": "Swiss and European unfair-competition law require such claims to be substantiated to a standard this kit cannot give."
+        },
+        {
+          "id": "credential-not-licence",
+          "rule": "Never say that the Entitlement licenses the code, pays for the code or buys the software: it is a credential that meets a condition of the licence.",
+          "reason": "The Association is a registrar and never a party to any project's licence."
+        },
+        {
+          "id": "pledge-words-only",
+          "rule": "Say where the money goes only in the pledge's words: quote the Association's pledge exactly as written, or say nothing about the money and link where it goes. Never shorten, paraphrase or translate the pledge yourself.",
+          "reason": "The pledge is stated in one form only."
+        },
+        {
+          "id": "give-back-with-money-line",
+          "rule": "Use the give-something-back line only together with the pledge or the link to where the money goes; the generic “we support charity” framing stays excluded.",
+          "reason": "A giving line with nothing behind it is the vague claim these rules exist to stop."
+        },
+        {
+          "id": "badge-coverage-only",
+          "rule": "Show the badge as proof of coverage, never as a mark of social or charitable merit.",
+          "reason": "See the note for consumer-facing organisations in the European Union."
+        },
+        {
+          "id": "one-verification-address",
+          "rule": "Offer no verification address other than the one in each line: verify only at purposesource.org/verify.",
+          "reason": "One address is what makes a forged badge or certificate easy to spot."
+        }
+      ],
+      "prohibited": [
+        "we support charity",
+        "any unquantified social-impact framing",
+        "describing the Purpose Fee as a donation or the organisation as a donor",
+        "a restated, shortened or translated pledge",
+        "any verification address other than the one printed on the certificate"
+      ],
+      "binding": "public claims about this certificate are governed by the enclosed claim-language kit"
+    },
+    "statusOnly": {
+      "appliesTo": [
+        "license-status.waiver"
+      ],
+      "lines": [
+        {
+          "id": "status",
+          "use": "base",
+          "text": "{organisation} is a Purpose Source Licensed Organization — waiver; coverage status: {status}. verify only at purposesource.org/verify"
+        }
+      ],
+      "permittedNotes": [
+        "Coverage-status wording exclusively. A status certificate attests a recorded status and no payment, so this variant permits no amount, no revenue band, no supporter designation, and no supporter or impact phrasing anywhere.",
+        "This version states a pattern for the waiver variant only. The under-threshold and gifted-pass variants of the status class carry their own designations, which the published certificate policy records; neither has been recorded for any organisation at this phase, and a later kit version states their patterns when the surfaces that record them exist.",
+        "{organisation} is the subject exactly as the certificate prints it; the designation is reproduced as the published certificate policy records it; and {status} is the coverage status the verify record carries when the claim is made, copied from that record rather than paraphrased.",
+        "An organisation covered by a waiver funded nothing. A claim implying that it did would be false rather than merely vague, which is why this variant stands apart from the supporter one instead of narrowing it.",
+        "The closing sentence is reproduced exactly as it stands above, in a claim as on the certificate. No other verification address may be offered beside it.",
+        "An organisation covered by a waiver funded nothing, so neither the give-something-back line, nor the pledge line, nor any share template is available to it: coverage-status wording is the whole of what this variant permits."
+      ],
+      "templates": [],
+      "badge": {
+        "text": "Purpose Source · waiver · {status}",
+        "notes": []
+      },
+      "prohibited": [
+        "we support charity",
+        "we give back",
+        "any unquantified social-impact framing",
+        "describing the Purpose Fee as a donation or the organisation as a donor",
+        "any verification address other than the one printed on the certificate",
+        "any supporter or impact phrasing"
+      ],
+      "binding": "public claims about this certificate are governed by the enclosed claim-language kit"
+    }
+  },
+  "translations": {},
+  "translationsNote": "Empty at this phase, and that is a fact rather than a gap: a rendering nobody has approved would be a builder's own translation of a legal constraint. Counsel-approved German and French renderings ship at P-M3, each marked as an approved rendering; the English text of this document is controlling in every case."
+}

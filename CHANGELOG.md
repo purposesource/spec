@@ -46,6 +46,10 @@ and the twenty-third is `publish-log.v1.json` (2026-09-12), the publish batch re
 artifact plane has carried since the first build and the plane's own validation gate had to
 list as unschematised for want of a contract.
 
+Ops decision D44 (2026-09-15) adds to the set, each addition with its own section below:
+`claim-kit.v2.json`, the second shape of the claim-language kit, beside `claim-kit.v1.json`
+rather than in place of it.
+
 ### Contracts published beyond the initially-scoped ten
 
 Seven schemas were added because another repository's acceptance test names a schema
@@ -773,6 +777,61 @@ creating one.
 - The example IS a published kit, byte for byte, and `check:kits` refuses one that has drifted
   from every document in `kits/`. Kit wording is claim language; a drifted example is the file
   somebody copies into a press release. Same precedent as `category-menu.v1.example.json`.
+
+## claim-kit.v2.json
+
+### 1.0.0 — unreleased (2026-09-15; ops decision D44)
+
+- Initial publication. The second shape of the claim-language kit, as a NEW FILE beside
+  `claim-kit.v1.json` under versioning policy 2: v1 requires every variant's `prohibited` list
+  to contain "we give back", allows exactly one `permittedPattern` per variant, closes the
+  variant set and has no member for templates, a badge or rules with their reasons, while D44
+  permits a give-something-back line tied to the pledge, several lines, share templates, named
+  rules and a coverage badge. `claim-kit.v1.json` and `kits/kit-1.json` are unchanged, and kit-1
+  stays a v1 document: this schema refuses `kitVersion: "kit-1"`.
+- THE MONEY LINE IS THE PLEDGE OR NOTHING. `pledge.text` is the only place a v2 kit says where a
+  Purpose Fee goes, and a line reaches it only through the `{pledge}` placeholder. `check:kits`
+  asserts that the text appears exactly once in the file; its byte-equality with the canonical
+  pledge of statutes Art. 5(5) is held by the publishing repository's tests, because JSON Schema
+  cannot hold it and this repository does not carry the pledge.
+- EVERY CLAIM ENDS WITH THE ONE VERIFICATION SENTENCE (CERT-027): every line whose `use` is
+  `base`, `line` or `gated`, and every template (`$defs.claimText`). A `clause` is words added
+  inside a line and carries none. `check:kits` asserts the same sentence against
+  `spec.config.json`, as it does for v1.
+- THE SUPPORTER RULES ARE NAMED BY ID, and the ten ids D44 fixes are required as `contains`
+  clauses, so a later edit cannot quietly drop one. The FS-08 §8 reviewer phrases "we support
+  charity" and "any unquantified social-impact framing" stay required members of the supporter's
+  `prohibited` list; "we give back" leaves that list, which is the point of D44, and stays
+  required on `statusOnly`, whose lines may carry no `{amount}`, `{band}`, `{pledge}`, `{tier}` or
+  `{figure}`, no "give something back" and no "Purpose Fee", and which has no templates.
+- A BADGE IS A COVERAGE BADGE. Its text is pinned to `Purpose Source · {lane} Entitlement ·
+  {status}` on the supporter variant and `Purpose Source · waiver · {status}` on the status-only
+  one, and the supporter badge requires the EU consumer notice.
+- A GATED LINE IS CLOSED IN THE DOCUMENT. Its gate names the fact the holder checks on the public
+  record (`figure-issued-after-disbursed-row`) and its `state` is the `const` `closed`: a
+  published kit never opens a gate by editing itself.
+- `supporter` and `statusOnly` are required; `sponsor` is OPTIONAL. kit-2 carries no sponsor
+  variant, because the sponsor certificate's wording waits for the tax adviser's answer
+  (LEG-094). The schema already fixes what a sponsor variant may never carry — `{pledge}`,
+  `{lane}`, `{band}`, `{categories}`, `{figure}`, "give something back", "Purpose Fee:", a
+  template or a badge — so the later kit that publishes those words needs no schema change.
+  *(Corrected before publication, the same day: the design draft of this file's description
+  still said that exactly three variants exist; it now says two are required and the third is
+  optional.)*
+- `appliesTo` keeps v1's type grammar, `topup` and `x2|x5|x10` included, and adds the `sponsor`
+  variant token. The grammar names tokens and grants nothing: the `topup` type is reserved and
+  never issued since D44 item 7 withdrew the multipliers before any sale
+  (`certificate.v1.json` 1.3.0).
+- No figure of any kind appears in a kit, no `generatedAt`, and `publishedAt` is null until first
+  publication at the permalink on the apex, immutable from then on (D32) — the v1 rules, kept.
+- The first document is `kits/kit-2.json`, published at `/kits/v2`: SHA-256
+  `c60a723677d5c5508192a79ec2cd4a5bd815ef61b7a201f43e0d5f65eb4925cb` over its raw bytes (11,622
+  bytes, LF). `examples/claim-kit.v2.example.json` IS that document, byte for byte.
+- `check:kits` now validates each kit against the shape its `schemaVersion` names (1 is
+  `claim-kit.v1`, 2 is `claim-kit.v2`, anything else is refused), runs the ending rule over v1
+  patterns and over v2 lines and templates, adds the pledge-once rule and the `verify` member for
+  v2, and pairs each example with its own kit byte for byte. Each new rule has a self-test case
+  that must fail.
 
 ## ct-segment.v1.json
 

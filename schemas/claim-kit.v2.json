@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/claim-kit.v2.json",
+  "title": "Claim-language kit (v2) — /kits/{version}.json",
+  "description": "The second shape of the claim-language kit (ops decision D44, 2026-09-15). A kit is still a versioned DOCUMENT whose `kitVersion` a certificate payload pins as `claimKitVersion` (D17), and still carries only PATTERNS with braced placeholders, never a filled-in claim. It is a new file rather than an edit of `claim-kit.v1.json` because v1 requires every variant's `prohibited` list to contain \"we give back\" and allows one pattern per variant, while D44 permits a give-something-back line, several lines, share templates and a coverage badge (versioning policy 2).\n\nWHAT THIS SHAPE MAKES STRUCTURAL. (1) THE MONEY LINE IS THE PLEDGE OR NOTHING: the only place the document states where a Purpose Fee goes is `pledge.text`, which must equal the canonical pledge of statutes Art. 5(5) byte for byte (a test in the publishing repositories holds that equality; JSON Schema cannot), and a line reaches it only through the `{pledge}` placeholder. (2) EVERY CLAIM ENDS WITH THE ONE VERIFICATION SENTENCE (CERT-027): every line whose `use` is `base`, `line` or `gated`, and every template, ends with it; a `clause` is added inside a line and does not. (3) THE SUPPORTER RULES ARE NAMED BY ID, and the ten ids D44 fixes are required, so a later edit cannot quietly drop one; the reviewer phrases \"we support charity\" and \"any unquantified social-impact framing\" stay required members of the supporter's `prohibited` list (FS-08 §8). (4) A BADGE IS A COVERAGE BADGE: its text is fixed to the Purpose Source name, the lane or the waiver designation, and the live status, and the supporter badge carries the EU consumer notice. (5) A GATED LINE IS CLOSED IN THE DOCUMENT: its gate names a fact the holder checks on the public record, and a published kit never opens a gate by editing itself.\n\nTwo variants are required: `supporter` for the payment class and `statusOnly` for the licence-status class. A third, `sponsor`, for the sponsor certificate (`supporter.sponsor`), is optional: kit-2 carries none, because that certificate's wording waits for the tax adviser's answer, and the later kit that publishes it needs no change to this schema. No figure of any kind appears in the document. The document carries no `generatedAt`; `publishedAt` is null until the document is first published at its permalink on the apex, and immutable from then on (D32).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/kits/{version}.json",
+    "authoritative": true,
+    "producer": "authored in this repository as kits/kit-{version}.json and published as-is (P-M2: vendored byte-identically by the website and served at its permalink; P-M3: emitted into the artifact plane by jobs.index-build)",
+    "consumers": [
+      "the certificate renderer, which embeds the kit as an integral PDF page carrying the binding statement",
+      "the kit page and its raw endpoint on the website",
+      "the checkout statement that delivers the kit at purchase (att-3 step 5)",
+      "OSPO reviewers, journalists and counsel checking a published claim against the document that governs it"
+    ],
+    "fsRefs": ["FS-08 §8 (FS08-070…072)", "D17", "D44", "CERT-027", "CERT-050…053", "CERT-062", "MKT-011…013", "MKT-032…035", "NEV-016", "NEV-017"],
+    "vsRefs": ["VS-31", "VS-30"],
+    "changelog": "CHANGELOG.md#claim-kitv2json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "kitVersion", "permalink", "publishedAt", "language", "verify", "pledge", "variants", "translations", "translationsNote"],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "kitVersion": { "type": "string", "pattern": "^kit-[0-9]+$", "not": { "const": "kit-1" }, "description": "`kit-1` is a v1 document and stays one; a v2 document is kit-2 or later." },
+    "permalink": { "type": "string", "pattern": "^https://purposesource\\.org/kits/v[0-9]+$" },
+    "publishedAt": { "type": ["string", "null"], "format": "date-time" },
+    "language": { "const": "en" },
+    "verify": { "const": "verify only at purposesource.org/verify", "description": "The one exclusive-verification sentence (CERT-027), stated once for the document and required at the end of every claim." },
+    "pledge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "source"],
+      "properties": {
+        "text": { "type": "string", "minLength": 200, "maxLength": 600, "pattern": "^100% of net Purpose Fee proceeds ", "description": "The canonical pledge, byte for byte; `{pledge}` in a line is replaced by exactly this text." },
+        "source": { "type": "string", "minLength": 5 }
+      }
+    },
+    "variants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["supporter", "statusOnly"],
+      "$comment": "D44 (FIXES-2): `sponsor` is optional. kit-2 carries no sponsor variant, because the sponsor certificate's wording waits for the tax adviser's answer (LEG-094); a later kit version adds it under this same schema, and a `supporter.sponsor` certificate pins that kit.",
+      "properties": {
+        "supporter": {
+          "allOf": [
+            { "$ref": "#/$defs/variant" },
+            {
+              "required": ["rules"],
+              "properties": {
+                "lines": { "contains": { "properties": { "text": { "pattern": "\\{pledge\\}" } }, "required": ["text"] } },
+                "badge": {
+                  "type": "object",
+                  "required": ["euConsumerNotice"],
+                  "properties": { "text": { "const": "Purpose Source · {lane} Entitlement · {status}" } }
+                },
+                "rules": {
+                  "allOf": [
+                    { "contains": { "properties": { "id": { "const": "donation-framing" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "numbers-not-printed" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "recipients-and-emblems" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "own-purchase-only" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "no-environmental-claims" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "credential-not-licence" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "pledge-words-only" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "give-back-with-money-line" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "badge-coverage-only" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "one-verification-address" } }, "required": ["id"] } }
+                  ]
+                },
+                "prohibited": {
+                  "allOf": [
+                    { "contains": { "const": "we support charity" } },
+                    { "contains": { "const": "any unquantified social-impact framing" } }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "statusOnly": {
+          "allOf": [
+            { "$ref": "#/$defs/variant" },
+            {
+              "properties": {
+                "lines": { "items": { "properties": { "text": { "not": { "pattern": "\\{(?:amount|band|pledge|tier|figure)\\}|give something back|Purpose Fee" } } } } },
+                "templates": { "maxItems": 0 },
+                "badge": { "type": "object", "properties": { "text": { "const": "Purpose Source · waiver · {status}" } } },
+                "prohibited": {
+                  "allOf": [
+                    { "contains": { "const": "we support charity" } },
+                    { "contains": { "const": "we give back" } },
+                    { "contains": { "const": "any unquantified social-impact framing" } },
+                    { "contains": { "const": "any supporter or impact phrasing" } }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "sponsor": {
+          "allOf": [
+            { "$ref": "#/$defs/variant" },
+            {
+              "properties": {
+                "lines": { "items": { "properties": { "text": { "not": { "pattern": "\\{(?:pledge|lane|band|categories|figure)\\}|give something back|Purpose Fee:" } } } } },
+                "templates": { "maxItems": 0 },
+                "badge": { "const": null }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "translations": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z]{2}$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["approvedRendering", "document"],
+        "properties": {
+          "approvedRendering": { "const": true },
+          "document": { "type": "string", "pattern": "^https://purposesource\\.org/kits/v[0-9]+/[a-z]{2}$" }
+        }
+      }
+    },
+    "translationsNote": { "type": "string", "minLength": 40 }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,48}$" },
+    "placeholderText": {
+      "type": "string",
+      "minLength": 10,
+      "pattern": "^(?:[^{}]|\\{(?:organisation|lane|period|amount|band|categories|status|tier|pledge|figure)\\})*$",
+      "description": "Text whose only braces are the closed placeholder set: {organisation} {lane} {period} {amount} {band} {categories} {status} {tier} {pledge} {figure}."
+    },
+    "claimText": {
+      "allOf": [
+        { "$ref": "#/$defs/placeholderText" },
+        { "pattern": "(?:verify only at purposesource.org/verify)$" }
+      ]
+    },
+    "line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "use", "text"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "use": { "enum": ["base", "line", "clause", "gated"], "description": "`base` — the one line a claim starts from; `line` — a line that may be used with the base; `clause` — words added inside a line; `gated` — unusable until its gate's fact is on the public record." },
+        "text": { "type": "string" },
+        "gate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "state"],
+          "properties": {
+            "kind": { "enum": ["figure-issued-after-disbursed-row"] },
+            "state": { "const": "closed" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "use": { "const": "clause" } }, "required": ["use"] },
+          "then": { "properties": { "text": { "$ref": "#/$defs/placeholderText" } } },
+          "else": { "properties": { "text": { "$ref": "#/$defs/claimText" } } }
+        },
+        {
+          "if": { "properties": { "use": { "const": "gated" } }, "required": ["use"] },
+          "then": { "required": ["gate"] },
+          "else": { "not": { "required": ["gate"] } }
+        }
+      ]
+    },
+    "template": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "channel", "text"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "channel": { "enum": ["long-post", "short-post"] },
+        "text": { "$ref": "#/$defs/claimText" }
+      }
+    },
+    "badge": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["text", "notes"],
+      "properties": {
+        "text": { "type": "string", "pattern": "^Purpose Source · (?:\\{lane\\} Entitlement|waiver) · \\{status\\}$" },
+        "notes": { "type": "array", "items": { "type": "string", "minLength": 40 } },
+        "euConsumerNotice": { "type": "string", "minLength": 100 }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "rule", "reason"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "rule": { "type": "string", "minLength": 20 },
+        "reason": { "type": "string", "minLength": 20 }
+      }
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["appliesTo", "lines", "permittedNotes", "templates", "badge", "prohibited", "binding"],
+      "properties": {
+        "appliesTo": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^(?:contributor|steward|supporter|license-status|topup)\\.(?:participation|registration|impact|entitlement|gift-funder|waived-funder|donation|sponsor|waiver|under-threshold|gifted-pass|x2|x5|x10)$" }
+        },
+        "lines": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/line" },
+          "contains": { "properties": { "use": { "const": "base" } }, "required": ["use"] },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        "permittedNotes": { "type": "array", "items": { "type": "string", "minLength": 20 } },
+        "templates": { "type": "array", "items": { "$ref": "#/$defs/template" } },
+        "badge": { "$ref": "#/$defs/badge" },
+        "rules": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/rule" } },
+        "prohibited": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 5 } },
+        "binding": { "const": "public claims about this certificate are governed by the enclosed claim-language kit" }
+      }
+    }
+  }
+}

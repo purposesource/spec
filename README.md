@@ -17,10 +17,10 @@ a procurement reviewer can consume all of it the way they consume a static file.
 
 | Directory | Contents |
 |---|---|
-| `schemas/` | 23 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
+| `schemas/` | 24 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v1.ts`, the published coverage function, with `vectors.json` (frozen test vectors) and its test suite. Zero dependencies. |
-| `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in two cases, `category-menu.v1.example.json` and `claim-kit.v1.example.json`, the example IS the published document, byte for byte. |
+| `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in three cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json` and `claim-kit.v2.example.json`, the example IS the published document, byte for byte. |
 | `kits/` | The claim-language kits — `kit-{version}.json`, the wording a certificate holder may publish and the framing that is excluded (FS08-070). Versioned documents, not pages: a certificate pins the kit that was in force when it was issued. Each is published at `/kits/v{n}` and validated by `check:kits`. |
 | `scripts/` | The CI gates. Each one refuses to pass on an empty input set. |
 | `spec.config.json` | The organisation and domain names, in one place. Every `$id`, server URL and printed host derives from it, and the gates name any file that disagrees. |
@@ -83,6 +83,7 @@ needs a toolchain is not really published.
 | `certificate-record.v1.json` | `/certs/{cert_id}.json` | first public version |
 | `certificate-policy.v1.json` | `/certs/policy/latest.json` | first public version |
 | `claim-kit.v1.json` | `kits/kit-{version}.json` here, published at `/kits/{version}.json` — the example is the published document | first public version |
+| `claim-kit.v2.json` | `kits/kit-{version}.json` from kit-2 on (ops decision D44), published at `/kits/{version}.json` — the example is the published document; kit-1 stays a `claim-kit.v1` document | first public version |
 | `ct-segment.v1.json` | `/ct/{n}.json`, `/ct/latest.json` | first public version |
 | `ct-checkpoint.v1.json` | payload published at `/ct/checkpoint-latest.json` | first public version |
 | `ledger-row.v1.json` | one ledger row | first public version |
