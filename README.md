@@ -89,7 +89,7 @@ needs a toolchain is not really published.
 | `ledger-export.v1.json` | `/ledger/{YYYY}-{MM}.json` (+ CSV twin) | first public version |
 | `ledger-chain.v1.json` | `/ledger/chain.json` | first public version |
 | `cost-support.v1.json` | one calendar month of the published cost-support table | P-M3 producer, v0 hand-maintained |
-| `recipient-list.v1.json` | one published version of the Recipient List (the statutes' annex) | P-M3 producer, v0 hand-maintained |
+| `recipient-list.v1.json` | one published version of the Recipient List (kept by the board, outside the statutes) | P-M3 producer, v0 hand-maintained |
 | `badge.v1.json` | `/badge/{node_id}.json` (shields.io endpoint) | first public version |
 | `stats.v1.json` | `/stats.json` | first public version |
 | `publish-log.v1.json` | `/meta/publish-log.json` | first public version |
@@ -102,8 +102,8 @@ a contract cannot ship here without provenance.
 The `cost-support.v1` and `recipient-list.v1` rows are the money contracts of 2026-09-07. Both describe artifacts the frozen
 artifact catalogue does not yet name — that deferral is deliberate — so each says so in its
 `x-psn.artifactPath` rather than claiming a URL: at v0 the cost-support table is
-hand-maintained and rendered on the transparency page, and the Recipient List is the published
-annex to the statutes. Neither adds a route: they are published files, and the schema is the
+hand-maintained and rendered on the transparency page, and the Recipient List is the board's
+published list, kept outside the statutes. Neither adds a route: they are published files, and the schema is the
 contract whether the producer is a job or a person.
 
 ## The coverage function
@@ -167,7 +167,7 @@ committed ledger table   ─────┼──────► ledger-row.v1  
                               ├──────► ledger-export.v1       │
                               ├──────► ledger-chain.v1        │
 fees account + invoices  ─────┼──────► cost-support.v1        │
-the statutes' annex      ─────┼──────► recipient-list.v1      │
+the board's list         ─────┼──────► recipient-list.v1      │
                               ├──────► entitlement-record.v1  │
                               ├──────► waiver.v1              │
                               ├──────► badge.v1               │

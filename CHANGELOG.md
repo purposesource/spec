@@ -1366,6 +1366,37 @@ reasoning: no month export has ever been published with a row in it.
   scope paid for. The rule this contract does govern — equal shares per listed recipient within
   a category, still PROPOSED and awaiting the operator — is unchanged, and so is every value.
 
+### 1.1.0 — unreleased (2026-09-15; founding change spec C2)
+
+- Widening. The Recipient Standard of D33 item 2 gives way to the floor of statutes Art. 7(2),
+  which a newly founded charity can pass, with the details of the checks in the Recipient Rules
+  that the board changes with publication. `standard.accountsYears` leaves `standard.required`
+  and its `minimum` falls from 3 to 0, and `website` and `address` leave the recipient's
+  `required`. Every property stays and nothing else moved, so every document that validated
+  still validates; a version may now also list a recipient with no years of accounts, no
+  published address and no website.
+- Wording. Every description that stated the old rules now states the new ones: the floor is
+  statutes Art. 7(2) and may only be tightened; the details are in the Recipient Rules, which the
+  board changes with publication; the list is kept by the board outside the statutes and is not a
+  statutes annex, the founding list being adopted by the board at its constituting meeting with
+  its first publication counting as the thirty days' public notice (so `noticeGivenAt` stays null
+  for it); and "ten to fifteen" is the board's non-binding "usually about ten to fifteen".
+  `standardUrl` keeps its name and points at the published Recipient Rules. Where a member stays
+  for a D33 limb that is no longer a requirement — years of accounts, a published address and
+  website, the annual use-of-funds statement, no contributor or repository owner among the
+  officers — its description says so. A removal for cause no longer names "failure to report".
+- Minor bump, 1.0.2 to 1.1.0 (versioning policy §3): a widening that §1 allows inside `v1`, and
+  not `pre-release`, because nothing is tightened. The 1.0.0 entry's "THE LEGAL INSTRUMENT IS THE
+  ANNEX" and "these floors can only rise" are superseded by this entry and kept above as history.
+- Wording, same day (ops decision D43; founding change spec C11). `shareRule` is DECIDED (ops
+  decision D40 item 7), so its description no longer calls the equal split a proposal. The split
+  now applies to the REST of a category's amount: an active listed recipient named with an amount
+  in an advisory designation by a repository's administrators or contributors, or in the board's
+  allocation key for shares nobody designated or left to the Association, receives that amount
+  first (statutes Art. 8(1), (2) and (4)); the key is published before the month it applies to.
+  No constraint moved: the `status` enum keeps both values, so a document carrying `proposed`
+  still validates.
+
 ## change-event.v1.json
 
 ### 1.0.0 — unreleased
