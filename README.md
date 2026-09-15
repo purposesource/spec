@@ -17,7 +17,7 @@ a procurement reviewer can consume all of it the way they consume a static file.
 
 | Directory | Contents |
 |---|---|
-| `schemas/` | 24 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
+| `schemas/` | 25 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v1.ts`, the published coverage function, with `vectors.json` (frozen test vectors) and its test suite. Zero dependencies. |
 | `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in three cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json` and `claim-kit.v2.example.json`, the example IS the published document, byte for byte. |
@@ -79,6 +79,7 @@ needs a toolchain is not really published.
 | `repo-record.v1.json` | `/registry/repo/{node_id}.json` | first public version |
 | `waiver.v1.json` | `/waivers/{node_id}.json`, `/waivers/all.json` | first public version (honest empty state) |
 | `entitlement-record.v1.json` | decoded payload of `/entitlements/{co_ulid}.jws` | first public version |
+| `covered-organisations.v1.json` | `/entitlements/covered-organisations.json` — one line per organisation holding an Entitlement term, named only where it asked to be (ops decision D44) | first public version |
 | `certificate.v1.json` | the certificate JWS payload profile | first public version |
 | `certificate-record.v1.json` | `/certs/{cert_id}.json` | first public version |
 | `certificate-policy.v1.json` | `/certs/policy/latest.json` | first public version |

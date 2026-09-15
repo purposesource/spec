@@ -4,7 +4,7 @@
   "title": "Publish log — /meta/publish-log.json",
   "description": "The publish batch records: the one artifact that describes the BUILD rather than the data. FS10-011 step (5) makes this document a batch's home — what was written, when, and with which ETag per path — so that a purge-by-URL can be checked against the batch it claims to cover, and a consumer can tell a REBUILD apart from a PUBLICATION without diffing the plane.\n\nTWO PRODUCERS, ONE CONTRACT. The P-M2 builder publishes the whole plane on every run and writes one batch for it. The P-M3 producer appends a batch only for a run that wrote at least one path, so an hourly rebuild over unchanged data does not grow this document. Both shapes validate here: the P-M2 members below are optional where the later producer does not carry them, and `publishedAt` and `edge` are the later producer's additions.\n\nAPPEND-ONLY (FS-00 §6.2). A batch already written is never edited; a correction is a new batch, forward only.\n\n`sourceDigest` IS OPAQUE AND IS NEVER COMPARED ACROSS PRODUCERS. It answers exactly one question — did the inputs this build read change? — and the two producers read different kinds of input: one digests the bytes of the files it read, the other the canonical form of the rows it read. A consumer compares a digest with the PREVIOUS digest of the SAME producer, and a difference between two producers' digests for one plane means nothing at all.",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M2",
     "artifactPath": "/meta/publish-log.json",
     "authoritative": true,
@@ -67,8 +67,13 @@
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "description": "Every artifact path this batch wrote, each rooted at `/`. A batch exists because something was written, so this is never empty \u2014 a run that wrote nothing appends no batch at all. This is the list a purge call is built from, which is why the paths are exact rather than patterned.\n\nWIDENED 2026-09-14 to admit `+` and `=`. Most of this plane's paths are built from a `node_id` \u2014 `/registry/repo/{node_id}.json`, `/badge/{node_id}.json`, `/waivers/{node_id}.json` \u2014 and GitHub's LEGACY node_id form is standard base64, whose alphabet includes both. `repo-record.v1` widened its own `githubNodeId` for the same reason on 2026-09-08, noting the `=` padding its first alternative could not express; this schema was written afterwards and repeated the omission, so a real plane carrying one legacy-keyed repository emitted paths its own publish log could not state. Found by the website's artifact gate on the day that gate began validating this file.",
+          "description": "Every artifact path this batch wrote, each rooted at `/`. A batch exists because something was written, so this is never empty \u2014 a run that wrote nothing appends no batch at all. This is the list a purge call is built from, which is why the paths are exact rather than patterned.\n\nWIDENED 2026-09-14 to admit `+` and `=`. Most of this plane's paths are built from a `node_id` \u2014 `/registry/repo/{node_id}.json`, `/badge/{node_id}.json`, `/waivers/{node_id}.json` \u2014 and GitHub's LEGACY node_id form is standard base64, whose alphabet includes both. `repo-record.v1` widened its own `githubNodeId` for the same reason on 2026-09-08, noting the `=` padding its first alternative could not express; this schema was written afterwards and repeated the omission, so a real plane carrying one legacy-keyed repository emitted paths its own publish log could not state. Found by the website's artifact gate on the day that gate began validating this file.\n\nAMENDED 2026-09-15 (ops decision D44): every artifact path this batch wrote EXCEPT the verify records of individual-subject certificates (`/certs/{cert_id}.json` whose subject is a person), which FS08-061 excludes from every index. Those are counted in `unlistedPaths` and purged by the producer from its own run record; they are served by the verify route and are not part of a fetched plane.",
           "items": { "type": "string", "pattern": "^/[A-Za-z0-9._/+=-]+$" }
+        },
+        "unlistedPaths": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many paths this batch wrote and deliberately does not list in `paths` or `etags`: the verify records of individual-subject certificates (FS08-061, D44). A count only, never an identifier. Absent on a batch written before 2026-09-15 and read as zero."
         },
         "etags": {
           "type": "object",

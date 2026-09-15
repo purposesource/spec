@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-27T09:00:00Z",
+  "source": "sample",
+  "organisations": [
+    {
+      "coId": "co_01j9smpvrgh7m3q2w8n5xb4tc0",
+      "listed": true,
+      "name": "Alpenglow Systems AG",
+      "terms": [
+        {
+          "entId": "ent_01j9smpvrgh7m3q2w8n5xb4t01",
+          "lane": "project",
+          "scope": {
+            "kind": "project",
+            "repos": [
+              "R_kgDOSMPL0001"
+            ]
+          },
+          "status": "active",
+          "periodStart": "2026-09-05T00:00:00Z",
+          "periodEnd": "2027-09-05T00:00:00Z",
+          "certId": "cert_01j9smqa1a2b3c4d5e6f7g8h9j"
+        }
+      ]
+    },
+    {
+      "coId": "co_01j9smpw4kd2f6t9r0h3z7ycva",
+      "listed": true,
+      "name": "Bergwerk Logistics GmbH",
+      "terms": [
+        {
+          "entId": "ent_01j9smpw4kd2f6t9r0h3z7yc01",
+          "lane": "project",
+          "scope": {
+            "kind": "project",
+            "repos": [
+              "R_kgDOSMPL0002"
+            ]
+          },
+          "status": "active",
+          "periodStart": "2026-09-07T00:00:00Z",
+          "periodEnd": "2027-09-07T00:00:00Z",
+          "certId": null
+        }
+      ]
+    },
+    {
+      "coId": "co_01j9smpx8ne5g1v4s7k0b2qzdw",
+      "listed": false,
+      "name": "Unlisted organisation",
+      "terms": [
+        {
+          "entId": "ent_01j9smpx8ne5g1v4s7k0b2qz01",
+          "lane": "project",
+          "scope": {
+            "kind": "project",
+            "repos": [
+              "R_kgDOSMPL0003"
+            ]
+          },
+          "status": "active",
+          "periodStart": "2026-09-09T00:00:00Z",
+          "periodEnd": "2027-09-09T00:00:00Z",
+          "certId": "cert_01j9smqab1c2d3e4f5g6h7j8k9"
+        }
+      ]
+    },
+    {
+      "coId": "co_01j9smpy2rf8h5w1t3m6c9xkbn",
+      "listed": true,
+      "name": "Tessellate Cloud Inc",
+      "terms": [
+        {
+          "entId": "ent_01j9smpy2rf8h5w1t3m6c9xk01",
+          "lane": "project",
+          "scope": {
+            "kind": "project",
+            "repos": [
+              "R_kgDOSMPL0009"
+            ]
+          },
+          "status": "active",
+          "periodStart": "2026-09-11T00:00:00Z",
+          "periodEnd": "2027-09-11T00:00:00Z",
+          "certId": "cert_01j9smqa5r6s7t8v9w0x1y2z3a"
+        },
+        {
+          "entId": "ent_01j9smpy2rf8h5w1t3m6c9xk02",
+          "lane": "project",
+          "scope": {
+            "kind": "project",
+            "repos": [
+              "R_kgDOSMPL0002"
+            ]
+          },
+          "status": "active",
+          "periodStart": "2026-10-02T00:00:00Z",
+          "periodEnd": "2027-10-02T00:00:00Z",
+          "certId": null
+        }
+      ]
+    },
+    {
+      "coId": "co_01j9smpz6th1j4x7v0p3d5wqfe",
+      "listed": true,
+      "name": "Oakhaven Municipal Utilities",
+      "terms": [
+        {
+          "entId": "ent_01j9smpz6th1j4x7v0p3d5wq01",
+          "lane": "donation",
+          "scope": {
+            "kind": "project",
+            "repos": [
+              "R_kgDOSMPL0003"
+            ]
+          },
+          "status": "active",
+          "periodStart": "2026-09-15T00:00:00Z",
+          "periodEnd": "2027-09-15T00:00:00Z",
+          "certId": null
+        }
+      ]
+    },
+    {
+      "coId": "co_01j9smq1ex7n0q4b6d9s2h5tvj",
+      "listed": false,
+      "name": "Unlisted organisation",
+      "terms": [
+        {
+          "entId": "ent_01j9smq1ex7n0q4b6d9s2h5t01",
+          "lane": "project",
+          "scope": {
+            "kind": "project",
+            "repos": [
+              "R_kgDOSMPL0006"
+            ]
+          },
+          "status": "suspended",
+          "periodStart": "2026-10-06T00:00:00Z",
+          "periodEnd": "2027-10-06T00:00:00Z",
+          "certId": null
+        }
+      ]
+    }
+  ],
+  "completeness": {
+    "lines": 6,
+    "entitlementRecords": 8,
+    "recordsWithoutTerm": 2,
+    "linesWithFeeLaneTerm": 5,
+    "payerIdsOnPoolInRows": 5,
+    "companiesCovered": 8,
+    "companiesCoveredRule": "sample-active-at-clock-plus-waivers"
+  }
+}

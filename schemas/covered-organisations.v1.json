@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/covered-organisations.v1.json",
+  "title": "Covered organisations — /entitlements/covered-organisations.json",
+  "description": "The one public list of organisations holding an Entitlement term (ops decision D44; resolves URS OPEN-34 toward a complete list with names optional, subject to counsel and comms sign-off before real launch). ONE LINE PER ORGANISATION that has a signed entitlement record with at least one term, keyed by its public company id, carrying either the legal name the payer asked to be listed under or the fixed words `Unlisted organisation`, and every term with its lane, scope, published status, dates and certificate id.\n\nWHAT NO LINE CAN CARRY. There is no member for an amount, a revenue band, a domain, a contact or a declaration, and the objects are closed, so an unlisted line cannot leak one by accident. Unlisted is not anonymous and the list says so: the ledger rows keyed by the same company id publish their amounts, an amount can show the band, and a verified domain resolves to the same id through `/entitlements/domain-index.json` (TRN-033: coverage is answerable regardless of naming).\n\nCOMPLETENESS, CHECKABLE BY ANYONE. `completeness` states the counts a reader can recompute from other published artifacts: every line is an entitlement record with a term; every line with a fee-lane term (Project, Portfolio, the Pass) is a company id on at least one published `pool-in` ledger row and every such id has a line — a refunded term keeps its line with status `void` and its row beside a `refund-out` row, a charged-back term keeps its line with status `suspended`; and `stats.json`'s `companiesCovered` is stated beside the rule that derives it. The builder refuses to publish a list whose counts disagree.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2",
+    "artifactPath": "/entitlements/covered-organisations.json",
+    "authoritative": true,
+    "producer": "index-build (P-M2: website/scripts/index-build-lite.mjs; P-M3: jobs.index-build, packages/Psn.Artifacts ArtifactRenderer.Trust)",
+    "consumers": [
+      "the /registry/organisations page",
+      "OSPO and journalist checks of the completeness counts",
+      "the edge deployment (static artifact, no route)"
+    ],
+    "fsRefs": [
+      "TRN-033",
+      "WEB-092",
+      "WEB-093",
+      "WEB-130",
+      "APP-064",
+      "OPEN-34",
+      "FS10-024",
+      "FS08-061",
+      "D44"
+    ],
+    "vsRefs": [
+      "VS-33",
+      "VS-36"
+    ],
+    "changelog": "CHANGELOG.md#covered-organisationsv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "organisations",
+    "completeness"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "enum": [
+        "registry-v0",
+        "sample",
+        "fixture",
+        "platform"
+      ],
+      "description": "Which plane produced this artifact. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders such an artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2 production source of record — the curated registry repository the index is built from. `platform` is the P-M3 producer of record — the platform database, rendered by `jobs.index-build`. Optional, and its absence asserts nothing: an artifact whose body cannot carry the label borrows the plane's declaration from `/registry/index/meta.json`. The enum widens additively when the P-M3 producer takes a value of its own, and `platform` (2026-09-12) is that widening: `jobs.index-build` writes it in `PSN_ENV=prod` and writes `fixture` in every other environment, so a reader can still tell a production plane from a synthetic one by the label alone. Two catalogued artifacts deliberately have no such member and are the borrowers above: `badge.v1` (shields.io owns the body — a foreign field would break the endpoint contract) and `certificate-policy.v1` (a rule, byte-identical on every plane, so a plane label on it would be meaningless). No signed payload carries it either: the label is a property of the build, not of what was attested."
+    },
+    "organisations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/line"
+      },
+      "description": "Ordered by `coId`. An empty array is the honest state before the first purchase."
+    },
+    "completeness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lines",
+        "entitlementRecords",
+        "recordsWithoutTerm",
+        "linesWithFeeLaneTerm",
+        "payerIdsOnPoolInRows",
+        "companiesCovered",
+        "companiesCoveredRule"
+      ],
+      "properties": {
+        "lines": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Equals `organisations.length`."
+        },
+        "entitlementRecords": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Signed entitlement records on the plane (`/entitlements/{co_id}.jws`)."
+        },
+        "recordsWithoutTerm": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Records with an empty `entitlements` array — waiver stubs. `lines` + this = `entitlementRecords`."
+        },
+        "linesWithFeeLaneTerm": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Lines holding at least one term in the project, portfolio or pass lane. Equals `payerIdsOnPoolInRows`."
+        },
+        "payerIdsOnPoolInRows": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Distinct `coId` values over every published `pool-in` ledger row of every month."
+        },
+        "companiesCovered": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "The value `stats.json` publishes, copied so the relation below is checkable in one file; null in `pre-launch`."
+        },
+        "companiesCoveredRule": {
+          "enum": [
+            "entitlement-records",
+            "sample-active-at-clock-plus-waivers"
+          ],
+          "description": "`entitlement-records` — the real plane: `companiesCovered` = `entitlementRecords` (so = `lines` + `recordsWithoutTerm`). `sample-active-at-clock-plus-waivers` — the sample plane derives the counter differently, and no equality with `lines` is asserted there."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "coId": {
+      "type": "string",
+      "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$"
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "description": "Structured scope — the PAID COVERAGE of the term, never the usage declaration. `project` ⇒ `repos[]`, the repositories the term covers (exactly one for a Project bought under ops decision D42; the array bound of 50 is the shape's, not a purchasable quantity); `portfolio` ⇒ `org`, the owner node_id, covering every registered repository of that owner; `network` (Pass) ⇒ neither — a Pass covers every registered repository, which is why it wins the precedence order. The repositories a Pass buyer may name (D42 item 4) are private and never appear here. Sources: D16, COM-020, ENG-029, D42. *(Corrected 2026-09-15: this cited \"min 1, cap 50 declared repositories, COM-018\", which conflated coverage with the declaration and cited the payment-account requirement. Superseded, kept as history.)*",
+      "properties": {
+        "kind": {
+          "enum": [
+            "project",
+            "portfolio",
+            "network"
+          ]
+        },
+        "repos": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/githubNodeId"
+          }
+        },
+        "org": {
+          "$ref": "#/$defs/githubNodeId",
+          "description": "Owner-organisation node_id, compared against the repo record's `owner.orgId` (FS-10 §4.3 step 5c)."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "project"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "repos"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "portfolio"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "org"
+            ]
+          }
+        }
+      ]
+    },
+    "githubNodeId": {
+      "type": "string",
+      "pattern": "^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$",
+      "description": "A GitHub GraphQL node_id, in either of the two forms GitHub has issued: the opaque current form (a repository's is `R_`-prefixed) and the legacy base64 form, whose decoded value begins `010:Repository` and whose `=` padding the first alternative cannot express. Widened 2026-09-08 to admit the second: `registry-v0-record.v1` accepts both, so a record the curated registry accepts is publishable in this artifact. The primary key for repositories and people throughout this contract set (FS-00 §6.1)."
+    },
+    "line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coId",
+        "listed",
+        "name",
+        "terms"
+      ],
+      "properties": {
+        "coId": {
+          "$ref": "#/$defs/coId"
+        },
+        "listed": {
+          "type": "boolean",
+          "description": "True only when the payer asked to be listed (att-3 step 7, or a later recorded request). Never a default (WEB-130)."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "terms": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/term"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "listed": {
+                "const": false
+              }
+            },
+            "required": [
+              "listed"
+            ]
+          },
+          "then": {
+            "properties": {
+              "name": {
+                "const": "Unlisted organisation"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "name": {
+                "not": {
+                  "const": "Unlisted organisation"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "term": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entId",
+        "lane",
+        "scope",
+        "status",
+        "periodStart",
+        "periodEnd",
+        "certId"
+      ],
+      "properties": {
+        "entId": {
+          "type": "string",
+          "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$"
+        },
+        "lane": {
+          "enum": [
+            "pass",
+            "project",
+            "portfolio",
+            "donation"
+          ]
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "suspended",
+            "void"
+          ],
+          "description": "The published projection, exactly as the signed record carries it (FS05-052)."
+        },
+        "periodStart": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "periodEnd": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "certId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$",
+          "description": "The payment certificate attesting this term that is not superseded, or null when none was issued."
+        }
+      }
+    }
+  }
+}

@@ -48,7 +48,8 @@ list as unschematised for want of a contract.
 
 Ops decision D44 (2026-09-15) adds to the set, each addition with its own section below:
 `claim-kit.v2.json`, the second shape of the claim-language kit, beside `claim-kit.v1.json`
-rather than in place of it.
+rather than in place of it; and `covered-organisations.v1.json`, the one public list of
+organisations holding an Entitlement term, named only where they asked to be.
 
 ### Contracts published beyond the initially-scoped ten
 
@@ -602,6 +603,55 @@ creating one.
   comment is superseded by this entry and kept as history until a `cov-v2` exists.
 - `examples/entitlement-record.v1.example.json`: the first term's Project scope names one
   repository (`R_kgDOAbc123`), so the example shows the shape a D42 Project writes.
+
+### 1.1.2 — unreleased (2026-09-15; ops decision D44)
+
+- Wording. `name` said that directory naming "defaults to unnamed" and that a browsable supporter
+  directory lists opted-in payers. It now says what D44 item 5 decided: the member is present
+  only when the payer asked to be listed (att-3 step 7, or a later recorded request); the
+  covered-organisations list (`covered-organisations.v1`) names only such payers and shows every
+  other payer as "Unlisted organisation"; and an unlisted payer's record still verifies at its own
+  URL (VS-33). The member stays optional.
+- Wording. `domains` adds that a verified domain resolves to its record whether or not the
+  organisation is named (TRN-033; D44 item 5(f)). The domain index stays as it is: it is how
+  coverage by domain is answered.
+- No member, type, vector or answer changes.
+
+## covered-organisations.v1.json
+
+### 1.0.0 — unreleased (2026-09-15; ops decision D44)
+
+- Initial publication. `/entitlements/covered-organisations.json`, beside the entitlement records
+  and the domain index it is built from, rendered on the website at `/registry/organisations`:
+  ONE LINE PER ORGANISATION that has a signed entitlement record with at least one term, ordered
+  by `coId`, carrying the legal name the payer asked to be listed under or the fixed words
+  `Unlisted organisation`, and every term with its `entId`, lane, scope, published status, dates
+  and the certificate that attests it. It resolves URS OPEN-34 toward a complete list with names
+  optional; the list publishes on the apex only after the counsel and comms sign-off OPEN-34
+  names.
+- NOTHING ELSE FITS ON A LINE. There is no member for an amount, a revenue band, a domain, a
+  contact or a declaration, and every object is closed, so an unlisted line cannot leak one by
+  accident. `listed` is never a default (WEB-130): `false` pins `name` to `Unlisted organisation`,
+  and `true` forbids those words, so the two states cannot be confused in either direction.
+- UNLISTED IS NOT ANONYMOUS, and the description says so: the ledger rows keyed by the same
+  company id publish their amounts, an amount against the public schedule shows the band, and a
+  verified domain resolves to the same id through the domain index (TRN-033: coverage is
+  answerable regardless of naming).
+- COMPLETENESS, CHECKABLE BY ANYONE. `completeness` publishes the counts a reader recomputes from
+  other published artifacts, and the builder refuses a list whose counts disagree: the lines plus
+  the entitlement records that carry no term equal the entitlement records; the lines holding a
+  Project, Portfolio or Pass term are exactly the company ids on published `pool-in` rows; and
+  every `pool-in` row's term is on the list, and every such term has its row. A refunded term
+  keeps its line with status `void`, a charged-back term keeps it with `suspended`, and a
+  donate-direct term has no `pool-in` row, which is why the second identity counts fee-lane lines
+  only. `companiesCovered` is copied from `stats.json` beside `companiesCoveredRule`, because the
+  real plane and the sample plane derive that counter differently, and only on the real plane
+  does it equal the records.
+- `certId` is the payment certificate attesting the term that is not superseded, or null. It is
+  found through the `entId` a certificate record carries from `certificate-record.v1` 1.3.0.
+- The example is the sample plane's list: six lines (two unlisted, one term suspended, one
+  donate-direct term), eight entitlement records, two of them without a term, and five payer ids
+  on `pool-in` rows.
 
 ## certificate.v1.json
 
@@ -1582,6 +1632,24 @@ reasoning: no month export has ever been published with a row in it.
   what that gate is for, and why the entry is recorded here rather than baselined there. A
   widening of a pattern admits strictly more (policy rule 1) and the version is unreleased,
   so no number moves.
+
+### 1.1.0 — unreleased (2026-09-15; ops decision D44)
+
+- Additive. `$defs.batch.unlistedPaths`, an integer of at least zero: how many paths the batch
+  wrote and deliberately does not list in `paths` or `etags` — the verify records of
+  individual-subject certificates, which FS08-061 excludes from every index and CERT-060 makes
+  private by default, and which this log, an index of every path written, listed until now. A
+  count only, never an identifier; absent on a batch written before the member existed, and read
+  as zero. `paths` states the exception in its description.
+- Only those paths. Entitlement-record paths and corporate certificate paths stay listed. Hiding
+  them would protect nothing, because the covered-organisations list (`covered-organisations.v1`)
+  publishes both ids on every line and every ledger row carries `coId` and `entId`; and it would
+  break something, because a plane fetch reads exactly the listed paths, so a fetched plane would
+  lose its entitlement records and corporate certificate records and the pages built from them.
+  Declaring every record id "not a secret" was the rejected alternative: it contradicts FS08-061
+  and CERT-060 for people.
+- The existing example validates unchanged, and so does the same log whose batch carries
+  `unlistedPaths: 2`.
 
 ## openapi/edge-public.v1.yaml
 
