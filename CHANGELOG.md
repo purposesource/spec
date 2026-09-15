@@ -1358,6 +1358,14 @@ reasoning: no month export has ever been published with a row in it.
   a cross-file `$ref`; `check:menu` asserts every copy is identical to the publication, which
   is the guarantee the `$ref` would have given.
 
+### 1.0.2 — unreleased (2026-09-15; ops decision D42)
+
+- Wording only, `pre-release`. `shareRule`'s description no longer names "payer declarations,
+  the commons slice" as the FS-07 allocation rule it does not touch: D42 retired the commons
+  slice and the directed slice, and a buyer's passed-on share is now attributed by the lane and
+  scope paid for. The rule this contract does govern — equal shares per listed recipient within
+  a category, still PROPOSED and awaiting the operator — is unchanged, and so is every value.
+
 ## change-event.v1.json
 
 ### 1.0.0 — unreleased
