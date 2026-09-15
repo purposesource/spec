@@ -4,7 +4,7 @@
   "title": "Certificate policy — /certs/policy/latest.json",
   "description": "The one published enumeration of every certificate class, its variants, and the exact claims each permits and prohibits (COM-084, FS08-011). It is the machine-readable half of the policy page: a reader who holds a certificate can look up its `typ` here and read what the holder is allowed to say about it, and a scanner can check a published claim against a document rather than against a marketing page.\n\nTwo properties make this a contract rather than a description. First, `classes[]` is the ISSUABLE set at the phase named in `phase` — a class absent from it cannot be issued, and `notIssuable[]` says which classes those are and what has to exist first. Second, the machine `typ` tokens are the frozen enum of the architecture chapter and are never renamed to match prose: `name` carries the human name, `typ` carries the token, and a consumer switches on the token.\n\nThe policy is not data about the world. Apart from the batch timestamp every artifact carries, it is identical on every plane and in every environment, it holds no counters and no subject data, and it changes only when the rule it encodes changes — which is what `policyVersion` records.",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M2",
     "artifactPath": "/certs/policy/latest.json",
     "authoritative": true,
@@ -73,7 +73,7 @@
   "$defs": {
     "typ": {
       "enum": ["contributor", "steward", "supporter", "license-status", "topup"],
-      "description": "The frozen certificate type enum (FS-00 §6.4). Copied here rather than referenced: a schema must validate from one downloaded file."
+      "description": "The frozen certificate type enum (FS-00 §6.4). Copied here rather than referenced: a schema must validate from one downloaded file. `topup` is reserved: the voluntary multipliers were withdrawn before any sale (ops decision D44 item 7, 2026-09-15), so no top-up certificate is ever issued; the token stays because the type enum is frozen and a published enum value is never removed."
     },
     "ruleIds": {
       "type": "array",
@@ -98,7 +98,7 @@
           "description": "What the certificate attests, and by implication what it does not. Every certificate attests a fact already recorded at issuance; none is anticipatory (CERT-004)."
         },
         "kitVariant": {
-          "enum": ["supporter", "status-only"],
+          "enum": ["supporter", "status-only", "sponsor"],
           "description": "Which claim-language kit variant governs the class. `status-only` permits coverage-status wording exclusively (CERT-052, MKT-034)."
         },
         "variants": {
@@ -127,7 +127,7 @@
       "required": ["variant", "label", "issuable", "precondition"],
       "properties": {
         "variant": {
-          "enum": ["participation", "registration", "impact", "entitlement", "gift-funder", "waived-funder", "donation", "waiver", "under-threshold", "gifted-pass", "x2", "x5", "x10"],
+          "enum": ["participation", "registration", "impact", "entitlement", "gift-funder", "waived-funder", "donation", "sponsor", "waiver", "under-threshold", "gifted-pass", "x2", "x5", "x10"],
           "description": "The variant discriminator (FS08-010). Same closed set as the certificate payload and the verify record."
         },
         "label": {
@@ -148,6 +148,10 @@
           "type": "string",
           "minLength": 2,
           "description": "The phase or event that makes a non-issuable variant issuable. Required in practice wherever `issuable` is false; a variant with neither is an unexplained absence."
+        },
+        "kitVariant": {
+          "enum": ["supporter", "status-only", "sponsor"],
+          "description": "A variant whose claims are governed by a different kit variant from its class's (D44: `supporter.sponsor` is governed by the kit's `sponsor` variant). Absent means the class's `kitVariant`."
         }
       },
       "allOf": [

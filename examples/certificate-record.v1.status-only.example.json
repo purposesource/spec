@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-27T09:00:00Z",
+  "source": "sample",
+  "cid": "cert_01j9smqab1c2d3e4f5g6h7j8k9",
+  "status": "valid",
+  "typ": "supporter",
+  "variant": "entitlement",
+  "disclosure": "status-only",
+  "scope": {
+    "kind": "project",
+    "repos": [
+      "R_kgDOSMPL0003"
+    ]
+  },
+  "period": {
+    "validFrom": "2026-09-09",
+    "validUntil": "2027-09-08"
+  },
+  "issuedAt": "2026-09-09T15:30:00Z",
+  "kid": "psn-dev-2026-1",
+  "ct": {
+    "seq": 7,
+    "segment": 0
+  },
+  "revocation": null,
+  "supersedes": null,
+  "supersededBy": null,
+  "entId": "ent_01j9smpx8ne5g1v4s7k0b2qz01",
+  "jwsSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

@@ -1,0 +1,18 @@
+{
+  "cid": "cert_01jm2k3n4p5q6r7s8t9v0w1x2y",
+  "typ": "supporter",
+  "variant": "sponsor",
+  "sub": "Example Industries AG",
+  "subId": "co_01jm2k3n4p5q6r7s8t9v0w1x2z",
+  "subjectKind": "company",
+  "scope": {
+    "kind": "none"
+  },
+  "period": {
+    "validFrom": "2027-02-01",
+    "validUntil": "2028-01-31"
+  },
+  "iat": 1800000000,
+  "iss": "https://api.purposesource.org",
+  "claimKitVersion": "kit-2"
+}

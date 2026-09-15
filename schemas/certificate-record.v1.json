@@ -4,7 +4,7 @@
   "title": "Certificate verify record — /certs/{cert_id}.json",
   "description": "The public verify record for one certificate, regenerated on issue and on every status change (FS08-060). This shape is BYTE-AUTHORITATIVE: the public verify route is a passthrough and no consumer may rename or reshape a field — same names (`cid`, `typ`, `variant`), structured `scope`, `band` with no currency prefix (FS08-060a). The record never contains more subject data than the certificate itself displays (CERT-026), individual-subject records are unlisted (unguessable ULID, excluded from every index and sitemap, served `X-Robots-Tag: noindex`, CERT-060), and the route reads this artifact only — never a database (FS08-061).\n\n`ct: null` means signed-but-not-yet-logged, and the verify page renders UNVERIFIED (CERT-030). Clients can independently re-derive inclusion from the published log segments. Erasure leaves a tombstone: `status: \"revoked\"` with the subject fields removed, hash-only log entries retained (CERT-045/031).",
   "x-psn": {
-    "specVersion": "1.2.0",
+    "specVersion": "1.3.0",
     "phase": "P-M2",
     "artifactPath": "/certs/{cert_id}.json",
     "authoritative": true,
@@ -16,7 +16,7 @@
   },
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "generatedAt", "cid", "status", "typ", "variant", "period", "issuedAt", "kid", "jws"],
+  "required": ["schemaVersion", "generatedAt", "cid", "status", "typ", "variant", "period", "issuedAt", "kid"],
   "properties": {
     "schemaVersion": { "const": 1 },
     "generatedAt": { "type": "string", "format": "date-time" },
@@ -26,15 +26,16 @@
       "enum": ["valid", "expired", "revoked", "superseded"],
       "description": "CERT-040. `expired` is clock-derived from `period.validUntil` and needs no write; expiry is non-destructive and verifies as 'was valid for period P' (CERT-041)."
     },
-    "typ": { "enum": ["contributor", "steward", "supporter", "license-status", "topup"] },
-    "variant": { "enum": ["participation", "registration", "impact", "entitlement", "gift-funder", "waived-funder", "donation", "waiver", "under-threshold", "gifted-pass", "x2", "x5", "x10"] },
+    "typ": { "enum": ["contributor", "steward", "supporter", "license-status", "topup"], "description": "The frozen certificate type enum (FS-00 §6.4), as the certificate payload carries it. `topup` is reserved: the voluntary multipliers were withdrawn before any sale (ops decision D44 item 7, 2026-09-15), so no top-up certificate is ever issued; the token stays because the type enum is frozen and a published enum value is never removed." },
+    "variant": { "enum": ["participation", "registration", "impact", "entitlement", "gift-funder", "waived-funder", "donation", "sponsor", "waiver", "under-threshold", "gifted-pass", "x2", "x5", "x10"] },
+    "disclosure": { "enum": ["full", "status-only"], "description": "What this public record discloses (ops decision D44). `full` — the subject's display name, band and compact JWS, as every record carried before D44; an absent member reads as `full`. `status-only` — the record of a corporate certificate whose payer did not ask to be listed: no `sub`, no `band` and no `jws`, and instead `jwsSha256`, the SHA-256 the transparency log already carries, so the holder who shows its own signed certificate can prove this record is its record. A consumer switches on this member and never infers it from a missing field." },
     "sub": { "type": "string", "maxLength": 200, "description": "Display name. ABSENT on a tombstoned record after an erasure request (CERT-045)." },
     "scope": {
       "type": "object",
       "additionalProperties": false,
       "required": ["kind"],
       "properties": {
-        "kind": { "enum": ["project", "portfolio", "network"] },
+        "kind": { "enum": ["project", "portfolio", "network", "none"] },
         "repos": { "type": "array", "minItems": 1, "maxItems": 50, "uniqueItems": true, "items": { "$ref": "#/$defs/githubNodeId" } },
         "org": { "$ref": "#/$defs/githubNodeId" }
       }
@@ -91,12 +92,25 @@
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$",
       "description": "The compact JWS — the certificate itself. Present so a client can validate the signature offline against a JWKS copy without a second fetch (CERT-025)."
-    }
+    },
+    "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "The Entitlement term this certificate attests, for a payment certificate (D44). The term id is already public on the ledger rows and the signed entitlement record; carrying it here is what lets the covered-organisations list name each term’s certificate without decoding a token." },
+    "jwsSha256": { "$ref": "#/$defs/sha256", "description": "Lowercase-hex SHA-256 of the compact JWS, the value the transparency log entry carries (FS08-050). Required on a `status-only` record; optional elsewhere." }
   },
   "allOf": [
     {
       "if": { "properties": { "status": { "const": "revoked" } }, "required": ["status"] },
       "then": { "required": ["revocation"] }
+    },
+    {
+      "$comment": "D44: a status-only record carries no subject name, no band and no token, and carries the token hash; every other record carries the token as before.",
+      "if": { "properties": { "disclosure": { "const": "status-only" } }, "required": ["disclosure"] },
+      "then": { "required": ["jwsSha256"], "not": { "anyOf": [{ "required": ["sub"] }, { "required": ["band"] }, { "required": ["jws"] }] } },
+      "else": { "required": ["jws"] }
+    },
+    {
+      "$comment": "D44: a sponsor is never unlisted (statutes Art. 6b(3): undisclosed support is prohibited).",
+      "if": { "properties": { "variant": { "const": "sponsor" } }, "required": ["variant"] },
+      "then": { "not": { "properties": { "disclosure": { "const": "status-only" } }, "required": ["disclosure"] } }
     }
   ],
   "$defs": {

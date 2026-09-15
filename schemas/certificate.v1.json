@@ -4,7 +4,7 @@
   "title": "Certificate JWS payload profile (v1)",
   "description": "The signed payload of a certificate. Header is fixed: `{\"alg\":\"ES256\",\"kid\":\"psn-{env}-{yyyy}-{n}\",\"typ\":\"application/psn-cert+jws\",\"cty\":\"application/json\"}`; the payload is canonicalised with RFC 8785 (JCS) before signing, the compact serialisation IS the certificate, and `SHA-256(compact JWS string)` is the hash that enters the transparency log (FS08-050). Keys are born non-exportable inside the movement's own Key Vault and only one principal may sign (FS-00 §6.4, FS-00 §3).\n\nVERIFICATION ORDER (published in the Trust Center, CERT-025): resolve `kid` in the JWKS → verify ES256 over the compact JWS → check `SHA-256(jws)` appears in the transparency log → fetch the certificate record for live status. Steps 1–2 work fully offline with a JWKS copy. A signature that verifies while its hash is ABSENT from the log renders UNVERIFIED — that is the rogue-issuance detector, not a soft warning (CERT-030).\n\nFUNDING TRUTH (CERT-002/013, D14, COM-066): `amountMinor` + `cur` appear ONLY where money actually moved, and never without `amountKind`, which distinguishes a fee paid from an impact figure routed from a documented donation. One payload never conflates them. A waived organisation that funded nothing can only ever hold `license-status.waiver`.\n\nMATERIALITY (CERT-014/054, D15): a per-contributor monetary figure enters the payload only if it meets the published floor for the attested period; otherwise the payload carries `impactBelowFloor: true` and no figure at all, so a template cannot leak a gated number it never received (FS08-091). No field can express a cross-contributor ranking (CERT-015 by construction).\n\nAt P-M2 only `supporter.entitlement` and `license-status.*` are issuable, by an operator-run signing script with the same profile (FS08-040/041). Impact figures do not exist before the first disbursed ledger row (NEV-017).",
   "x-psn": {
-    "specVersion": "1.2.0",
+    "specVersion": "1.3.0",
     "phase": "P-M2 (supporter.entitlement + license-status.* only)",
     "artifactPath": "(compact JWS; embedded in the PDF and in the certificate record's `jws` field)",
     "authoritative": true,
@@ -22,11 +22,11 @@
     "cid": { "type": "string", "pattern": "^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "Certificate ULID. Non-guessable by construction, and the verify route is rate-limited against scraping (CERT-010/026)." },
     "typ": {
       "enum": ["contributor", "steward", "supporter", "license-status", "topup"],
-      "description": "The frozen type enum (FS-00 §6.4). Not to be confused with the JWS header's `typ`, which is the media type."
+      "description": "The frozen type enum (FS-00 §6.4). Not to be confused with the JWS header's `typ`, which is the media type. `topup` is reserved: the voluntary multipliers were withdrawn before any sale (ops decision D44 item 7, 2026-09-15), so no top-up certificate is ever issued; the token stays because the type enum is frozen and a published enum value is never removed."
     },
     "variant": {
-      "enum": ["participation", "registration", "impact", "entitlement", "gift-funder", "waived-funder", "donation", "waiver", "under-threshold", "gifted-pass", "x2", "x5", "x10"],
-      "description": "Additive discriminator from the FS08-010 table. Permitted combinations: contributor→participation; steward→registration|impact; supporter→entitlement|gift-funder|waived-funder|donation; license-status→waiver|under-threshold|gifted-pass; topup→x2|x5|x10. The combination is enforced by the `allOf` rules below and by issuance-time gates."
+      "enum": ["participation", "registration", "impact", "entitlement", "gift-funder", "waived-funder", "donation", "sponsor", "waiver", "under-threshold", "gifted-pass", "x2", "x5", "x10"],
+      "description": "Additive discriminator from the FS08-010 table. Permitted combinations: contributor→participation; steward→registration|impact; supporter→entitlement|gift-funder|waived-funder|donation|sponsor; license-status→waiver|under-threshold|gifted-pass; topup→x2|x5|x10 (reserved and never issued: the multipliers were withdrawn before any sale, ops decision D44 item 7). The combination is enforced by the `allOf` rules below and by issuance-time gates."
     },
     "sub": {
       "type": "string",
@@ -42,7 +42,7 @@
       "required": ["kind"],
       "description": "Structured scope — the same shape the entitlement record uses, so a certificate and its entitlement describe coverage identically.",
       "properties": {
-        "kind": { "enum": ["project", "portfolio", "network"] },
+        "kind": { "enum": ["project", "portfolio", "network", "none"] },
         "repos": { "type": "array", "minItems": 1, "maxItems": 50, "uniqueItems": true, "items": { "$ref": "#/$defs/githubNodeId" } },
         "org": { "$ref": "#/$defs/githubNodeId" }
       }
@@ -56,7 +56,7 @@
     "amountMinor": { "type": "integer", "minimum": 0, "description": "Integer minor units (FS-00 §6.1). Present ONLY where funded, and only together with `cur` and `amountKind`." },
     "cur": { "$ref": "#/$defs/currency" },
     "amountKind": {
-      "enum": ["fee-paid", "impact-routed", "donation"],
+      "enum": ["fee-paid", "impact-routed", "donation", "sponsorship-paid"],
       "description": "What the amount IS. A fee renders as a fee, never as a donation (D17/CERT-054c); the donate-direct lane is the only place `donation` states a documented fact. Templates bind money slots only to a field carrying this label and compute nothing themselves (FS08-091)."
     },
     "period": {
@@ -161,7 +161,7 @@
     },
     {
       "if": { "properties": { "typ": { "const": "supporter" } }, "required": ["typ"] },
-      "then": { "properties": { "variant": { "enum": ["entitlement", "gift-funder", "waived-funder", "donation"] } } }
+      "then": { "properties": { "variant": { "enum": ["entitlement", "gift-funder", "waived-funder", "donation", "sponsor"] } } }
     },
     {
       "if": { "properties": { "typ": { "const": "license-status" } }, "required": ["typ"] },
@@ -172,6 +172,7 @@
       }
     },
     {
+      "$comment": "D44 item 7: the voluntary multipliers were withdrawn before any sale. `topup` is reserved and no top-up certificate is ever issued; the rule stays so the frozen type keeps its row of the FS08-010 table.",
       "if": { "properties": { "typ": { "const": "topup" } }, "required": ["typ"] },
       "then": { "properties": { "variant": { "enum": ["x2", "x5", "x10"] } }, "required": ["amountMinor"] }
     },
@@ -179,6 +180,23 @@
       "$comment": "D15/CERT-054b: the below-floor flag and a monetary figure are mutually exclusive.",
       "if": { "properties": { "impactBelowFloor": { "const": true } }, "required": ["impactBelowFloor"] },
       "then": { "not": { "anyOf": [{ "required": ["impactMinor"] }, { "required": ["amountMinor"] }] } }
+    },
+    {
+      "$comment": "D44 item 6(d): a sponsor certificate attests a settled sponsorship of the Association — its tier, period and published use order — and covers nothing: scope kind `none`, no band, and an amount, where one is stated, labelled `sponsorship-paid`.",
+      "if": { "properties": { "variant": { "const": "sponsor" } }, "required": ["variant"] },
+      "then": {
+        "properties": {
+          "typ": { "const": "supporter" },
+          "scope": { "properties": { "kind": { "const": "none" } }, "not": { "anyOf": [{ "required": ["repos"] }, { "required": ["org"] }] } },
+          "amountKind": { "const": "sponsorship-paid" }
+        },
+        "not": { "required": ["band"] }
+      }
+    },
+    {
+      "$comment": "D44: scope kind `none` and the `sponsorship-paid` label belong to the sponsor variant and to nothing else.",
+      "if": { "anyOf": [{ "properties": { "scope": { "properties": { "kind": { "const": "none" } }, "required": ["kind"] } }, "required": ["scope"] }, { "properties": { "amountKind": { "const": "sponsorship-paid" } }, "required": ["amountKind"] }] },
+      "then": { "properties": { "variant": { "const": "sponsor" } }, "required": ["variant"] }
     }
   ],
   "$defs": {

@@ -704,6 +704,34 @@ creating one.
   FS-08 §8's two `kit-1.0` examples are the FS owner's one-line dated note, recorded
   separately; this entry does not touch the record.
 
+### 1.3.0 — unreleased (2026-09-15; ops decision D44)
+
+- Additive. The sponsor certificate, as the variant `sponsor` under the `supporter` type (D44
+  item 6(d)): `variant` gains `sponsor` (after `donation`), `scope.kind` gains `none`,
+  `amountKind` gains `sponsorship-paid`, and the supporter row of the type/variant table gains
+  `sponsor`. Two new rules: a `sponsor` certificate has `typ: supporter`, `scope: {"kind":
+  "none"}` with no `repos` or `org`, and no `band`, and an amount, where one is stated, is
+  labelled `sponsorship-paid`; and scope kind `none` or the `sponsorship-paid` label implies the
+  `sponsor` variant. The certificate attests a settled sponsorship — its tier, period and
+  published use order — and covers nothing.
+- A variant and not a type, because the type enum is frozen (FS08-010). `topup` is not reused:
+  a top-up was a multiplier on a Purpose Fee that enters the fees account (COM-064), and
+  sponsorship never enters that account (statutes Art. 6a(1), 6b).
+- Not issuable yet: the sponsor certificate waits for the tax adviser's answer (LEG-094), and
+  its claim wording comes in a later kit version, because kit-2 carries no sponsor variant.
+- Wording (ops decision D44 item 7). `typ`, `variant` and the `topup` rule now say that `topup`
+  is reserved: the voluntary multipliers were withdrawn before any sale, so no top-up
+  certificate is ever issued. No enum value is removed.
+- Every payload valid under 1.2.0 still validates and means the same: the new rules constrain
+  only the new values. The existing example validates unchanged. The new
+  `examples/certificate.v1.sponsorship.example.json` validates, and so does the same payload
+  with a stated `sponsorship-paid` amount; the schema refuses a sponsor certificate with a band,
+  with coverage, or with a `fee-paid` or `donation` amount, the variant under `license-status`,
+  and scope `none` on an entitlement certificate.
+- `check:examples` now validates further examples of one schema, named
+  `{schema key}.{state}.example.json` beside the main one, and refuses an example file that
+  belongs to no schema.
+
 ## certificate-record.v1.json
 
 ### 1.0.0 — unreleased
@@ -747,6 +775,42 @@ creating one.
   for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
   2026-09-10, which authorises the P-M3 build.
 
+### 1.3.0 — unreleased (2026-09-15; ops decision D44) — pre-release
+
+- **A pre-release change under versioning policy 5, not an additive one.** What moved: `jws`
+  leaves the unconditional `required` list and is required on every record except a status-only
+  one; `disclosure` (`full` | `status-only`), `entId` and `jwsSha256` are added; a record with
+  `disclosure: "status-only"` must carry `jwsSha256` and may not carry `sub`, `band` or `jws`;
+  `variant` gains `sponsor`; `scope.kind` gains `none`; and a `sponsor` record is never
+  status-only.
+- Why. The public record republished the subject's display name and the full signed token for
+  every certificate, including the certificate of a corporate payer that never asked to be
+  named, which FS08-061 and CERT-060 make private by default (D44 item 5(e)). A status-only
+  record publishes the status and proves itself by the SHA-256 the transparency log already
+  carries, so a holder that shows its own signed certificate can prove this record is its
+  record. An absent `disclosure` reads as `full`; a consumer switches on the member and never
+  infers it from a missing field.
+- Why policy 5 and not a new file. A reader that expects `jws` on every record breaks, which
+  rule 1 does not allow inside v1. Rule 5 allows it before first publication, and every
+  condition holds: no certificate record has been published on the apex and none exists outside
+  the sample plane, whose records are fixtures; every record valid under 1.2.0 still validates
+  and means the same; and the record already knew an absent `sub`, the tombstone after an
+  erasure request (CERT-045).
+- `entId` is the Entitlement term a payment certificate attests (the payload's
+  `factRefs.entId`). It is already public on the ledger rows and in the signed entitlement
+  record; carrying it here lets the covered-organisations list (`covered-organisations.v1`) name
+  each term's certificate without decoding a token.
+- The `sponsor` values mirror `certificate.v1.json` 1.3.0. A sponsor's record is never
+  status-only, because undisclosed support is prohibited (statutes Art. 6b(3)).
+- Wording (ops decision D44 item 7). `typ` gains a description: `topup` is reserved — the
+  voluntary multipliers were withdrawn before any sale — so no top-up certificate is ever
+  issued. No enum value is removed.
+- The readers that assumed `jws` or `sub` on every record move in the same wave: the website's
+  verify island and verify page, the edge verify route's record type, and the platform's plane
+  reader and trust renderer.
+- New example `examples/certificate-record.v1.status-only.example.json`; its `jwsSha256` is a
+  placeholder. The existing example validates unchanged.
+
 ## certificate-policy.v1.json
 
 ### 1.0.0 — unreleased
@@ -766,6 +830,19 @@ creating one.
   guarantee than a policy sentence about it.
 - `claimKitVersion` is nullable because no kit document is published yet. Null is a fact,
   not a gap: a payload cannot pin a version that does not exist.
+
+### 1.1.0 — unreleased (2026-09-15; ops decision D44)
+
+- Additive. `$defs.certClass.kitVariant` gains `sponsor`; `$defs.variant.variant` gains
+  `sponsor`, the sponsor certificate under the supporter class (`supporter.sponsor`, mirroring
+  `certificate.v1.json` 1.3.0); and a variant may carry its own optional `kitVariant` where a kit
+  variant other than its class's governs its claims — absent means the class's. A policy lists
+  `supporter.sponsor` as not issuable until the tax adviser has answered (LEG-094), and the kit
+  variant it names is carried by the later kit that publishes the sponsor certificate's words,
+  not by kit-2.
+- Wording (ops decision D44 item 7). `$defs.typ` says that `topup` is reserved and never issued:
+  the voluntary multipliers were withdrawn before any sale. No enum value is removed.
+- The existing example validates unchanged.
 
 ## claim-kit.v1.json
 
