@@ -4,7 +4,7 @@
   "title": "Publish log — /meta/publish-log.json",
   "description": "The publish batch records: the one artifact that describes the BUILD rather than the data. FS10-011 step (5) makes this document a batch's home — what was written, when, and with which ETag per path — so that a purge-by-URL can be checked against the batch it claims to cover, and a consumer can tell a REBUILD apart from a PUBLICATION without diffing the plane.\n\nTWO PRODUCERS, ONE CONTRACT. The P-M2 builder publishes the whole plane on every run and writes one batch for it. The P-M3 producer appends a batch only for a run that wrote at least one path, so an hourly rebuild over unchanged data does not grow this document. Both shapes validate here: the P-M2 members below are optional where the later producer does not carry them, and `publishedAt` and `edge` are the later producer's additions.\n\nAPPEND-ONLY (FS-00 §6.2). A batch already written is never edited; a correction is a new batch, forward only.\n\n`sourceDigest` IS OPAQUE AND IS NEVER COMPARED ACROSS PRODUCERS. It answers exactly one question — did the inputs this build read change? — and the two producers read different kinds of input: one digests the bytes of the files it read, the other the canonical form of the rows it read. A consumer compares a digest with the PREVIOUS digest of the SAME producer, and a difference between two producers' digests for one plane means nothing at all.",
   "x-psn": {
-    "specVersion": "1.1.0",
+    "specVersion": "1.2.0",
     "phase": "P-M2",
     "artifactPath": "/meta/publish-log.json",
     "authoritative": true,
@@ -99,8 +99,8 @@
       }
     },
     "edgeStep": {
-      "enum": ["done", "skipped", "not-configured"],
-      "description": "`done` — the step ran and succeeded. `skipped` — it was available and deliberately not run for this batch. `not-configured` — the credential or identifier it needs does not exist in this deployment, which is a stated posture rather than a failure."
+      "enum": ["done", "skipped", "not-configured", "failed"],
+      "description": "`done` — the step ran and succeeded. `skipped` — it was available and deliberately not run for this batch. `not-configured` — the credential or identifier it needs does not exist in this deployment, which is a stated posture rather than a failure. `failed` — it was configured, it ran, and it did not succeed; added 2026-09-15 because none of the three words above is TRUE of that state and a producer with no word for it would have to write a false one. It is deliberately not an error for the batch: the artifacts are on the plane either way, so what a failed step costs is edge freshness the FS-10 §12 TTLs already bound, and the publishing run records it here and exits 0 rather than refusing a publication that happened."
     }
   }
 }
