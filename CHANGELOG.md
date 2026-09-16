@@ -1784,6 +1784,26 @@ reasoning: no month export has ever been published with a row in it.
 
 ## publish-log.v1.json
 
+### 1.1.0 — unreleased (2026-09-15)
+
+- Additive. `edgeStep` admits a fourth value, `failed` — the step was configured, it ran,
+  and it did not succeed. The three words it had could not say that: `done` asserts
+  success, `skipped` asserts a deliberate choice not to run, and `not-configured` asserts
+  that the credential the step needs does not exist in the deployment. A producer whose
+  handshake failed therefore had no true word, and the only shapes available to it were to
+  write a false one or to omit the block that exists so a reader never has to guess.
+- WHY IT IS NOT AN ERROR FOR THE BATCH, stated in the description rather than left to a
+  reader. The edge steps run AFTER the artifacts are on the plane, so a failed refresh or
+  purge costs edge freshness and nothing else — and FS-10 §12 bounds that at 300 s for
+  every class except the three the edge reads key-value-first. The publishing run records
+  the value here and exits 0; a publication that happened is not reported as one that did
+  not.
+- The enum only widens and `edge` stays optional, so nothing that validated stops
+  validating and `done`, `skipped` and `not-configured` keep exactly the meanings they
+  had. A consumer that switches on the member gains a fourth case; nothing published
+  switches on it today. Authority: FS-10 FS10-011 steps 3 and 4, and ops decision D35 of
+  2026-09-10.
+
 ### 1.0.0 — unreleased (2026-09-12)
 
 - Initial publication. `/meta/publish-log.json` — the publish batch records of FS10-011

@@ -99,8 +99,8 @@
       }
     },
     "edgeStep": {
-      "enum": ["done", "skipped", "not-configured"],
-      "description": "`done` — the step ran and succeeded. `skipped` — it was available and deliberately not run for this batch. `not-configured` — the credential or identifier it needs does not exist in this deployment, which is a stated posture rather than a failure."
+      "enum": ["done", "skipped", "not-configured", "failed"],
+      "description": "`done` — the step ran and succeeded. `skipped` — it was available and deliberately not run for this batch. `not-configured` — the credential or identifier it needs does not exist in this deployment, which is a stated posture rather than a failure. `failed` — it was configured, it ran, and it did not succeed; added 2026-09-15 because none of the three words above is TRUE of that state and a producer with no word for it would have to write a false one. It is deliberately not an error for the batch: the artifacts are on the plane either way, so what a failed step costs is edge freshness the FS-10 §12 TTLs already bound, and the publishing run records it here and exits 0 rather than refusing a publication that happened."
     }
   }
 }
