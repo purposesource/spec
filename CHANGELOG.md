@@ -1794,8 +1794,13 @@ reasoning: no month export has ever been published with a row in it.
   write a false one or to omit the block that exists so a reader never has to guess.
 - WHY IT IS NOT AN ERROR FOR THE BATCH, stated in the description rather than left to a
   reader. The edge steps run AFTER the artifacts are on the plane, so a failed refresh or
-  purge costs edge freshness and nothing else — and FS-10 §12 bounds that at 300 s for
-  every class except the three the edge reads key-value-first. The publishing run records
+  purge costs edge freshness and nothing else — bounded per class by the FS-10 §12 table,
+  which is a spread and not one figure: `s-maxage=300` on the short-lived records, 3600 on
+  the export, the badges, the stats and the key sets, 21600 on the registry index and its
+  shards, and 86400 on closed ledger months and numbered segments. The three the edge reads
+  key-value-first have rows there and are still not bounded by them — when a response TTL
+  expires the edge re-reads the namespace and is handed the same stale key, so nothing ends
+  it until something overwrites it. The publishing run records
   the value here and exits 0; a publication that happened is not reported as one that did
   not.
 - The enum only widens and `edge` stays optional, so nothing that validated stops
