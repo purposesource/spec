@@ -20,7 +20,7 @@
   "properties": {
     "ledId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
     "month": { "$ref": "#/$defs/monthKey", "description": "Settlement month for intake rows, allocation month for allocation rows. `(month, seq)` is unique." },
-    "seq": { "type": "integer", "minimum": 1, "description": "Position within the month. The HASH chain is global, not per-month — do not infer chain order from this field." },
+    "seq": { "type": "integer", "minimum": 1, "description": "Position in the GLOBAL append order: contiguous from 1, no gaps, no duplicates, across months. Both `seq` alone and `(month, seq)` are unique, and a month’s lock numbers from the chain head’s seq + 1 — it never restarts at 1. The hash chain is global too, but is a separate fact: do not infer chain order from this field. (Corrected 2026-09-22: this read \"Position within the month\", which a build followed into a collision with the intake rows already on the chain; FS-07 FS07-032 carries the correction and its ground.)" },
     "type": {
       "enum": [
         "pool-in", "topup-multiplier-in", "topup-donation-in", "donation-entitlement-note",
