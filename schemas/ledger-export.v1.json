@@ -93,7 +93,7 @@
     },
     "headHash": { "$ref": "#/$defs/sha256", "description": "Global chain head after this month's last row." },
     "prevHeadHash": { "$ref": "#/$defs/sha256OrGenesis", "description": "Global chain head before this month's first row. Genesis is 64 zeros." },
-    "monthDigest": { "$ref": "#/$defs/sha256", "description": "Digest over this month's rows, mirrored in the chain document and in the month-lock row." },
+    "monthDigest": { "$ref": "#/$defs/sha256", "description": "Digest over this month's rows, mirrored in the chain document and in the month-lock row. THE PREIMAGE, stated exactly because two implementations read this sentence differently and disagreed on every locked month (2026-09-22): SHA-256 of the RFC 8785 canonical JSON of the ARRAY of this month's rows in ascending `seq`, each row AS PUBLISHED HERE — complete, chain members included, with the export-only `date` member — and WITHOUT the `month-lock` row, which carries this value and therefore cannot be inside it." },
     "methodologyUrl": { "type": "string", "format": "uri", "description": "The published methodology: the annual cap on direct costs charged to fees; the lock-before-sweep rule (ops decisions D33 item 4 and D43 item 4 — every payout's allocation is locked no later than the twentieth day after its credit and its transfers follow no later than the thirtieth day after its credit; a joint month lock must meet the deadlines of the month's earliest payout); the reserve retention (the steward hardship pay, the second capped line of D34, was struck 2026-09-14); the append-only doctrine, and annotation-never-restatement (VS-37)." }
   },
   "$defs": {
