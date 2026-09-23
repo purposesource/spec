@@ -1408,6 +1408,13 @@ reasoning: no month export has ever been published with a row in it.
   voluntary multipliers were withdrawn before any sale. No enum value is removed, and the CSV
   twin's header is unchanged.
 
+### 1.6.2 — unreleased (2026-09-23; ops decision D57 item 6)
+
+- Wording only. Four descriptions said the operator's override of 2026-09-14 was "adopted in the statutes
+  of 16 September 2026". The founding assembly was moved to 1 October 2026 and has not been held, so
+  they now say the override is "written into the statutes set for adoption at the founding assembly of
+  1 October 2026". No property, type, enum or meaning changes.
+
 ## ledger-chain.v1.json
 
 ### 1.0.0 — unreleased
@@ -1542,6 +1549,13 @@ reasoning: no month export has ever been published with a row in it.
   credit. The example's reserve note follows. Descriptions follow ops decisions D43 items 1 and 4
   (annexes out of the statutes; one clock per payout); no member, type, vector or answer changes
   by this wording.
+
+### 1.1.1 — unreleased (2026-09-23; ops decision D57 item 6)
+
+- Wording only. Five descriptions said the operator's override of 2026-09-14 was "adopted in the statutes
+  of 16 September 2026". The founding assembly was moved to 1 October 2026 and has not been held, so
+  they now say the override is "written into the statutes set for adoption at the founding assembly of
+  1 October 2026". No property, type, enum or meaning changes.
 
 ## recipient-list.v1.json
 
