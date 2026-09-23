@@ -1955,8 +1955,13 @@ components:
           properties:
             keyedBy:
               type: string
-              example: ip
-              description: What a counter counts against — the client address, taken from the header the platform writes on every request and a caller cannot forge.
+              example: "ip: IPv4 address, IPv6 /64 prefix"
+              description: >-
+                What a counter counts against — the client address, taken from the header the platform
+                writes on every request and a caller cannot forge. An IPv4 address (and an IPv4-mapped
+                IPv6 address) counts whole; an IPv6 address counts by its /64 prefix, because one
+                ordinary IPv6 network holds 2^64 addresses and a per-address counter would bound
+                nothing (2026-09-23). The value is free-form and starts with `ip`.
             enforced:
               type: boolean
               description: Whether the limiter is switched on here. `false` means the figures below are published and not applied.
