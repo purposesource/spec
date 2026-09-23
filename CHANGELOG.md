@@ -1222,6 +1222,16 @@ row the new-file rule binds absolutely.
   multipliers were withdrawn before any sale, so no ledger writes it. The value stays in the
   enum, because a published enum value is never removed.
 
+### 1.5.2 — unreleased (2026-09-23; ops REVIEW-2026-09-23 slice 2b, MC-5)
+
+- Wording only. `month` is the BOOKING month: for an intake row the Europe/Zurich settlement month
+  while that month is open, and — when it had already locked when the row was written — the first month
+  after the lock frontier (statutes Art. 6a(4); FS07-042); the settlement instant stays in `createdAt`.
+  `holdStatus` reads "while the row's `month` has not locked". `note` also carries the fixed
+  booked-forward sentence of such a row, and "Annotation is the ONLY mechanism" now reads "for
+  after-the-fact context about a LOCKED month". No property, type, enum or meaning of an existing row
+  changes.
+
 ## ledger-export.v1.json
 
 ### 1.0.0 — unreleased
@@ -1414,6 +1424,27 @@ reasoning: no month export has ever been published with a row in it.
   of 16 September 2026". The founding assembly was moved to 1 October 2026 and has not been held, so
   they now say the override is "written into the statutes set for adoption at the founding assembly of
   1 October 2026". No property, type, enum or meaning changes.
+
+### 1.7.0 — unreleased (2026-09-23; ops REVIEW-2026-09-23 slice 2b, MC-5 and MC-6)
+
+- Additive: a top-level `batch` object — `batchId`, `inputsDigest`, `recipientListVersion`,
+  `costSupportSha256`, all required when the object is present — naming the allocation batch that
+  wrote a locked month, the commitment to its frozen input, the Recipient List it paid against and the
+  digest of the cost-support document the lock read (FS07-010, FS07-012; statutes Art. 6e(2)). Absent on
+  a month no allocation locked. `inputsDigest` is described as a commitment an auditor holding the
+  frozen input can recompute, not the public. `monthDigest` stays the one place the output digest is
+  published.
+- Wording: `policy` is "absent on a month no allocation locked" (it said "ABSENT at P-M2") and names
+  the five members a producer writes; the struck hardship members and `commonsBps` stay in the contract
+  and are never written. `shadow` is written only when the batch ran under `shadow` and tier 1 produced
+  a row, aggregated per (repo, fund, voteSource) without `contributorRef`; `contributorRef` is, in a
+  locked export, never a login.
+- Wording, mirroring `ledger-row.v1` 1.5.2: the export row's `month` is the booking month (a row
+  settled in an already-locked month books into the first month after the lock frontier, statutes Art.
+  6a(4), FS07-042, with the settlement instant in `createdAt`); `holdStatus` reads "while the row's
+  `month` has not locked"; `note` gains its description, covering the booked-forward sentence.
+- `x-psn.phase` names the P-M3 blocks. No existing member, type, enum or meaning changes; every
+  document valid under 1.6.2 is valid under 1.7.0.
 
 ## ledger-chain.v1.json
 

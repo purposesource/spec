@@ -4,8 +4,8 @@
   "title": "Monthly ledger export — /ledger/{YYYY}-{MM}.json",
   "description": "The published monthly ledger export (FS-07 §6.2). Immutable once written: regeneration may only re-emit byte-identical content for a locked month, and a divergence is an alert, not a fix (FS07-051). The `.csv` twin carries the same rows flat; the human ledger page generates from the same rows, and any divergence between page, JSON and CSV is a defect (VS-37, ENG-043/044).\n\nThe shadow section, when present, carries its label IN BAND so no downstream consumer can strip it accidentally: contributor votes are computed and NOT used for routing until the fairness-review gate opens (D27, FS07-052).\n\nDisplay law: pages generate exclusively from these rows; per-contributor money respects the published materiality floor; unclaimed shares appear in aggregate only; there are no leaderboards (FS07-052, D15).\n\nAt P-M2 there are no allocation rows and no `policy`/`totals` allocation figures — the export carries intake rows only, and before the first money moves the ledger page says 'no money has moved yet' in words rather than rendering a zero (FS07-100, VS-37).",
   "x-psn": {
-    "specVersion": "1.6.2",
-    "phase": "P-M2 (intake rows only)",
+    "specVersion": "1.7.0",
+    "phase": "P-M2 (intake rows only); P-M3 locked months carry policy, batch and shadow (1.7.0)",
     "artifactPath": "/ledger/{YYYY}-{MM}.json (+ .csv twin)",
     "authoritative": true,
     "producer": "index-build (P-M2: index-build-lite CI, VS-04) from the committed monthly table",
@@ -28,7 +28,7 @@
     "policy": {
       "type": "object",
       "additionalProperties": false,
-      "description": "The allocation policy in force for the month. ABSENT at P-M2 — no allocation runs before P-M3, so publishing a policy block would describe machinery that has not acted.",
+      "description": "The allocation policy in force for the month: the board's adoption with the newest `effective_month` at or before it. Absent on a month no allocation locked (every P-M2 month, every open month) — publishing a policy block would describe machinery that has not acted. From 1.7.0 a producer writes exactly `capBps`, `reserveRetentionBpsMax`, `reserveTargetMinor`, `routingMode` and `algoVersion`; the struck hardship members and `commonsBps` (retired by ops decisions D40 item 1 and D42 item 2) are never written again and stay here only so earlier documents keep validating.",
       "properties": {
         "capBps": { "type": "integer", "minimum": 0, "maximum": 10000, "description": "The ANNUAL cap on charged-to-fees, in basis points of the financial year's Purpose Fees net of the rail's processing fee (GOV-001; ENG-077 as amended). There is no percentage levy: a `charged-to-fees` row is one itemised direct invoice nobody supported — including the transfer charges on the outbound transfers to the listed recipients (ops decision D33 item 5) — and the cap is tested on the year's total, never on a month (ops decision D29 §2, D31 item 6)." },
         "reserveRetentionBpsMax": { "type": "integer", "minimum": 0, "maximum": 10000, "description": "Ops decision D34 item 4, as D43 item 4 amends it: the operations reserve retains at most this share of the Purpose Fees of each payout, in basis points, until the reserve holds its published target; above target nothing is retained. A figure in the statutes' own text (Art. 6g(2)); it can only fall." },
@@ -42,6 +42,18 @@
           "description": "The canonical routing-mode enum in force for the month (ops decision D27 as amended at the fifth collision; URS MIL-014(e) — FS-07 and FS-04 use exactly these three names). Semantics in full on the published `ledger-row.v1` field of the same name; while the mode is `project_default` or `shadow`, no money row of type `category-route` cites a contributor vote, and `contributor_active` requires the recorded D27 fairness review. *(Corrected 2026-09-07, pre-release: this field carried `shadow | live`; superseded, kept as history.)*"
         },
         "algoVersion": { "type": "string", "maxLength": 32 }
+      }
+    },
+    "batch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["batchId", "inputsDigest", "recipientListVersion", "costSupportSha256"],
+      "description": "The allocation batch that wrote this month (FS07-010, FS07-012; statutes Art. 6e(2)). Absent on a month no allocation locked. `monthDigest` is also the batch's output digest (FS07-094), so that number is published once, below.",
+      "properties": {
+        "batchId": { "type": "string", "maxLength": 64, "description": "The batch id every allocator row of the month carries as `batchId`." },
+        "inputsDigest": { "$ref": "#/$defs/sha256", "description": "SHA-256 of the RFC 8785 serialization of the frozen input the month was computed from (FS07-011). A COMMITMENT: an auditor given the frozen input can recompute it and compare; a member of the public, who does not hold that input, cannot, and this contract does not claim otherwise." },
+        "recipientListVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$", "description": "The adopted Recipient List version the month's disbursements were computed against (`recipient-list.v1`)." },
+        "costSupportSha256": { "$ref": "#/$defs/sha256", "description": "SHA-256 of the exact bytes of the month's `cost-support.v1` document that the lock read. Where that document is published beside the export, it is those bytes (FS07-051)." }
       }
     },
     "totals": {
@@ -67,7 +79,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["label", "rows"],
-      "description": "Shadow-mode routing data (D27). P-M3+.",
+      "description": "Shadow-mode routing data (D27). P-M3+. Written only when the month's batch ran under `shadow` AND tier 1 produced at least one row; absent means tier 1 produced nothing (today: no participation snapshots exist). Rows are AGGREGATED per (repo, fund, voteSource) and carry no `contributorRef` until the per-contributor floor (D15, OPEN-25) is ruled.",
       "properties": {
         "label": {
           "type": "string",
@@ -82,7 +94,7 @@
             "required": ["repo", "fund", "amountMinor"],
             "properties": {
               "repo": { "$ref": "#/$defs/githubNodeId" },
-              "contributorRef": { "type": "string", "maxLength": 100, "description": "Login at emission; replaced with an irreversible node_id hash on account deletion (FS07-043). Money rows never reference persons (ENG-083)." },
+              "contributorRef": { "type": "string", "maxLength": 100, "description": "In a LOCKED export never a login, only ever the irreversible node_id hash: the file is immutable, and a login inside it could never be pseudonymised on account deletion (FS07-043). Not written while the per-contributor floor is open (OPEN-25). Money rows never reference persons (ENG-083)." },
               "fund": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" },
               "amountMinor": { "type": "integer" },
               "voteSource": { "enum": ["contributor", "steward-default", "project-default"] }
@@ -103,7 +115,7 @@
       "required": ["ledId", "seq", "type", "amountMinor", "rowHash"],
       "properties": {
         "ledId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
-        "month": { "$ref": "#/$defs/monthKey", "description": "Settlement month for intake rows, allocation month for allocation rows. `(month, seq)` is unique." },
+        "month": { "$ref": "#/$defs/monthKey", "description": "The BOOKING month. For an allocation row, the month allocated. For an intake row, the Europe/Zurich month of its settlement while that month is open; when that month had already locked at the time the row was written, the first month after the lock frontier (statutes Art. 6a(4); FS07-042), and the settlement instant stays in `createdAt`. `(month, seq)` is unique." },
         "seq": { "type": "integer", "minimum": 1 },
         "type": {
           "enum": [
@@ -129,7 +141,7 @@
         "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "lane": { "enum": ["pass", "project", "portfolio", "donation"] },
-        "holdStatus": { "enum": ["open-M+1", "released", "not-applicable"], "description": "Allocation state of an intake row (COM-023, ENG-025 as amended by ops decisions D31 and D33): `open-M+1` while the row's settlement month has not locked, `released` once it has. A state of the allocation data only, never of money: under the lock-before-sweep rule (D33 item 4) the allocation is computed at the lock, no later than twenty days after the credit of the month's earliest rail payout, and each listed recipient's share is transferred directly no later than thirty days after that credit (D43 item 4: every payout has its own deadlines). The token keeps its D31 name for contract stability. `not-applicable` is the third state, added 2026-09-08: a zero-amount narrative row (`annotation`, `month-note`, `month-lock`) carries no allocable money, so neither other value says anything true about it." },
+        "holdStatus": { "enum": ["open-M+1", "released", "not-applicable"], "description": "Allocation state of an intake row (COM-023, ENG-025 as amended by ops decisions D31 and D33): `open-M+1` while the row's `month` has not locked, `released` once it has. A state of the allocation data only, never of money: under the lock-before-sweep rule (D33 item 4) the allocation is computed at the lock, no later than twenty days after the credit of the month's earliest rail payout, and each listed recipient's share is transferred directly no later than thirty days after that credit (D43 item 4: every payout has its own deadlines). The token keeps its D31 name for contract stability. `not-applicable` is the third state, added 2026-09-08: a zero-amount narrative row (`annotation`, `month-note`, `month-lock`) carries no allocable money, so neither other value says anything true about it." },
         "payerName": { "type": "string", "maxLength": 200, "description": "The literal `unnamed` on every row written from 2026-09-15 (ops decision D44 item 5(a)); a listed payer's name is joined from `covered-organisations.v1` at render time and never written into a row. A row written earlier may carry an opted-in name." },
         "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$" },
         "ppSnapshotId": { "type": "string", "maxLength": 64 },
@@ -144,7 +156,7 @@
           "enum": ["project_default", "shadow", "contributor_active"],
           "description": "The canonical routing-mode enum in force when the row was written (ops decision D27 as amended at the fifth collision; URS MIL-014(e), GOV-038, ENG-032 — FS-07 and FS-04 use exactly these three names). Semantics in full on the published `ledger-row.v1` field of the same name: `project_default` does not compute the contributor tier, `shadow` computes it without applying it, and `contributor_active` engages only once both D27 activation conditions hold."
         },
-        "note": { "type": "string", "maxLength": 1000 },
+        "note": { "type": "string", "maxLength": 1000, "description": "Narrative text for `month-note` and `annotation` rows, and the fixed booked-forward sentence on an intake row whose settlement month had already locked when it was written (statutes Art. 6a(4); FS07-042). Annotation is the ONLY mechanism for after-the-fact context about a LOCKED month; the booked-forward note is not context about one, it states why a row carries the month it does." },
         "emittingJob": { "type": "string", "maxLength": 64, "description": "Which component wrote the row — e.g. `tools/record-purchases` at v0. Every row states its own provenance.", "examples": ["tools/record-purchases", "jobs.allocator"] },
         "createdAt": { "type": "string", "format": "date-time" },
         "monthDigest": { "$ref": "#/$defs/sha256" },
