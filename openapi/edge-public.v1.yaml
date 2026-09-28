@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.0.3
+  version: 1.1.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -41,7 +41,9 @@ info:
     - `P-M2` — live in the first public version.
     - `P-M3` — the computed coverage endpoint. At P-M2 the coverage proof is the
       published entitlement JWS plus the human verify page; the endpoint activates later
-      with no schema change.
+      with no schema change. The two allocation-key routes are P-M3 as well: their
+      producer is the platform's index build, and until its first run writes the index
+      both answer `404`.
     - `P-M4` — the change feed and the sandbox tenant, both demand-gated.
 
     ## Machine-readable schemas
@@ -86,6 +88,8 @@ tags:
     description: Signed organisation entitlement records.
   - name: ledger
     description: The append-only allocation ledger and its hash chain.
+  - name: allocation-keys
+    description: The board's allocation key for each month, published before the month, and the index of what became of each.
   - name: badges
     description: README badge endpoints in the shields.io endpoint format.
   - name: counters
@@ -1275,6 +1279,168 @@ paths:
                         locked: false
                         lockedAt: null
                         exportUrl: https://api.purposesource.org/v1/ledger/2027-06.json
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/allocation-keys/index.json:
+    get:
+      operationId: getAllocationKeyIndex
+      summary: Every released allocation key, and what became of it
+      description: |
+        The board's allocation keys, newest month first, one entry per released month.
+        Each entry states the key's `status` and, once a steward has recorded the key's
+        publication, the Europe/Zurich date it was published on and the publish batch
+        that proves it. There is deliberately no `adopted` status: the board's decision is
+        its minuted resolution (`decisionRef`), and what the platform can prove afterwards
+        is a publication and its date.
+
+        Regenerated whenever a release or a record act changes it. An entry never leaves
+        the index: a key published too late, or a release that was voided, keeps its line
+        with that status. Before the first release it is published with `keys` empty, so
+        an empty list says no key has been released, where a `404` says the index has not
+        been built.
+
+        Check each entry against the key document at its `url`, and its `publishBatchId`
+        against `/meta/publish-log.json`; the schema says which members to compare.
+      tags: [allocation-keys]
+      x-psn-phase: P-M3
+      responses:
+        '200':
+          description: The index. Cached 300 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/allocation-keys.v1.json'
+              examples:
+                beforeFirstRelease:
+                  summary: Published, before any key has been released
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2026-12-01T05:00:00Z'
+                    source: fixture
+                    keys: []
+                threeKeys:
+                  summary: Two keys recorded before their months, the newest released and not yet recorded (development plane)
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-02-16T09:12:44Z'
+                    source: fixture
+                    keys:
+                      - effectiveMonth: 2027-03
+                        url: https://dev-api.purposesource.org/v1/allocation-keys/2027-03.json
+                        bodySha256: 1809b7a85d62ab2908586e6a997fa4151b557b5cc390e953650e51de8c0e3dc7
+                        decisionRef: SAMPLE-MINUTE-2027-02-11-ALLOCATION-KEY-2027-03
+                        releasedAt: '2027-02-16T09:12:44Z'
+                        status: released
+                      - effectiveMonth: 2027-02
+                        url: https://dev-api.purposesource.org/v1/allocation-keys/2027-02.json
+                        bodySha256: 0918d6b92c94f5c4c87e2f596036d515a0acc8a295feff184deed9210c1dca77
+                        decisionRef: SAMPLE-MINUTE-2027-01-14-ALLOCATION-KEY-2027-02
+                        releasedAt: '2027-01-19T14:03:10Z'
+                        status: recorded
+                        publishedOn: '2027-01-19'
+                        publishBatchId: evt_01mcq45dj8tsrv7r0rbxk4hskf
+                      - effectiveMonth: 2027-01
+                        url: https://dev-api.purposesource.org/v1/allocation-keys/2027-01.json
+                        bodySha256: e5ede3e74d7b6bdb33e414c7a2520dd1c816602b20ab318612b1fc30c89d1c3d
+                        decisionRef: SAMPLE-MINUTE-2026-12-10-ALLOCATION-KEY-2027-01
+                        releasedAt: '2026-12-14T16:20:31Z'
+                        status: recorded
+                        publishedOn: '2026-12-14'
+                        publishBatchId: evt_01m9tnq1dg1s1eds7zvq4kj09y
+                lateAndVoid:
+                  summary: A key published on its month's first day, and a voided release (development plane)
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-04-28T07:15:02Z'
+                    source: fixture
+                    keys:
+                      - effectiveMonth: 2027-05
+                        url: https://dev-api.purposesource.org/v1/allocation-keys/2027-05.json
+                        bodySha256: a9c1210bf70eb8bf017dd11b5889a319220e6a28ba868d5b96fa12449a7569af
+                        decisionRef: SAMPLE-MINUTE-2027-04-15-ALLOCATION-KEY-2027-05
+                        releasedAt: '2027-04-20T08:30:48Z'
+                        status: void
+                      - effectiveMonth: 2027-04
+                        url: https://dev-api.purposesource.org/v1/allocation-keys/2027-04.json
+                        bodySha256: a761e01c561a83faeae926e580c38dd6669d78d9359cf26b6f1e8947c175c738
+                        decisionRef: SAMPLE-MINUTE-2027-03-18-ALLOCATION-KEY-2027-04
+                        releasedAt: '2027-03-30T16:10:05Z'
+                        status: late
+                        publishedOn: '2027-04-01'
+                        publishBatchId: evt_01mjesw7a92wvrgs1rw5rtgh8b
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/allocation-keys/{month}.json:
+    get:
+      operationId: getAllocationKey
+      summary: The allocation key released for one month
+      description: |
+        How the shares that nobody designated are split across the published categories
+        for one month (statutes Art. 8(4); Calculation Rules Nr. 29), with the exact text
+        two stewards approved carried as the string `approvedBody` and its SHA-256 as
+        `bodySha256`. Recompute the hash over the string as carried — for example
+        `jq -j .approvedBody | sha256sum` — and read the key, the month and the
+        `decisionRef` back out of the approved text. The board's resolution named by
+        `decisionRef` is the decision; this document is its publication, and where the two
+        ever disagree the resolution governs and the divergence is a defect to report.
+
+        Written once per month and never rewritten, so its `generatedAt`, and with it
+        `Last-Modified`, is the release instant. It carries no publication date, because no
+        document can carry the date it was first published: the index states that date
+        once a steward has recorded it, and a released key governs nothing until then.
+
+        Cached 300 s although the document never changes, so that a `404` answered for a
+        month before its key was written is not held for longer than that once the key is
+        published.
+      tags: [allocation-keys]
+      x-psn-phase: P-M3
+      parameters:
+        - name: month
+          in: path
+          required: true
+          description: The key's effective month, `YYYY-MM`.
+          schema:
+            type: string
+            pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$'
+          example: 2027-01
+      responses:
+        '200':
+          description: The key document. Cached 300 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/allocation-key.v1.json'
+              examples:
+                januaryKey:
+                  summary: A key released for January (development plane)
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2026-12-14T16:20:31Z'
+                    source: fixture
+                    effectiveMonth: 2027-01
+                    key:
+                      cat-health: 1429
+                      cat-education: 1429
+                      cat-poverty-relief: 1429
+                      cat-humanitarian-aid: 1429
+                      cat-environment: 1428
+                      cat-animal-welfare: 1428
+                      cat-research: 1428
+                    decisionRef: SAMPLE-MINUTE-2026-12-10-ALLOCATION-KEY-2027-01
+                    proposalId: ppr_01m9j4hzhrh2d6wpcn2x1gs63c
+                    releasedAt: '2026-12-14T16:20:31Z'
+                    approvedBody: '{"actKind":"policy-adopt","algoVersion":"ALLOC-v1","capBps":1500,"categoryFunds":[{"fundId":"cat-animal-welfare","name":"Animal welfare"},{"fundId":"cat-education","name":"Education"},{"fundId":"cat-environment","name":"Environment"},{"fundId":"cat-health","name":"Health"},{"fundId":"cat-humanitarian-aid","name":"Humanitarian aid"},{"fundId":"cat-poverty-relief","name":"Poverty relief"},{"fundId":"cat-research","name":"Research"}],"decisionRef":"SAMPLE-MINUTE-2026-12-10-ALLOCATION-KEY-2027-01","effectiveMonth":"2027-01","reserveRetentionBpsMax":500,"reserveTargetMinor":2700000,"routingMode":"shadow","stewardDefaultVector":{"cat-animal-welfare":1428,"cat-education":1429,"cat-environment":1428,"cat-health":1429,"cat-humanitarian-aid":1429,"cat-poverty-relief":1429,"cat-research":1428}}'
+                    bodySha256: e5ede3e74d7b6bdb33e414c7a2520dd1c816602b20ab318612b1fc30c89d1c3d
+        '404':
+          $ref: '#/components/responses/NotFound'
         '429':
           $ref: '#/components/responses/RateLimited'
         '503':

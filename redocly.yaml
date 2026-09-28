@@ -15,12 +15,13 @@ rules:
   #   /v1/waivers/all.json           vs  /v1/waivers/{nodeId}.json
   #   /ct/latest.json                vs  /ct/{segment}.json
   #   /ct/checkpoint-latest.json     vs  /ct/{segment}.json
+  #   /v1/allocation-keys/index.json vs  /v1/allocation-keys/{month}.json
   #
   # Redocly is right that these overlap: `{shard}` could in principle be the string
   # "meta.json". In the real system it cannot, because a shard key is one alphanumeric
-  # character (the pattern on the parameter says so) and the literal object exists in
-  # the store under its own name. A static file store resolves the exact name first;
-  # there is no router precedence question to get wrong.
+  # character (the pattern on the parameter says so), a month is `YYYY-MM`, and the
+  # literal object exists in the store under its own name. A static file store resolves
+  # the exact name first; there is no router precedence question to get wrong.
   #
   # Renaming the artifacts to satisfy the linter would be the wrong direction: the
   # artifact paths are frozen contract (FS-00 §6.2) and are already published in the

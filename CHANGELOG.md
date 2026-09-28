@@ -2127,3 +2127,36 @@ which kind of change each entry was.
   1.1.1 corrects). The ledger month JSON and CSV examples carry the new `scope` member of
   `ledger-row.v1` 1.5.0 and `ledger-export.v1` 1.6.0; the CSV header gains the `scope` column
   after `repoNodeId`.
+
+### 1.1.0 — unreleased (2026-09-28; the allocation key's publication)
+
+- Additive, and a minor bump rather than a patch like the three entries above, because this is
+  new API surface: two GET operations serve the two artifacts FS-00 §6.2's dated note of
+  2026-09-28 adds to the catalog. `getAllocationKeyIndex` at `/v1/allocation-keys/index.json`
+  answers `allocation-keys.v1`, and `getAllocationKey` at `/v1/allocation-keys/{month}.json`
+  answers `allocation-key.v1`. The plane paths are `/allocation-keys/index.json` and
+  `/allocation-keys/{YYYY-MM}.json`, outside `ledger/`, which the platform's index build reads as
+  months. No existing route, status code, cache class or error code moved.
+- Both are `x-psn-phase: P-M3`, and the phase list in `info.description` says so: the producer is
+  the platform's index build, and until its first run writes the index both routes answer `404`.
+  Both carry a new tag, `allocation-keys`, because the key is neither the ledger nor its chain.
+- Both are cached 300 s, the key document included, although it is written once. The edge reads
+  the plane with the route's class as the lifetime of its own store read, and an absent document
+  is held for that lifetime like a present one. So a month asked for before its key was written
+  would keep answering `404` for as long as the class after the key was published: for a day at
+  the closed-ledger-month class. 300 s bounds that to the five minutes the description already
+  publishes as the propagation bound. The class moves to 86400 s only once a `404` cached before
+  the first write is ruled out (ops `design/money-policy/KEY-PUBLICATION-PLAN-2026-09-28.md`
+  §2.2).
+- Errors: `404` for the index before it has been built and for a month with no released key,
+  `429`, and `503`. `404` is listed on the index as well, unlike the other regenerated documents,
+  because the index is emitted only from the first index-build run after the key renderer ships.
+- The examples are the development plane's (`source: fixture`, `dev-api.purposesource.org`,
+  `SAMPLE-` references), copied member for member from `examples/allocation-key.v1.example.json`,
+  `examples/allocation-keys.v1.example.json` and `examples/allocation-keys.v1.late-and-void.example.json`,
+  whose hashes, order, dates and agreement `check:allocation-keys` holds. No production key
+  exists to show. The index adds one more, `beforeFirstRelease`, with `keys` empty. The examples
+  gate validates all four against the schemas.
+- `redocly.yaml`'s list of literal and template paths that overlap by design gains
+  `/v1/allocation-keys/index.json` and `/v1/allocation-keys/{month}.json`; `no-ambiguous-paths`
+  stays off for the reason recorded there.
