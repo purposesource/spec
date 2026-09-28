@@ -1383,10 +1383,11 @@ paths:
       operationId: getAllocationKey
       summary: The allocation key released for one month
       description: |
-        How the shares that nobody designated are split across the published categories
-        for one month (statutes Art. 8(4); Calculation Rules Nr. 29), with the exact text
-        two stewards approved carried as the string `approvedBody` and its SHA-256 as
-        `bodySha256`. Recompute the hash over the string as carried — for example
+        How the shares that nobody designated, or that were expressly left to the
+        Association, are split across the published categories for one month (statutes
+        Art. 8(4); Calculation Rules Nr. 29), with the exact text two stewards approved
+        carried as the string `approvedBody` and its SHA-256 as `bodySha256`. Recompute
+        the hash over the string as carried — for example
         `jq -j .approvedBody | sha256sum` — and read the key, the month and the
         `decisionRef` back out of the approved text. The board's resolution named by
         `decisionRef` is the decision; this document is its publication, and where the two
