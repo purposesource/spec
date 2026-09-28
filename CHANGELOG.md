@@ -1719,6 +1719,20 @@ reasoning: no month export has ever been published with a row in it.
 
 ## allocation-key.v1.json
 
+### 1.1.0 — unreleased (2026-09-29; pre-release: `decisionRef`'s grammar)
+
+- **Pre-release tightening (versioning rule 5).** `$defs.decisionRef` was any 1 to 200
+  characters that are not all white space and carry no control character. It is now
+  `^[A-Za-z0-9][A-Za-z0-9 ._/:#()-]{0,199}$`: plain ASCII, a letter or digit first. This is
+  the grammar the console's allocation-policy proposal applies (the platform's check 6, as
+  PS-1129 builds it on the defect report D-017), so the contract states exactly what the
+  proposal admits. Nothing has been published under this file (no key has been released on
+  any plane), so no document is affected. A Unicode format character (category Cf, such as a
+  zero-width space) could otherwise sit in a published key's reference and make two
+  references that look the same compare unequal. The `SAMPLE-` and production-address rules
+  are unchanged; with no backslash in the grammar, the `\/` spelling of a production address
+  can no longer occur.
+
 ### 1.0.0 — unreleased (2026-09-28; the allocation key's publication)
 
 - Initial publication. `/allocation-keys/{YYYY-MM}.json`: the key the board released for one
@@ -1780,6 +1794,20 @@ reasoning: no month export has ever been published with a row in it.
   fail before trusting it.
 
 ## allocation-keys.v1.json
+
+### 1.1.0 — unreleased (2026-09-29; pre-release: `decisionRef`'s grammar)
+
+- **Pre-release tightening (versioning rule 5).** `$defs.decisionRef` was any 1 to 200
+  characters that are not all white space and carry no control character. It is now
+  `^[A-Za-z0-9][A-Za-z0-9 ._/:#()-]{0,199}$`: plain ASCII, a letter or digit first. This is
+  the grammar the console's allocation-policy proposal applies (the platform's check 6, as
+  PS-1129 builds it on the defect report D-017), so the contract states exactly what the
+  proposal admits. Nothing has been published under this file (no key has been released on
+  any plane), so no document is affected. A Unicode format character (category Cf, such as a
+  zero-width space) could otherwise sit in a published key's reference and make two
+  references that look the same compare unequal. The `SAMPLE-` and production-address rules
+  are unchanged; with no backslash in the grammar, the `\/` spelling of a production address
+  can no longer occur.
 
 ### 1.0.0 — unreleased (2026-09-28; the allocation key's publication)
 
