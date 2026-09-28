@@ -4,7 +4,7 @@
   "title": "Allocation-key index — /allocation-keys/index.json",
   "description": "Every allocation key the board has released, newest first, each with the one fact its own document cannot carry: what became of its publication. A key's document (`allocation-key.v1`, at `/allocation-keys/{YYYY-MM}.json`) is written once, at its release; whether its publication before the month was then recorded, and on which date, is established afterwards by a steward's record act, and this index is where that is published.\n\nONE ENTRY PER RELEASED MONTH, NEWEST FIRST. A month is released at most once, ever, so `effectiveMonth` is unique across `keys` and orders it, descending. An entry never leaves the index: a key that came too late or was voided keeps its line with that status, because a release is a published fact whatever became of it. Before the first release the document is published all the same, with `keys` empty.\n\nREGENERATED, NOT WRITTEN ONCE. Unlike the key documents it lists, this document is rendered again whenever a release or a record act changes it, and its `generatedAt` moves with them.\n\nWHAT A READER CHECKS AGAINST THE KEY DOCUMENTS, stated here because JSON Schema cannot relate two documents: each entry's `bodySha256`, `decisionRef` and `releasedAt` equal the document at `url`, and `url` names that entry's `effectiveMonth`. And against the publish log: a `publishBatchId` is a batch of `/meta/publish-log.json` whose `etags` name the key's path, and `publishedOn` is that batch's `publishedAt` as a Europe/Zurich calendar date. An entry that disagrees with its key document is a defect to report, and the key document governs it.\n\nWHAT THIS INDEX IS AUTHORITATIVE FOR. The key itself is published by its own document, and the board's resolution named by `decisionRef` governs both (`allocation-key.v1`). What only this index publishes is what became of each release — its status and its proven publication date — and for that it is the one published record.",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M3 (producer: `jobs.index-build`). Nothing is published under this contract yet: no key has been released, and production's policy switch stays off until the operator's go.",
     "artifactPath": "/allocation-keys/index.json — regenerated; served by the edge at /v1/allocation-keys/index.json",
     "authoritative": true,
@@ -84,7 +84,7 @@
         "bodySha256": { "$ref": "#/$defs/sha256", "description": "The key document's `bodySha256`: the SHA-256 of the approved text, and the `act_sha256` both approvals recorded (FS12-056)." },
         "decisionRef": {
           "$ref": "#/$defs/decisionRef",
-          "description": "The key document's `decisionRef`: the reference of the board's minuted resolution that decided the key. At most 200 characters, never empty or white space only, and no control character. A `SAMPLE-` reference (trimmed, any case) is admitted only on the development environment, and a reference naming a production address (`$defs.productionAddress`) only on production, so a `sample` or `fixture` document never carries one."
+          "description": "The key document's `decisionRef`: the reference of the board's minuted resolution that decided the key. At most 200 characters of plain ASCII: a letter or digit first, then letters, digits, spaces and `. _ / : # ( ) -` (the pattern `^[A-Za-z0-9][A-Za-z0-9 ._/:#()-]{0,199}$`), so no control or format character, and no leading space, can reach a published key. A `SAMPLE-` reference (trimmed, any case) is admitted only on the development environment, and a reference naming a production address (`$defs.productionAddress`) only on production, so a `sample` or `fixture` document never carries one."
         },
         "releasedAt": { "type": "string", "format": "date-time", "description": "The key document's `releasedAt`: when the second approval released the key." },
         "status": {
@@ -112,10 +112,7 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 200,
-      "allOf": [
-        { "pattern": "\\S" },
-        { "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]*$" }
-      ]
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._/:#()-]{0,199}$"
     },
     "sampleReference": {
       "type": "string",
