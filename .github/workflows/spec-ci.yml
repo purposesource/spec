@@ -63,6 +63,14 @@ jobs:
         # then faithfully matches bytes against a published copy that is already wrong.
         run: npm run check:menu
 
+      - name: Every example allocation key hashes to the text two stewards approved
+        # After the menu step, because a key's approved text carries the menu it was checked
+        # against. The schema can say that `approvedBody` and `bodySha256` exist; only this
+        # step can say that one is the SHA-256 of the other, that the text is its own RFC 8785
+        # form, that the key beside it is the key inside it, and that the index examples agree
+        # with the key example. Each rule is proved able to fail first.
+        run: npm run check:allocation-keys
+
       - name: Coverage vectors use valid published artifacts
         # The vector suite proves the function computes the right answer; this proves it
         # does so over inputs that are shaped like real artifacts, and that all eight

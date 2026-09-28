@@ -17,7 +17,7 @@ a procurement reviewer can consume all of it the way they consume a static file.
 
 | Directory | Contents |
 |---|---|
-| `schemas/` | 27 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
+| `schemas/` | 29 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v1.ts`, the published coverage function, with `vectors.json` (frozen test vectors) and its test suite. Zero dependencies. |
 | `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in three cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json` and `claim-kit.v2.example.json`, the example IS the published document, byte for byte. |
@@ -35,7 +35,8 @@ npm test
 That runs, in order: schemas compile and are addressed correctly; every example validates
 against its schema; every claim-language kit validates, is addressed at the permalink its
 own name implies and carries no figure; the category menu is a single list whose every copy
-is identical; the coverage vectors use valid artifacts and still cover all eight answers;
+is identical; every example allocation key hashes to the approved text it carries and the key
+index agrees with it; the coverage vectors use valid artifacts and still cover all eight answers;
 the coverage module is dependency-free and clock-free (and its SHA-256 is printed); the copy
 law holds; the published module typechecks under `erasableSyntaxOnly`; the frozen vector
 suite passes; the OpenAPI lints; and every example inside the API description validates too.
@@ -47,6 +48,7 @@ npm run check:schemas           # compile, $id, self-containment, provenance, ch
 npm run check:examples          # one example per schema, each valid
 npm run check:kits              # every claim-language kit: valid, correctly addressed, no figure
 npm run check:menu              # the category menu is one list; every copy of it is identical
+npm run check:allocation-keys   # example keys hash to their approved text; the key index agrees
 npm run check:vectors           # vector inputs are valid artifacts; all eight answers covered
 npm run check:module            # coverage module: no imports, no clock, no I/O; prints its digest
 npm run check:copy              # claim rules and leak guards over published copy
@@ -92,6 +94,8 @@ needs a toolchain is not really published.
 | `ledger-chain.v1.json` | `/ledger/chain.json` | first public version |
 | `cost-support.v1.json` | one calendar month of the published cost-support table | P-M3 producer, v0 hand-maintained |
 | `recipient-list.v1.json` | one published version of the Recipient List (kept by the board, outside the statutes) | P-M3 producer, v0 hand-maintained |
+| `allocation-key.v1.json` | `/allocation-keys/{YYYY-MM}.json` — the board's allocation key for one month, released by two steward approvals before the month and written once, with the exact text they approved | P-M3 producer |
+| `allocation-keys.v1.json` | `/allocation-keys/index.json` — every released key, newest first, with its state (released, recorded, late or void) and its proven publication date | P-M3 producer |
 | `sponsorship-schedule.v1.json` | `/sponsors/schedule/{version}.json` — the published sponsorship tiers and terms, versioned, never edited once a sponsor has paid under a version (ops decision D44) | P-M2, `draft` until the board adopts it |
 | `sponsorship.v1.json` | `/sponsors.json` — the sponsor register: every settled sponsorship by name, tier, period, amount and use (ops decision D44) | P-M3 producer, v0 hand-maintained |
 | `badge.v1.json` | `/badge/{node_id}.json` (shields.io endpoint) | first public version |
@@ -115,6 +119,13 @@ pattern. Sponsorship is invoiced and paid by bank transfer, never through the ch
 schedule is a versioned document the website serves, `draft` until the board adopts it, and the
 register is hand-maintained at v0 from the general-account statement and the invoices. Every
 sponsor is named: undisclosed support is prohibited by the statutes.
+
+The `allocation-key.v1` and `allocation-keys.v1` rows (2026-09-28) publish the board's allocation
+key before the month it governs (statutes Art. 8(4)). The key document carries the exact
+canonical text two stewards approved, as a string, and its SHA-256 — the hash both approvals
+recorded — so anyone can recompute that hash from the published text with one SHA-256 and read
+the key back out of the same text. It is written once, at the release; the date it was published is proven afterwards from the publish log and
+stated in the index, which is also where a key that came too late, or was voided, keeps its line.
 
 ## The coverage function
 

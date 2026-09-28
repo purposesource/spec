@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-02-16T09:12:44Z",
+  "source": "fixture",
+  "keys": [
+    {
+      "effectiveMonth": "2027-03",
+      "url": "https://dev-api.purposesource.org/v1/allocation-keys/2027-03.json",
+      "bodySha256": "1809b7a85d62ab2908586e6a997fa4151b557b5cc390e953650e51de8c0e3dc7",
+      "decisionRef": "SAMPLE-MINUTE-2027-02-11-ALLOCATION-KEY-2027-03",
+      "releasedAt": "2027-02-16T09:12:44Z",
+      "status": "released"
+    },
+    {
+      "effectiveMonth": "2027-02",
+      "url": "https://dev-api.purposesource.org/v1/allocation-keys/2027-02.json",
+      "bodySha256": "0918d6b92c94f5c4c87e2f596036d515a0acc8a295feff184deed9210c1dca77",
+      "decisionRef": "SAMPLE-MINUTE-2027-01-14-ALLOCATION-KEY-2027-02",
+      "releasedAt": "2027-01-19T14:03:10Z",
+      "status": "recorded",
+      "publishedOn": "2027-01-19",
+      "publishBatchId": "evt_01mcq45dj8tsrv7r0rbxk4hskf"
+    },
+    {
+      "effectiveMonth": "2027-01",
+      "url": "https://dev-api.purposesource.org/v1/allocation-keys/2027-01.json",
+      "bodySha256": "e5ede3e74d7b6bdb33e414c7a2520dd1c816602b20ab318612b1fc30c89d1c3d",
+      "decisionRef": "SAMPLE-MINUTE-2026-12-10-ALLOCATION-KEY-2027-01",
+      "releasedAt": "2026-12-14T16:20:31Z",
+      "status": "recorded",
+      "publishedOn": "2026-12-14",
+      "publishBatchId": "evt_01m9tnq1dg1s1eds7zvq4kj09y"
+    }
+  ]
+}

@@ -53,6 +53,11 @@ organisations holding an Entitlement term, named only where they asked to be; an
 `sponsorship-schedule.v1.json` and `sponsorship.v1.json`, the published sponsorship schedule and
 the sponsor register — twenty-seven schemas in all.
 
+The allocation key's publication (2026-09-28) adds two more, each with its own section below:
+`allocation-key.v1.json`, the key the board released for one month, written once, carrying the
+exact text two stewards approved and that text's SHA-256; and `allocation-keys.v1.json`, the index
+of every released key with what became of its publication — twenty-nine schemas in all.
+
 ### Contracts published beyond the initially-scoped ten
 
 Seven schemas were added because another repository's acceptance test names a schema
@@ -1711,6 +1716,78 @@ reasoning: no month export has ever been published with a row in it.
   first (statutes Art. 8(1), (2) and (4)); the key is published before the month it applies to.
   No constraint moved: the `status` enum keeps both values, so a document carrying `proposed`
   still validates.
+
+## allocation-key.v1.json
+
+### 1.0.0 — unreleased (2026-09-28; the allocation key's publication)
+
+- Initial publication. `/allocation-keys/{YYYY-MM}.json`: the key the board released for one
+  effective month, which splits the shares nobody designated, or that were left to the
+  Association, across the published categories (statutes Art. 8(4); Calculation Rules Nr. 29).
+  It closes the one gap in that rule: nothing published the key before its month, and the month's
+  allocation policy can carry a key only with the date it was published, a date that has to exist
+  before the policy is written.
+- PUBLISH FIRST, RECORD SECOND, and the shape follows from it. The second of two steward
+  approvals releases the key; `jobs.index-build` publishes this document within minutes; a
+  steward's record act then proves the publication from the public data plane and writes the key
+  into the month's policy with the proven date. So the document carries every fact of the release
+  (`effectiveMonth`, `key`, `decisionRef`, `proposalId`, `releasedAt`, `approvedBody`,
+  `bodySha256`) and none of the publication, whose date is published in `allocation-keys.v1`.
+- WRITTEN ONCE. A month is released at most once, ever, and `generatedAt` equals `releasedAt`
+  rather than the plane's instant, so every later render produces the same bytes; one that does
+  not leaves the stored bytes where they are.
+- `approvedBody` IS A STRING: the proposal's stored RFC 8785 text, byte for byte, as the two
+  stewards approved it. `bodySha256` is the SHA-256 of its UTF-8 bytes, which is the proposal's
+  `body_sha256` and the `act_sha256` both approvals recorded (FS12-056), so a reader recomputes it
+  with one hash over the value as any JSON parser returns it, and reads the key back out of the
+  parsed text. A nested object would have needed a canonicaliser on the reader's side agreeing
+  byte for byte with the writer's. The member's pattern pins the text to a `policy-adopt` body in
+  canonical form — it begins `{"actKind":"policy-adopt",`, because no member of the body sorts
+  before `actKind` — and loosening that later is a widening.
+- `key` is per category only: the `cat-*` ids of the menu (a copy of `category-menu.v1`'s
+  `$defs.categoryId`, which `check:menu` holds equal), integer weights from 1 to 10000 summing to
+  exactly 10000, and a category with no share left out rather than written as zero. The shares per
+  active listed recipient that Nr. 29 also allows are not carried at this version.
+- `decisionRef` follows the proposal's own refusals: 1 to 200 characters, not white space only,
+  no control character. A `SAMPLE-` reference (trimmed, in any case) is refused on a `platform`
+  document, because a sample reference is admitted only on the development environment, which
+  labels its plane `fixture`.
+- `source` is REQUIRED and admits `sample`, `fixture` and `platform`: the artifact has one
+  producer, which always knows its plane, and the curated registry never carries a key, so
+  `registry-v0` is left out — a value can be added later, never taken back.
+- The example is a development-plane (`fixture`) key for 2027-01, equal over the seven
+  categories, with a sample decision reference. Its hash recomputes, and a new gate,
+  `check:allocation-keys`, holds every key example to the hash, the canonical form, the key and
+  figures inside the text, the sum, the envelope and the menu, and proves each of those rules can
+  fail before trusting it.
+
+## allocation-keys.v1.json
+
+### 1.0.0 — unreleased (2026-09-28; the allocation key's publication)
+
+- Initial publication. `/allocation-keys/index.json`: every released key, newest
+  `effectiveMonth` first, one entry per month, each with `url`, `bodySha256`, `decisionRef`,
+  `releasedAt` and `status`, and — once the record act has proven it — `publishedOn` and
+  `publishBatchId`.
+- FOUR STATUSES, AND NONE OF THEM IS `adopted`. `released`: the second approval released the key
+  and no publication is recorded yet. `recorded`: the record act found the earliest publish-log
+  batch naming the key's path at its bytes' ETag, that batch's Europe/Zurich date fell before the
+  month, and the month's policy carries the key with that date. `late`: the same proof, on or after
+  the month's first day, and the key governs no month. `void`: a release that can never be
+  recorded, closed by the owner's procedure. The board's decision is its minuted resolution; what
+  the platform proves afterwards is a publication and its date, so that is what the statuses name.
+- THE DATE IS PROVEN, NEVER ASSERTED. `publishedOn` is absent on `released` even when the bytes
+  are already on the plane, because the build that writes them does not date its own publication:
+  the record act does, from the batch's `publishedAt`, which is stamped after the write and so never
+  dates a publication early. `publishedOn` and `publishBatchId` travel together, are required on
+  `recorded` and `late`, and are optional on `void`.
+- Regenerated, not written once. An entry never leaves the index, and before the first release
+  the document is published with `keys` empty.
+- `source` and `decisionRef` are typed as on `allocation-key.v1`, and a `platform` index carries no
+  sample decision reference.
+- Two examples: the main one, a development plane with one key released and two recorded, and
+  `late-and-void`, the other two statuses. `check:allocation-keys` holds both to their order and
+  dates and to agreement with the key example.
 
 ## sponsorship-schedule.v1.json
 

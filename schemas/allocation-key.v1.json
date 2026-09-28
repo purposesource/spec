@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/allocation-key.v1.json",
+  "title": "Allocation key — /allocation-keys/{YYYY-MM}.json",
+  "description": "The allocation key the board released for one month: how the shares that nobody designated, or that were expressly left to the Association, are split across the published categories (statutes Art. 8(4), the Zuteilungsschlüssel; Calculation Rules Nr. 29). The board decides the key in a minuted resolution, named by `decisionRef`, before the month begins. Two stewards then approve the exact bytes of the proposal that carries it, and the second approval RELEASES the key. The approvals check those bytes and cast no vote: the decision is the board's resolution, taken without any member who must step aside (statutes Art. 18(5)).\n\nONE DOCUMENT PER EFFECTIVE MONTH, WRITTEN ONCE. `jobs.index-build` publishes this document within minutes of the release and never rewrites it: a month is released at most once, ever, and a later render that differs leaves the stored bytes where they are (FS-00 §6.2, the dated note of 2026-09-28). Every member is a fact of the release, so the document is complete the moment it exists.\n\nTHE PUBLICATION DATE IS NOT IN THIS DOCUMENT, because no document can carry the date it was first published. It is the Europe/Zurich calendar date of the `publishedAt` of the earliest `/meta/publish-log.json` batch whose `etags` name this path at these bytes' ETag. A steward's record act reads this document and the publish log from the public data plane, checks them against the release, and writes that date as the key's publication date; `/allocation-keys/index.json` (`allocation-keys.v1`) then states it beside the key's status. That date is the one the month's close names (Calculation Rules Nr. 30). What counts as \"published\" under Art. 8(4) is open with counsel; the default is this document at its edge URL, with the index, dated by the publish log.\n\nWHAT A READER CHECKS, stated here because JSON Schema cannot relate two members: (1) `bodySha256` is the lowercase hex SHA-256 of the UTF-8 bytes of `approvedBody` exactly as carried — nothing is re-serialised; (2) `approvedBody`, parsed, has `actKind` `policy-adopt`, and its `effectiveMonth`, `decisionRef` and `stewardDefaultVector` equal this document's `effectiveMonth`, `decisionRef` and `key`; (3) the weights of `key` sum to exactly 10000; (4) `generatedAt` equals `releasedAt`. And one fact a reader takes on the record rather than checks: `bodySha256` is the `act_sha256` both approvals recorded (FS12-056), so the key published here is the text two stewards approved, byte for byte. The approval record names the stewards' accounts and is not published, so a member of the public can check that the bytes are the ones hashed, not that two approvals exist, and this contract does not claim otherwise.\n\nA RELEASED KEY IS NOT YET IN FORCE. It enters a month's allocation policy only when its publication before the month has been recorded; the index says whether that happened. A recorded key governs its month and each later month until a later key is recorded.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (producer: `jobs.index-build`). Nothing is published under this contract yet: no key has been released, and production's policy switch stays off until the operator's go.",
+    "artifactPath": "/allocation-keys/{YYYY-MM}.json — written once per effective month; served by the edge at /v1/allocation-keys/{YYYY-MM}.json",
+    "authoritative": true,
+    "producer": "`jobs.index-build` (P-M3), from the release row the second approval of a `policy-adopt` proposal writes and the proposal's stored body (migration 0058)",
+    "consumers": [
+      "the public transparency page, which links each month's key",
+      "the steward console's record act, which reads these bytes from the public data plane and checks them against the release",
+      "`/allocation-keys/index.json` (`allocation-keys.v1`)",
+      "auditors checking the key a month's close names (Calculation Rules Nr. 30)"
+    ],
+    "fsRefs": [
+      "FS-00 §6.2 (dated note of 2026-09-28: the allocation key's publication)",
+      "FS-00 §6.1 (the `ppr_` prefix)",
+      "FS-07 §3 (FS07-026 tier 3: the board's published allocation key)",
+      "FS-12 §4.4 (FS12-056: the approval record's `act_sha256`)",
+      "statutes Art. 8(4), Art. 18(5)",
+      "Calculation Rules Nr. 29, Nr. 30"
+    ],
+    "vsRefs": ["VS-05"],
+    "changelog": "CHANGELOG.md#allocation-keyv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "source",
+    "effectiveMonth",
+    "key",
+    "decisionRef",
+    "proposalId",
+    "releasedAt",
+    "approvedBody",
+    "bodySha256"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The envelope instant (FS-00 §6.2), and for this artifact it EQUALS `releasedAt`, not the instant of the plane it was first published with. The rule that `generatedAt` is derived from the rows the build read, never from a clock, is kept: the one row behind this document is its release, and a document that is written once must render to the same bytes on every later run, so its envelope instant is the one fact about it that never moves."
+    },
+    "source": {
+      "enum": ["sample", "fixture", "platform"],
+      "description": "Which plane produced this document, in the envelope's vocabulary (FS-00 §6.2). `platform` is `jobs.index-build` in `PSN_ENV=prod`; it writes `fixture` in every other environment, and `sample` labels a sample plane. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders one is labelled sample, and a production deployment refuses to serve it (the edge route answers `sandbox_artifact_on_prod`). REQUIRED here, unlike the envelope's older homes, because this artifact has one producer and it always knows its plane. `registry-v0` is not admitted: the curated registry never carries a key, and a value can be added later but never taken back. A `platform` document never carries a sample `decisionRef` (the rule below)."
+    },
+    "effectiveMonth": {
+      "$ref": "#/$defs/monthKey",
+      "description": "The month the key first governs. The board decides it before that calendar month begins and publishes it before that month (Calculation Rules Nr. 29), and the release row's own constraint holds `releasedAt` before 22:00Z on the last day of the month before. One release per month, ever — which is what lets this path be written once."
+    },
+    "key": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 7,
+      "propertyNames": { "$ref": "#/$defs/categoryId" },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10000,
+        "description": "The category's share, in basis points."
+      },
+      "description": "The key: for each category the board gave a share, that share in integer basis points, the weights summing to EXACTLY 10000. A category with no share is LEFT OUT rather than written as zero — a zero weight is refused when the proposal is made, so one key has one spelling. The names are the `cat-*` ids of the published category menu (`category-menu.v1`), the ledger's `category_fund_id`. Per category only: Nr. 29 also allows shares per active listed recipient, which no key carries at this version, and admitting them later widens this member additively. It equals `approvedBody`'s `stewardDefaultVector`, the name the proposal and the database give the same vector — the floor of the allocator's ladder, where every amount with no effective designation lands (FS07-026 tier 3). The order of the members carries no meaning."
+    },
+    "decisionRef": {
+      "$ref": "#/$defs/decisionRef",
+      "description": "The reference of the board's minuted resolution that decided this key — the decision itself, which the approvals check and do not replace. At most 200 characters, never empty or white space only, and no control character (the proposal's own refusals). A reference beginning `SAMPLE-` (after trimming, in any case) is a sample and is admitted only on the development environment; a `platform` document never carries one. Equal to `approvedBody`'s `decisionRef`."
+    },
+    "proposalId": {
+      "type": "string",
+      "pattern": "^ppr_[0-9abcdefghjkmnpqrstvwxyz]{26}$",
+      "description": "The proposal the key came from: `ppr_` and a 26-character lowercase Crockford ULID (FS-00 §6.1). It is the subject both approvals name. It is not inside `approvedBody`: the id is minted when the proposal is stored, and the approved text is the proposal's content, not its row."
+    },
+    "releasedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the second approval released the key: the server's clock in that approval's transaction, which no writer can type. It is the instant of the RELEASE, not of the publication — the publication follows within minutes and is dated by the publish log (see the description above)."
+    },
+    "approvedBody": {
+      "type": "string",
+      "pattern": "^\\{\"actKind\":\"policy-adopt\",",
+      "description": "THE EXACT TEXT TWO STEWARDS APPROVED, carried as a STRING and never as a nested object. It is the proposal's stored body byte for byte: the RFC 8785 (JCS) canonical JSON of the proposal — members sorted, no whitespace, integers only, non-ASCII characters unescaped. Its members include `actKind` (always `policy-adopt`, and always first, because no member of the body sorts before it), `effectiveMonth`, `decisionRef`, `stewardDefaultVector` (this document's `key`), `categoryFunds` (the menu's seven `{fundId, name}`, sorted by `fundId`) and the month's other figures the approvals bind together with the key: the running-cost cap, the reserve retention and target, the routing mode and the algorithm version. It carries no person, and no publication date — nobody can approve a date that has not happened yet, so the date is proven afterwards from the publish log.\n\nWHY A STRING. A hash is over bytes. A nested object would be re-serialised by this document's writer and again by every reader's parser, and checking it would need a canonicaliser on both sides that agreed byte for byte. Carried as a string, the check is one SHA-256 over the UTF-8 bytes of the value as any JSON parser returns it — for example `jq -j .approvedBody | sha256sum` — and parsing the value once more gives the approved figures."
+    },
+    "bodySha256": {
+      "$ref": "#/$defs/sha256",
+      "description": "The lowercase hex SHA-256 of the UTF-8 bytes of `approvedBody`, exactly as carried: no normalisation, no trailing newline, no re-canonicalisation. It is the proposal's stored `body_sha256` and the `act_sha256` BOTH approvals recorded — the SHA-256 of the RFC 8785 text of the exact act approved (FS12-056) — so this value names the approved bytes, and a key whose text does not hash to it is not the key the stewards approved."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "source": { "const": "platform" } }, "required": ["source"] },
+      "then": { "properties": { "decisionRef": { "not": { "$ref": "#/$defs/sampleReference" } } } }
+    }
+  ],
+  "$defs": {
+    "monthKey": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "categoryId": {
+      "enum": [
+        "cat-animal-welfare",
+        "cat-education",
+        "cat-environment",
+        "cat-health",
+        "cat-humanitarian-aid",
+        "cat-poverty-relief",
+        "cat-research"
+      ],
+      "description": "The seven published categories in the ledger's `cat-*` spelling — a copy of `category-menu.v1.json#/$defs/categoryId`, because a published schema validates on its own download; the publishing repository's gate asserts every copy is the same seven."
+    },
+    "decisionRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "allOf": [
+        { "pattern": "\\S" },
+        { "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]*$" }
+      ]
+    },
+    "sampleReference": {
+      "type": "string",
+      "pattern": "^\\s*[Ss][Aa][Mm][Pp][Ll][Ee]-",
+      "description": "A sample decision reference, matched as the proposal matches it: trimmed and in any case."
+    }
+  }
+}
