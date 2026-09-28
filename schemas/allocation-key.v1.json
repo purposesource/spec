@@ -45,7 +45,7 @@
     "generatedAt": {
       "type": "string",
       "format": "date-time",
-      "description": "The envelope instant (FS-00 §6.2), and for this artifact it EQUALS `releasedAt`, not the instant of the plane it was first published with. The rule that `generatedAt` is derived from the rows the build read, never from a clock, is kept: the one row behind this document is its release, and a document that is written once must render to the same bytes on every later run, so its envelope instant is the one fact about it that never moves. It therefore differs from the `generatedAt` of the `/meta/publish-log.json` batch that lists this path whenever a newer row existed when the document was published, and always in a batch that heals the log; `publish-log.v1` names this exception (its 1.2.1)."
+      "description": "The envelope instant (FS-00 §6.2), and for this artifact it EQUALS `releasedAt`, not the instant of the plane it was first published with. The rule that `generatedAt` is derived from the rows the build read, never from a clock, is kept: the one row behind this document is its release, and a document that is written once must render to the same bytes on every later run, so its envelope instant is the one fact about it that never moves. It therefore differs from the `generatedAt` of the `/meta/publish-log.json` batch that lists this path whenever a newer row existed when the document was published, and always in a batch that heals the log; FS-00 §6.2's dated note of 2026-09-28 records this as an exception to `publish-log.v1`'s statement that every artifact of a batch carries the batch's `generatedAt`."
     },
     "source": {
       "enum": ["sample", "fixture", "platform"],

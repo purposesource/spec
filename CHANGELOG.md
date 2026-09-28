@@ -1772,7 +1772,7 @@ reasoning: no month export has ever been published with a row in it.
   already allocated is open with counsel. The reader's four checks end in a rule: a document that
   fails any of them MUST NOT be treated as the board's key.
 - `generatedAt` = `releasedAt` makes this artifact an exception to `publish-log.v1`'s statement
-  that every artifact of a batch carries the batch's `generatedAt`; that contract's 1.2.1 names it.
+  that every artifact of a batch carries the batch's `generatedAt`; FS-00 §6.2's dated note of 2026-09-28 records it (the contract itself is left as it is, so platform's vendored copy and its mirror check do not move).
 - The example is a development-plane (`fixture`) key for 2027-01, equal over the seven
   categories, with a sample decision reference. Its hash recomputes, and a new gate,
   `check:allocation-keys`, holds every key example to the hash, the canonical form, the key and
@@ -2041,18 +2041,6 @@ reasoning: no month export has ever been published with a row in it.
   that number records D44's `unlistedPaths`, a separate change made the same day under a
   separate authority, and policy rule 3 gives an additive change its own minor. Authority:
   FS-10 FS10-011 steps 3 and 4, and ops decision D35 of 2026-09-10.
-
-### 1.2.1 — unreleased (2026-09-28; the allocation key's publication)
-
-- Wording only. Both `generatedAt` descriptions said every artifact of a batch carries the
-  batch's envelope instant. That was already untrue before today: the P-M3 producer renders
-  a locked ledger month with its own `lockedAt` as `generatedAt`, so that a closed extract renders
-  to the same bytes on every later run (statutes Art. 12(1)), and the badge and a closed
-  transparency-log segment carry no `generatedAt` at all (FS-00 §6.2). From today an allocation key
-  document (`allocation-key.v1`) carries its `releasedAt` for the same reason as the ledger month.
-  Such a document's `generatedAt` differs from its batch's whenever a newer row existed when it was
-  written, and always in a batch that heals the log. The batch's `generatedAt` now names these
-  exceptions, and the document's `generatedAt` points at it. No property, type or value changes.
 
 ## openapi/edge-public.v1.yaml
 
