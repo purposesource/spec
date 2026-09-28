@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://purposesource.org/spec/schemas/allocation-keys.v1.json",
   "title": "Allocation-key index — /allocation-keys/index.json",
-  "description": "Every allocation key the board has released, newest first, each with the one fact its own document cannot carry: what became of its publication. A key's document (`allocation-key.v1`, at `/allocation-keys/{YYYY-MM}.json`) is written once, at its release; whether its publication before the month was then recorded, and on which date, is established afterwards by a steward's record act, and this index is where that is published.\n\nONE ENTRY PER RELEASED MONTH, NEWEST FIRST. A month is released at most once, ever, so `effectiveMonth` is unique across `keys` and orders it, descending. An entry never leaves the index: a key that came too late or was voided keeps its line with that status, because a release is a published fact whatever became of it. Before the first release the document is published all the same, with `keys` empty.\n\nREGENERATED, NOT WRITTEN ONCE. Unlike the key documents it lists, this document is rendered again whenever a release or a record act changes it, and its `generatedAt` moves with them.\n\nWHAT A READER CHECKS AGAINST THE KEY DOCUMENTS, stated here because JSON Schema cannot relate two documents: each entry's `bodySha256`, `decisionRef` and `releasedAt` equal the document at `url`, and `url` names that entry's `effectiveMonth`. And against the publish log: a `publishBatchId` is a batch of `/meta/publish-log.json` whose `etags` name the key's path, and `publishedOn` is that batch's `publishedAt` as a Europe/Zurich calendar date.",
+  "description": "Every allocation key the board has released, newest first, each with the one fact its own document cannot carry: what became of its publication. A key's document (`allocation-key.v1`, at `/allocation-keys/{YYYY-MM}.json`) is written once, at its release; whether its publication before the month was then recorded, and on which date, is established afterwards by a steward's record act, and this index is where that is published.\n\nONE ENTRY PER RELEASED MONTH, NEWEST FIRST. A month is released at most once, ever, so `effectiveMonth` is unique across `keys` and orders it, descending. An entry never leaves the index: a key that came too late or was voided keeps its line with that status, because a release is a published fact whatever became of it. Before the first release the document is published all the same, with `keys` empty.\n\nREGENERATED, NOT WRITTEN ONCE. Unlike the key documents it lists, this document is rendered again whenever a release or a record act changes it, and its `generatedAt` moves with them.\n\nWHAT A READER CHECKS AGAINST THE KEY DOCUMENTS, stated here because JSON Schema cannot relate two documents: each entry's `bodySha256`, `decisionRef` and `releasedAt` equal the document at `url`, and `url` names that entry's `effectiveMonth`. And against the publish log: a `publishBatchId` is a batch of `/meta/publish-log.json` whose `etags` name the key's path, and `publishedOn` is that batch's `publishedAt` as a Europe/Zurich calendar date. An entry that disagrees with its key document is a defect to report, and the key document governs it.\n\nWHAT THIS INDEX IS AUTHORITATIVE FOR. The key itself is published by its own document, and the board's resolution named by `decisionRef` governs both (`allocation-key.v1`). What only this index publishes is what became of each release — its status and its proven publication date — and for that it is the one published record.",
   "x-psn": {
     "specVersion": "1.0.0",
     "phase": "P-M3 (producer: `jobs.index-build`). Nothing is published under this contract yet: no key has been released, and production's policy switch stays off until the operator's go.",
@@ -35,7 +35,7 @@
     },
     "source": {
       "enum": ["sample", "fixture", "platform"],
-      "description": "Which plane produced this document, in the envelope's vocabulary (FS-00 §6.2), exactly as on `allocation-key.v1`: `platform` is `jobs.index-build` in `PSN_ENV=prod`, `fixture` every other environment, `sample` a sample plane; `sample` and `fixture` declare a NON-PRODUCTION plane, which a production deployment refuses to serve (`sandbox_artifact_on_prod`). Required, and `registry-v0` is not admitted, for the same reasons as there. On a `platform` document no entry carries a sample `decisionRef`."
+      "description": "Which plane produced this document, in the envelope's vocabulary (FS-00 §6.2), exactly as on `allocation-key.v1`: `platform` is `jobs.index-build` in `PSN_ENV=prod`, `fixture` every other environment, `sample` a sample plane; `sample` and `fixture` declare a NON-PRODUCTION plane, which a production deployment refuses to serve (`sandbox_artifact_on_prod`). Required although the envelope rule makes it optional, and `registry-v0` is not admitted, for the same reasons as there (FS-00 §6.2, the dated note of 2026-09-28). On a `platform` document no entry carries a sample `decisionRef`; on a `sample` or `fixture` document no entry carries a production address in `decisionRef` or `url`."
     },
     "keys": {
       "type": "array",
@@ -51,6 +51,21 @@
           "keys": { "items": { "properties": { "decisionRef": { "not": { "$ref": "#/$defs/sampleReference" } } } } }
         }
       }
+    },
+    {
+      "if": { "properties": { "source": { "enum": ["sample", "fixture"] } }, "required": ["source"] },
+      "then": {
+        "properties": {
+          "keys": {
+            "items": {
+              "properties": {
+                "decisionRef": { "not": { "$ref": "#/$defs/productionAddress" } },
+                "url": { "not": { "$ref": "#/$defs/productionAddress" } }
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "$defs": {
@@ -58,28 +73,28 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["effectiveMonth", "url", "bodySha256", "decisionRef", "releasedAt", "status"],
-      "description": "One released key. `publishedOn` and `publishBatchId` travel together: both or neither.",
+      "description": "One released key. `publishedOn` and `publishBatchId` travel together, and are present exactly when `status` is `recorded` or `late`.",
       "properties": {
         "effectiveMonth": { "$ref": "#/$defs/monthKey", "description": "The month the key first governs; the key document's own `effectiveMonth`." },
         "url": {
           "type": "string",
           "format": "uri",
-          "description": "Where the key document is served: the plane's own API origin, then `/v1/allocation-keys/{effectiveMonth}.json`. A non-production plane names its own origin, never production's."
+          "description": "Where the key document is served: the plane's own API origin, then `/v1/allocation-keys/{effectiveMonth}.json`. A non-production plane names its own origin, never production's: a `sample` or `fixture` document's `url` names no production address (`$defs.productionAddress`)."
         },
         "bodySha256": { "$ref": "#/$defs/sha256", "description": "The key document's `bodySha256`: the SHA-256 of the approved text, and the `act_sha256` both approvals recorded (FS12-056)." },
         "decisionRef": {
           "$ref": "#/$defs/decisionRef",
-          "description": "The key document's `decisionRef`: the reference of the board's minuted resolution that decided the key. At most 200 characters, never empty or white space only, and no control character. A `SAMPLE-` reference (trimmed, any case) is admitted only on the development environment."
+          "description": "The key document's `decisionRef`: the reference of the board's minuted resolution that decided the key. At most 200 characters, never empty or white space only, and no control character. A `SAMPLE-` reference (trimmed, any case) is admitted only on the development environment, and a reference naming a production address (`$defs.productionAddress`) only on production, so a `sample` or `fixture` document never carries one."
         },
         "releasedAt": { "type": "string", "format": "date-time", "description": "The key document's `releasedAt`: when the second approval released the key." },
         "status": {
           "enum": ["released", "recorded", "late", "void"],
-          "description": "What became of the key's publication. There is deliberately no `adopted`: the board's decision is its minuted resolution (`decisionRef`), the two approvals check the bytes and cast no vote, and what the platform can prove afterwards is a publication and its date.\n\n`released` — two stewards approved the exact bytes and the second approval released the key; the document is on the plane, or will be within minutes; no steward has recorded its publication yet. A released key governs nothing yet, and no month locks while a release for it or an earlier month is neither recorded nor closed as `late` or `void`.\n\n`recorded` — a steward's record act read the key's bytes and the publish log from the public data plane, matched the month, the proposal and `bodySha256` against the release, and found the earliest batch naming the key's path at those bytes' ETag. That batch's Zurich date, `publishedOn`, fell before the first day of `effectiveMonth`, so the month's allocation policy was written with the key and with `publishedOn` as its publication date — the date the month's close names (Calculation Rules Nr. 30). The key governs its month and each later month until a later key is recorded.\n\n`late` — the same proof, but `publishedOn` fell on or after the first day of `effectiveMonth`: published too late for that month (Calculation Rules Nr. 29: before the month). Only the proof was written; no policy names the key, and it governs no month. (Whether Nr. 29's \"a key applies until a new one is published\" lets a late key govern from the next month is open with counsel; until that is answered it governs none, and the board releases a key again.)\n\n`void` — the release can never be recorded, and it was closed by the owner's procedure with both stewards' minuted sign-off. It governs no month. `publishedOn` and `publishBatchId` are present when the voided key had been published, and absent when it had not."
+          "description": "What became of the key's publication. There is deliberately no `adopted`: the board's decision is its minuted resolution (`decisionRef`), the two approvals check the bytes and cast no vote, and what the platform can prove afterwards is a publication and its date.\n\n`released` — two stewards approved the exact bytes and the second approval released the key; the document is on the plane, or will be within minutes; no steward has recorded its publication yet. A released key governs nothing yet, and no month locks while a release for it or an earlier month is neither recorded nor closed as `late` or `void`.\n\n`recorded` — a steward's record act read the key's bytes and the publish log from the public data plane, matched the month, the proposal and `bodySha256` against the release, and found the earliest batch naming the key's path at those bytes' ETag. That batch's Zurich date, `publishedOn`, fell before the first day of `effectiveMonth`, so the month's allocation policy was written with the key and with `publishedOn` as its publication date — the date the month's close names (Calculation Rules Nr. 30). The key governs its month and each later month until a later key is recorded.\n\n`late` — the same proof, but `publishedOn` fell on or after the first day of `effectiveMonth`: published too late for that month (Calculation Rules Nr. 29: before the month). Only the proof was written; no policy names the key, and it governs no month. (Whether Nr. 29's \"a key applies until a new one is published\" lets a late key govern from the next month is open with counsel; until that is answered it governs none, and the board releases a key again.)\n\n`void` — the release can never be recorded, and it was closed by the owner's procedure with both stewards' minuted sign-off: for instance the bytes on the plane are not the approved bytes, or they were never published. It governs no month, and it carries no `publishedOn` or `publishBatchId`, because a void release has no proven publication to state: a key whose approved bytes were proven published before its month can still be recorded, so it is never void, and one proven published on or after the month's first day is `late`. (If the owner's procedure ever needs to state a publication on a void entry, the two members widen additively to it.)"
         },
         "publishedOn": {
           "type": "string",
           "format": "date",
-          "description": "The key's publication date, as the record act proved it: the Europe/Zurich calendar date of the `publishedAt` of the earliest `/meta/publish-log.json` batch whose `etags` name the key's path at its bytes' ETag. `publishedAt` is stamped after the bytes are written, so it never dates a publication early. Present on `recorded` and `late`; absent on `released`, because the date is proven by the record act and never asserted by the build that wrote the bytes; on `void` as the proof has it."
+          "description": "The key's publication date, as the record act proved it: the Europe/Zurich calendar date of the `publishedAt` of the earliest `/meta/publish-log.json` batch whose `etags` name the key's path at its bytes' ETag. `publishedAt` is stamped after the bytes are written, so it never dates a publication early. Present on `recorded` and `late`, and only there: absent on `released`, because the date is proven by the record act and never asserted by the build that wrote the bytes, and absent on `void`, which has no proven publication (see `status`)."
         },
         "publishBatchId": {
           "type": "string",
@@ -87,20 +102,9 @@
           "description": "The `batchId` of that earliest batch in `/meta/publish-log.json`, so a reader can find the batch and check the ETag and the instant for themselves. Present exactly when `publishedOn` is."
         }
       },
-      "dependentRequired": {
-        "publishedOn": ["publishBatchId"],
-        "publishBatchId": ["publishedOn"]
-      },
-      "allOf": [
-        {
-          "if": { "properties": { "status": { "enum": ["recorded", "late"] } }, "required": ["status"] },
-          "then": { "required": ["publishedOn", "publishBatchId"] }
-        },
-        {
-          "if": { "properties": { "status": { "const": "released" } }, "required": ["status"] },
-          "then": { "not": { "anyOf": [{ "required": ["publishedOn"] }, { "required": ["publishBatchId"] }] } }
-        }
-      ]
+      "if": { "properties": { "status": { "enum": ["recorded", "late"] } }, "required": ["status"] },
+      "then": { "required": ["publishedOn", "publishBatchId"] },
+      "else": { "not": { "anyOf": [{ "required": ["publishedOn"] }, { "required": ["publishBatchId"] }] } }
     },
     "monthKey": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" },
     "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
@@ -117,6 +121,11 @@
       "type": "string",
       "pattern": "^\\s*[Ss][Aa][Mm][Pp][Ll][Ee]-",
       "description": "A sample decision reference, matched as the proposal matches it: trimmed and in any case."
+    },
+    "productionAddress": {
+      "type": "string",
+      "pattern": ":\\\\?/\\\\?/((([Aa][Pp][Ii]|[Ww][Ww][Ww]|[Aa][Pp][Pp])\\.)?[Pp][Uu][Rr][Pp][Oo][Ss][Ee][Ss][Oo][Uu][Rr][Cc][Ee]\\.[Oo][Rr][Gg]|[Pp][Uu][Rr][Pp][Oo][Ss][Ee][Ss][Oo][Uu][Rr][Cc][Ee]\\.[Pp][Aa][Gg][Ee][Ss]\\.[Dd][Ee][Vv])",
+      "description": "Text naming one of production's addresses, exactly as on `allocation-key.v1`: any of the five origin markers of the platform's production-marker check (`://purposesource.org`, `://api.purposesource.org`, `://www.purposesource.org`, `://app.purposesource.org`, `://purposesource.pages.dev`), anywhere in the text, ASCII letters in any case, each slash optionally written `\\/`. `https://dev-api.purposesource.org/…` contains none of them."
     }
   }
 }

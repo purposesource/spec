@@ -1751,10 +1751,28 @@ reasoning: no month export has ever been published with a row in it.
 - `decisionRef` follows the proposal's own refusals: 1 to 200 characters, not white space only,
   no control character. A `SAMPLE-` reference (trimmed, in any case) is refused on a `platform`
   document, because a sample reference is admitted only on the development environment, which
-  labels its plane `fixture`.
+  labels its plane `fixture`. And a reference naming a production address is refused on a
+  `sample` or `fixture` document (`$defs.productionAddress`), because the proposal refuses one
+  anywhere but raw `PSN_ENV` exactly `prod` (the key publication plan's §2.5, taken into PS-1128):
+  the five origin markers of the platform's production-marker check, in any case, either slash
+  optionally written `\/`, matched as that check matches them. On a non-production plane that
+  check is the renderer's last line and stops the whole plane, and a key row must never do that.
 - `source` is REQUIRED and admits `sample`, `fixture` and `platform`: the artifact has one
   producer, which always knows its plane, and the curated registry never carries a key, so
-  `registry-v0` is left out — a value can be added later, never taken back.
+  `registry-v0` is left out — a value can be added later, never taken back. Both are departures
+  from FS-00 §6.2's envelope rule, which makes `source` optional (the note of 2026-09-08, later)
+  and gives the other thirteen sites all four values (the note of 2026-09-17); the section's
+  dated note of 2026-09-28 records them.
+- `x-psn.authoritative` is TRUE, and the description says why and what governs a divergence.
+  The document is the key's publication itself (by default what Art. 8(4) calls published) and
+  the text the platform allocates by, not a machine-readable copy of another published text —
+  unlike `recipient-list.v1`, whose flag is false because the board's published list is the
+  instrument. It is not the decision: where it and the resolution named by `decisionRef` disagree,
+  the resolution governs and the divergence is a defect to report; what that means for a month
+  already allocated is open with counsel. The reader's four checks end in a rule: a document that
+  fails any of them MUST NOT be treated as the board's key.
+- `generatedAt` = `releasedAt` makes this artifact an exception to `publish-log.v1`'s statement
+  that every artifact of a batch carries the batch's `generatedAt`; that contract's 1.2.1 names it.
 - The example is a development-plane (`fixture`) key for 2027-01, equal over the seven
   categories, with a sample decision reference. Its hash recomputes, and a new gate,
   `check:allocation-keys`, holds every key example to the hash, the canonical form, the key and
@@ -1780,14 +1798,25 @@ reasoning: no month export has ever been published with a row in it.
   are already on the plane, because the build that writes them does not date its own publication:
   the record act does, from the batch's `publishedAt`, which is stamped after the write and so never
   dates a publication early. `publishedOn` and `publishBatchId` travel together, are required on
-  `recorded` and `late`, and are optional on `void`.
+  `recorded` and `late`, and are absent on `released` and on `void`. A void release has no proven
+  publication to state: a key whose approved bytes were proven published before its month can
+  still be recorded, so it is never void, and one proven published later is `late`. Forbidding the
+  two members on `void` is the reversible choice while migration 0058's proof row is unwritten —
+  admitting them later is a widening.
 - Regenerated, not written once. An entry never leaves the index, and before the first release
   the document is published with `keys` empty.
-- `source` and `decisionRef` are typed as on `allocation-key.v1`, and a `platform` index carries no
-  sample decision reference.
+- `source` and `decisionRef` are typed as on `allocation-key.v1`: a `platform` index carries no
+  sample decision reference, and a `sample` or `fixture` index carries no production address in any
+  entry's `decisionRef` or `url`.
+- `x-psn.authoritative` is TRUE for what only this index publishes: each release's status and
+  proven publication date. For the key itself its own document governs the entry, and the board's
+  resolution governs both.
 - Two examples: the main one, a development plane with one key released and two recorded, and
-  `late-and-void`, the other two statuses. `check:allocation-keys` holds both to their order and
-  dates and to agreement with the key example.
+  `late-and-void`, the other two statuses. The late key was released on the last day the release
+  deadline allows and its first batch landed at 22:04Z on 31 March, which is already 1 April in
+  Zurich, so it is dated 1 April and is late; the void key carries no publication.
+  `check:allocation-keys` holds both to their order and dates and to agreement with the key
+  example.
 
 ## sponsorship-schedule.v1.json
 
@@ -2012,6 +2041,18 @@ reasoning: no month export has ever been published with a row in it.
   that number records D44's `unlistedPaths`, a separate change made the same day under a
   separate authority, and policy rule 3 gives an additive change its own minor. Authority:
   FS-10 FS10-011 steps 3 and 4, and ops decision D35 of 2026-09-10.
+
+### 1.2.1 — unreleased (2026-09-28; the allocation key's publication)
+
+- Wording only. Both `generatedAt` descriptions said every artifact of a batch carries the
+  batch's envelope instant. That was already untrue before today: the P-M3 producer renders
+  a locked ledger month with its own `lockedAt` as `generatedAt`, so that a closed extract renders
+  to the same bytes on every later run (statutes Art. 12(1)), and the badge and a closed
+  transparency-log segment carry no `generatedAt` at all (FS-00 §6.2). From today an allocation key
+  document (`allocation-key.v1`) carries its `releasedAt` for the same reason as the ledger month.
+  Such a document's `generatedAt` differs from its batch's whenever a newer row existed when it was
+  written, and always in a batch that heals the log. The batch's `generatedAt` now names these
+  exceptions, and the document's `generatedAt` points at it. No property, type or value changes.
 
 ## openapi/edge-public.v1.yaml
 

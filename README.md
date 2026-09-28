@@ -124,8 +124,9 @@ The `allocation-key.v1` and `allocation-keys.v1` rows (2026-09-28) publish the b
 key before the month it governs (statutes Art. 8(4)). The key document carries the exact
 canonical text two stewards approved, as a string, and its SHA-256 — the hash both approvals
 recorded — so anyone can recompute that hash from the published text with one SHA-256 and read
-the key back out of the same text. It is written once, at the release; the date it was published is proven afterwards from the publish log and
-stated in the index, which is also where a key that came too late, or was voided, keeps its line.
+the key back out of the same text. It is written once, at the release; the date it was
+published is proven afterwards from the publish log and stated in the index, which is also where
+a key that came too late, or was voided, keeps its line.
 
 ## The coverage function
 
