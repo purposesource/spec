@@ -4,7 +4,7 @@
   "title": "Badge artifact — /badge/{node_id}.json (shields.io endpoint response)",
   "description": "The badge body a README embeds, in the shields.io ENDPOINT schema. Two rules govern it and both are about honesty rather than looks.\n\n(1) A STALE BADGE MUST NEVER KEEP ASSERTING REGISTRATION (WEB-085). `suspended`, `quit` and `delisted` repositories all render the neutral form — label unchanged, message 'status: see registry', colour lightgrey — and the edge route serves the neutral form even against a still-cached artifact whenever the index meta's delist set contradicts it (FS10-032). An unknown node_id answers 200 with `isError: true` and 'not registered', because shields renders errors from bodies, not from 404s (FS10-033).\n\n(2) NO MONEY FIGURE BEFORE THE LEDGER. The default message is mechanism copy ('registered'); a charity band may render only after the first franc actually moves, and the band thresholds and visual design are an open decision (URS §21 OPEN-11, VS-24, MKT-042).\n\nSCHEMA-VERSION NOTE: `schemaVersion` here is shields.io's own literal `1`, which happens to satisfy the FS-00 §6.2 requirement that every artifact carry a schema version. This artifact deliberately carries NO `generatedAt` field: the body must remain a valid shields endpoint response, so freshness travels in the `ETag` and `Last-Modified` headers instead (FS10-003).",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M2",
     "artifactPath": "/badge/{node_id}.json",
     "authoritative": true,
@@ -27,7 +27,7 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 60,
-      "description": "Right-hand text. Canonical values: `registered` (verified), `status: see registry` (suspended/quit/delisted), `not registered` (unknown id). A money band may appear only post-first-franc (OPEN-11).",
+      "description": "Right-hand text. Canonical values: `registered` (every registered repository, whether or not its admins have claimed it: the platform's internal states `detected` and `verified`, ops decision D82 item 5), `status: see registry` (suspended/quit/delisted), `not registered` (unknown id). A money band may appear only post-first-franc (OPEN-11). *(Amended 2026-09-30, D82 item 5: `registered` said \"(verified)\"; no value was added.)*",
       "examples": ["registered", "status: see registry", "not registered"]
     },
     "color": {

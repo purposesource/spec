@@ -9,7 +9,6 @@
   "cur": "CHF",
   "firstDisbursementScheduledFor": "2027-07-15",
   "loi": null,
-  "detectedUnclaimed": 3,
   "smallnessThresholds": {
     "projects": 25,
     "contributors": 50,

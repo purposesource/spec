@@ -14,14 +14,21 @@
  *   4. `title`, a substantive `description`, and an `x-psn` provenance block naming the
  *      spec version, the artifact path, the phase and the FS clauses it implements;
  *   5. a matching section in CHANGELOG.md (VS-05's acceptance test: "schema files carry
- *      versions and changelogs").
+ *      versions and changelogs");
+ *   6. ONE PUBLISHED STATE FOR A REGISTERED REPOSITORY (ops decision D82 and its dated note of
+ *      2026-09-29). Every public repository-state enum admits `registered` and none admits the
+ *      internal `detected`, which would tell a reader that nobody has claimed the repository;
+ *      and every public claimed/unclaimed count is marked `deprecated`. `change-event.v1` has
+ *      carried `detected` since 1.0.0 and a v1 enum never narrows, so it is held to admitting
+ *      `registered` only; `registry-v0-record.v1` is the curated SOURCE record, whose enum is
+ *      the internal FS-02 §3 one on purpose, and is not a published artifact state.
  *
  * Run: node scripts/check-schemas.mjs
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { ROOT, DIALECT, config, createAjv, listSchemas, changelogAnchor, fail } from './lib/spec.mjs';
+import { ROOT, DIALECT, config, createAjv, listSchemas, changelogAnchor, readYamlFile, fail } from './lib/spec.mjs';
 
 const cfg = config();
 const schemas = listSchemas();
@@ -100,6 +107,44 @@ for (const { file, json } of schemas) {
 
   if (!changelog.includes(`## ${file}`)) {
     problems.push(`${where}: CHANGELOG.md has no "## ${file}" section (VS-05: schemas carry versions and changelogs)`);
+  }
+}
+
+// 6. One published state for a registered repository (D82). A pointer that no longer resolves
+// is a problem too: the gate must not pass because the member it guards moved.
+const byFile = new Map(schemas.map(({ file, json }) => [file, json]));
+const at = (node, path) => path.reduce((value, key) => (value == null ? undefined : value[key]), node);
+const openapi = readYamlFile(join(ROOT, 'openapi', 'edge-public.v1.yaml'));
+const stateEnums = [
+  ['schemas/registry-index.v1.json', at(byFile.get('registry-index.v1.json'), ['$defs', 'entry', 'properties', 'state', 'enum']), true],
+  ['schemas/repo-record.v1.json', at(byFile.get('repo-record.v1.json'), ['$defs', 'repoState', 'enum']), true],
+  ['schemas/change-event.v1.json', at(byFile.get('change-event.v1.json'), ['properties', 'payload', 'properties', 'state', 'enum']), false],
+  [
+    'openapi/edge-public.v1.yaml CoverageBasis.repo.repoState',
+    at(openapi, ['components', 'schemas', 'CoverageBasis', 'properties', 'repo', 'properties', 'repoState', 'enum']),
+    true,
+  ],
+];
+for (const [where, values, closedToDetected] of stateEnums) {
+  if (!Array.isArray(values)) {
+    problems.push(`${where}: the repository-state enum this gate guards (D82) did not resolve`);
+    continue;
+  }
+  if (!values.includes('registered')) {
+    problems.push(`${where}: must admit \`registered\`, the one state a registered repository publishes from ops decision D82 on`);
+  }
+  if (closedToDetected && values.includes('detected')) {
+    problems.push(`${where}: must not admit the internal state \`detected\` — it would publish that nobody has claimed the repository (D82 item 3)`);
+  }
+}
+const unclaimedCounts = [
+  ['schemas/stats.v1.json detectedUnclaimed', at(byFile.get('stats.v1.json'), ['properties', 'detectedUnclaimed'])],
+  ['schemas/registry-index-meta.v1.json totals.verified', at(byFile.get('registry-index-meta.v1.json'), ['properties', 'totals', 'properties', 'verified'])],
+  ['schemas/registry-index-meta.v1.json totals.detected', at(byFile.get('registry-index-meta.v1.json'), ['properties', 'totals', 'properties', 'detected'])],
+];
+for (const [where, member] of unclaimedCounts) {
+  if (!member || member.deprecated !== true) {
+    problems.push(`${where}: a public claimed/unclaimed count must be marked \`deprecated\` and not published (D82's dated note (c) of 2026-09-29)`);
   }
 }
 

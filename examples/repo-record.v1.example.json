@@ -9,7 +9,7 @@
   },
   "name": "widget-engine",
   "defaultBranch": "main",
-  "state": "verified",
+  "state": "registered",
   "stateChangedAt": "2027-03-14T00:00:00Z",
   "weightClass": "standard",
   "allocationFrozen": false,

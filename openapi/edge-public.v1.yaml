@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.1.1
+  version: 1.1.2
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -173,7 +173,7 @@ paths:
                         verification: domain-verified
                       repo:
                         nodeId: R_kgDOAbc123
-                        repoState: verified
+                        repoState: registered
                       entitlement:
                         entId: ent_01jf8w2c9km3q7xz5r0v4t6y9b
                         lane: pass
@@ -195,7 +195,7 @@ paths:
                         verification: officer-attested
                       repo:
                         nodeId: R_kgDOAbc123
-                        repoState: verified
+                        repoState: registered
                       entitlement:
                         entId: ent_01jn4c8j5st9x3df1y6b0z2e5h
                         lane: project
@@ -218,7 +218,7 @@ paths:
                         verification: officer-attested
                       repo:
                         nodeId: R_kgDOAbc123
-                        repoState: verified
+                        repoState: registered
                     asOf: '2027-06-01T12:00:00Z'
                     dates:
                       selfCertifiedAt: '2027-03-10T09:00:00Z'
@@ -236,7 +236,7 @@ paths:
                         verification: unverified
                       repo:
                         nodeId: R_kgDOAbc123
-                        repoState: verified
+                        repoState: registered
                       waiver:
                         wvrId: wvr_01jk2a6g3qr7v1bd9w4z8x0c3f
                         grantedAt: '2027-04-01T00:00:00Z'
@@ -254,7 +254,7 @@ paths:
                       note: no registry record for this organization
                       repo:
                         nodeId: R_kgDOAbc123
-                        repoState: verified
+                        repoState: registered
                     asOf: '2027-06-01T12:00:00Z'
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -332,7 +332,7 @@ paths:
                         verification: domain-verified
                       repo:
                         nodeId: R_kgDOAbc123
-                        repoState: verified
+                        repoState: registered
                       entitlement:
                         entId: ent_01jh0y4e1np5s9zb7t2x6v8a1d
                         lane: project
@@ -550,6 +550,9 @@ paths:
         asserting registration, so the worker serves neutral whenever the registry index
         contradicts the cached artifact.
 
+        Every registered repository's badge says "registered", whether or not its admins
+        have claimed it (ops decision D82 item 5).
+
         No money figure appears on any badge before real money has moved.
       tags: [badges]
       x-psn-phase: P-M2
@@ -578,7 +581,7 @@ paths:
                 $ref: '../schemas/badge.v1.json'
               examples:
                 registered:
-                  summary: A verified repository
+                  summary: A registered repository, claimed or not
                   value:
                     schemaVersion: 1
                     label: purpose source
@@ -651,7 +654,6 @@ paths:
                     cur: CHF
                     firstDisbursementScheduledFor: null
                     loi: null
-                    detectedUnclaimed: null
                     smallnessThresholds:
                       projects: 25
                       contributors: 50
@@ -669,7 +671,6 @@ paths:
                     cur: CHF
                     firstDisbursementScheduledFor: '2027-07-15'
                     loi: null
-                    detectedUnclaimed: 3
                     smallnessThresholds:
                       projects: 25
                       contributors: 50
@@ -741,9 +742,10 @@ paths:
         The shard list, registry-wide counts, and the delisted set the badge route uses as
         a guard against stale caches. Fetch this first; fetch only the shards you need.
 
-        Detected-but-unclaimed repositories are **counted here and listed nowhere**. A
-        repository that adopted the licence without claiming has made a licensing
-        decision, not a publicity decision.
+        Every registered repository is **listed and counted once**, whether or not its
+        admins have claimed it, and no count here separates the two (ops decision D82
+        items 1 and 3). Until D82 this route counted detected-but-unclaimed repositories
+        and listed them nowhere.
       tags: [registry]
       x-psn-phase: P-M2
       responses:
@@ -769,11 +771,10 @@ paths:
                     exportUrl: https://api.purposesource.org/v1/registry/export.json
                     totals:
                       listed: 3
-                      verified: 2
+                      registered: 2
                       suspended: 0
                       quit: 0
                       delisted: 1
-                      detected: 4
                     delisted: [R_kgDODel456]
         '429':
           $ref: '#/components/responses/RateLimited'
@@ -818,7 +819,7 @@ paths:
                       - nodeId: R_kgDOAbc123
                         owner: acme
                         name: widget-engine
-                        state: verified
+                        state: registered
                         weightClass: standard
                         licenseId: PurposeSource-1.0
                         licenseVersion: '1.0'
@@ -864,7 +865,7 @@ paths:
                       - nodeId: R_kgDOAbc123
                         owner: acme
                         name: widget-engine
-                        state: verified
+                        state: registered
                         weightClass: standard
                         licenseId: PurposeSource-1.0
                         adoptedAt: '2027-03-14'
@@ -908,8 +909,8 @@ paths:
               schema:
                 $ref: '../schemas/repo-record.v1.json'
               examples:
-                verified:
-                  summary: A verified repository with no manifest — defaults apply, none needed
+                registered:
+                  summary: A registered repository with no manifest — defaults apply, none needed
                   value:
                     schemaVersion: 1
                     generatedAt: '2027-06-01T05:00:00Z'
@@ -920,7 +921,7 @@ paths:
                       type: Organization
                     name: widget-engine
                     defaultBranch: main
-                    state: verified
+                    state: registered
                     stateChangedAt: '2027-03-14T00:00:00Z'
                     weightClass: standard
                     license:
@@ -1619,7 +1620,7 @@ paths:
                           nodeId: R_kgDOAbc123
                           owner: acme
                           name: widget-engine
-                          state: verified
+                          state: registered
                           recordUrl: https://api.purposesource.org/v1/registry/repo/R_kgDOAbc123.json
                       - id: evt_01jh0y4e1np5s9zb7t2x6v8a0d
                         type: waiver-granted
@@ -1812,8 +1813,15 @@ components:
               pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$'
             repoState:
               type: string
-              enum: [verified, suspended, quit, delisted]
-              description: A quit or delisted repository still computes — coverage that was bought stays bought.
+              enum: [registered, verified, suspended, quit, delisted]
+              description: >-
+                The state the repository's published record carries, as the coverage function read it.
+                `registered` is the one state a record published from ops decision D82 on carries for a
+                registered repository, whether or not its admins have claimed it (D82 and its dated note (d) of
+                2026-09-29); `verified` is what records published before D82 carried. cov-v1 reports the
+                record's state without branching on it, and its own `PublishedRepoState` type, which predates
+                D82, stays byte-identical for pinned readers. A quit or delisted repository still computes —
+                coverage that was bought stays bought.
         entitlement:
           type: object
           additionalProperties: false
