@@ -2188,3 +2188,25 @@ which kind of change each entry was.
 - `redocly.yaml`'s list of literal and template paths that overlap by design gains
   `/v1/allocation-keys/index.json` and `/v1/allocation-keys/{month}.json`; `no-ambiguous-paths`
   stays off for the reason recorded there.
+
+### 1.1.1 — unreleased (2026-09-29; the legacy repository node id at the edge)
+
+- Additive, a patch like 1.0.1 to 1.0.3: no route, status code, cache class or error code moved.
+  The six repository node id patterns — the coverage query's and body's `repo`, the badge's, the
+  registry record's and the waivers' `nodeId`, and the coverage answer's `basis.repo.nodeId` —
+  widen from `^[A-Za-z0-9_-]{4,128}$` to the contract set's `githubNodeId`,
+  `^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$`, the pattern the eleven schema
+  files took on 2026-09-08. Pure widening; every value that validated still validates.
+- Why now: the registry keys a repository created before GitHub's id migration by its legacy id
+  (`MDEw…=`, `registry-v0-record.v1` accepts it), the plane names its badge, record and waivers
+  with that id raw, and on 2026-09-29 the edge began serving them (website `edge-legacy-node-ids`).
+  DimitrieVatra/Pie-Scanner's README badge, `MDEwOlJlcG9zaXRvcnkyNTIxMTYxMDk=`, rendered "custom
+  badge | resource not found" until then. A client generated from 1.1.0 would still refuse that
+  id, and a coverage answer about such a repository carried a `basis.repo.nodeId` 1.1.0 forbade.
+- NOT closed to `registry-v0-record.v1`'s narrower first alternative (`R_[A-Za-z0-9_-]{6,118}`),
+  for the reason the 2026-09-08 entry gives: that would tighten. The three repository-keyed path
+  parameters say instead, in their descriptions, what the edge refuses before a read: anything but
+  `R_` and 6 to 118 characters, or the legacy form spelled canonically with its `=` (`%3D` read as
+  `=`, no other escape decoded) — `400 invalid_repo_id` on the badge, `404 artifact_not_found` on
+  the record and waiver passthroughs. The coverage `repo` keeps its published opaque form beside
+  the legacy one, as the edge does.

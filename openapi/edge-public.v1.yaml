@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.1.0
+  version: 1.1.1
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -142,7 +142,7 @@ paths:
           description: The repository's GitHub node id. Names and owners are display caches and are not accepted.
           schema:
             type: string
-            pattern: '^[A-Za-z0-9_-]{4,128}$'
+            pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$'
           example: R_kgDOAbc123
       responses:
         '200':
@@ -299,7 +299,7 @@ paths:
                   description: A `co_` ULID or a verified domain.
                 repo:
                   type: string
-                  pattern: '^[A-Za-z0-9_-]{4,128}$'
+                  pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$'
                   description: The repository's GitHub node id.
             examples:
               byDomain:
@@ -557,10 +557,14 @@ paths:
         - name: nodeId
           in: path
           required: true
-          description: The repository's GitHub node id.
+          description: >-
+            The repository's GitHub node id, in either form GitHub has issued (the legacy one carries its
+            `=` padding: `MDEwOlJlcG9zaXRvcnkyNTIxMTYxMDk=`). The edge refuses, before any read, a value that
+            is not a repository node id in either form: `R_` and 6 to 118 characters, or the legacy form
+            spelled as GitHub spells it (`%3D` is read as `=`; no other escape is decoded). It answers `400 invalid_repo_id`.
           schema:
             type: string
-            pattern: '^[A-Za-z0-9_-]{4,128}$'
+            pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$'
           example: R_kgDOAbc123
       responses:
         '200':
@@ -887,10 +891,14 @@ paths:
         - name: nodeId
           in: path
           required: true
-          description: The repository's GitHub node id.
+          description: >-
+            The repository's GitHub node id, in either form GitHub has issued (the legacy one carries its
+            `=` padding: `MDEwOlJlcG9zaXRvcnkyNTIxMTYxMDk=`). The edge refuses, before any read, a value that
+            is not a repository node id in either form: `R_` and 6 to 118 characters, or the legacy form
+            spelled as GitHub spells it (`%3D` is read as `=`; no other escape is decoded). It answers `404 artifact_not_found`, as for any path outside the allow-list.
           schema:
             type: string
-            pattern: '^[A-Za-z0-9_-]{4,128}$'
+            pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$'
           example: R_kgDOAbc123
       responses:
         '200':
@@ -955,10 +963,14 @@ paths:
         - name: nodeId
           in: path
           required: true
-          description: The repository's GitHub node id.
+          description: >-
+            The repository's GitHub node id, in either form GitHub has issued (the legacy one carries its
+            `=` padding: `MDEwOlJlcG9zaXRvcnkyNTIxMTYxMDk=`). The edge refuses, before any read, a value that
+            is not a repository node id in either form: `R_` and 6 to 118 characters, or the legacy form
+            spelled as GitHub spells it (`%3D` is read as `=`; no other escape is decoded). It answers `404 artifact_not_found`, as for any path outside the allow-list.
           schema:
             type: string
-            pattern: '^[A-Za-z0-9_-]{4,128}$'
+            pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$'
           example: R_kgDOAbc123
       responses:
         '200':
@@ -1797,7 +1809,7 @@ components:
           properties:
             nodeId:
               type: string
-              pattern: '^[A-Za-z0-9_-]{4,128}$'
+              pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$'
             repoState:
               type: string
               enum: [verified, suspended, quit, delisted]
