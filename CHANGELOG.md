@@ -346,6 +346,19 @@ remembering the same rule.
   and its validator refuses one login under two `owner_node_id` values, one `owner_node_id`
   under two logins, and an owner whose records disagree about having one.
 
+### 1.2.1 — unreleased (2026-09-30; ops decision D82 and its dated note of 2026-09-29)
+
+- Wording only, a patch under policy 3: nothing this file validates changes, and the `state` enum
+  stays the FS-02 §3 one verbatim — these are the internal states, which D82's dated note (d)
+  keeps. `state`'s description said `detected` repositories "appear in aggregate counts only — no
+  listing, no repo record, no badge (GH-014)"; since D82 item 1 a `detected` repository is
+  registered like a `verified` one, and the artifacts index-build publishes from a record list it
+  and publish both states as `registered` (`registry-index.v1` 1.4.0, `repo-record.v1` 1.4.0).
+  The old sentence stays in the description as history.
+- The curated registry repository re-vendors this file byte for byte, and the platform's contracts
+  mirror (`packages/contracts/schema-manifest.json`) re-pins its hash; both follow this file's
+  publication, since each compares against the contract set's main branch.
+
 ## registry-index.v1.json
 
 ### 1.0.0 — unreleased
