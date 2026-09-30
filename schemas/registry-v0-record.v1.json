@@ -4,7 +4,7 @@
   "title": "registry-v0 record — one curated YAML file per registered repository",
   "description": "The P-M2-only, PR-curated registry source of truth: one file `registry/{owner}--{name}.yml` in the public curated registry repository (FS-02 §7 FS02-060). THIS is the schema that repository validates against — it holds a byte-identical vendored copy and its CI fails on any byte difference, so there is one record contract rather than two that agree by habit. The filename is derived from `owner` and `name`, lowercased and joined by `--`, because an opaque `R_kgDO…` filename makes a curation pull request unreviewable at a glance; `node_id` remains the primary key in every artifact and every reference (FS-02 §7's `repos/{node_id}.yml` is the chapter's earlier form). Consumed by the index-build-lite job that renders the published artifacts (VS-04). Three hard constraints carry legal weight: (1) there is NO `waivers` field and there never will be — waivers are issued only by a claimed admin from the platform dashboard (D14), so no waiver can enter the registry by pull request; (2) the YAML file is a CACHE of display facts, while the repository's own committed LICENSE file is the truth about adoption (D13); (3) this whole repository is data class P0-public (FS-00 §6.9), so the only person-identifying data a record may hold is a GitHub login — the `contacts` patterns make an e-mail address structurally unrepresentable (D15). Frozen and archived at P-M3 with a pointer to the export endpoints (FS-00 §2).",
   "x-psn": {
-    "specVersion": "1.2.1",
+    "specVersion": "1.2.0",
     "phase": "P-M2 only",
     "artifactPath": "(curated registry repository) registry/{owner}--{name}.yml",
     "authoritative": false,
@@ -52,7 +52,7 @@
     },
     "state": {
       "$ref": "#/$defs/repoState",
-      "description": "The FS-02 §3 state enum verbatim: the internal states, which this source record keeps (ops decision D82's dated note (d) of 2026-09-29). A `detected` repository is registered like a `verified` one (D82 item 1): the artifacts index-build publishes from this record list it and give it a repo record and a badge, and they publish both states as `registered`, so none of them says which of the two the record holds (D82 item 3). *(Amended 2026-09-30, D82: it said \"`detected` repositories appear in aggregate counts only — no listing, no repo record, no badge (GH-014).\")* `powers_suspended` and `allocation_frozen` are the two orthogonal private flags of FS02-020 and are deliberately absent from this contract: they are platform state, never registry data."
+      "description": "The FS-02 §3 state enum verbatim. `detected` repositories appear in aggregate counts only — no listing, no repo record, no badge (GH-014). `powers_suspended` and `allocation_frozen` are the two orthogonal private flags of FS02-020 and are deliberately absent from this contract: they are platform state, never registry data."
     },
     "state_note": {
       "type": "string",
