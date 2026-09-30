@@ -4,7 +4,7 @@
   "title": "Public counters — /stats.json",
   "description": "The public counter artifact, with an explicit three-state machine so that a number's ABSENCE is a documented state rather than a bug (WEB-060/061, FS-10 §10).\n\n`state` is computed from real registry and ledger facts and is never set by hand:\n  · `pre-launch` — mechanism copy only. Every numeric field is null. No letter-of-intent counts, no progress bar.\n  · `launched-pre-disbursement` — projects, contributors and companies are real; `chfRoutedMinor` stays NULL with `firstDisbursementScheduledFor` naming the date. 'CHF 0' is never rendered, neither as an achievement nor as an embarrassment.\n  · `post-first-franc` — every figure is real and `chfRoutedMinor` is the ledger total.\n\nA field may be null in any state where the underlying thing does not yet exist: at P-M2 `contributorsClaimed` is null because there is no claim flow to claim through, and the page labels it as the structural zero it is (VS-19).\n\nRendering rules travel with the data: a `computedAt` caption, deep links to the source surfaces, no upward animation from zero, and `prefers-reduced-motion` honoured (WEB-062/063, WEB-121).",
   "x-psn": {
-    "specVersion": "1.3.0",
+    "specVersion": "1.2.1",
     "phase": "P-M2",
     "artifactPath": "/stats.json",
     "authoritative": true,
@@ -25,7 +25,7 @@
       "enum": ["pre-launch", "launched-pre-disbursement", "post-first-franc"],
       "description": "The machine state. The prose labels S1/S2/S3 stay prose and never appear in this artifact (FS01-050)."
     },
-    "projectsRegistered": { "type": ["integer", "null"], "minimum": 0, "description": "Registered repositories in ops decision D82 item 1's sense: every repository registered from the moment it passes the network's registration rules, whether or not its admins have claimed it, until it quits or is delisted — in the platform's internal states `detected`, `verified` and `suspended`. *(Worded 2026-09-30, D82 item 1; the member had no description.)*" },
+    "projectsRegistered": { "type": ["integer", "null"], "minimum": 0, "description": "Registered repositories in ops decision D82 item 1's sense: every repository registered from the moment it passes the network's registration rules, whether or not its admins have claimed it, until it quits or is delisted — in the platform's internal states `detected`, `verified` and `suspended`. On the same plane it is the index meta's `totals.registered` + `totals.suspended`. *(Worded 2026-09-30, D82 item 1; the member had no description.)*" },
     "contributorsClaimed": { "type": ["integer", "null"], "minimum": 0, "description": "Null until the claim flow exists — an honest structural zero, labelled as such on the page (VS-19)." },
     "companiesCovered": { "type": ["integer", "null"], "minimum": 0 },
     "chfRoutedMinor": { "type": ["integer", "null"], "minimum": 0, "description": "Ledger total in minor units. NULL, never 0, before the first disbursement." },

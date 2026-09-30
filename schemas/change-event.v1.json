@@ -30,7 +30,7 @@
         "schedule-published", "license-version-published", "jwks-changed",
         "entitlement-recorded", "entitlement-lapsed"
       ],
-      "description": "The complete event catalogue (FS10-070). Additive-only: a new type may be added, an existing one never redefined (WEB-112)."
+      "description": "The complete event catalogue (FS10-070). Additive-only: a new type may be added, an existing one never redefined (WEB-112). `repo-adopted` fires when a repository becomes registered under the network's rules (ops decision D82 item 1), whether or not its admins ever claim it; a claim changes no published state and publishes no event, because an event at the claim would tell a reader that the admins have claimed (D82 items 3 and 4)."
     },
     "occurredAt": { "type": "string", "format": "date-time" },
     "payload": {
@@ -40,7 +40,7 @@
         "nodeId": { "$ref": "#/$defs/githubNodeId" },
         "owner": { "type": "string", "maxLength": 39, "description": "Display cache only." },
         "name": { "type": "string", "maxLength": 100 },
-        "state": { "enum": ["registered", "detected", "verified", "suspended", "quit", "delisted"], "description": "The repository's published state. `registered` is the one state an event published from ops decision D82 on carries for a repository registered under the network's rules, whether or not its admins have claimed it, with `suspended`, `quit` and `delisted` as the registry publishes them (D82 item 1 and its dated note (d) of 2026-09-29). `detected` and `verified` are the platform's internal FS-02 §3 states: no event published from D82 on carries either, because an event naming one of the two would publish whether the repository's admins have claimed it (D82 item 3). They stay in the enum only because a v1 enum never narrows (versioning policy 1)." },
+        "state": { "enum": ["registered", "suspended", "quit", "delisted"], "description": "The repository's published state, as the registry index publishes it: `registered` for a repository registered under the network's rules, whether or not its admins have claimed it, and `suspended`, `quit` or `delisted` as before (ops decision D82 item 1 and its dated note (d) of 2026-09-29). The platform's internal FS-02 §3 states `detected` and `verified` are not event values: an event naming one of the two would publish whether the repository's admins have claimed it (D82 item 3). *(Changed before first publication, 2026-09-30, under versioning policy 5: the enum was the FS-02 §3 list verbatim, `detected`, `verified`, `suspended`, `quit`, `delisted`; no change event had been published.)*" },
         "wvrId": { "type": "string", "pattern": "^wvr_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },

@@ -551,7 +551,7 @@ paths:
         contradicts the cached artifact.
 
         Every registered repository's badge says "registered", whether or not its admins
-        have claimed it (ops decision D82 item 5).
+        have claimed it, unless it is suspended (ops decision D82 item 5).
 
         No money figure appears on any badge before real money has moved.
       tags: [badges]
@@ -743,7 +743,8 @@ paths:
         a guard against stale caches. Fetch this first; fetch only the shards you need.
 
         Every registered repository is **listed and counted once**, whether or not its
-        admins have claimed it, and no count here separates the two (ops decision D82
+        admins have claimed it: in `totals.registered`, or in `totals.suspended` while it
+        is suspended. No count here separates claimed from unclaimed (ops decision D82
         items 1 and 3). Until D82 this route counted detected-but-unclaimed repositories
         and listed them nowhere.
       tags: [registry]
@@ -1817,7 +1818,7 @@ components:
               description: >-
                 The state the repository's published record carries, as the coverage function read it.
                 `registered` is the one state a record published from ops decision D82 on carries for a
-                registered repository, whether or not its admins have claimed it (D82 and its dated note (d) of
+                registered repository that is not suspended, whether or not its admins have claimed it (D82 and its dated note (d) of
                 2026-09-29); `verified` is what records published before D82 carried. cov-v1 reports the
                 record's state without branching on it, and its own `PublishedRepoState` type, which predates
                 D82, stays byte-identical for pinned readers. A quit or delisted repository still computes —
