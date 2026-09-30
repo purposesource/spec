@@ -119,9 +119,12 @@ paths:
         scanners matters more than a pedantic 404. A repository with no published registry
         record is different. A Pass covers any work under the licence, registered or not
         (ops decision D48 item 5), so an organisation holding a Pass inside its term is
-        answered `yes-via-pass` about it, with `basis.repo.repoState: unregistered` and
-        `basis.reason: pass-any-work` saying why. For every other organisation the question
-        cannot be asked about that repository, and the answer is `repo_not_registered`. A
+        answered `yes-via-pass` about it, with `basis.repo.repoState: no-record` and
+        `basis.reason: pass-any-work` saying why. `no-record` says only that no record is
+        published under the node id asked about: the repository may be registered and not
+        yet published, or not under the licence at all, and the answer checks neither. For
+        every other organisation — one holding no Pass inside its term — the question cannot
+        be asked about that repository, and the answer is `repo_not_registered`. A
         registered repository is answered the same way whether or not its admins have
         claimed it (ops decision D82).
 
@@ -251,8 +254,8 @@ paths:
                     proof:
                       type: waiver-record
                       url: https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f
-                yesViaPassUnregistered:
-                  summary: A Pass covers a repository with no registry record (D48 item 5)
+                yesViaPassNoRecord:
+                  summary: A Pass covers a repository with no published registry record (D48 item 5)
                   value:
                     answer: yes-via-pass
                     basis:
@@ -262,7 +265,7 @@ paths:
                         verification: domain-verified
                       repo:
                         nodeId: R_kgDONoRec01
-                        repoState: unregistered
+                        repoState: no-record
                       entitlement:
                         entId: ent_01jf8w2c9km3q7xz5r0v4t6y9b
                         lane: pass
@@ -1846,7 +1849,7 @@ components:
               pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$'
             repoState:
               type: string
-              enum: [registered, verified, suspended, quit, delisted, unregistered]
+              enum: [registered, verified, suspended, quit, delisted, no-record]
               description: >-
                 The state the repository's published record carries, as the coverage function read it.
                 `registered` is the one state a record published from ops decision D82 on carries for a
@@ -1854,10 +1857,11 @@ components:
                 2026-09-29); `verified` is what records published before D82 carried. cov-v2 reports a
                 `verified` record as `registered`, so an answer from cov-v2 never says `verified`; cov-v1
                 reports the record's state without branching on it, and its own `PublishedRepoState` type,
-                which predates D82, stays byte-identical for pinned readers. `unregistered` (cov-v2 only):
-                the repository has no published record, and the answer is a Pass's, with `reason`
-                `pass-any-work` (D48 item 5). A quit or delisted repository still computes — coverage that
-                was bought stays bought.
+                which predates D82, stays byte-identical for pinned readers. `no-record` (cov-v2 only) is
+                not a registry state: no record is published under this node id, and the answer is a
+                Pass's, with `reason` `pass-any-work` (D48 item 5). The repository may be registered and not
+                yet published, or not under the licence at all; the answer checks neither. A quit or
+                delisted repository still computes — coverage that was bought stays bought.
         entitlement:
           type: object
           additionalProperties: false
@@ -1891,7 +1895,7 @@ components:
           enum: [pass-any-work]
           description: >-
             Why the answer holds when the other members cannot show it (cov-v2). `pass-any-work`: the
-            repository has no published record (`repo.repoState: unregistered`), and the organisation's
+            repository has no published record (`repo.repoState: no-record`), and the organisation's
             Pass covers it because a Pass covers any work under the licence, registered or not (ops
             decision D48 item 5). Absent from every other answer.
 
@@ -2290,7 +2294,7 @@ components:
             $ref: '#/components/schemas/ErrorEnvelope'
           examples:
             repoNotRegistered:
-              summary: No registry record for the repository, and no Pass reaches it
+              summary: No registry record for the repository, and no Pass inside its term
               value:
                 error:
                   code: repo_not_registered

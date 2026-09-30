@@ -1,5 +1,5 @@
 {
-  "$comment": "Test vectors for cov-v2 (ops decisions D48 item 5 and D82 item 10). Same rules as coverage/vectors.json, which stays frozen for cov-v1: every input is a COMPLETE published artifact (scripts/check-vectors.mjs validates each `repos` fixture against repo-record.v1.json, each `company` against entitlement-record.v1.json and each `waivers` document against waiver.v1.json), and `expect` is asserted by DEEP EQUALITY against the whole outcome. The first 25 vectors are cov-v1's, CARRIED: `carriedFrom` names the cov-v1 vector, whose inputs they repeat byte for byte, and whose expected result they repeat with exactly two moves — `basis.algoVersion` says cov-v2, and a `verified` record is reported as `registered` (D82's dated note (d)); coverage/cov-v2.test.ts proves both. The V2- vectors are new: (a) a Pass covers a work with no published record (`repo: null`, `repoNodeId` names the repository asked about, and nothing is published at registry/repo/{repoNodeId}.json), and every other organisation gets `repo_not_registered`, expected as `{error, algoVersion, repo}`; (b) a registered repository its admins never claimed answers like any registered one; (c) the one public state. Vectors are appended, never edited, once cov-v2 is published.",
+  "$comment": "Test vectors for cov-v2 (ops decisions D48 item 5 and D82 item 10). Same rules as coverage/vectors.json, which stays frozen for cov-v1: every input is a COMPLETE published artifact (scripts/check-vectors.mjs validates each `repos` fixture against repo-record.v1.json, each `company` against entitlement-record.v1.json and each `waivers` document against waiver.v1.json), and `expect` is asserted by DEEP EQUALITY against the whole outcome. The first 25 vectors are cov-v1's, CARRIED: `carriedFrom` names the cov-v1 vector, whose inputs they repeat byte for byte, and whose expected result they repeat with exactly two moves — `basis.algoVersion` says cov-v2, and a `verified` record is reported as `registered` (D82's dated note (d)); coverage/cov-v2.test.ts proves both. The V2- vectors are new: (a) a Pass inside its term covers a work with no published record (`repo: null`, `repoNodeId` names the repository asked about, and nothing is published at registry/repo/{repoNodeId}.json; the answer reports `repoState: no-record`), and every other organisation gets `repo_not_registered`, expected as `{error, algoVersion, repo}`; (b) a registered repository its admins never claimed answers like any registered one; (c) the one public state. Vectors are appended, never edited, once cov-v2 is published.",
   "algoVersion": "cov-v2",
   "specVersion": "1.0.0",
   "repos": {
@@ -185,6 +185,44 @@
       },
       "links": {
         "repository": "https://github.com/acme/paused-lib"
+      }
+    },
+    "quit": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "nodeId": "R_kgDOQui321",
+      "owner": {
+        "login": "acme",
+        "orgId": "O_kgDOAcme001",
+        "type": "Organization"
+      },
+      "name": "left-project",
+      "defaultBranch": "main",
+      "state": "quit",
+      "stateChangedAt": "2027-05-10T00:00:00Z",
+      "weightClass": "standard",
+      "license": {
+        "id": "PurposeSource-1.0",
+        "version": "1.0",
+        "publishedAt": "2027-01-15",
+        "apacheConversionDate": "2031-01-15",
+        "adoptedAt": "2027-03-14",
+        "textSha256": "9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f"
+      },
+      "manifest": {
+        "present": false,
+        "rejections": []
+      },
+      "waivers": {
+        "count": 0,
+        "url": "https://api.purposesource.org/v1/waivers/R_kgDOQui321.json"
+      },
+      "badge": {
+        "url": "https://api.purposesource.org/badge/R_kgDOQui321.json",
+        "state": "neutral"
+      },
+      "links": {
+        "repository": "https://github.com/acme/left-project"
       }
     }
   },
@@ -1614,8 +1652,8 @@
       "carriedFrom": "VEC-25-project-scope-does-not-cover-undeclared-repo"
     },
     {
-      "id": "V2-01-unregistered-work-pass-covers",
-      "description": "A repository with no published record is covered by an active Pass: a Pass covers any work under the licence, registered or not. The basis says the repository is unregistered and why the answer holds.",
+      "id": "V2-01-no-record-pass-covers",
+      "description": "A repository with no published record is covered by an active Pass: a Pass covers any work under the licence, registered or not. The basis says no record is published under the node id (`no-record`, which checks neither registration nor the licence) and why the answer holds.",
       "fsRef": "D48 item 5; D82 item 10; FS-10 §4.3 step 5a",
       "now": "2027-06-01T12:00:00Z",
       "repo": null,
@@ -1661,7 +1699,7 @@
           },
           "repo": {
             "nodeId": "R_kgDONoRec01",
-            "repoState": "unregistered"
+            "repoState": "no-record"
           },
           "entitlement": {
             "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
@@ -1678,8 +1716,8 @@
       }
     },
     {
-      "id": "V2-02-unregistered-work-pass-at-period-end",
-      "description": "The term boundary is the registered repository's: now == periodEnd is still inside the Pass, so an unregistered work is still covered.",
+      "id": "V2-02-no-record-pass-at-period-end",
+      "description": "The term boundary is the registered repository's: now == periodEnd is still inside the Pass, so a work with no record is still covered.",
       "fsRef": "D48 item 5; FS10-121",
       "now": "2028-01-01T00:00:00Z",
       "repo": null,
@@ -1725,7 +1763,7 @@
           },
           "repo": {
             "nodeId": "R_kgDONoRec01",
-            "repoState": "unregistered"
+            "repoState": "no-record"
           },
           "entitlement": {
             "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
@@ -1742,7 +1780,7 @@
       }
     },
     {
-      "id": "V2-03-unregistered-work-two-passes-latest-term-named",
+      "id": "V2-03-no-record-two-passes-latest-term-named",
       "description": "Two live Pass terms: the basis names the one with the later periodEnd, by step 5a's own tie-break, so two deployments name the same term.",
       "fsRef": "D48 item 5; FS-10 §4.3 step 5a; FS-00 §7.3",
       "now": "2027-06-01T12:00:00Z",
@@ -1805,7 +1843,7 @@
           },
           "repo": {
             "nodeId": "R_kgDONoRec01",
-            "repoState": "unregistered"
+            "repoState": "no-record"
           },
           "entitlement": {
             "entId": "ent_01jz4p7m2kq8w3xv5r9t6y0b4c",
@@ -1822,8 +1860,8 @@
       }
     },
     {
-      "id": "V2-04-unregistered-work-project-only-is-not-registered",
-      "description": "A Project names a registered repository, so it never reaches a work with no record: without a Pass the question stays repo_not_registered, as under cov-v1.",
+      "id": "V2-04-no-record-project-only-is-not-registered",
+      "description": "A Project naming other repositories never reaches a work with no record: without a Pass inside its term the question stays repo_not_registered, as under cov-v1.",
       "fsRef": "D82 item 10; FS-10 §4.3 step 1; D42",
       "now": "2027-06-01T12:00:00Z",
       "repo": null,
@@ -1869,7 +1907,7 @@
       }
     },
     {
-      "id": "V2-05-unregistered-work-unknown-company-is-not-registered",
+      "id": "V2-05-no-record-unknown-company-is-not-registered",
       "description": "No company record and no record for the repository: repo_not_registered, never `no` — the organisation's absence is an answer only about a registered repository.",
       "fsRef": "FS-10 §4.3 steps 1 and 3; COM-057",
       "now": "2027-06-01T12:00:00Z",
@@ -1886,7 +1924,7 @@
       }
     },
     {
-      "id": "V2-06-unregistered-work-suspended-pass-is-not-registered",
+      "id": "V2-06-no-record-suspended-pass-is-not-registered",
       "description": "A suspended Pass is excluded exactly as at step 4, so it reaches nothing: repo_not_registered.",
       "fsRef": "D48 item 5; FS-10 §4.3 step 4; COM-024",
       "now": "2027-06-01T12:00:00Z",
@@ -1930,8 +1968,8 @@
       }
     },
     {
-      "id": "V2-07-unregistered-work-pass-in-grace-is-not-registered",
-      "description": "Only a Pass inside its term reaches a work with no record. A Pass in its grace window answers lapsed-in-grace about a registered repository (VEC-13's rule) and repo_not_registered here.",
+      "id": "V2-07-no-record-pass-in-grace-is-not-registered",
+      "description": "Only a Pass inside its term is answered about a work with no record. A Pass in its grace window answers lapsed-in-grace about a registered repository (VEC-13's rule) and repo_not_registered here.",
       "fsRef": "D82 item 10; FS-10 §4.3 steps 1 and 9",
       "now": "2027-06-01T12:00:00Z",
       "repo": null,
@@ -1974,8 +2012,8 @@
       }
     },
     {
-      "id": "V2-08-unregistered-work-under-threshold-is-not-registered",
-      "description": "A threshold self-certification is not an Entitlement, and D48 item 5 and D82 moved only the Pass: repo_not_registered, as under cov-v1.",
+      "id": "V2-08-no-record-under-threshold-is-not-registered",
+      "description": "A threshold self-certification is not an Entitlement, and cov-v2 answers only a Pass inside its term about a work with no record (D82 item 10): repo_not_registered, as under cov-v1.",
       "fsRef": "D48 item 5; D82 item 10; FS-10 §4.3 steps 1 and 8",
       "now": "2027-06-01T12:00:00Z",
       "repo": null,
@@ -2002,7 +2040,7 @@
       }
     },
     {
-      "id": "V2-09-unregistered-work-waivers-are-not-read",
+      "id": "V2-09-no-record-waivers-are-not-read",
       "description": "A waiver is granted by a registered repository's admins and published under its record's node id; for a work with no record the waiver list is not read, even when one is passed.",
       "fsRef": "D14; D82 item 4; FS-10 §4.3 steps 1 and 2",
       "now": "2027-06-01T12:00:00Z",
@@ -2359,6 +2397,293 @@
           "repo": {
             "nodeId": "R_kgDOSus789",
             "repoState": "suspended"
+          },
+          "entitlement": {
+            "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
+            "lane": "pass",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z"
+          }
+        },
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b"
+        }
+      }
+    },
+    {
+      "id": "V2-16-no-record-portfolio-is-not-registered",
+      "description": "VEC-03's Portfolio, asked about a work with no record. A Portfolio is matched through the record's owner organisation id, and with no record there is no owner to match: repo_not_registered.",
+      "fsRef": "D82 item 10; FS-10 §4.3 steps 1 and 5c",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-02-01T09:00:00Z",
+        "coId": "co_01jj1z5f2pq6t0ac8v3y7w9b1e",
+        "domains": [
+          "portfolio.example"
+        ],
+        "verification": "domain-verified",
+        "entitlements": [
+          {
+            "entId": "ent_01jj1z5f2pq6t0ac8v3y7w9b2e",
+            "lane": "portfolio",
+            "scope": {
+              "kind": "portfolio",
+              "org": "O_kgDOAcme001"
+            },
+            "status": "active",
+            "periodStart": "2027-02-01T00:00:00Z",
+            "periodEnd": "2028-01-31T00:00:00Z",
+            "graceEnd": "2028-03-01T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-02-01",
+                "to": "2028-01-31"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v2",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-17-no-record-network-donation-is-not-registered",
+      "description": "VEC-11's donation term, scoped to the whole network, asked about a work with no record. cov-v2 answers only a Pass inside its term about such a work (D82 item 10), so the donation term stays repo_not_registered, as under cov-v1.",
+      "fsRef": "D82 item 10; FS-10 §4.3 steps 1 and 7",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-05-01T09:00:00Z",
+        "coId": "co_01jm3b7h4rs8w2ce0x5a9y1d3g",
+        "name": "Donor Cooperative",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01jm3b7h4rs8w2ce0x5a9y1d4g",
+            "lane": "donation",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "active",
+            "periodStart": "2027-05-01T00:00:00Z",
+            "periodEnd": "2028-04-30T00:00:00Z",
+            "graceEnd": "2028-05-30T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-05-01",
+                "to": "2028-04-30"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v2",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-18-no-record-void-pass-is-not-registered",
+      "description": "A void Pass is excluded exactly as at step 4, so it reaches nothing, a work with no record included: repo_not_registered.",
+      "fsRef": "D82 item 10; FS-10 §4.3 step 4; FS05-052",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-05-20T09:00:00Z",
+        "coId": "co_01k0a1b2c3d4e5f6g7h8j9k0m1",
+        "name": "Voided Order Ltd",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01k0a1b2c3d4e5f6g7h8j9k0m2",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "void",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z",
+            "graceEnd": "2028-01-31T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2028-01-01"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v2",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-19-no-record-pass-not-yet-started-is-not-registered",
+      "description": "A Pass whose term starts after `now` is not inside its term (step 5a skips it for a registered repository too), so it reaches no work with no record yet: repo_not_registered.",
+      "fsRef": "D82 item 10; FS-10 §4.3 step 5a; FS10-121",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-05-28T09:00:00Z",
+        "coId": "co_01k1a2b3c4d5e6f7g8h9j0k1m2",
+        "name": "Early Order GmbH",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01k1a2b3c4d5e6f7g8h9j0k1m3",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "active",
+            "periodStart": "2027-07-01T00:00:00Z",
+            "periodEnd": "2028-07-01T00:00:00Z",
+            "graceEnd": "2028-07-31T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-07-01",
+                "to": "2028-07-01"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v2",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-20-no-record-project-naming-it-is-not-registered",
+      "description": "A Project whose scope names this very node id, asked about it while no record is published under it. cov-v2 answers only a Pass inside its term about a work with no record (D82 item 10), so the Project is answered once the repository's record is published, and until then the question is repo_not_registered, as under cov-v1.",
+      "fsRef": "D82 items 1 and 10; FS-10 §4.3 steps 1 and 5b; D42",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-05-02T09:00:00Z",
+        "coId": "co_01k2a3b4c5d6e7f8g9h0j1k2m3",
+        "name": "Named Repository AG",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01k2a3b4c5d6e7f8g9h0j1k2m4",
+            "lane": "project",
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDONoRec01"
+              ]
+            },
+            "status": "active",
+            "periodStart": "2027-05-01T00:00:00Z",
+            "periodEnd": "2028-04-30T00:00:00Z",
+            "graceEnd": "2028-05-30T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-05-01",
+                "to": "2028-04-30"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v2",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-21-quit-record-reports-quit",
+      "description": "A repository that quit still has its record and still computes: coverage that was bought stays bought (D12). The answer reports `quit`, as published, never `registered`.",
+      "fsRef": "D82 item 1 and dated note (d); FS-10 §4.3 step 1; D12",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": "quit",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-01-01T09:00:00Z",
+        "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+        "name": "Example Industries AG",
+        "domains": [
+          "example.com"
+        ],
+        "verification": "domain-verified",
+        "entitlements": [
+          {
+            "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "active",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z",
+            "graceEnd": "2028-01-31T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2028-01-01"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "answer": "yes-via-pass",
+        "basis": {
+          "algoVersion": "cov-v2",
+          "company": {
+            "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+            "verification": "domain-verified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOQui321",
+            "repoState": "quit"
           },
           "entitlement": {
             "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",

@@ -25,7 +25,9 @@
  * module every answer reporting `algoVersion: "cov-v1"` came from; its digest is what the
  * edge published at `/v1/meta` and what readers pinned. Now that a second module lives
  * beside it, an edit to the wrong file would be one keystroke away, so the gate compares
- * the bytes with the pinned digest instead of trusting the version string alone.
+ * the bytes with the pinned digest instead of trusting the version string alone. cov-v2 is
+ * pinned the same way from its first merge, because the edge mirrors it and answers with it
+ * from the next deploy.
  *
  * Then it prints each module's SHA-256. That digest is what a deployment publishes at its
  * own diagnostics route, and what continuous integration compares against the deployed
@@ -49,7 +51,15 @@ const MODULES = [
     // Frozen since the edge first published it (measured 2026-09-17, FS-10 §4.6 dated note).
     pinned: '96b19df421e4c3d8b719de736640133c3c2376dbc92045f13b83384c0184267a',
   },
-  { version: 'cov-v2', file: 'cov-v2.ts', vectors: 'cov-v2.vectors.json', pinned: null },
+  {
+    version: 'cov-v2',
+    file: 'cov-v2.ts',
+    vectors: 'cov-v2.vectors.json',
+    // Pinned from its first merge (2026-09-30, ops decisions D48 item 5 and D82 item 10): the
+    // edge mirrors these bytes and answers with them from its next deploy, so a later change
+    // is a cov-v3 beside it, never an edit here.
+    pinned: 'a2c5f1174b1bf346b28d8e6d6e1e225d30569a19f8779cad2accb8aa4e313ebb',
+  },
 ];
 
 const IMPURE = [

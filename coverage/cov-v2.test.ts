@@ -39,7 +39,7 @@ import type {
   CoverageOutcome,
   CoverageResult,
   RepoRecord,
-  UnregisteredRepo,
+  NoRecordRepo,
   WaiverRecord,
 } from './cov-v2.ts';
 
@@ -101,10 +101,10 @@ function resolveWaivers(vector: Vector): WaiverRecord[] {
   return vector.waivers.waivers;
 }
 
-function resolveRepo(vector: Vector): RepoRecord | UnregisteredRepo {
+function resolveRepo(vector: Vector): RepoRecord | NoRecordRepo {
   if (vector.repo === null) {
     assert.ok(vector.repoNodeId, `vector ${vector.id} has no record and names no repository`);
-    return { nodeId: vector.repoNodeId, state: 'unregistered' };
+    return { nodeId: vector.repoNodeId, state: 'no-record' };
   }
   const repo = vectorFile.repos[vector.repo];
   assert.ok(repo, `vector ${vector.id} names an unknown repo fixture: ${vector.repo}`);
@@ -183,7 +183,7 @@ test("every frozen cov-v1 vector is carried, with the same inputs and the same a
     for (const member of ['now', 'repo', 'company', 'companyRef', 'waivers', 'fsRef'] as const) {
       assert.deepStrictEqual(now[member], old[member], `${old.id}: ${member} moved`);
     }
-    assert.ok(old.repo !== null, 'cov-v1 has no unregistered input');
+    assert.ok(old.repo !== null, 'cov-v1 has no no-record input');
     assert.deepStrictEqual(vectorFile.repos[old.repo], v1File.repos[old.repo], `${old.id}: its repo fixture moved`);
     const moved = structuredClone(old.expect);
     moved.basis.algoVersion = 'cov-v2';
@@ -205,9 +205,9 @@ test('all eight answer values are produced by the vector suite (FS10-120(b))', (
 });
 
 test('(a) a Pass inside its term covers a work with no record, and says why', () => {
-  const result = answerOf(run(byId('V2-01-unregistered-work-pass-covers')));
+  const result = answerOf(run(byId('V2-01-no-record-pass-covers')));
   assert.equal(result.answer, 'yes-via-pass');
-  assert.equal(result.basis.repo.repoState, 'unregistered');
+  assert.equal(result.basis.repo.repoState, 'no-record');
   assert.equal(result.basis.reason, 'pass-any-work');
   assert.equal(result.basis.entitlement?.lane, 'pass');
   assert.deepStrictEqual(result.proofRef, { type: 'entitlement-jws', coId: 'co_01jf8w2c9km3q7xz5r0v4t6y8b' });
@@ -215,12 +215,40 @@ test('(a) a Pass inside its term covers a work with no record, and says why', ()
 
 test('(a) without a current Pass a work with no record is repo_not_registered, returned and not thrown', () => {
   const ids = vectorFile.vectors.filter((v) => v.repo === null && 'error' in v.expect).map((v) => v.id);
-  assert.ok(ids.length >= 5, `expected the refusals to be pinned, found ${ids.length}`);
+  assert.ok(ids.length >= 11, `expected the refusals to be pinned, found ${ids.length}`);
   for (const id of ids) {
     const outcome = run(byId(id));
     assert.ok(isRepoNotRegistered(outcome), id);
     assert.deepStrictEqual(outcome, { error: 'repo_not_registered', algoVersion: 'cov-v2', repo: { nodeId: 'R_kgDONoRec01' } }, id);
   }
+});
+
+test('(a) each kind of organisation cov-v2 does not answer about a work with no record has its vector', () => {
+  // coverage/README.md and the CHANGELOG name these; a sentence there with no vector behind it
+  // is a promise nobody checks. Each is repo_not_registered, and each is only a Pass away from
+  // an answer: V2-01 is the same question asked by a Pass inside its term.
+  const pinned = {
+    'a Project naming other repositories': 'V2-04-no-record-project-only-is-not-registered',
+    'a Project naming this very node id': 'V2-20-no-record-project-naming-it-is-not-registered',
+    'a Portfolio': 'V2-16-no-record-portfolio-is-not-registered',
+    'a network-scope donation term': 'V2-17-no-record-network-donation-is-not-registered',
+    'a suspended Pass': 'V2-06-no-record-suspended-pass-is-not-registered',
+    'a void Pass': 'V2-18-no-record-void-pass-is-not-registered',
+    'a Pass in its grace window': 'V2-07-no-record-pass-in-grace-is-not-registered',
+    'a Pass not yet started': 'V2-19-no-record-pass-not-yet-started-is-not-registered',
+    'a threshold self-certification': 'V2-08-no-record-under-threshold-is-not-registered',
+    'a waiver': 'V2-09-no-record-waivers-are-not-read',
+    'no company record': 'V2-05-no-record-unknown-company-is-not-registered',
+  };
+  for (const [who, id] of Object.entries(pinned)) {
+    const vector = byId(id);
+    assert.equal(vector.repo, null, `${who}: ${id} must ask about a work with no record`);
+    assert.ok(isRepoNotRegistered(run(vector)), `${who}: ${id}`);
+  }
+  const lanes = new Set(
+    Object.values(pinned).flatMap((id) => (byId(id).company?.entitlements ?? []).map((ent) => ent.lane)),
+  );
+  assert.deepStrictEqual([...lanes].sort(), ['donation', 'pass', 'portfolio', 'project']);
 });
 
 test('(a) `reason` appears only where the repository has no record', () => {
@@ -229,10 +257,10 @@ test('(a) `reason` appears only where the repository has no record', () => {
     if (isRepoNotRegistered(outcome)) continue;
     if (vector.repo === null) {
       assert.equal(outcome.basis.reason, 'pass-any-work', vector.id);
-      assert.equal(outcome.basis.repo.repoState, 'unregistered', vector.id);
+      assert.equal(outcome.basis.repo.repoState, 'no-record', vector.id);
     } else {
       assert.equal('reason' in outcome.basis, false, `${vector.id} carries a reason about a registered repository`);
-      assert.notEqual(outcome.basis.repo.repoState, 'unregistered', vector.id);
+      assert.notEqual(outcome.basis.repo.repoState, 'no-record', vector.id);
     }
   }
 });
@@ -270,6 +298,7 @@ test('(c) no answer reports `verified`; `registered` is the one public state', (
   assert.ok(fromVerified >= 20, `expected most carried vectors to read a verified record, found ${fromVerified}`);
   assert.equal(answerOf(run(byId('V2-15-suspended-record-reports-suspended'))).basis.repo.repoState, 'suspended');
   assert.equal(answerOf(run(byId('VEC-24-delisted-repo-still-computes'))).basis.repo.repoState, 'delisted');
+  assert.equal(answerOf(run(byId('V2-21-quit-record-reports-quit'))).basis.repo.repoState, 'quit');
 });
 
 // 5. Purity.
@@ -295,13 +324,13 @@ test('the function reads no clock: time is only ever the parameter', () => {
 
   // And for a work with no record: one millisecond past the Pass's term, it is no longer
   // reached, so the same inputs answer differently only because the instant moved.
-  const unregistered = byId('V2-02-unregistered-work-pass-at-period-end');
-  const later = new Date(Date.parse(unregistered.now) + 1).toISOString();
-  assert.ok(isRepoNotRegistered(coverage(unregistered.company, resolveRepo(unregistered), [], later)));
+  const noRecord = byId('V2-02-no-record-pass-at-period-end');
+  const later = new Date(Date.parse(noRecord.now) + 1).toISOString();
+  assert.ok(isRepoNotRegistered(coverage(noRecord.company, resolveRepo(noRecord), [], later)));
 });
 
 test('the input arrays are never mutated', () => {
-  for (const vector of [vectorFile.vectors[0], byId('V2-09-unregistered-work-waivers-are-not-read')]) {
+  for (const vector of [vectorFile.vectors[0], byId('V2-09-no-record-waivers-are-not-read')]) {
     assert.ok(vector);
     const repo = resolveRepo(vector);
     const waivers = resolveWaivers(vector);
@@ -312,8 +341,8 @@ test('the input arrays are never mutated', () => {
 });
 
 // 6. Errors the caller owns.
-test('a missing repository input throws — the caller passes a record or the unregistered marker', () => {
-  for (const missing of [undefined, null, { state: 'unregistered' }, { nodeId: '', state: 'unregistered' }]) {
+test('a missing repository input throws — the caller passes a record or the no-record marker', () => {
+  for (const missing of [undefined, null, { state: 'no-record' }, { nodeId: '', state: 'no-record' }]) {
     assert.throws(
       () => coverage(null, missing as unknown as RepoRecord, [], '2027-06-01T00:00:00Z'),
       (error: unknown) => {
@@ -328,8 +357,8 @@ test('a missing repository input throws — the caller passes a record or the un
 
 test('an unparsable `now` throws rather than silently answering', () => {
   const repo: RepoRecord = { nodeId: 'R_kgDOAbc123', state: 'registered' };
-  const unregistered: UnregisteredRepo = { nodeId: 'R_kgDONoRec01', state: 'unregistered' };
-  for (const input of [repo, unregistered]) {
+  const noRecord: NoRecordRepo = { nodeId: 'R_kgDONoRec01', state: 'no-record' };
+  for (const input of [repo, noRecord]) {
     assert.throws(() => coverage(null, input, [], 'not-a-date'), (error: unknown) => {
       assert.ok(error instanceof CoverageInputError);
       assert.equal(error.code, 'invalid_now');
@@ -359,8 +388,8 @@ test('a malformed date inside a signed record fails closed, registered or not', 
   const registered = coverage(company, { nodeId: 'R_kgDOAbc123', state: 'registered' }, [], '2027-06-01T12:00:00Z');
   assert.equal(answerOf(registered).answer, 'no');
   assert.equal(answerOf(registered).proofRef, undefined);
-  const unregistered = coverage(company, { nodeId: 'R_kgDONoRec01', state: 'unregistered' }, [], '2027-06-01T12:00:00Z');
-  assert.ok(isRepoNotRegistered(unregistered), 'a Pass whose dates cannot be read reaches nothing');
+  const noRecord = coverage(company, { nodeId: 'R_kgDONoRec01', state: 'no-record' }, [], '2027-06-01T12:00:00Z');
+  assert.ok(isRepoNotRegistered(noRecord), 'a Pass whose dates cannot be read reaches nothing');
 });
 
 test('waivers may be omitted by a JS caller without crashing', () => {
@@ -372,7 +401,7 @@ test('waivers may be omitted by a JS caller without crashing', () => {
 
 // 7. Wire shaping.
 test('toCoverageResponse builds the FS-10 §4.4 body, for a work with no record too', () => {
-  const vector = byId('V2-01-unregistered-work-pass-covers');
+  const vector = byId('V2-01-no-record-pass-covers');
   const result = answerOf(run(vector));
   const body = toCoverageResponse(result, {
     asOf: '2027-06-01T12:00:00Z',

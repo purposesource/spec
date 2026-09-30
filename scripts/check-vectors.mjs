@@ -65,13 +65,13 @@ const EIGHT = [
 const NODE_ID = /^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$/;
 
 const FILES = [
-  { name: 'vectors.json', algoVersion: 'cov-v1', unregistered: false },
-  { name: 'cov-v2.vectors.json', algoVersion: 'cov-v2', unregistered: true },
+  { name: 'vectors.json', algoVersion: 'cov-v1', acceptsNoRecord: false },
+  { name: 'cov-v2.vectors.json', algoVersion: 'cov-v2', acceptsNoRecord: true },
 ];
 const loaded = Object.fromEntries(FILES.map(({ name }) => [name, readJson(join(ROOT, 'coverage', name))]));
 const summary = [];
 
-for (const { name, algoVersion, unregistered } of FILES) {
+for (const { name, algoVersion, acceptsNoRecord } of FILES) {
   const vectorFile = loaded[name];
 
   // The shared fixtures, once each.
@@ -89,7 +89,7 @@ for (const { name, algoVersion, unregistered } of FILES) {
 
     const noRecord = vector.repo === null;
     if (noRecord) {
-      if (!unregistered) problems.push(`${label}: names no repository record, which ${algoVersion} cannot take`);
+      if (!acceptsNoRecord) problems.push(`${label}: names no repository record, which ${algoVersion} cannot take`);
       if (typeof vector.repoNodeId !== 'string' || !NODE_ID.test(vector.repoNodeId)) {
         problems.push(`${label}: a vector with no record must name the repository asked about in \`repoNodeId\``);
       } else if (fixtureIds.has(vector.repoNodeId)) {
@@ -147,7 +147,7 @@ for (const { name, algoVersion, unregistered } of FILES) {
     problems.push(`${name} targets ${JSON.stringify(vectorFile.algoVersion)}; it is the ${algoVersion} suite`);
   }
   summary.push(
-    `${name}: ${(vectorFile.vectors ?? []).length} vectors` + (unregistered ? ` (${refusals} expect repo_not_registered)` : ''),
+    `${name}: ${(vectorFile.vectors ?? []).length} vectors` + (acceptsNoRecord ? ` (${refusals} expect repo_not_registered)` : ''),
   );
 }
 
