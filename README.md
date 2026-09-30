@@ -44,7 +44,8 @@ suite passes; the OpenAPI lints; and every example inside the API description va
 Individual gates:
 
 ```sh
-npm run check:schemas           # compile, $id, self-containment, provenance, changelog section
+npm run check:schemas           # compile, $id, self-containment, provenance, changelog section,
+                                #   one published state for a registered repository (D82)
 npm run check:examples          # one example per schema, each valid
 npm run check:kits              # every claim-language kit: valid, correctly addressed, no figure
 npm run check:menu              # the category menu is one list; every copy of it is identical

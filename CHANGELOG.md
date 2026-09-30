@@ -398,6 +398,33 @@ remembering the same rule.
   references. The file's broad `githubNodeId` pattern would also admit a login, and the member
   is new, so the narrower pattern constrains nothing that already validated.
 
+### 1.4.0 — unreleased (2026-09-30; ops decision D82 and its dated note of 2026-09-29)
+
+- Additive. `$defs.entry.state` admits `registered`: the one state an entry published from ops
+  decision D82 on shows for a repository registered under the network's rules, whether or not its
+  admins have claimed it. The platform's internal `detected` and `verified` both publish as
+  `registered` (D82 item 1; the orchestrator's dated note (d) of 2026-09-29T23:39Z, which replaces
+  the plan in ops `design/registry/LISTING-WITHOUT-CLAIM-2026-09-29.md` §3 slice 1 to publish
+  `detected`). `verified` stays in the enum, so every document published before D82 stays valid
+  (policy 4) and today's producers, which still write it, keep passing until they move; its
+  description now says a producer writes `registered` in its place. `detected` is NOT added: it is
+  an internal state, and publishing it would tell a reader that nobody has claimed the repository,
+  which D82 item 3 rules out ("no difference a reader could use to tell the two apart").
+- One vocabulary per document. `entries` refuses a document that carries both a `verified` and a
+  `registered` entry. A producer half-way between the two vocabularies would write `verified` for
+  claimed rows and `registered` for the rest, and every enum would pass it, although the mix tells a
+  reader which repositories their admins have claimed (D82 item 3). This constrains only documents
+  that carry `registered`, which is new in this version, so nothing published under 1.3.0 or
+  earlier is refused and the change as a whole stays additive. `check:schemas` check 6 proves the
+  guard refuses a mixed export and admits the example.
+- Wording. The file's description said `detected` repositories were "counted, never listed
+  (GH-014, OPEN-33 default)"; it now says every registered repository appears and no entry says
+  whether its admins have claimed it. D82 closes OPEN-33. The old sentence stays in the
+  description as history. `state`'s description says `registered` means registered and not
+  suspended: a suspended repository is registered in D82 item 1's sense too, and its entry shows
+  `suspended`, as before.
+- The example's first entry carries `registered`.
+
 ## registry-index-meta.v1.json
 
 ### 1.0.0 — unreleased
@@ -449,6 +476,30 @@ remembering the same rule.
   guard still refuses it. No second value was added — `dev` was considered and rejected
   for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
   2026-09-10, which authorises the P-M3 build.
+
+### 1.3.0 — unreleased (2026-09-30; ops decision D82 and its dated note of 2026-09-29)
+
+- Additive. `totals.registered`: the shard entries whose state is `registered`, which is every
+  registered repository that is not suspended, whether or not its admins have claimed it (D82
+  item 1). A suspended repository is registered in D82 item 1's sense too and stays counted in
+  `suspended`, so D82's registered repositories (`stats.v1`'s `projectsRegistered`) are
+  `registered` + `suspended`. `listed` is now registered + suspended + quit + delisted, and its
+  description says what it summed before D82.
+- One vocabulary per document. `totals` refuses `registered` beside either deprecated count: a
+  document carrying both would tell a reader how many registered repositories their admins have
+  claimed. `registered` is new in this version, so nothing published under 1.2.0 or earlier is
+  refused and the change as a whole stays additive; `check:schemas` check 6 proves the guard.
+- `totals.verified` and `totals.detected` are marked `deprecated` and are not published from D82 on.
+  Either of them beside `listed` tells a reader how many registered repositories nobody has
+  claimed, and the dated note (c) of 2026-09-29 drops every public claimed/unclaimed count
+  (D82 item 3: "whether admins have claimed is their internal matter"). Neither member is removed:
+  `totals` is `additionalProperties: false`, so a removal would invalidate every document published
+  with them, which policy 1 forbids. `deprecated` is the 2020-12 annotation and constrains nothing.
+- Wording. The file's description said `detected` repositories were counted in `totals.detected`
+  only and never listed; it now says every registered repository is listed and counted once, in
+  `totals.registered` or, while suspended, in `totals.suspended`. The old sentence stays in the
+  description as history.
+- The example's totals carry `registered` and neither deprecated member.
 
 ## repo-record.v1.json
 
@@ -527,6 +578,29 @@ creating one.
 - Wording. `owner.orgId` is described as the owner node_id of either account type (`O_…` or
   `U_…`), taken from the curated record's new `owner_node_id`, and says what its absence means:
   no Portfolio term matches the repository. No constraint moved.
+
+### 1.4.0 — unreleased (2026-09-30; ops decision D82 and its dated note of 2026-09-29)
+
+- Additive. `$defs.repoState` admits `registered`, as `registry-index.v1` 1.4.0 does and in the same
+  words. A registered repository gets a record whether or not its admins have claimed it (D82 items
+  1 and 6), and the record's `state` is what cov-v1 reports as `basis.repoState` — so the coverage
+  answer carries `registered` from the day the renderer does (`openapi/edge-public.v1.yaml` 1.1.2).
+  `verified` stays valid for records published before D82 (policy 4); `detected` is not added.
+- Wording. The description said records are published for `verified`, `suspended`, `quit` or
+  `delisted` repositories and that `detected` ones "appear in aggregate counts only"; it now says
+  every registered repository has one, claimed or not. `repoState` and `badge.state` say
+  `registered` means registered and not suspended, claimed or not (D82 items 1 and 5); a suspended
+  repository's record shows `suspended` and its badge the neutral form, as before. No other
+  constraint moved.
+- `stateChangedAt` gains a description: the instant the PUBLISHED state last changed. The internal
+  move from `detected` to `verified` is a claim and, from D82 on, no change of published state, so
+  it never sets the instant; a `registered` record carries when the repository became registered,
+  never when its admins claimed it (D82 item 3). The member had none, and the platform's renderer
+  publishes the instant of the last state-moving event, which on dev today is the claim (a record
+  whose `stateChangedAt` is two days after its `license.adoptedAt`). Wording only: no constraint
+  moves, and a record published before D82 may carry the instant of the claim, when `verified` was
+  its published state.
+- The example carries `registered`.
 
 ## waiver.v1.json
 
@@ -1922,6 +1996,24 @@ reasoning: no month export has ever been published with a row in it.
   alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
   instrument from this one.
 
+### 1.2.0 — unreleased (2026-09-30; ops decision D82 and its dated note of 2026-09-29) — **pre-release** change under versioning policy 5
+
+- **Pre-release.** `payload.state` becomes `registered`, `suspended`, `quit`, `delisted`: the
+  states the registry index publishes. `registered` is what the feed carries for a registered
+  repository, claimed or not (D82 item 1 and its dated note (d) of 2026-09-29). `detected` and
+  `verified`, which the enum carried since 1.0.0 as the FS-02 §3 states verbatim, are removed: they
+  are the platform's internal states, and an event naming either would publish whether the
+  repository's admins have claimed it (D82 item 3). This narrows the enum, which policy 1 forbids
+  after first publication and policy 5 allows before it: no change event has ever been published.
+  The feed is demand-gated to P-M4, `/v1/changes` answers `route_not_enabled` on every deployment,
+  and nothing produces an event (the platform's index build writes no `changes/*`, which its
+  catalogue test asserts). So no published document can become invalid.
+- `type`'s description says `repo-adopted` fires when a repository becomes registered, never at a
+  claim: a claim changes no published state and publishes no event (D82 items 3 and 4).
+  Wording only; no type is added or redefined.
+- The example carries `registered`. `check:schemas` check 6 holds this enum to the same rule as the
+  registry index's and the repo record's: `registered` admitted, `detected` refused.
+
 ## badge.v1.json
 
 ### 1.0.0 — unreleased
@@ -1929,6 +2021,18 @@ reasoning: no month export has ever been published with a row in it.
 - Initial publication. The shields.io endpoint body, with the neutral and unknown forms
   documented as canonical values rather than left to a renderer's discretion.
 - See open question 3 above regarding `generatedAt`.
+
+### 1.0.1 — unreleased (2026-09-30; ops decision D82 and its dated note of 2026-09-29)
+
+- Wording only, a patch under policy 3. The description of the message `registered` changes, as
+  D82 item 5 rules ("badge.v1's description of `registered` changes; no new value"). It said
+  `registered` (verified); it now says every registered repository that is not suspended, whether
+  or not its admins have claimed it — the platform's internal `detected` and `verified`. Suspended,
+  quit and delisted repositories render `status: see registry`, as before. No value is added and no
+  constraint moves; every body that validated still validates.
+- Policy 1's "never change what an existing value means" is read as intact: the value still asserts
+  registration and nothing else; D82 moved which repositories are registered and ruled this
+  change by name.
 
 ## stats.v1.json
 
@@ -1968,6 +2072,24 @@ reasoning: no month export has ever been published with a row in it.
   guard still refuses it. No second value was added — `dev` was considered and rejected
   for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
   2026-09-10, which authorises the P-M3 build.
+
+### 1.2.1 — unreleased (2026-09-30; ops decision D82 and its dated note of 2026-09-29)
+
+- Wording only, a patch under policy 3: no member is added and no constraint moves.
+- `projectsRegistered` gains a description: registered in D82 item 1's sense, which is every
+  repository from the moment it passes the network's registration rules, whether or not its admins
+  have claimed it, until it quits or is delisted (the platform's internal `detected`, `verified` and
+  `suspended`); on one plane, the index meta's `totals.registered` + `totals.suspended`. The member
+  had none, and the producers counted it differently: the platform's renderer counts `verified`
+  only, the curated registry's builder `detected`, `verified` and `suspended`. Every
+  `projectsRegistered` published so far is `null` (pre-launch), so no published value changes
+  meaning.
+- `detectedUnclaimed` is marked `deprecated` and is not published from D82 on; a producer omits it
+  (it was never required). The dated note (c) of 2026-09-29 drops the aggregate "detected, not yet
+  claimed" figure (GH-014, FS01-044, FS10-080) from every public artifact, following D82 item 3. It
+  is not removed (policy 1); the pre-launch rule that holds it `null` stays and binds only a
+  document that still carries it. `deprecated` is the 2020-12 annotation and constrains nothing.
+- The example no longer carries `detectedUnclaimed`.
 
 ## publish-log.v1.json
 
@@ -2210,3 +2332,24 @@ which kind of change each entry was.
   `=`, no other escape decoded) — `400 invalid_repo_id` on the badge, `404 artifact_not_found` on
   the record and waiver passthroughs. The coverage `repo` keeps its published opaque form beside
   the legacy one, as the edge does.
+
+### 1.1.2 — unreleased (2026-09-30; ops decision D82 and its dated note of 2026-09-29)
+
+- Additive, a patch like 1.1.1: no route, status code, cache class or error code moved.
+- `CoverageBasis.repo.repoState` admits `registered`, as `repo-record.v1` 1.4.0 does. cov-v1 reports
+  the record's state without branching on it, so once the renderer publishes `registered` (D82's
+  dated note (d) of 2026-09-29) the edge's answer carries it, and a client generated from 1.1.1
+  would refuse that answer. `coverage/cov-v1.ts` is NOT changed: its `PublishedRepoState` type
+  predates D82, and the module stays byte-identical for every reader who pinned its digest; the
+  component's description says so. A `cov-v2` that types the state and answers D48 item 5 is a
+  separate contract (D82 item 10).
+- The badge route says every registered repository's badge says "registered" unless it is
+  suspended (D82 item 5). The index meta route no longer says detected-but-unclaimed repositories
+  are "counted here and listed nowhere"; it says every registered repository is listed and counted
+  once, in `totals.registered` or, while suspended, in `totals.suspended`, and that no count
+  separates claimed from unclaimed (D82 items 1 and 3, dated note (c)).
+- Examples: every `state`/`repoState` of `verified` becomes `registered` — the six coverage answers,
+  the shard, the export, the repo record (its example key renamed
+  `registered`) and the change feed. The meta example's totals carry `registered` and neither
+  `verified` nor `detected`, and both counters examples lose `detectedUnclaimed`. The examples gate
+  validates all 45.

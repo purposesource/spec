@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://purposesource.org/spec/schemas/registry-index-meta.v1.json",
   "title": "Registry index meta — /registry/index/meta.json",
-  "description": "The registry index's table of contents: the shard list, registry-wide counts, and the delist set the badge route uses as a belt-and-braces guard against a stale cached badge (FS10-032 — the edge keeps this document hot in KV as `registry-index-meta`). Counts include `detected` repositories in `totals.detected` only; they are never listed (GH-014).",
+  "description": "The registry index's table of contents: the shard list, registry-wide counts, and the delist set the badge route uses as a belt-and-braces guard against a stale cached badge (FS10-032 — the edge keeps this document hot in KV as `registry-index-meta`). Every registered repository is listed and counted once, whether or not its admins have claimed it (ops decision D82 item 1): in `totals.registered`, or in `totals.suspended` while it is suspended. No count separates claimed from unclaimed (D82 item 3 and its dated note (c) of 2026-09-29). *(Amended 2026-09-30: it said \"Counts include `detected` repositories in `totals.detected` only; they are never listed (GH-014).\")*",
   "x-psn": {
-    "specVersion": "1.2.0",
+    "specVersion": "1.3.0",
     "phase": "P-M2",
     "artifactPath": "/registry/index/meta.json",
     "authoritative": true,
@@ -41,13 +41,16 @@
       "additionalProperties": false,
       "required": ["listed"],
       "properties": {
-        "listed": { "type": "integer", "minimum": 0, "description": "Repositories that appear in a shard: verified + suspended + quit + delisted." },
-        "verified": { "type": "integer", "minimum": 0 },
+        "listed": { "type": "integer", "minimum": 0, "description": "Repositories that appear in a shard: registered + suspended + quit + delisted. In a document published before ops decision D82: verified + suspended + quit + delisted." },
+        "registered": { "type": "integer", "minimum": 0, "description": "The shard entries whose state is `registered`: every registered repository that is not suspended, whether or not its admins have claimed it (ops decision D82 item 1). A suspended repository is registered in D82 item 1's sense too and is counted in `suspended`, so the registered repositories of D82 item 1, `stats.v1`'s `projectsRegistered`, are `registered` + `suspended`. Added 2026-09-30; a document published before D82 carries `verified` instead, and a document never carries both (see `totals`)." },
+        "verified": { "type": "integer", "minimum": 0, "deprecated": true, "description": "Deprecated: not published from ops decision D82 on. Before D82 it counted the repositories listed as `verified`; beside `listed` it would now tell a reader how many registered repositories nobody has claimed, and whether admins have claimed is their internal matter (D82 item 3, dated note (c) of 2026-09-29). `registered` takes its place. Kept so a document published before D82 stays valid (versioning policy 4)." },
         "suspended": { "type": "integer", "minimum": 0 },
         "quit": { "type": "integer", "minimum": 0 },
         "delisted": { "type": "integer", "minimum": 0 },
-        "detected": { "type": "integer", "minimum": 0, "description": "Detected-but-unclaimed repositories. Counted here and nowhere else (GH-014; URS §21 OPEN-33 governs whether they ever enter exports)." }
-      }
+        "detected": { "type": "integer", "minimum": 0, "deprecated": true, "description": "Deprecated: not published from ops decision D82 on. Before D82 it counted detected-but-unclaimed repositories, which were counted here and listed nowhere (GH-014). A detected repository is now registered, listed and counted in `registered`, and no public artifact counts unclaimed repositories (D82 items 1 and 3, dated note (c) of 2026-09-29; D82 closes URS §21 OPEN-33). Kept so a document published before D82 stays valid (versioning policy 4)." }
+      },
+      "not": { "anyOf": [{ "required": ["registered", "verified"] }, { "required": ["registered", "detected"] }] },
+      "$comment": "One vocabulary per document (ops decision D82 item 3 and its dated note (c) of 2026-09-29): totals carrying `registered` carry neither deprecated count, because either one beside it would tell a reader how many registered repositories their admins have claimed. `registered` is new in 1.3.0, so no document published before it is refused. Added 2026-09-30."
     },
     "delisted": {
       "type": "array",

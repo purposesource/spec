@@ -16,11 +16,10 @@
   "exportUrl": "https://api.purposesource.org/v1/registry/export.json",
   "totals": {
     "listed": 3,
-    "verified": 2,
+    "registered": 2,
     "suspended": 0,
     "quit": 1,
-    "delisted": 0,
-    "detected": 4
+    "delisted": 0
   },
   "delisted": ["R_kgDOWob321"]
 }
