@@ -602,6 +602,13 @@ creating one.
   its published state.
 - The example carries `registered`.
 
+### 1.4.1 — unreleased (2026-09-30; ops decisions D48 item 5 and D82 item 10)
+
+- Wording. The description named the record "one of the three inputs to the cov-v1 coverage
+  function"; it now names `cov-v2`, `cov-v1` before it, and says that cov-v2 reports a `verified`
+  record as `registered` and answers a Pass's `yes-via-pass` about a repository with no record
+  (`coverage/cov-v2.ts`). No constraint moved.
+
 ## waiver.v1.json
 
 ### 1.0.0 — unreleased
@@ -645,6 +652,12 @@ creating one.
   guard still refuses it. No second value was added — `dev` was considered and rejected
   for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
   2026-09-10, which authorises the P-M3 build.
+
+### 1.2.1 — unreleased (2026-09-30; ops decisions D48 item 5 and D82 item 10)
+
+- Wording. The description called the document "the second of the three cov-v1 inputs"; it now
+  names `cov-v2`, `cov-v1` before it, and says cov-v2 reads no waiver list for a repository with
+  no published record, since a waiver is published under a record's node id. No constraint moved.
 
 ## entitlement-record.v1.json
 
@@ -2353,3 +2366,100 @@ which kind of change each entry was.
   `registered`) and the change feed. The meta example's totals carry `registered` and neither
   `verified` nor `detected`, and both counters examples lose `detectedUnclaimed`. The examples gate
   validates all 45.
+
+### 1.2.0 — unreleased (2026-09-30; ops decisions D48 item 5 and D82 item 10)
+
+- Minor. The schema change is additive under versioning policy 1: one enum value and one
+  optional member, and no route, status code, cache class or error code moved. The behaviour
+  change is wider than that: the same GET that answered `404 repo_not_registered` (a Pass holder
+  asking about a repository with no published record) now answers `200` with `yes-via-pass`. An
+  existing request changing its answer is more than policy 1 allows inside a version, and it is
+  taken under policy 5: the coverage route has never answered on production (FS10-021;
+  production's route set leaves it out), so no answer anyone was given there changes. From the
+  route's first production answer, a change like this one needs a new versioned URL.
+- The coverage route is answered by `cov-v2` (`coverage/cov-v2.ts`, its own section below)
+  instead of `cov-v1`. `basis.algoVersion` names the function in every answer, and `cov-v1.ts`
+  stays published beside it byte for byte, so every answer a deployment gave under `cov-v1`
+  stays reproducible from the file that answer names. `/v1/meta`'s `coverage` object keeps its
+  two members and reports the module the deployment runs.
+- `CoverageBasis.repo.repoState` admits `no-record`: no record is published under the node id
+  asked about, and the answer is a Pass's. A Pass covers any work under the licence, registered
+  or not (D48 item 5), so an organisation holding a Pass inside its term is answered
+  `yes-via-pass` about a repository with no record, where `cov-v1` left the caller's
+  `404 repo_not_registered`. `no-record` is what the edge found, not a registry state: the
+  repository may be registered and not yet published (the publish lag, or a record the producers
+  do not write yet), or not under the licence at all, and the answer checks neither. It was named
+  for that before first publication; `unregistered` would have said more than the edge knows.
+  Every other organisation still gets `repo_not_registered`; the code keeps its meaning (no
+  registry record for the repository) and is answered in fewer cases.
+- `CoverageBasis` gains the optional `reason`, enum `[pass-any-work]`, present only on such an
+  answer, so a reader sees why a repository with no record is covered without inferring it.
+- `getCoverage`'s description says both, and that a registered repository is answered the same
+  whether or not its admins have claimed it (D82 item 1). The `NotFound` response's description
+  and its `repoNotRegistered` example summary say the same: no record, and no Pass inside its term. A cov-v2 answer reports a `verified`
+  record as `registered` (D82's dated note (d)), and `repoState`'s description says so.
+- Examples: the seven coverage and meta examples say `algoVersion: cov-v2`; the GET form gains
+  `yesViaPassNoRecord`. The examples gate validates all 46.
+
+## coverage/cov-v2.ts
+
+The second version of the published coverage function, beside the first. The module, its
+vectors (`coverage/cov-v2.vectors.json`) and its runner (`coverage/cov-v2.test.ts`) are versioned
+together; `cov-v1.ts`, `vectors.json` and `cov-v1.test.ts` are not touched, and
+`scripts/check-coverage-module.mjs` now pins cov-v1's SHA-256
+(`96b19df421e4c3d8b719de736640133c3c2376dbc92045f13b83384c0184267a`, what the edge has published
+since 2026-09-17), so an edit to the frozen file fails the gate even if its version string
+survives. It pins cov-v2's too, from this first merge
+(`a2c5f1174b1bf346b28d8e6d6e1e225d30569a19f8779cad2accb8aa4e313ebb`): the edge mirrors these
+bytes and answers with them from its next deploy, so a later change is a cov-v3.
+
+### 1.0.0 — unreleased (2026-09-30; ops decisions D48 item 5 and D82 items 1, 3 and 10, and D82's dated note (d) of 2026-09-29)
+
+- **A Pass covers any work under the licence, registered or not** (D48 item 5: "Coverage
+  attaches to the licence, not to registration"; D82 item 10: "a `cov-v2` answers that a Pass
+  covers any work under the licence; a registered but unclaimed repository is no longer `404
+  repo_not_registered`"). The caller passes `{ nodeId, state: 'no-record' }` when the
+  repository has no published record. An organisation holding a Pass inside its term (status
+  `active`, `periodStart <= now <= periodEnd`, picked by step 5a's rule) is answered
+  `yes-via-pass`, with `basis.repo.repoState: 'no-record'`, `basis.reason: 'pass-any-work'`
+  and the entitlement-JWS proof. `no-record` says only that no record is published under the
+  node id: the repository may be registered and not yet published, or not under the licence at
+  all, and the answer checks neither. Every other organisation gets `repo_not_registered`, now
+  RETURNED as `{ error, algoVersion, repo }` instead of cov-v1's thrown `CoverageInputError`,
+  because it is a fact about the repository and not a skipped step; `isRepoNotRegistered`
+  narrows it, and `coverage()`'s return type is the union `CoverageOutcome`. A missing
+  repository argument still throws, now with code `repo_input_missing` (cov-v1 threw it with
+  code `repo_not_registered`, which is now the returned outcome).
+- Deliberately NOT widened, because D82 item 10 asks cov-v2 for the Pass ("a `cov-v2` answers
+  that a Pass covers any work under the licence"): for a work with no record, a Project naming
+  other repositories (V2-04) or this very node id (V2-20), a Portfolio (V2-16, no record so no
+  owner to match), a donation term scoped to the whole network (V2-17), a suspended, void,
+  grace-window or not-yet-started Pass (V2-06, V2-18, V2-07, V2-19), a threshold
+  self-certification (V2-08), a waiver (V2-09; the list passed is not read) and no company
+  record (V2-05) each keep cov-v1's outcome, `repo_not_registered`. D48 item 5 is worded more
+  widely ("an Entitlement covers the software it names, or every work licensed under these
+  terms if it says so") and would reach some of them; answering them without a record is a new
+  version beside this one, not an edit to it.
+- **A registered repository is one thing, claimed or not** (D82 items 1 and 3). Nothing in the
+  function reads a claim; the vectors V2-10 to V2-13 run a record published for a repository its
+  admins never claimed and get the answers any registered repository gets, `no` included.
+- **One public state** (D82's dated note (d)). `basis.repo.repoState` reports `registered` for a
+  record that says `registered` or the older `verified`; `suspended`, `quit` and `delisted` as
+  before (V2-14, V2-15, V2-21 and the carried VEC-24). The types say it: `RecordRepoState` is what a record carries,
+  `PublishedRepoState` what an answer reports, and it has no `verified`.
+- Everything else is cov-v1's, line for line and in the same order. All 25 frozen cov-v1
+  vectors are carried with `carriedFrom`, the same ids, the same inputs and the same answers;
+  `cov-v2.test.ts` proves that only `basis.algoVersion` and the `verified` token moved. VEC-01's
+  description says a Pass covers every work under the licence rather than every registered
+  repository. The eight answers are unchanged.
+- The doc comment of `Scope.repos` says what `entitlement-record.v1` 1.1.1 says — the term's paid
+  coverage, one repository for a Project bought under D42 — instead of cov-v1's "Declared
+  repository node_ids … min 1, cap 50 — COM-018", which the 1.1.1 entry above kept as history
+  until a cov-v2 existed.
+- Vectors: 46, the 25 carried and 21 new (V2-01 to V2-21), 11 of which expect
+  `repo_not_registered`; one new fixture, a `quit` record. `cov-v2.test.ts` checks that each kind
+  of organisation named above has its vector.
+- Gates: `check:module` checks both modules (no imports, no clock, one version per file) and
+  pins and prints both digests; `check:vectors` validates both suites' inputs and allows
+  `repo_not_registered` only for a vector with no record whose node id is no fixture's;
+  `test:coverage` runs both runners.
