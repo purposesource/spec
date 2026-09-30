@@ -2353,3 +2353,77 @@ which kind of change each entry was.
   `registered`) and the change feed. The meta example's totals carry `registered` and neither
   `verified` nor `detected`, and both counters examples lose `detectedUnclaimed`. The examples gate
   validates all 45.
+
+### 1.2.0 — unreleased (2026-09-30; ops decisions D48 item 5 and D82 item 10)
+
+- Minor, and additive under versioning policy 1: one enum value and one optional member, and no
+  route, status code, cache class or error code moved. Nothing is published under this document
+  yet (the coverage route is off on production, FS10-021), so policy 5 would allow more; nothing
+  more is taken.
+- The coverage route is answered by `cov-v2` (`coverage/cov-v2.ts`, its own section below)
+  instead of `cov-v1`. `basis.algoVersion` names the function in every answer, and `cov-v1.ts`
+  stays published beside it byte for byte, so every answer a deployment gave under `cov-v1`
+  stays reproducible from the file that answer names. `/v1/meta`'s `coverage` object keeps its
+  two members and reports the module the deployment runs.
+- `CoverageBasis.repo.repoState` admits `unregistered`: the repository has no published record,
+  and the answer is a Pass's. A Pass covers any work under the licence, registered or not (D48
+  item 5), so an organisation holding a Pass inside its term is answered `yes-via-pass` about a
+  repository with no record, where `cov-v1` left the caller's `404 repo_not_registered`. Every
+  other organisation still gets `repo_not_registered`; the code keeps its meaning (no registry
+  record for the repository) and is answered in fewer cases.
+- `CoverageBasis` gains the optional `reason`, enum `[pass-any-work]`, present only on such an
+  answer, so a reader sees why a repository nobody registered is covered without inferring it.
+- `getCoverage`'s description says both, and that a registered repository is answered the same
+  whether or not its admins have claimed it (D82 item 1). The `NotFound` response's description
+  and its `repoNotRegistered` example summary say the same. A cov-v2 answer reports a `verified`
+  record as `registered` (D82's dated note (d)), and `repoState`'s description says so.
+- Examples: the seven coverage and meta examples say `algoVersion: cov-v2`; the GET form gains
+  `yesViaPassUnregistered`. The examples gate validates all 46.
+
+## coverage/cov-v2.ts
+
+The second version of the published coverage function, beside the first. The module, its
+vectors (`coverage/cov-v2.vectors.json`) and its runner (`coverage/cov-v2.test.ts`) are versioned
+together; `cov-v1.ts`, `vectors.json` and `cov-v1.test.ts` are not touched, and
+`scripts/check-coverage-module.mjs` now pins cov-v1's SHA-256
+(`96b19df421e4c3d8b719de736640133c3c2376dbc92045f13b83384c0184267a`, what the edge has published
+since 2026-09-17), so an edit to the frozen file fails the gate even if its version string
+survives.
+
+### 1.0.0 — unreleased (2026-09-30; ops decisions D48 item 5 and D82 items 1, 3 and 10, and D82's dated note (d) of 2026-09-29)
+
+- **A Pass covers any work under the licence, registered or not** (D48 item 5: "Coverage
+  attaches to the licence, not to registration"; D82 item 10: "a `cov-v2` answers that a Pass
+  covers any work under the licence; a registered but unclaimed repository is no longer `404
+  repo_not_registered`"). The caller passes `{ nodeId, state: 'unregistered' }` when the
+  repository has no published record. An organisation holding a Pass inside its term (status
+  `active`, `periodStart <= now <= periodEnd`, picked by step 5a's rule) is answered
+  `yes-via-pass`, with `basis.repo.repoState: 'unregistered'`, `basis.reason: 'pass-any-work'`
+  and the entitlement-JWS proof. Every other organisation gets `repo_not_registered`, now
+  RETURNED as `{ error, algoVersion, repo }` instead of cov-v1's thrown `CoverageInputError`,
+  because it is a fact about the repository and not a skipped step; `isRepoNotRegistered`
+  narrows it. A missing repository argument still throws, with code `repo_input_missing`.
+- Deliberately NOT widened, because D48 item 5 and D82 moved only the Pass: a Pass in its grace
+  window, a Project, a Portfolio, a waiver, a donation term and a threshold self-certification
+  answer about a registered repository only, and each has a vector pinning `repo_not_registered`
+  for a work with no record (V2-04 to V2-09). A waiver list passed for such a work is not read.
+- **A registered repository is one thing, claimed or not** (D82 items 1 and 3). Nothing in the
+  function reads a claim; the vectors V2-10 to V2-13 run a record published for a repository its
+  admins never claimed and get the answers any registered repository gets, `no` included.
+- **One public state** (D82's dated note (d)). `basis.repo.repoState` reports `registered` for a
+  record that says `registered` or the older `verified`; `suspended`, `quit` and `delisted` as
+  before (V2-14, V2-15). The types say it: `RecordRepoState` is what a record carries,
+  `PublishedRepoState` what an answer reports, and it has no `verified`.
+- Everything else is cov-v1's, line for line and in the same order. All 25 frozen cov-v1
+  vectors are carried with `carriedFrom`, the same ids, the same inputs and the same answers;
+  `cov-v2.test.ts` proves that only `basis.algoVersion` and the `verified` token moved. VEC-01's
+  description says a Pass covers every work under the licence rather than every registered
+  repository. The eight answers are unchanged.
+- The doc comment of `Scope.repos` says what `entitlement-record.v1` 1.1.1 says — the term's paid
+  coverage, one repository for a Project bought under D42 — instead of cov-v1's "Declared
+  repository node_ids … min 1, cap 50 — COM-018", which the 1.1.1 entry above kept as history
+  until a cov-v2 existed.
+- Gates: `check:module` checks both modules (no imports, no clock, one version per file) and
+  prints both digests; `check:vectors` validates both suites' inputs and allows
+  `repo_not_registered` only for a vector with no record whose node id is no fixture's;
+  `test:coverage` runs both runners.

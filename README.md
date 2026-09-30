@@ -19,7 +19,7 @@ a procurement reviewer can consume all of it the way they consume a static file.
 |---|---|
 | `schemas/` | 29 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
-| `coverage/` | `cov-v1.ts`, the published coverage function, with `vectors.json` (frozen test vectors) and its test suite. Zero dependencies. |
+| `coverage/` | `cov-v2.ts`, the published coverage function in force, with `cov-v2.vectors.json` and its test suite; `cov-v1.ts`, the first version, frozen beside it with `vectors.json`. Zero dependencies. |
 | `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in three cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json` and `claim-kit.v2.example.json`, the example IS the published document, byte for byte. |
 | `kits/` | The claim-language kits — `kit-{version}.json`, the wording a certificate holder may publish and the framing that is excluded (FS08-070). Versioned documents, not pages: a certificate pins the kit that was in force when it was issued. Each is published at `/kits/v{n}` and validated by `check:kits`. |
 | `scripts/` | The CI gates. Each one refuses to pass on an empty input set. |
@@ -131,7 +131,7 @@ a key that came too late, or was voided, keeps its line.
 
 ## The coverage function
 
-`coverage/cov-v1.ts` answers with exactly one of eight values, plus a `basis` block naming
+`coverage/cov-v2.ts` answers with exactly one of eight values, plus a `basis` block naming
 what produced the answer:
 
 `yes-via-pass` · `yes-via-project` · `yes-via-portfolio` · `yes-via-waiver` ·
@@ -140,6 +140,14 @@ what produced the answer:
 It is a pure function over three published inputs and an explicit `now`. No I/O, no clock
 read, no dependencies. Two calls with the same arguments return the same result forever,
 which is what makes the vector file a real test rather than a snapshot.
+
+`cov-v2` (2026-09-30) is `cov-v1` with three changes, each an ops decision: a Pass covers
+any work under the licence, registered or not, so a Pass holder asking about a repository
+with no registry record is answered `yes-via-pass` rather than `repo_not_registered` (D48
+item 5, D82 item 10); a registered repository answers the same whether or not its admins
+claimed it (D82 item 1); and an answer reports one public state, `registered`, for a record
+that says `registered` or the older `verified` (D82's dated note (d)). `cov-v1.ts` stays
+beside it unchanged, its digest pinned, so every answer it gave stays reproducible.
 
 The deployed worker publishes its own module digest at `GET /v1/meta`. Compare it with the
 digest `npm run check:module` prints, and you have verified that the code that answered
@@ -198,8 +206,9 @@ the board's list         ─────┼──────► recipient-list.
                               └──────► stats.v1              ─┘
                                               │
                                               ▼
-                                   coverage/cov-v1.ts  ── the pure function over
+                                   coverage/cov-v2.ts  ── the pure function over
                                                           entitlement + repo + waivers
+                                                          (cov-v1.ts frozen beside it)
 ```
 
 `category-menu.v1` sits underneath all of it: the seven public-benefit categories, written

@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.1.2
+  version: 1.2.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -116,15 +116,22 @@ paths:
         `POST` for a domain-keyed lookup.
 
         Absence of a record for the organisation is `no`, never an error — legibility for
-        scanners matters more than a pedantic 404. An unregistered *repository*, by
-        contrast, is `repo_not_registered`: the question cannot be asked about a
-        repository that never adopted.
+        scanners matters more than a pedantic 404. A repository with no published registry
+        record is different. A Pass covers any work under the licence, registered or not
+        (ops decision D48 item 5), so an organisation holding a Pass inside its term is
+        answered `yes-via-pass` about it, with `basis.repo.repoState: unregistered` and
+        `basis.reason: pass-any-work` saying why. For every other organisation the question
+        cannot be asked about that repository, and the answer is `repo_not_registered`. A
+        registered repository is answered the same way whether or not its admins have
+        claimed it (ops decision D82).
 
-        The answer is computed by a published, versioned pure function (`cov-v1`) over
-        three signed or published inputs. Its source and its frozen test vectors are in
-        the same repository as this document, and the running deployment publishes its own
-        module digest at `/v1/meta` — so the code that answered your query is checkable
-        against the code we published.
+        The answer is computed by a published, versioned pure function over three signed or
+        published inputs: `cov-v2` from API 1.2.0, `cov-v1` before it. `basis.algoVersion`
+        names the one that answered. Both modules and their test vectors are in the same
+        repository as this document — `cov-v1` unchanged, so every answer it gave stays
+        reproducible — and the running deployment publishes the digest of the module it runs
+        at `/v1/meta`, so the code that answered your query is checkable against the code we
+        published.
       tags: [coverage]
       x-psn-phase: P-M3
       parameters:
@@ -167,7 +174,7 @@ paths:
                   value:
                     answer: yes-via-pass
                     basis:
-                      algoVersion: cov-v1
+                      algoVersion: cov-v2
                       company:
                         coId: co_01jf8w2c9km3q7xz5r0v4t6y8b
                         verification: domain-verified
@@ -189,7 +196,7 @@ paths:
                   value:
                     answer: lapsed-in-grace
                     basis:
-                      algoVersion: cov-v1
+                      algoVersion: cov-v2
                       company:
                         coId: co_01jr7f1n8wx2a6gj4b9e3c5h7m
                         verification: officer-attested
@@ -212,7 +219,7 @@ paths:
                   value:
                     answer: no-entitlement-required-under-threshold
                     basis:
-                      algoVersion: cov-v1
+                      algoVersion: cov-v2
                       company:
                         coId: co_01jn4c8j5st9x3df1y6b0z2e4h
                         verification: officer-attested
@@ -230,7 +237,7 @@ paths:
                   value:
                     answer: yes-via-waiver
                     basis:
-                      algoVersion: cov-v1
+                      algoVersion: cov-v2
                       company:
                         coId: co_01jk2a6g3qr7v1bd9w4z8x0c2f
                         verification: unverified
@@ -244,12 +251,35 @@ paths:
                     proof:
                       type: waiver-record
                       url: https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f
+                yesViaPassUnregistered:
+                  summary: A Pass covers a repository with no registry record (D48 item 5)
+                  value:
+                    answer: yes-via-pass
+                    basis:
+                      algoVersion: cov-v2
+                      company:
+                        coId: co_01jf8w2c9km3q7xz5r0v4t6y8b
+                        verification: domain-verified
+                      repo:
+                        nodeId: R_kgDONoRec01
+                        repoState: unregistered
+                      entitlement:
+                        entId: ent_01jf8w2c9km3q7xz5r0v4t6y9b
+                        lane: pass
+                        periodStart: '2027-01-01T00:00:00Z'
+                        periodEnd: '2028-01-01T00:00:00Z'
+                      reason: pass-any-work
+                    asOf: '2027-06-01T12:00:00Z'
+                    proof:
+                      type: entitlement-jws
+                      url: https://api.purposesource.org/v1/entitlements/co_01jf8w2c9km3q7xz5r0v4t6y8b.jws
+                      sha256: b1946ac92492d2347c6235b4d2611184b1946ac92492d2347c6235b4d2611184
                 noRecord:
                   summary: No record for this organisation — `no`, and no proof
                   value:
                     answer: no
                     basis:
-                      algoVersion: cov-v1
+                      algoVersion: cov-v2
                       company: null
                       note: no registry record for this organization
                       repo:
@@ -326,7 +356,7 @@ paths:
                   value:
                     answer: yes-via-project
                     basis:
-                      algoVersion: cov-v1
+                      algoVersion: cov-v2
                       company:
                         coId: co_01jh0y4e1np5s9zb7t2x6v8a0d
                         verification: domain-verified
@@ -710,7 +740,7 @@ paths:
                   value:
                     edgeVersion: 2027.06.01-3
                     coverage:
-                      algoVersion: cov-v1
+                      algoVersion: cov-v2
                       moduleSha256: 3b1c9e0a5d7f2846bb14c0e9a7d3f5028c6b4a19e7d2f80315a9c4b6e8d0f2a4
                     contracts:
                       answerEnum:
@@ -1787,8 +1817,10 @@ components:
       properties:
         algoVersion:
           type: string
-          description: The coverage function version. Its source and vectors are published.
-          example: cov-v1
+          description: >-
+            The coverage function version — `cov-v2` from API 1.2.0, `cov-v1` before it. Its source and
+            vectors are published, and a published version is never edited.
+          example: cov-v2
         company:
           type: [object, 'null']
           additionalProperties: false
@@ -1814,15 +1846,18 @@ components:
               pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$'
             repoState:
               type: string
-              enum: [registered, verified, suspended, quit, delisted]
+              enum: [registered, verified, suspended, quit, delisted, unregistered]
               description: >-
                 The state the repository's published record carries, as the coverage function read it.
                 `registered` is the one state a record published from ops decision D82 on carries for a
                 registered repository that is not suspended, whether or not its admins have claimed it (D82 and its dated note (d) of
-                2026-09-29); `verified` is what records published before D82 carried. cov-v1 reports the
-                record's state without branching on it, and its own `PublishedRepoState` type, which predates
-                D82, stays byte-identical for pinned readers. A quit or delisted repository still computes —
-                coverage that was bought stays bought.
+                2026-09-29); `verified` is what records published before D82 carried. cov-v2 reports a
+                `verified` record as `registered`, so an answer from cov-v2 never says `verified`; cov-v1
+                reports the record's state without branching on it, and its own `PublishedRepoState` type,
+                which predates D82, stays byte-identical for pinned readers. `unregistered` (cov-v2 only):
+                the repository has no published record, and the answer is a Pass's, with `reason`
+                `pass-any-work` (D48 item 5). A quit or delisted repository still computes — coverage that
+                was bought stays bought.
         entitlement:
           type: object
           additionalProperties: false
@@ -1851,6 +1886,14 @@ components:
             grantedAt:
               type: string
               format: date-time
+        reason:
+          type: string
+          enum: [pass-any-work]
+          description: >-
+            Why the answer holds when the other members cannot show it (cov-v2). `pass-any-work`: the
+            repository has no published record (`repo.repoState: unregistered`), and the organisation's
+            Pass covers it because a Pass covers any work under the licence, registered or not (ops
+            decision D48 item 5). Absent from every other answer.
 
     CoverageProof:
       type: object
@@ -2077,7 +2120,8 @@ components:
           properties:
             algoVersion:
               type: string
-              example: cov-v1
+              description: The coverage function this deployment runs — the one every answer's `basis.algoVersion` names.
+              example: cov-v2
             moduleSha256:
               type: string
               pattern: '^[0-9a-f]{64}$'
@@ -2235,8 +2279,10 @@ components:
 
     NotFound:
       description: |
-        The addressed artifact does not exist. Note the asymmetry: an unregistered
-        *repository* is this error, while an organisation with no record is the answer
+        The addressed artifact does not exist. Note the asymmetry on the coverage route: a
+        repository with no registry record is this error (`repo_not_registered`) unless the
+        organisation holds a Pass inside its term, which covers any work under the licence
+        (cov-v2, ops decision D48 item 5), while an organisation with no record is the answer
         `no`.
       content:
         application/json:
@@ -2244,7 +2290,7 @@ components:
             $ref: '#/components/schemas/ErrorEnvelope'
           examples:
             repoNotRegistered:
-              summary: The repository never adopted
+              summary: No registry record for the repository, and no Pass reaches it
               value:
                 error:
                   code: repo_not_registered
