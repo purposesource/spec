@@ -3,18 +3,35 @@
   "generatedAt": "2026-12-14T16:20:31Z",
   "source": "fixture",
   "effectiveMonth": "2027-01",
+  "listVersion": "v1",
+  "weights": {
+    "rcp_0svacmgratb4f4q0syghrz8ym4": 2,
+    "rcp_28h7pz5ynzcftzy0pjrhjqsqmk": 1,
+    "rcp_66ss8w31jg95dd6vc2kn7t5f8y": 1,
+    "rcp_814sdk80b8hzejd1wx7h12ea1s": 1,
+    "rcp_8jf9xfejcgadg7cgyag0hmkcxb": 2,
+    "rcp_92tq7q30k6a0gjvjrps04weeek": 1,
+    "rcp_bdzk8dv1s58eyavk3g0m8g2ncj": 1,
+    "rcp_bnpt0deptzcjgsm50wpvmrw7kn": 1,
+    "rcp_f5cc8xgz81c00nrve04pdahejb": 2,
+    "rcp_r8m8v0kcyttv527jz2m5rha2ps": 1,
+    "rcp_tg8g3ps3smxzdpy1zt0zesjnx9": 2,
+    "rcp_vztv7dk7w3wjbehnz4zr7vd9yz": 1,
+    "rcp_wrfhyk9jj3awrx8dknj7r6yjcn": 1,
+    "rcp_zyjz8xjhrede9fhzq9hf84wc0w": 1
+  },
   "key": {
-    "cat-health": 1429,
-    "cat-education": 1429,
-    "cat-poverty-relief": 1429,
-    "cat-humanitarian-aid": 1429,
-    "cat-environment": 1428,
-    "cat-animal-welfare": 1428,
-    "cat-research": 1428
+    "cat-health": 2222,
+    "cat-education": 2223,
+    "cat-poverty-relief": 1111,
+    "cat-humanitarian-aid": 1111,
+    "cat-environment": 1111,
+    "cat-animal-welfare": 1111,
+    "cat-research": 1111
   },
   "decisionRef": "SAMPLE-MINUTE-2026-12-10-ALLOCATION-KEY-2027-01",
   "proposalId": "ppr_01m9j4hzhrh2d6wpcn2x1gs63c",
   "releasedAt": "2026-12-14T16:20:31Z",
-  "approvedBody": "{\"actKind\":\"policy-adopt\",\"algoVersion\":\"ALLOC-v1\",\"capBps\":1500,\"categoryFunds\":[{\"fundId\":\"cat-animal-welfare\",\"name\":\"Animal welfare\"},{\"fundId\":\"cat-education\",\"name\":\"Education\"},{\"fundId\":\"cat-environment\",\"name\":\"Environment\"},{\"fundId\":\"cat-health\",\"name\":\"Health\"},{\"fundId\":\"cat-humanitarian-aid\",\"name\":\"Humanitarian aid\"},{\"fundId\":\"cat-poverty-relief\",\"name\":\"Poverty relief\"},{\"fundId\":\"cat-research\",\"name\":\"Research\"}],\"decisionRef\":\"SAMPLE-MINUTE-2026-12-10-ALLOCATION-KEY-2027-01\",\"effectiveMonth\":\"2027-01\",\"reserveRetentionBpsMax\":500,\"reserveTargetMinor\":2700000,\"routingMode\":\"shadow\",\"stewardDefaultVector\":{\"cat-animal-welfare\":1428,\"cat-education\":1429,\"cat-environment\":1428,\"cat-health\":1429,\"cat-humanitarian-aid\":1429,\"cat-poverty-relief\":1429,\"cat-research\":1428}}",
-  "bodySha256": "e5ede3e74d7b6bdb33e414c7a2520dd1c816602b20ab318612b1fc30c89d1c3d"
+  "approvedBody": "{\"actKind\":\"policy-adopt\",\"algoVersion\":\"ALLOC-v1\",\"capBps\":1500,\"categoryFunds\":[{\"fundId\":\"cat-animal-welfare\",\"name\":\"Animal welfare\"},{\"fundId\":\"cat-education\",\"name\":\"Education\"},{\"fundId\":\"cat-environment\",\"name\":\"Environment\"},{\"fundId\":\"cat-health\",\"name\":\"Health\"},{\"fundId\":\"cat-humanitarian-aid\",\"name\":\"Humanitarian aid\"},{\"fundId\":\"cat-poverty-relief\",\"name\":\"Poverty relief\"},{\"fundId\":\"cat-research\",\"name\":\"Research\"}],\"decisionRef\":\"SAMPLE-MINUTE-2026-12-10-ALLOCATION-KEY-2027-01\",\"effectiveMonth\":\"2027-01\",\"listVersion\":\"v1\",\"reserveRetentionBpsMax\":500,\"reserveTargetMinor\":2700000,\"routingMode\":\"shadow\",\"stewardDefaultVector\":{\"cat-animal-welfare\":1111,\"cat-education\":2223,\"cat-environment\":1111,\"cat-health\":2222,\"cat-humanitarian-aid\":1111,\"cat-poverty-relief\":1111,\"cat-research\":1111},\"weights\":{\"rcp_0svacmgratb4f4q0syghrz8ym4\":2,\"rcp_28h7pz5ynzcftzy0pjrhjqsqmk\":1,\"rcp_66ss8w31jg95dd6vc2kn7t5f8y\":1,\"rcp_814sdk80b8hzejd1wx7h12ea1s\":1,\"rcp_8jf9xfejcgadg7cgyag0hmkcxb\":2,\"rcp_92tq7q30k6a0gjvjrps04weeek\":1,\"rcp_bdzk8dv1s58eyavk3g0m8g2ncj\":1,\"rcp_bnpt0deptzcjgsm50wpvmrw7kn\":1,\"rcp_f5cc8xgz81c00nrve04pdahejb\":2,\"rcp_r8m8v0kcyttv527jz2m5rha2ps\":1,\"rcp_tg8g3ps3smxzdpy1zt0zesjnx9\":2,\"rcp_vztv7dk7w3wjbehnz4zr7vd9yz\":1,\"rcp_wrfhyk9jj3awrx8dknj7r6yjcn\":1,\"rcp_zyjz8xjhrede9fhzq9hf84wc0w\":1}}",
+  "bodySha256": "e5337e2cfbd58e914df1945ae871692c09d44e0f4e78fd2f9504107187e85e37"
 }

@@ -58,6 +58,11 @@ The allocation key's publication (2026-09-28) adds two more, each with its own s
 exact text two stewards approved and that text's SHA-256; and `allocation-keys.v1.json`, the index
 of every released key with what became of its publication — twenty-nine schemas in all.
 
+The Recipient List's versions and their index (2026-10-01; FS-00 §6.2's dated note of
+2026-10-01) add one more, with its own section below: `recipient-lists.v1.json`, the index of
+every released List version with what became of its publication, and of every immediate removal
+with its published ground — thirty schemas in all.
+
 ### Contracts published beyond the initially-scoped ten
 
 Seven schemas were added because another repository's acceptance test names a schema
@@ -1820,7 +1825,200 @@ reasoning: no month export has ever been published with a row in it.
   No constraint moved: the `status` enum keeps both values, so a document carrying `proposed`
   still validates.
 
+### 1.2.0 — unreleased (2026-10-01; PS-870 items 5, 7 and 8) — **pre-release** change under versioning policy 5
+
+- **Pre-release (versioning rule 5).** Nothing has been published under this file: no List
+  version has been released on any plane, and no producer has written one. So it loses members,
+  tightens types and closes values in place, with a minor bump, 1.1.0 to 1.2.0. What moved and
+  why follows.
+- ONE DOCUMENT PER RELEASED VERSION, AT A PATH. `x-psn.artifactPath` is
+  `/recipient-list/{version}.json` (`{version}` is the token; the founding List is `v1.0`),
+  served by the edge at `/v1/recipient-list/{version}.json`. The producer is `jobs.index-build`,
+  which renders the document from the release row and the released proposal on the release's
+  `index.rebuild` message, publishes it within minutes and never rewrites it; `jobs.ledger-publish`
+  has no part (FS-00 §6.2, the dated note of 2026-10-01, which replaces the 2026-09-08 note's
+  producer line for the List). The phase and consumers lines say so. `x-psn.authoritative` stays
+  false: the board's published List governs.
+- PENDING AND ACTIVE. Every entry carries `status` (`pending | active`; statutes Art. 7(4);
+  Annex A §1(3)) and `legalForm` beside `registrationRef` (Annex A's «Rechtsform und
+  Registernummer» column, split, in the List's German). An `active` entry carries the activation
+  decision's three dates (Recipient Rules §5(1); Financial Regulation §9(1)):
+  `sanctionsScreenedOn`, `accountConfirmedOn` and `grantLetterAcceptedOn`. `standard`,
+  `activeFrom` and the three dates are required on an active entry and absent on a pending one.
+  `legalForm` and `status` join the required members; `registrationRef` already was one.
+- NO SCREENING RECORD IS PUBLISHED. `standard.screening`, which published each check with its
+  list, date, result and reference, is removed: the records of the sanctions screening are
+  confidential and are never published or cited (Financial Regulation §9(7); Recipient Rules
+  §7(2)). The one screening fact published is the date the published activation decision names,
+  because Financial Regulation §9(1) and Recipient Rules §5(1) require the decision to name it;
+  how that sits with §9(7)'s clause that the public pages carry nothing about individual
+  screenings is open with counsel, and `sanctionsScreenedOn` says so. `standard.declaredConflict`
+  is stated without naming a person (Recipient Rules §7(1) and (2)).
+- THE NOTICE AND THE REMOVALS MOVE TO THE INDEX. `noticeGivenAt` is removed: a document written
+  once cannot carry the date it was first published, and for most versions that date is the
+  notice. The new `recipient-lists.v1` states it for every recorded version, the founding List
+  included, whose notice is its own first publication. `removedAt` and `removalGround` are removed
+  too, with their `dependentRequired` rule: the document is written at release, before any removal
+  of its entries, and no version taking effect from the month of a removal or later lists the
+  organisation (migration 0050's whole-list rule), so a removal under statutes Art. 7(6) is
+  published in the index with its ground.
+- ONLY WHAT THE MAPPING TAKES. The document maps the released body through an allow-list (PS-870
+  item 5 (7)), and the record act compares every member the mapping takes with the release, so a
+  member outside it could be published as proven notice without ever being checked. `standardUrl`,
+  the version's `note`, and an entry's `website`, `address`, `activeTo` and `note` are therefore
+  removed: the mapping takes none of them, and `activeTo` has no producer in a document written
+  once. The description now names the members the document carries. Besides the envelope,
+  `categories` stays, rendered from the published category menu and never from the body, and
+  `sample` becomes the constant `true`, set from the plane: two more `allOf` rules require it on
+  every entry of a `sample` or `fixture` document and refuse it on a `platform` one. `source` says
+  that its production-address rule is a rule on `decisionRef`, which is what the schema holds.
+- `status` is the constant `adopted` (`draft` is withdrawn): a version is published only once two
+  stewards have released it on the board's decision, and a draft is a proposal, which is never
+  published. `shareRule.status` is the constant `decided` (ops decision D40 item 7).
+- `shareBps` IS 0, THE EQUAL SHARE. The value is the constant 0, which means the equal share of
+  Calculation Rules Nr. 7 to 9 — what Annex A writes as «gleich» — rounded by largest remainder,
+  ties going to the earlier entry. A non-zero value is reserved for a deviating share under Nr. 10,
+  which no version sets and which needs a change to this contract and to the allocator first.
+  Withdrawn from the description: the sentence that one category's active shares sum to exactly
+  10000 (3333 / 3333 / 3334), and the sentence that zero is for a recipient listed but not yet
+  active. With 0 an activation rewrites no other entry's share, and three equal recipients are
+  paid by Nr. 8's rounding rather than by basis points that gain or lose a Rappen.
+- THE LIST'S ORDER IS ASCENDING `recipientId`. An id is minted when its entry first enters a
+  version, in the List's order, and `shareRule.tiebreak` `list-order` is that order (Nr. 9). The
+  earlier entry keeps the lower id only while the board numbers a newly admitted organisation after
+  the existing ones, never in between; `recipients` says so, as a rule the board is asked to keep,
+  not as a fact the ids make true. JSON Schema cannot compare items; the new gate
+  `check:recipient-lists` holds the examples to it.
+- THE ENVELOPE, AS ON THE KEY. `source` is required (`sample | fixture | platform`, no
+  `registry-v0`); `adoptedAt` and `decisionRef` are required, and `decisionRef` takes
+  `allocation-key.v1`'s grammar and its two `allOf` rules: no `SAMPLE-` reference on a `platform`
+  document, no production address on a `sample` or `fixture` one. `generatedAt` equals the release
+  instant. FS-00 §6.2's dated note of 2026-10-01 records these departures from the envelope rule,
+  as the note of 2026-09-28 does for the key.
+- Wording, same change. The floor paragraph and `country` no longer place the FATF clause in
+  statutes Art. 7(2): a recipient not seated in a jurisdiction the FATF calls for action on is
+  Recipient Rules §1(2), a requirement the board sets above the floor. The sanctions clause stays
+  Art. 7(2) item 3.
+- Nothing about weights is added here: the board's weights are members of the allocation key
+  (`allocation-key.v1` 1.2.0).
+- Wording. The description says how a version is released and published, that its publication
+  is the notice, how an entry becomes active, which grounds a removal under Art. 7(6) has (the
+  organisation's own request among them, «auf eigenen Wunsch»), and that nothing confidential is
+  published; `version`, `effectiveFrom`, `recipients`, `shareRule` and its members say the same
+  where they touched it.
+- THE EXAMPLES. The main example is rebuilt as the sample world's activation version `v1` on the
+  development plane (`fixture`): released 2026-12-04 on a sample decision of 2026-12-03, effective
+  from 2027-01, with all fourteen sample organisations active and their three dates — the fourteen
+  that ops decision D61 item 1 has the development fixtures write as recipients, so none of them is
+  a pending entry there. A further example, `recipient-list.v1.founding.example.json`, is the
+  sample's founding version `v0` (the sample's own token; the real founding List is `v1.0`),
+  released 2026-11-20 on a sample decision of 2026-11-19 with the same fourteen pending, and v1's
+  notice is v0's first publication, as the index example states. The entries are in ascending
+  `recipientId` order and keep their ids, so the `cost-support.v1` example's transfers still
+  resolve against v1 id for id, to active entries, and `check:recipient-lists` proves that. Every
+  share is 0 and every entry is marked `sample`.
+
+## recipient-lists.v1.json
+
+### 1.0.0 — unreleased (2026-10-01; PS-870 items 5, 7 and 8)
+
+- Initial publication. `/recipient-list/index.json`, served by the edge at
+  `/v1/recipient-list/index.json`: every released List version, newest first, with `version`,
+  `url`, `status`, `effectiveFrom` and `releasedAt`; on `recorded` and `late` also `publishedAt`
+  and `publishBatchId`, the record act's proof; and on `recorded` also `noticeGivenAt`, the
+  notice the record holds. Modelled on `allocation-keys.v1`, for the same reason: a write-once
+  document cannot carry the date it was first published, so the proven dates and the status live
+  in an index (FS-00 §6.2, the dated note of 2026-10-01).
+- FOUR STATUSES. `released`: released, its publication not yet recorded, governing nothing.
+  `recorded`: the record act proved the publication, the version's notice met the thirty whole UTC
+  days before `effectiveFrom`, and the record holds the version. `late`: the same proof, but the
+  notice could not meet the thirty days, so only the proof is written, the version governs no month
+  and its token is spent. `void`: a release that can never be recorded, closed by the owner's
+  procedure. `publishedAt` is an instant, not a date as on the key's index, because the List's
+  notice is counted from it in whole UTC days (migration 0050).
+- `noticeGivenAt` IS NEVER NULL. It is present on every recorded version, the founding List
+  included, whose first publication is its notice (statutes Art. 7(4)); for a version whose only
+  changes are activations it is the proven publication of the version that first listed the
+  entries it activates. It replaces `recipient-list.v1`'s nullable `noticeGivenAt`, and the
+  wording Conductor's PS-870 request proposed for that member (its item 10) stands here, less the
+  null case and the removal sentence, which the removals below replace.
+- IMMEDIATE REMOVALS. Every removal under statutes Art. 7(6), newest first, with `recipientId`,
+  `name`, `removedAt` and the published `ground`: `requirement-lapsed`, `registration-lost`,
+  `serious-misconduct` or `own-request`. A stored sanctions hit is published as
+  `requirement-lapsed`, because the ground named is the lapse of a requirement of Art. 7(2), never
+  the list, the entry or the evidence (Financial Regulation §9(6)); no value of the enum names
+  sanctions. `own-request` is the statutes' «auf eigenen Wunsch» and is never rendered as a cause.
+- `source` is required and typed as on `allocation-key.v1`, and a `sample` or `fixture` index
+  names no production address in any `url`. `x-psn.authoritative` is false: the board's published
+  List governs, and a divergence is a defect to report.
+- Regenerated, not written once, and published with both arrays empty before the first release.
+- WHAT A READER CHECKS, in the description: each entry agrees with its version document; a
+  `publishBatchId` and `publishedAt` are a batch of the publish log naming the version's path; a
+  `recorded` entry's `noticeGivenAt` is the `publishedAt` of that entry or of an earlier `recorded`
+  one, and its thirty days ran; a `late` entry's `publishedAt` is fewer than thirty days before the
+  first day of its `effectiveFrom`; and no version whose `effectiveFrom` is the UTC month of a
+  removal or later lists the removed organisation (migration 0050's whole-list rule).
+- The example is a development plane after five releases: the sample's founding version `v0` and
+  its activation version `v1` recorded; `v1.1` late, first published on 3 March 2027 for April,
+  29 days before its first day; `v1.2` void; and `v2` released for July 2027. One organisation is
+  removed, SAMPLE — Animal-welfare recipient 2, for `registration-lost` on 3 February 2027, after
+  the 2027-01 key was released and so not left out of that key. The new gate
+  `check:recipient-lists` holds the example to its order, dates and notices (each recorded notice
+  is the proof of a recorded version at or before it, and the late version was published fewer
+  than thirty days before its month) and to agreement with the two List examples, and proves the
+  refusals of both List contracts on copies of the examples.
+
 ## allocation-key.v1.json
+
+### 1.2.0 — unreleased (2026-10-01; PS-870 item 7; ops decision D89 item 1) — pre-release
+
+- **Pre-release (versioning rule 5).** Nothing has been published under this file (no key has
+  been released on any plane), so it gains two REQUIRED members in place, with a minor bump.
+- `listVersion` and `weights`, in the document and in `approvedBody`. D89 item 1 gives every
+  listed charity a weight, splits the key money by weight among the charities that are active, and
+  has the board publish the key before the month with the weights and the resulting shares. The
+  weight belongs to the key, not to the List: D89 places re-weighting under statutes Art. 8(4),
+  the key's regime, so a later key for a later month changes it, and Calculation Rules Nr. 29 names
+  the key as the instrument. `weights` is a flat map from `rcp_` id to an integer from 1 to 10000,
+  covering every entry of `listVersion`, pending ones included; the weights of one category's
+  entries are equal until per-recipient key amounts under Nr. 27 are built. `listVersion` is fixed
+  at the key's release: of the List versions released before it and not then closed `late` or
+  `void`, the newest whose `effectiveFrom` is at or before `effectiveMonth`. A `late` or `void`
+  closing of that version after the release does not void the key; how such a month is allocated
+  is FS-07's, and its close names the key with its publication date (Nr. 30).
+- Both are REQUIRED rather than optional: nothing is published under this file, and no consumer
+  reads a key document that lacks them. That holds for every key released once the platform's key
+  proposal carries both (Conductor's K1 ticket, after this change). It does not hold by itself on
+  the development environment, whose key adoption is switched on: a key released there before K1
+  has an approved body without them, cannot be rendered under 1.2.0, so it is never published and
+  can never be recorded, and it is a release that `allocation-keys.v1`'s `void` status covers.
+  `x-psn.producer` says so.
+- `key`'s description no longer calls the key "the floor of the allocator's ladder". It says how
+  the key is computed: for each category, the sum of the weights of `listVersion`'s active entries
+  there, less the entries removed under statutes Art. 7(6) before the key's release; then the
+  largest remainder of 10000 over those sums, ties to the ascending category id, and a category at
+  0 left out — so no key is released while every entry is pending. It says that tier 3 splits the
+  key money by `key` for a month whose counted entries are the ones the key was computed over,
+  and names the two ways they can differ (an Art. 7(6) removal after the release, a `listVersion`
+  closed `late` or `void` after it), which FS-07 governs. The member's shape, its `minProperties`
+  and the sum of 10000 are unchanged.
+- Reader check (5) is added: `key` is derived from `weights` over `listVersion`'s active entries
+  and their categories (`recipient-list.v1`), less the entries that `recipient-lists.v1` shows
+  removed before `releasedAt`. While the index shows `listVersion` `void`, check (5) cannot be
+  made, and a reader reports that instead of failing the key. Check (2) now also compares
+  `listVersion` and `weights` with the approved text. Check (3) stays, and says "shares" so that
+  "weights" means one thing.
+- The example is rebuilt. `listVersion` is `v1`, the recipient-list example. The weights are 2 for
+  each health and each education entry and 1 for every other entry, and the key is what they give
+  over v1's fourteen active entries: health 2222, education 2223 and every other category 1111.
+  After the floors one basis point remains, and health and education tie on the largest remainder;
+  it goes to education, whose category id sorts first, where the menu's order would have given it
+  to health. The approved text and its hash are new (`e5337e2c…`); `allocation-keys.v1`'s example
+  entry for 2027-01 and the API description's two examples carry the new hash, and
+  `allocation-keys.v1` itself does not change. `check:allocation-keys` holds the key to reader
+  check (5) against the List examples and to `listVersion` being the version in force at the
+  release (its `version` rule), and proves both can fail, a removal before the release left in
+  included.
 
 ### 1.1.0 — unreleased (2026-09-29; pre-release: `decisionRef`'s grammar)
 
@@ -2438,6 +2636,17 @@ which kind of change each entry was.
   does not reach a work with no record, so the published code is still tested as published;
   `check:vectors` still asks for all eight answers for the same reason. No example moved:
   `check:openapi-examples` validates the same 46.
+
+### 1.2.2 — unreleased (2026-10-01; PS-870 item 7)
+
+- Examples only, a patch: no route, status code, cache class, error code or schema moved.
+  `getAllocationKey`'s `januaryKey` example is `allocation-key.v1`'s rebuilt example (1.2.0:
+  `listVersion`, `weights`, the key they give, the approved text and its hash), and
+  `getAllocationKeyIndex`'s `threeKeys` entry for 2027-01 carries the new hash.
+  `check:openapi-examples` validates the same 46.
+- The Recipient List's two edge routes, `/v1/recipient-list/{version}.json` and
+  `/v1/recipient-list/index.json` (FS-00 §6.2, the dated note of 2026-10-01), are not described
+  here yet.
 
 ## coverage/cov-v2.ts
 

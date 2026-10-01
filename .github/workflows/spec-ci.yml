@@ -63,12 +63,25 @@ jobs:
         # then faithfully matches bytes against a published copy that is already wrong.
         run: npm run check:menu
 
+      - name: The Recipient List examples keep their order, dates and agreement
+        # The schemas can say what each List version and index entry carries; only this step
+        # can say that the entries are in the List's order, that a recorded notice ran thirty
+        # days and is the proof of a recorded version, that the index agrees with the version it
+        # lists, that no version taking effect from a removal's month lists the organisation, and
+        # that the cost-support example's transfers resolve to active entries. It also proves the
+        # two contracts still refuse a pending entry with evidence, a published screening record,
+        # a share other than 0 and a member the mapping of the released body does not take. Each
+        # rule is proved able to fail first.
+        run: npm run check:recipient-lists
+
       - name: Every example allocation key hashes to the text two stewards approved
         # After the menu step, because a key's approved text carries the menu it was checked
         # against. The schema can say that `approvedBody` and `bodySha256` exist; only this
         # step can say that one is the SHA-256 of the other, that the text is its own RFC 8785
-        # form, that the key beside it is the key inside it, and that the index examples agree
-        # with the key example. Each rule is proved able to fail first.
+        # form, that the key beside it is the key inside it, that the key is the one its weights
+        # give over the List version it names (reader check 5), that this version was the one in
+        # force when the key was released, and that the index examples agree with the key
+        # example. Each rule is proved able to fail first.
         run: npm run check:allocation-keys
 
       - name: Coverage vectors use valid published artifacts

@@ -17,7 +17,7 @@ a procurement reviewer can consume all of it the way they consume a static file.
 
 | Directory | Contents |
 |---|---|
-| `schemas/` | 29 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
+| `schemas/` | 30 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v2.ts`, the published coverage function in force, with `cov-v2.vectors.json` and its test suite; `cov-v1.ts`, the first version, frozen beside it with `vectors.json`. Zero dependencies. |
 | `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in three cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json` and `claim-kit.v2.example.json`, the example IS the published document, byte for byte. |
@@ -35,11 +35,14 @@ npm test
 That runs, in order: schemas compile and are addressed correctly; every example validates
 against its schema; every claim-language kit validates, is addressed at the permalink its
 own name implies and carries no figure; the category menu is a single list whose every copy
-is identical; every example allocation key hashes to the approved text it carries and the key
-index agrees with it; the coverage vectors use valid artifacts and still cover all eight answers;
-the coverage module is dependency-free and clock-free (and its SHA-256 is printed); the copy
-law holds; the published module typechecks under `erasableSyntaxOnly`; the frozen vector
-suite passes; the OpenAPI lints; and every example inside the API description validates too.
+is identical; the Recipient List examples keep the List's order, their dates and notices, and
+agree with their index and with the cost-support example, and the two List contracts refuse what
+they must; every example allocation key hashes to the approved text it carries, is the key its
+weights give over the List version it names, and the key index agrees with it; the coverage
+vectors use valid artifacts and still cover all eight answers; the coverage module is
+dependency-free and clock-free (and its SHA-256 is printed); the copy law holds; the published
+module typechecks under `erasableSyntaxOnly`; the frozen vector suite passes; the OpenAPI lints;
+and every example inside the API description validates too.
 
 Individual gates:
 
@@ -49,7 +52,9 @@ npm run check:schemas           # compile, $id, self-containment, provenance, ch
 npm run check:examples          # one example per schema, each valid
 npm run check:kits              # every claim-language kit: valid, correctly addressed, no figure
 npm run check:menu              # the category menu is one list; every copy of it is identical
-npm run check:allocation-keys   # example keys hash to their approved text; the key index agrees
+npm run check:recipient-lists   # the List examples: order, dates, notices, index agreement, refusals
+npm run check:allocation-keys   # example keys hash to their approved text and derive from their
+                                #   weights over the List; the key index agrees
 npm run check:vectors           # vector inputs are valid artifacts; all eight answers covered
 npm run check:module            # coverage module: no imports, no clock, no I/O; prints its digest
 npm run check:copy              # claim rules and leak guards over published copy
@@ -94,7 +99,8 @@ needs a toolchain is not really published.
 | `ledger-export.v1.json` | `/ledger/{YYYY}-{MM}.json` (+ CSV twin) | first public version |
 | `ledger-chain.v1.json` | `/ledger/chain.json` | first public version |
 | `cost-support.v1.json` | one calendar month of the published cost-support table | P-M3 producer, v0 hand-maintained |
-| `recipient-list.v1.json` | one published version of the Recipient List (kept by the board, outside the statutes) | P-M3 producer, v0 hand-maintained |
+| `recipient-list.v1.json` | `/recipient-list/{version}.json` — one released version of the Recipient List (kept by the board, outside the statutes), each entry pending or active, written once | P-M3 producer |
+| `recipient-lists.v1.json` | `/recipient-list/index.json` — every released List version, newest first, with its state (released, recorded, late or void), its proven publication and its notice, and every immediate removal with its published ground | P-M3 producer |
 | `allocation-key.v1.json` | `/allocation-keys/{YYYY-MM}.json` — the board's allocation key for one month, released by two steward approvals before the month and written once, with the exact text they approved | P-M3 producer |
 | `allocation-keys.v1.json` | `/allocation-keys/index.json` — every released key, newest first, with its state (released, recorded, late or void) and its proven publication date | P-M3 producer |
 | `sponsorship-schedule.v1.json` | `/sponsors/schedule/{version}.json` — the published sponsorship tiers and terms, versioned, never edited once a sponsor has paid under a version (ops decision D44) | P-M2, `draft` until the board adopts it |
@@ -108,12 +114,18 @@ Each schema carries an `x-psn` block naming its artifact path, its milestone, th
 clauses it implements, and its changelog section. CI fails if any of that is missing —
 a contract cannot ship here without provenance.
 
-The `cost-support.v1` and `recipient-list.v1` rows are the money contracts of 2026-09-07. Both describe artifacts the frozen
-artifact catalogue does not yet name — that deferral is deliberate — so each says so in its
-`x-psn.artifactPath` rather than claiming a URL: at v0 the cost-support table is
-hand-maintained and rendered on the transparency page, and the Recipient List is the board's
-published list, kept outside the statutes. Neither adds a route: they are published files, and the schema is the
+The `cost-support.v1` and `recipient-list.v1` rows are the money contracts of 2026-09-07. Both described artifacts the frozen
+artifact catalogue did not yet name — that deferral was deliberate — so each said so in its
+`x-psn.artifactPath` rather than claiming a URL. The cost-support table still does: at v0 it is
+hand-maintained and rendered on the transparency page, a published file whose schema is the
 contract whether the producer is a job or a person.
+
+The `recipient-list.v1` and `recipient-lists.v1` rows (FS-00 §6.2's dated note of 2026-10-01)
+publish the Recipient List the way the allocation key is published: each released version is
+written once at `/recipient-list/{version}.json`, and its publication is the public notice of what
+it announces; the date of that publication is proven afterwards from the publish log and stated in
+the index, which also lists every organisation removed at once under statutes Art. 7(6), with its
+ground. Both stay `authoritative: false`: the board's published List is the instrument.
 
 The `sponsorship-schedule.v1` and `sponsorship.v1` rows (ops decision D44) follow the same
 pattern. Sponsorship is invoiced and paid by bank transfer, never through the checkout, so the

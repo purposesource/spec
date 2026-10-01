@@ -1,51 +1,75 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://purposesource.org/spec/schemas/recipient-list.v1.json",
-  "title": "Recipient List (v1)",
-  "description": "One published version of the Recipient List: the organisations that receive what the fees account passes on, each assigned to one of the movement's seven published categories (ops decision D33, 2026-09-06).\n\nWHAT IT IS. What is passed on goes DIRECTLY, from the fees account, to the public-benefit organisations on this list, in the shares the published allocation rule produces for the month. There is no intermediary: no umbrella, no pooled fund, no earmark instruction, no handling fee. The board usually aims for about ten to fifteen organisations anywhere in the world. That is a non-binding target, not a rule, so this schema enforces no range: a removal for cause takes effect at once, and a contract that cannot express the true state is worse than none.\n\nTHE LEGAL INSTRUMENT IS THE BOARD'S PUBLISHED LIST, NOT THIS FILE. The Recipient List is kept by the board under statutes Art. 7, outside the statutes: it is not a statutes annex, and a change to it is never a statutes amendment. The founding list is adopted by the board at its constituting meeting, and its first publication counts as the thirty days' public notice for the entries on it. This artifact is the list's machine-readable form, which is why `x-psn.authoritative` is false. Where the two disagree the published list governs and the divergence is a defect to report.\n\nCHANGES ARE PROSPECTIVE. An addition or a removal takes effect for months AFTER thirty days' public notice (`noticeGivenAt`, `effectiveFrom`). A removal for cause — for instance a sanctions hit or loss of registration — takes effect at once, is published with its ground, and the removed recipient's share for that month goes to the other recipients of its category (D33 item 3). There is no open self-registration: every addition meets statutes Art. 7(2) and the Recipient Rules and is a board decision, minuted and published, even where an organisation proposed itself; no recipient is ever added by free text or on a payer's or a contributor's nomination alone.\n\nTHE FLOOR IS IN THE STATUTES; THE DETAILS ARE IN THE RECIPIENT RULES. Statutes Art. 7(2) sets the minimum every recipient meets, and that floor may only be tightened: it is constituted under the law of its country as a not-for-profit organisation with a charitable or public-benefit purpose in one of the seven categories, and a newly founded organisation is not excluded; it may lawfully receive a transfer from a Swiss association under the law that applies to it; it is not the target of sanctions that apply to the Association and is not seated in a jurisdiction the FATF calls for action on; it is not controlled by any member, board member, employee or contractor of the Association, or by a person close to one, and gives no such person a personal benefit; and it is paid only into a bank account in its own name that the Association has verified. The details of the checks are set by the Recipient Rules, which the board issues and changes with publication: they may add further requirements and remove them again, but never fall below the floor. So this schema holds constant only what the floor makes constant — payment by bank transfer into a verified account, never in cash or crypto-assets (`standard.bankTransferOnly`), and the declaration of independence (`standard.independenceDeclared`) — and carries the rest as references into the recipient file, because a validator can prove that the evidence was recorded and only a human can prove that it is true. Years of accounts, an audit, a published address and a website are not requirements: `standard.accountsYears`, `address` and `website` are recorded where they exist and are never a condition of listing.\n\nNO REAL ORGANISATION IS NAMED BEFORE THE BOARD ADOPTS AND PUBLISHES THE LIST. A sample dataset marks every entry `sample: true` and its names say so; nothing renders a recipient as listed on the strength of a fixture.",
+  "title": "Recipient List (v1) — /recipient-list/{version}.json",
+  "description": "One released version of the Recipient List: the organisations that receive what the fees account passes on, each assigned to one of the movement's seven published categories and each `pending` or `active` (statutes Art. 7(1) and (4); ops decision D33, 2026-09-06).\n\nWHAT IT IS. What is passed on goes DIRECTLY, from the fees account, to the active public-benefit organisations on this list, in the shares the published allocation rule produces for the month. There is no intermediary: no umbrella, no pooled fund, no earmark instruction, no handling fee. The board usually aims for about ten to fifteen organisations anywhere in the world. That is a non-binding target, not a rule, so this schema enforces no range.\n\nTHE LEGAL INSTRUMENT IS THE BOARD'S PUBLISHED LIST, NOT THIS FILE. The Recipient List is kept by the board under statutes Art. 7, outside the statutes: it is not a statutes annex, and a change to it is never a statutes amendment. The founding list is adopted by the board at its constituting meeting, and its first publication counts as the thirty days' public notice for the entries on it (statutes Art. 7(4)). This artifact is the list's machine-readable form, which is why `x-psn.authoritative` is false. Where the two disagree the published list governs and the divergence is a defect to report.\n\nONE DOCUMENT PER RELEASED VERSION, WRITTEN ONCE. Two stewards approve the exact bytes of a version proposal, and the second approval RELEASES the version. `jobs.index-build` then publishes this document within minutes and never rewrites it: a token is released at most once, ever, and a later render that differs leaves the stored bytes where they are (FS-00 §6.2, the dated note of 2026-10-01). Every member is a fact of the release, so a released document is `adopted`: a draft is a proposal, and no proposal is ever published. The document maps the released version's body member by member and never carries the body verbatim. Besides the envelope (`schemaVersion`, `generatedAt`, `source`), the seven `categories` of the published menu and the `sample` marks of a non-production plane, it carries only what that mapping takes from the released body: `version`, `status`, `effectiveFrom`, `adoptedAt`, `decisionRef` and `shareRule`, and for each entry `recipientId`, `name`, `country`, `legalForm`, `registrationRef`, `category`, `shareBps` and `status`, with `activeFrom`, `standard` and the activation decision's three dates on an `active` entry. The steward's record act compares each of those members with the release, the entries in order, before it records the publication as notice.\n\nTHE PUBLICATION IS THE NOTICE, AND ITS DATE IS NOT IN THIS DOCUMENT. Publishing a version is the public notice of the changes it announces (statutes Art. 7(4) and (5)), and no document can carry the date it was first published. A steward's record act proves that date afterwards from `/meta/publish-log.json`, and `/recipient-list/index.json` (`recipient-lists.v1`) states it beside the version's status, with the notice the record holds once the version is recorded. What counts as the List's publication is open with counsel; the default is this document at its edge URL, dated by the publish log.\n\nPENDING AND ACTIVE. Every entry is `pending` or `active` (statutes Art. 7(4)). An entry becomes active by a minuted and published board decision that its file is complete under the Recipient Rules, the accepted grant letter included; the decision names the date of the sanctions screening, the date the bank account was confirmed and the date the grant letter was accepted (Recipient Rules §5(1); Financial Regulation §9(1)). That decision is published as a later version listing the entry as `active` with those three dates. No entry receives a share before its activation (Financial Regulation §9(1)), and the founding list lists every entry `pending` (Annex A §1(3)). Only an `active` entry carries `activeFrom`, `standard` and the three dates; a `pending` entry carries none of them.\n\nCHANGES ARE PROSPECTIVE. An addition takes effect for the months after its public notice has run, and a removal other than under statutes Art. 7(6) for the months after thirty days' public notice (statutes Art. 7(5); Recipient Rules §2(2)); `effectiveFrom` is the first month a version governs. A removal under Art. 7(6) — a sanctions hit, loss of registration, the lapse of another requirement of Art. 7(2), serious misconduct, or the organisation's own request («auf eigenen Wunsch») — takes effect at once and records no version: it is published with its ground in the index (`recipient-lists.v1`), never by rewriting a version, and no version that takes effect from the month of the removal (UTC) or later lists the organisation. The removed organisation's share for that month goes to the other active recipients of its category, except after a sanctions hit, when it is held as blocked while a legal ban stands (statutes Art. 7(6); Calculation Rules Nr. 11). There is no open self-registration: every addition meets statutes Art. 7(2) and the Recipient Rules and is a board decision, minuted and published, even where an organisation proposed itself; no recipient is ever added by free text or on a payer's or a contributor's nomination alone (statutes Art. 7(3)).\n\nNOTHING CONFIDENTIAL IS PUBLISHED. This document carries no screening record — the records of the sanctions screening are confidential and are never published or cited (Financial Regulation §9(7); Recipient Rules §7(2)) — no person and no bank detail. The date of the sanctions screening appears only as the published activation decision names it.\n\nTHE FLOOR IS IN THE STATUTES; THE DETAILS ARE IN THE RECIPIENT RULES. Statutes Art. 7(2) sets the minimum every recipient meets, and that floor may only be tightened: it is constituted under the law of its country as a not-for-profit organisation with a charitable or public-benefit purpose in one of the seven categories, and a newly founded organisation is not excluded; it may lawfully receive a transfer from a Swiss association under the law that applies to it; it is not the target of sanctions that apply to the Association; it is not controlled by any member, board member, employee or contractor of the Association, or by a person close to one, and gives no such person a personal benefit; and it is paid only into a bank account in its own name that the Association has verified. The details of the checks are set by the Recipient Rules, which the board issues and changes with publication (their §1(2) adds that a recipient is not seated in a jurisdiction the FATF calls for action on): they may add further requirements and remove them again, but never fall below the floor. So this schema holds constant only what the floor makes constant — payment by bank transfer into a verified account, never in cash or crypto-assets (`standard.bankTransferOnly`), and the declaration of independence (`standard.independenceDeclared`) — and carries the rest as references into the recipient file, because a validator can prove that the evidence was recorded and only a human can prove that it is true. Years of accounts, an audit, a published address and a website are not requirements: `standard.accountsYears` is recorded where accounts exist and is never a condition of listing, and this document carries neither an address nor a website.\n\nNO REAL ORGANISATION IS NAMED BEFORE THE BOARD ADOPTS AND PUBLISHES THE LIST. A sample dataset declares its plane in `source`, marks every entry `sample: true` and its names say so; nothing renders a recipient as listed on the strength of a fixture.",
   "x-psn": {
-    "specVersion": "1.1.0",
-    "phase": "P-M3 (producer). No list has been adopted: the board adopts the founding list at its constituting meeting and publishes it as the Recipient List, kept outside the statutes, and no transfer is made before an adopted list is published.",
-    "artifactPath": "no path in the FS-00 §6.2 catalogue yet — deliberately deferred; the list is the board's published, versioned Recipient List, kept outside the statutes, and is rendered on the causes and transparency pages. The published path is fixed when FS-00 §6.2 adopts this artifact.",
+    "specVersion": "1.2.0",
+    "phase": "P-M3 (producer: `jobs.index-build`). Nothing is published under this contract yet: no List version has been released on any plane. The founding List (Annex A, «Version 1.0») is to be released as `v1.0` and published here before a steward records it.",
+    "artifactPath": "/recipient-list/{version}.json — written once per released version ({version} is the token; the founding List is v1.0); served by the edge at /v1/recipient-list/{version}.json",
     "authoritative": false,
-    "producer": "the operator, from the recipient files, on a board decision that is minuted and published · P-M3: the `recipients` table, published by `jobs.ledger-publish`",
-    "consumers": ["the causes and transparency pages (FS-01)", "cost-support.v1 transfers and ledger `disburse` rows, which resolve their `recipientId` against the version in force", "reconcilers and reviewers"],
-    "fsRefs": ["FS-07 amendment banner (D33 items 1–3 — the `recipients` table at P-M3)", "FS-00 §6.2", "URS TRN-024, GOV-033, ENG-045"],
+    "producer": "`jobs.index-build` (P-M3), from the release row the second approval of a version proposal writes and the proposal's stored body (Conductor's PS-1346 and PS-1347), on the release's `index.rebuild` message to `q-index-build`",
+    "consumers": [
+      "the causes and transparency pages (FS-01)",
+      "the steward console's record act, which reads these bytes from the public data plane and checks them against the release",
+      "`/recipient-list/index.json` (`recipient-lists.v1`)",
+      "`allocation-key.v1`, whose `listVersion` names a version and whose key is derived over that version's active entries (its reader check 5)",
+      "cost-support.v1 transfers and ledger `disburse` rows, which resolve their `recipientId` against the version in force",
+      "reconcilers and reviewers"
+    ],
+    "fsRefs": [
+      "FS-00 §6.2 (dated note of 2026-10-01: the Recipient List's versions and their index)",
+      "FS-07 amendment banner (D33 items 1–3 — the `recipients` table at P-M3)",
+      "statutes Art. 7(1) to (7)",
+      "Recipient Rules §2(2), §5, §7",
+      "Financial Regulation §9(1) and (7)",
+      "Calculation Rules Nr. 7 to 11",
+      "URS TRN-024, GOV-033, ENG-045"
+    ],
     "vsRefs": ["VS-05"],
     "changelog": "CHANGELOG.md#recipient-listv1json"
   },
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "generatedAt", "version", "status", "effectiveFrom", "noticeGivenAt", "categories", "recipients", "shareRule"],
+  "required": ["schemaVersion", "generatedAt", "source", "version", "status", "effectiveFrom", "adoptedAt", "decisionRef", "categories", "recipients", "shareRule"],
   "properties": {
     "schemaVersion": { "const": 1 },
-    "generatedAt": { "type": "string", "format": "date-time" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The envelope instant (FS-00 §6.2), and for this artifact it EQUALS the release instant: the version's `releasedAt` in `/recipient-list/index.json`, the server's clock in the second approval's transaction, which no writer can type. It is not the instant of the plane the document was first published with. The rule that `generatedAt` is derived from the rows the build read, never from a clock, is kept: the one row behind this document is its release, and a document that is written once must render to the same bytes on every later run. It therefore differs from the `generatedAt` of the `/meta/publish-log.json` batch that lists this path whenever a newer row existed when the document was published; FS-00 §6.2's dated note of 2026-10-01 records this departure, as the note of 2026-09-28 does for `allocation-key.v1`."
+    },
+    "source": {
+      "enum": ["sample", "fixture", "platform"],
+      "description": "Which plane produced this document, in the envelope's vocabulary (FS-00 §6.2), exactly as on `allocation-key.v1`. `platform` is `jobs.index-build` in `PSN_ENV=prod`; it writes `fixture` in every other environment, and `sample` labels a sample plane. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders one is labelled sample, and a production deployment refuses to serve it. REQUIRED here, although the envelope rule makes `source` optional, because this artifact has one producer and it always knows its plane; `registry-v0` is not admitted, because the curated registry never carries a List version, and a value can be added later but never taken back. FS-00 §6.2's dated note of 2026-10-01 records both departures. A `platform` document never carries a sample `decisionRef`, and a `sample` or `fixture` document never carries a production address in its `decisionRef` (the rules below). Every entry of a `sample` or `fixture` document is marked `sample`, and no entry of a `platform` document is."
+    },
     "version": {
       "type": "string",
       "pattern": "^v[0-9]+(\\.[0-9]+)?$",
-      "description": "This list version's own published token — the version cited by every month that transferred under it (URS TRN-024 publishes the Recipient List version in force). The token shape follows `scheduleVersion`, the contract set's other published version on a money-bearing reference (URS ENG-084), so a reader meets one form rather than two."
+      "description": "This version's own published token, `v<major>[.<minor>]` — the version cited by every month that transferred under it (URS TRN-024 publishes the Recipient List version in force). A token is released once, ever, and each released token sorts after every earlier one as (major, minor), so `v2.0` does not sort after `v2`. The founding List is `v1.0` (Annex A: «Version 1.0»). The token shape follows `scheduleVersion`, the contract set's other published version on a money-bearing reference (URS ENG-084), so a reader meets one form rather than two."
     },
     "status": {
-      "enum": ["draft", "adopted"],
-      "description": "`adopted` means this version was adopted by the board, minuted and published as the Recipient List, which the board keeps outside the statutes and which is never a statutes annex; `draft` means it was not, and no transfer is ever made against a draft. The distinction is in the artifact because the honesty rule needs it in the artifact: a page cannot tell an adopted list from a proposal by looking at the recipients."
+      "const": "adopted",
+      "description": "Always `adopted`: a version is published only after two stewards have released it on the board's minuted decision (`adoptedAt`, `decisionRef`), and a draft is a proposal, which is never published and against which no transfer is ever made. The member stays in the artifact because the honesty rule needs it there: a page reads the fact from the document rather than assuming it."
     },
     "effectiveFrom": {
       "$ref": "#/$defs/monthKey",
-      "description": "The first month this version governs. Changes are prospective: a version that adds or removes a recipient takes effect for months after thirty days' public notice (D33 item 3). A removal for cause is the one immediate change, and its recipient carries `removedAt` and `removalGround`."
+      "description": "The first month this version governs. Its changes take effect only for months after their public notice has run (statutes Art. 7(5)); that notice is stated in the index (`recipient-lists.v1`), never here, because it is proven after this document is written. The version in force for a month is the one the statutes name — the version last announced and published (statutes Art. 7(1)) — and a released version governs no month until it is recorded."
     },
-    "noticeGivenAt": {
-      "type": ["string", "null"],
-      "format": "date-time",
-      "description": "When the public notice for this version was given, at least thirty days before `effectiveFrom` (D33 item 3). NULL, and required rather than optional, for the two cases where no separate notice is given: the first adopted list, whose first publication itself counts as the thirty days' public notice for the entries on it, so its `effectiveFrom` lies at least thirty days after that publication; and a removal for cause, which takes effect at once. In an audit a missing key and an explicit null must not be distinguishable — the same reasoning `ct-segment.v1` gives its nullable `ref`."
+    "adoptedAt": {
+      "type": "string",
+      "format": "date",
+      "description": "The date of the board's minuted decision this version publishes: the founding List's adoption at the constituting meeting, or a later decision that adds, activates, re-categorises or removes entries (statutes Art. 7(3) to (5); Recipient Rules §5(1))."
     },
-    "adoptedAt": { "type": "string", "format": "date", "description": "The date of the decision that adopted this version. Every addition and every removal is a board decision, minuted and published (D33 item 3)." },
-    "decisionRef": { "type": "string", "maxLength": 200, "description": "The published minute of that decision." },
-    "standardUrl": { "type": "string", "format": "uri", "description": "Where the Recipient Rules are published: the board's rules that set the details of the checks above the floor of statutes Art. 7(2). The floor may only be tightened; the board changes the Rules with publication, never below the floor. The member keeps its D33 item 2 name, and the text a reader checks a recipient against is a published document, not a paraphrase in a schema." },
+    "decisionRef": {
+      "$ref": "#/$defs/decisionRef",
+      "description": "The reference of the board's published minute of that decision. At most 200 characters of plain ASCII: a letter or digit first, then letters, digits, spaces and `. _ / : # ( ) -` (the pattern `^[A-Za-z0-9][A-Za-z0-9 ._/:#()-]{0,199}$`, the grammar `allocation-key.v1`'s `decisionRef` carries), so no control or format character, and no leading space, can reach a published List. A reference beginning `SAMPLE-` (after trimming, in any case) is a sample and is admitted only on the development environment; a `platform` document never carries one. A reference naming a production address (`$defs.productionAddress`) is admitted only on production, so a `sample` or `fixture` document never carries one."
+    },
     "categories": {
       "type": "array",
       "minItems": 7,
       "maxItems": 7,
-      "description": "The movement's seven published categories (statutes Art. 7; D33 item 1: the seven stay, and a 'category fund' is from now on nothing but the basket of listed recipients in that category). All seven are carried in every version, including one whose recipients have all been removed for cause, because the menu is the movement's and not the list's. EXACTLY ONE ENTRY PER SLUG, enforced: seven items, and one `contains` clause per slug of `$defs.categorySlug`. `uniqueItems` would not do this job — on an array of objects it compares whole objects, so seven entries all slugged `health` with distinct names would pass it, and a published version could claim seven categories while six of the movement's seven were silently absent.",
+      "description": "The movement's seven published categories (statutes Art. 7; D33 item 1: the seven stay, and a 'category fund' is from now on nothing but the basket of listed recipients in that category). All seven are carried in every version, including one whose recipients have all been removed, because the menu is the movement's and not the list's. EXACTLY ONE ENTRY PER SLUG, enforced: seven items, and one `contains` clause per slug of `$defs.categorySlug`. `uniqueItems` would not do this job — on an array of objects it compares whole objects, so seven entries all slugged `health` with distinct names would pass it, and a published version could claim seven categories while six of the movement's seven were silently absent. `jobs.index-build` renders them from the published category menu (`category-menu.v1`), never from the released body.",
       "allOf": [
         { "contains": { "properties": { "slug": { "const": "health" } }, "required": ["slug"] } },
         { "contains": { "properties": { "slug": { "const": "education" } }, "required": ["slug"] } },
@@ -68,98 +92,113 @@
     },
     "recipients": {
       "type": "array",
-      "description": "The listed organisations. The board usually aims for about ten to fifteen — a non-binding target, not a rule, so no range is enforced here; a removal for cause also takes effect at once, and the published state must remain expressible. Each entry carries its own evidence under statutes Art. 7(2) and the Recipient Rules, and the category it is assigned to.",
+      "description": "The listed entries, `pending` and `active`, IN ASCENDING `recipientId` ORDER, which is the List's order. An entry's id is minted when the entry first enters a version, in the List's order, and is never reused. Ascending id and the List's order stay one order only while the board's List numbers a newly admitted organisation after the existing ones, never in between, which the board is asked to keep so that the earlier entry (Calculation Rules Nr. 9) is always the one with the lower id. That order is the tiebreak of `shareRule` (Calculation Rules Nr. 9: the earlier entry first). JSON Schema cannot compare one item with the next, so the order is stated here, and `check:recipient-lists` holds the examples to it. A version lists every entry it keeps and every entry it introduces, and no organisation removed under statutes Art. 7(6) in the month it takes effect from or earlier (UTC). The board usually aims for about ten to fifteen organisations — a non-binding target, not a rule, so no range is enforced here. Each active entry carries its own evidence under statutes Art. 7(2) and the Recipient Rules; every entry carries the category it is assigned to.",
       "items": { "$ref": "#/$defs/recipient" }
     },
     "shareRule": {
       "type": "object",
       "additionalProperties": false,
       "required": ["mode", "rounding", "tiebreak", "status"],
-      "description": "How a category's amount for a month is divided among the listed recipients OF THAT CATEGORY. DECIDED (ops decision D40 item 7, 2026-09-14; statutes Art. 8(2)): equal shares per active listed recipient, apportioned by largest remainder with ties broken by list order; a different share may be set per recipient on the List itself. Since ops decision D43 (2026-09-15; statutes Art. 8(1), (2) and (4)) the equal split applies to the REST of the category's amount: advisory designations by the persons who administer a repository or by its contributors, and the board's allocation key for shares nobody designated or that were expressly left to the Association, may name an active listed recipient and an amount, and that recipient receives the amount so determined before the rest is split. The allocation key is adopted and published before the month it applies to and changes only for later months. Note what this rule is NOT: it does not touch how much each CATEGORY receives (that is the allocation rule of FS-07 — attribution by the lane and scope each buyer paid for (ops decision D42) and the routing hierarchy), and it does not touch the annual cap on direct costs, which URS §21 OPEN-05 owns.",
+      "description": "How a category's amount for a month is divided among the active listed recipients OF THAT CATEGORY. DECIDED (ops decision D40 item 7, 2026-09-14; statutes Art. 8(2); Calculation Rules Nr. 7 to 9): so far as the amount does not go to a named active recipient under Nr. 27, it goes in equal shares to every active listed recipient of the category, rounded to the Rappen by largest remainder, ties going to the earlier entry. A deviating share may be set per recipient on the List itself (Nr. 10); no version sets one (`shareBps`). Since ops decision D43 (2026-09-15; statutes Art. 8(1), (2) and (4)) the equal split applies to the REST of the category's amount: advisory designations by the persons who administer a repository or by its contributors, and the board's allocation key for shares nobody designated or that were expressly left to the Association, may name an active listed recipient and an amount, and that recipient receives the amount so determined before the rest is split. The allocation key is adopted and published before the month it applies to and changes only for later months. Note what this rule is NOT: it does not touch how much each CATEGORY receives (that is the allocation rule of FS-07 — attribution by the lane and scope each buyer paid for (ops decision D42) and the routing hierarchy), and it does not touch the annual cap on direct costs, which URS §21 OPEN-05 owns.",
       "properties": {
         "mode": {
           "enum": ["equal-per-recipient-in-category"],
-          "description": "`equal-per-recipient-in-category`: every listed recipient of a category carries the same share of that category's amount, which is what the sample dataset already assumes. One value today; a second value is added only by a recorded decision."
+          "description": "`equal-per-recipient-in-category`: every active listed recipient of a category carries the same share of that category's amount (Calculation Rules Nr. 7). One value today; a second value is added only by a recorded decision."
         },
         "rounding": {
           "enum": ["largest-remainder"],
-          "description": "Largest remainder, the contract set's only apportionment rule (FS-07 FS07-030): quotas, then floors, then the remaining minor units one each in descending fractional-remainder order. Exactness holds by construction — the shares sum to the category's amount and no sub-centime dust exists."
+          "description": "Largest remainder, the contract set's only apportionment rule (FS-07 FS07-030; Calculation Rules Nr. 8): quotas, then floors, then the remaining minor units one each in descending fractional-remainder order. Exactness holds by construction — the shares sum to the category's amount and no sub-centime dust exists."
         },
         "tiebreak": {
           "enum": ["list-order"],
-          "description": "The stated ascending stable key FS07-030 requires: the order of `recipients[]` in this published version. Publishing the tiebreak is what makes the apportionment reproducible by a reader rather than merely correct."
+          "description": "The stated ascending stable key FS07-030 requires: the order of `recipients[]` in this published version, which is ascending `recipientId` (Calculation Rules Nr. 9: the earlier entry first). Publishing the tiebreak is what makes the apportionment reproducible by a reader rather than merely correct."
         },
         "status": {
-          "enum": ["proposed", "decided"],
-          "description": "`proposed` until the operator confirms the rule; the value is part of the artifact so a page can say which it is. It flips to `decided` only when a dated decision says so."
+          "const": "decided",
+          "description": "`decided` (ops decision D40 item 7). The value is part of the artifact so a page can say so; the rule was decided before any version was released, and `proposed` is no longer admitted."
         },
-        "note": { "type": "string", "maxLength": 1000, "description": "The published wording of the rule, and what happens to a removed recipient's share for the month it was removed in: it goes to the other recipients of its category (D33 item 3)." }
+        "note": { "type": "string", "maxLength": 1000, "description": "The published wording of the rule, and what happens to a removed recipient's share for the month it was removed in: it goes to the other active recipients of its category, except after a sanctions hit (statutes Art. 7(6); Calculation Rules Nr. 11)." }
       }
-    },
-    "note": { "type": "string", "maxLength": 2000, "description": "Version-level narrative — what changed against the previous version and why, in the words a reader can check against the published minute." }
+    }
   },
+  "allOf": [
+    {
+      "if": { "properties": { "source": { "const": "platform" } }, "required": ["source"] },
+      "then": { "properties": { "decisionRef": { "not": { "$ref": "#/$defs/sampleReference" } }, "recipients": { "items": { "not": { "required": ["sample"] } } } } }
+    },
+    {
+      "if": { "properties": { "source": { "enum": ["sample", "fixture"] } }, "required": ["source"] },
+      "then": { "properties": { "decisionRef": { "not": { "$ref": "#/$defs/productionAddress" } }, "recipients": { "items": { "required": ["sample"] } } } }
+    }
+  ],
   "$defs": {
     "monthKey": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" },
     "categorySlug": {
       "enum": ["health", "education", "poverty-relief", "humanitarian-aid", "environment", "animal-welfare", "research"],
       "description": "The movement's seven published public-benefit categories (statutes Art. 7; ops decision D33 item 1). The menu is PUBLISHED in `category-menu.v1.json` (`$defs.slug`, with `examples/category-menu.v1.example.json` as the menu itself); the enum here is a copy of it. Every schema in this set must validate on its own after a single download, so none may `$ref` another — which means a shared vocabulary can only be carried as copies, and `npm run check:menu` asserts every copy is identical to the published one, so a copy cannot fork at the next amendment. Fields that constrain the vocabulary by PATTERN rather than by enum name the published menu instead: `ledger-row.v1.categoryFundId`, `ledger-export.v1`'s export-row `categoryFundId`, `cost-support.v1.transfers[].category`, and `purpose-yml.v1`'s own `categorySlug`, which stays a pattern on purpose because a manifest is untrusted repository content whose unknown slugs are rejected field by field at parse time. A category that is not on this list would be a fabricated fact about where money goes: free-text categories and free-text recipients are forbidden outright."
     },
+    "decisionRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._/:#()-]{0,199}$"
+    },
+    "sampleReference": {
+      "type": "string",
+      "pattern": "^\\s*[Ss][Aa][Mm][Pp][Ll][Ee]-",
+      "description": "A sample decision reference, matched as `allocation-key.v1` matches it: trimmed and in any case."
+    },
+    "productionAddress": {
+      "type": "string",
+      "pattern": ":\\\\?/\\\\?/((([Aa][Pp][Ii]|[Ww][Ww][Ww]|[Aa][Pp][Pp])\\.)?[Pp][Uu][Rr][Pp][Oo][Ss][Ee][Ss][Oo][Uu][Rr][Cc][Ee]\\.[Oo][Rr][Gg]|[Pp][Uu][Rr][Pp][Oo][Ss][Ee][Ss][Oo][Uu][Rr][Cc][Ee]\\.[Pp][Aa][Gg][Ee][Ss]\\.[Dd][Ee][Vv])",
+      "description": "Text naming one of production's addresses, exactly as on `allocation-key.v1`: any of the five origin markers of the platform's production-marker check (`://purposesource.org`, `://api.purposesource.org`, `://www.purposesource.org`, `://app.purposesource.org`, `://purposesource.pages.dev`), anywhere in the text, ASCII letters in any case, each slash optionally written `\\/`."
+    },
     "recipient": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["recipientId", "name", "country", "category", "shareBps", "registrationRef", "standard", "activeFrom"],
+      "required": ["recipientId", "name", "country", "legalForm", "registrationRef", "category", "shareBps", "status"],
+      "description": "One entry of the List. Every entry carries its identity, its category, its share rule and its status; an `active` entry also carries `activeFrom`, `standard` and the activation decision's three dates, and a `pending` entry carries none of them.",
       "properties": {
         "recipientId": {
           "type": "string",
           "pattern": "^rcp_[0-9abcdefghjkmnpqrstvwxyz]{26}$",
-          "description": "Platform-minted ULID, `rcp_` prefix, lowercase Crockford base32 — the same identifier the ledger's `disburse` rows and the cost-support transfers carry. It is minted once and never reused, so a removed recipient's history stays resolvable forever."
+          "description": "Platform-minted ULID, `rcp_` prefix, lowercase Crockford base32 — the same identifier the ledger's `disburse` rows and the cost-support transfers carry. It is minted when the entry first enters a version, pending, in the List's order, and is never reused, so a removed recipient's history stays resolvable forever and ascending `recipientId` is the List's order."
         },
-        "name": { "type": "string", "minLength": 1, "maxLength": 200, "description": "The organisation's registered name, as published. Money rows name organisations, never persons (URS ENG-083)." },
+        "name": { "type": "string", "minLength": 1, "maxLength": 200, "description": "The organisation's name exactly as the board's published List gives it (Annex A's «Organisation» column). Money rows name organisations, never persons (URS ENG-083)." },
         "country": {
           "type": "string",
           "pattern": "^[A-Z]{2}$",
-          "description": "The country of registration as an ISO 3166-1 alpha-2 code. A code rather than a name because the two facts that hang on it are jurisdictional: whether the organisation may lawfully receive a transfer from a Swiss association under the law that applies to it (statutes Art. 7(2) item 2), and which sanctions regimes the screening must clear and whether it is seated in a jurisdiction the FATF calls for action on (item 3). The rendering surface prints the country's name from the code."
+          "description": "The country of the organisation's seat (Annex A's «Sitzstaat» column) as an ISO 3166-1 alpha-2 code. A code rather than a name because the two facts that hang on it are jurisdictional: whether the organisation may lawfully receive a transfer from a Swiss association under the law that applies to it (statutes Art. 7(2) item 2), and which sanctions regimes the screening must clear (item 3), and whether it is seated in a jurisdiction the FATF calls for action on (Recipient Rules §1(2)). The rendering surface prints the country's name from the code."
         },
+        "legalForm": { "type": "string", "minLength": 1, "maxLength": 300, "description": "The organisation's legal form as the board's published List states it, in the List's own German: the legal-form part of Annex A's «Rechtsform und Registernummer» column, which shows that the organisation is constituted under the law of its country as an organisation without profit purpose (statutes Art. 7(2) item 1). A newly founded organisation is not excluded." },
+        "registrationRef": { "type": "string", "minLength": 1, "maxLength": 300, "description": "The register and number from the same column, as published: the register entry or official record that shows the legal form (statutes Art. 7(2) item 1), so a reader can open it." },
         "category": { "$ref": "#/$defs/categorySlug", "description": "The one category of the seven this organisation is assigned to (D33 item 1). One category per recipient: a basket is made of recipients, not of shares of a recipient." },
         "shareBps": {
           "type": "integer",
-          "minimum": 0,
-          "maximum": 10000,
-          "description": "This recipient's share OF ITS CATEGORY's amount, in basis points. The shares of one category's active recipients sum to exactly 10000 — apportioned by the same largest-remainder rule with the same list-order tiebreak, so three equal recipients read 3333 / 3333 / 3334 rather than three rounded thirds that lose a unit. JSON Schema cannot express a sum across items, so the bound is stated here rather than left as a surprise, exactly as `purpose-yml.v1` states its micro-share bound. Zero is valid for a recipient that is listed but not yet active."
+          "const": 0,
+          "description": "The entry's share rule within its category. `0` means THE EQUAL SHARE: the category's amount, so far as it does not go to a named active recipient under Calculation Rules Nr. 27, goes in equal shares to every active listed recipient of the category (Nr. 7), rounded to the Rappen by largest remainder (Nr. 8), ties going to the earlier entry (Nr. 9) — what the List writes as «gleich» in its «Anteil» column (Annex A §1(4) and §2). It is the same value for a pending entry and an active one, so an activation rewrites no other entry's share. A non-zero value is reserved for a deviating share the List itself would set (Nr. 10). No version sets one, and admitting one needs a change to this contract and to the allocator first, so the schema holds the value to 0."
         },
-        "website": { "type": "string", "format": "uri", "description": "The organisation's website, where it has one. Optional: a published website is no longer a condition of listing (D33 item 2(g) is superseded by statutes Art. 7(2)), and a newly founded organisation may not have one yet." },
-        "address": { "type": "string", "minLength": 1, "maxLength": 300, "description": "The organisation's postal address, where it publishes one. Optional: a published address is no longer a condition of listing (D33 item 2(g) is superseded by statutes Art. 7(2))." },
-        "registrationRef": { "type": "string", "minLength": 1, "maxLength": 300, "description": "The reference of the register entry or official record that shows the organisation's legal form as a not-for-profit organisation under the law of its country (statutes Art. 7(2) item 1) — the register's own identifier, so a reader can open it. The public list carries it beside the legal form; a newly founded organisation is not excluded." },
+        "status": {
+          "enum": ["pending", "active"],
+          "description": "`pending`: listed by a minuted board decision, the file not yet complete, no transfer (statutes Art. 7(4); Annex A §1(3)); it receives no share (Financial Regulation §9(1)). `active`: the board has minuted and published that the organisation's file is complete under the Recipient Rules, the accepted grant letter included (statutes Art. 7(4); Recipient Rules §5(1)); only active entries receive shares under statutes Art. 8. An organisation removed under Art. 7(6) is in neither state: the index (`recipient-lists.v1`) lists its removal, and no version that takes effect from the month of the removal or later lists it."
+        },
+        "sanctionsScreenedOn": { "type": "string", "format": "date", "description": "The date of the sanctions screening that the activation decision names: the organisation's screening before its activation (Recipient Rules §3 item 3 and §4(1)). It is published because Financial Regulation §9(1) and Recipient Rules §5(1) require the published activation decision to name it. Nothing else about the screening is: its records are confidential and are never published or cited (Financial Regulation §9(7); Recipient Rules §7(2)), so no list, result or record reference appears here. How publishing this date sits with §9(7)'s clause that the public pages carry a coverage status and nothing about individual screenings is open with counsel. Required on an `active` entry, absent on a `pending` one." },
+        "accountConfirmedOn": { "type": "string", "format": "date", "description": "The date the organisation's bank account was confirmed, as the activation decision names it (Recipient Rules §3 item 4 and §5(1); Financial Regulation §9(1)). The account itself is never published. Required on an `active` entry, absent on a `pending` one." },
+        "grantLetterAcceptedOn": { "type": "string", "format": "date", "description": "The date the organisation accepted the grant letter («Empfängerschreiben»), as the activation decision names it (Recipient Rules §3 item 5 and §5(1); Financial Regulation §9(1)). Required on an `active` entry, absent on a `pending` one." },
         "standard": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["foreignReceiptEvidence", "screening", "independenceDeclared", "bankTransferOnly", "grantLetterRef"],
-          "description": "The evidence held in the recipient file for the floor of statutes Art. 7(2) and for the checks the Recipient Rules set. The Association keeps one file per recipient — registration, foreign-receipt evidence, screening records, grant letter, receipts, and accounts where they exist — and these are references into it. The members keep their D33 item 2 names; what they evidence is the floor and the Rules.",
+          "required": ["foreignReceiptEvidence", "independenceDeclared", "bankTransferOnly", "grantLetterRef"],
+          "description": "The evidence held in the recipient file for the floor of statutes Art. 7(2) and for the checks the Recipient Rules set, as references into the file. Required on an `active` entry and absent on a `pending` one, whose file is not yet complete (Annex A §1(3)). The Association keeps one file per recipient and publishes its non-personal parts (statutes Art. 7(7); Recipient Rules §7(1)). The records of the sanctions screening belong to the file and are never published or cited (Financial Regulation §9(7); Recipient Rules §7(2)), so this object carries none; the screening date the activation decision names is the entry's `sanctionsScreenedOn`. The members keep their D33 item 2 names; what they evidence is the floor and the Rules.",
           "properties": {
             "accountsYears": { "type": "integer", "minimum": 0, "description": "Years of published accounts, where the organisation has any — a recorded fact, never a condition of listing. Statutes Art. 7(2) sets no minimum and a newly founded organisation is not excluded, so zero is valid and the member is optional; the former minimum of three (D33 item 2(a)) no longer applies." },
             "accountsRef": { "type": "string", "maxLength": 300, "description": "Where those accounts are published." },
             "foreignReceiptEvidence": { "type": "string", "minLength": 1, "maxLength": 300, "description": "The evidence that the organisation may lawfully receive a transfer from a Swiss association under the law that applies to it — for instance a foreign-contribution registration (statutes Art. 7(2) item 2). One foreign-funding regime per recipient country is a cost the decision accepted with its eyes open." },
-            "screening": {
-              "type": "array",
-              "minItems": 4,
-              "description": "The sanctions screening records for statutes Art. 7(2) item 3 — not the target of sanctions that apply to the Association, not seated in a jurisdiction the FATF calls for action on: the SECO, EU, UN and OFAC lists, checked as the Recipient Rules set, each check recorded. All four lists appear — hence at least four entries — and the array grows with every later check rather than being overwritten.",
-              "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": ["list", "checkedAt", "result"],
-                "properties": {
-                  "list": { "enum": ["SECO", "EU", "UN", "OFAC"] },
-                  "checkedAt": { "type": "string", "format": "date" },
-                  "result": { "enum": ["clear", "hit"], "description": "A `hit` is a removal for cause under D33 item 3: it takes effect at once, is published with its ground, and the entry carries `removedAt` and `removalGround`. The value exists in the enum because a screening result that cannot be recorded is a screening nobody can audit." },
-                  "ref": { "type": "string", "maxLength": 300, "description": "The recorded check in the recipient file." }
-                }
-              }
-            },
             "independenceDeclared": {
               "const": true,
               "description": "The declaration for statutes Art. 7(2) item 4: the organisation is not controlled by any member, board member, employee or contractor of the Association, or by a person close to one, and gives no such person a personal benefit. Enforced as a constant because a listing without the declaration is not a listing the statutes permit; where a link short of control exists, the person concerned is excluded from the vote (Art. 68 ZGB) and the fact is published in `declaredConflict`. The wider D33 item 2(d) limbs — no contributor or repository owner among its officers, no financial link to any of them — are no longer requirements."
             },
-            "declaredConflict": { "type": "string", "maxLength": 500, "description": "The published fact where a link exists, together with the exclusion it caused (statutes Art. 7(2) item 4; Art. 68 ZGB)." },
+            "declaredConflict": { "type": "string", "maxLength": 500, "description": "The published fact where a link short of control exists, together with the exclusion it caused (statutes Art. 7(2) item 4; Art. 68 ZGB), stated without naming a person: the personal parts of the recipient file are not published (Recipient Rules §7(1) and (2))." },
             "bankTransferOnly": {
               "const": true,
               "description": "Statutes Art. 7(2) item 5: paid only into a bank account in the organisation's own name that the Association has verified — by bank transfer, never in cash and never in crypto-assets. A constant, because this is not a per-recipient preference — it is the payment rail the statutes allow."
@@ -169,16 +208,21 @@
             "receiptsRef": { "type": "string", "maxLength": 300, "description": "Where the per-transfer receipts are held. The receipt for one transfer travels on that transfer's own row (`cost-support.v1`)." }
           }
         },
-        "activeFrom": { "$ref": "#/$defs/monthKey", "description": "The first month this recipient receives under. Additions are prospective, after thirty days' public notice (D33 item 3)." },
-        "activeTo": { "$ref": "#/$defs/monthKey", "description": "The last month this recipient receives under, once an end is known. Absent means active with no end recorded." },
-        "removedAt": { "type": "string", "format": "date-time", "description": "When a removal for cause took effect — at once, not at a month boundary (D33 item 3)." },
-        "removalGround": { "type": "string", "minLength": 1, "maxLength": 1000, "description": "The published ground for a removal for cause: for instance a sanctions hit or loss of registration. Published WITH the removal — a recipient that disappears without a stated ground is exactly the fact this list exists to prevent. The removed recipient's share for that month goes to the other recipients of its category, and nothing is ever clawed back from what was already transferred (D33 items 3 and 4)." },
-        "sample": { "type": "boolean", "description": "True in a sample dataset, on every entry, alongside a name that says so. A production list carries no `sample` entry: sample data is labelled sample, and no surface renders a fixture as a listed organisation." },
-        "note": { "type": "string", "maxLength": 1000 }
+        "activeFrom": { "$ref": "#/$defs/monthKey", "description": "The first month this entry receives a share under: never before its activation decision and never before the public notice of its listing has run (Recipient Rules §5(2); statutes Art. 7(5)). In the version that activates the entry it is never before that version's `effectiveFrom`. Required on an `active` entry, absent on a `pending` one." },
+        "sample": { "const": true, "description": "The mark of a non-production plane, set by `jobs.index-build` from `source` and never taken from the released body: present on every entry of a `sample` or `fixture` document and on no entry of a `platform` one (the document's two `allOf` rules). Sample data is labelled sample, and no surface renders a fixture as a listed organisation." }
       },
-      "dependentRequired": {
-        "removalGround": ["removedAt"],
-        "removedAt": ["removalGround"]
+      "if": { "properties": { "status": { "const": "active" } }, "required": ["status"] },
+      "then": { "required": ["standard", "activeFrom", "sanctionsScreenedOn", "accountConfirmedOn", "grantLetterAcceptedOn"] },
+      "else": {
+        "not": {
+          "anyOf": [
+            { "required": ["standard"] },
+            { "required": ["activeFrom"] },
+            { "required": ["sanctionsScreenedOn"] },
+            { "required": ["accountConfirmedOn"] },
+            { "required": ["grantLetterAcceptedOn"] }
+          ]
+        }
       }
     }
   }

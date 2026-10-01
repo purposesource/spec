@@ -24,7 +24,7 @@
     {
       "effectiveMonth": "2027-01",
       "url": "https://dev-api.purposesource.org/v1/allocation-keys/2027-01.json",
-      "bodySha256": "e5ede3e74d7b6bdb33e414c7a2520dd1c816602b20ab318612b1fc30c89d1c3d",
+      "bodySha256": "e5337e2cfbd58e914df1945ae871692c09d44e0f4e78fd2f9504107187e85e37",
       "decisionRef": "SAMPLE-MINUTE-2026-12-10-ALLOCATION-KEY-2027-01",
       "releasedAt": "2026-12-14T16:20:31Z",
       "status": "recorded",

@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/recipient-lists.v1.json",
+  "title": "Recipient List index — /recipient-list/index.json",
+  "description": "Every Recipient List version two stewards have released, newest first, each with the facts its own document cannot carry — what became of its publication and, once it is recorded, the notice it gives — and every organisation removed at once under statutes Art. 7(6), with its published ground. A version's document (`recipient-list.v1`, at `/recipient-list/{version}.json`) is written once, at its release; whether its publication was then recorded, and at which instant it was first published, is established afterwards by a steward's record act from `/meta/publish-log.json`, and this index is where that is published, as `allocation-keys.v1` does for the allocation key.\n\nONE ENTRY PER RELEASED VERSION, NEWEST FIRST. A token is released at most once, ever, and each released token sorts after every earlier one as (major, minor), so `version` is unique across `versions` and orders it, descending. An entry never leaves the index: a version published too late, or voided, keeps its line with that status, because a release is a published fact whatever became of it.\n\nIMMEDIATE REMOVALS. A removal under statutes Art. 7(6) takes effect at once and records no version, so it is published here, with its instant and its ground («wird mit ihrem Grund veröffentlicht»), and never by rewriting a version. No version that takes effect from the UTC month of the removal or later lists the removed organisation, and its id is never reused. One organisation is removed at most once, so `recipientId` is unique across `removals`, which is newest `removedAt` first.\n\nREGENERATED, NOT WRITTEN ONCE. Unlike the version documents it lists, this document is rendered again whenever a release, a record act or a removal changes it, and its `generatedAt` moves with them. It is published from the first run after its renderer ships, with both arrays empty until the first release.\n\nWHAT A READER CHECKS, stated here because JSON Schema cannot relate two documents: each entry's `url` names that entry's `version`, and its `effectiveFrom` and `releasedAt` equal the version document's `effectiveFrom` and `generatedAt`; a `publishBatchId` is a batch of `/meta/publish-log.json` whose `etags` name the version's path, and `publishedAt` is that batch's `publishedAt`; a `recorded` entry's `noticeGivenAt` is the `publishedAt` of that entry or of an earlier `recorded` one, so it is no later than its own `publishedAt`, and the first day of its `effectiveFrom` is at least thirty days after the UTC date of `noticeGivenAt`; a `late` entry's `publishedAt` is fewer than thirty days before the first day of its `effectiveFrom` (UTC dates); and no version whose `effectiveFrom` is the UTC month of a removal or later lists the removed organisation. An entry that disagrees with its version document is a defect to report, and the version document governs it.\n\nNOT AUTHORITATIVE. `x-psn.authoritative` is false, as on `recipient-list.v1`: the board's published List governs, and a divergence is a defect to report (FS-00 §6.2, the dated note of 2026-10-01). What counts as the List's publication is open with counsel; the default is the version document at its edge URL, dated by the publish log.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (producer: `jobs.index-build`). Nothing is published under this contract yet: no List version has been released on any plane.",
+    "artifactPath": "/recipient-list/index.json — regenerated; served by the edge at /v1/recipient-list/index.json",
+    "authoritative": false,
+    "producer": "`jobs.index-build` (P-M3), from the release rows, the record act's proof rows and the recorded versions (Conductor's PS-1346 and PS-1347; migration 0050), and the removals under statutes Art. 7(6) with their stored grounds",
+    "consumers": [
+      "the causes and transparency pages, which list each version with its state and each removal with its ground",
+      "the steward console's screen of released, published and recorded versions",
+      "`allocation-key.v1`'s reader check (5), which leaves out the organisations removed before a key's release",
+      "auditors and reconcilers"
+    ],
+    "fsRefs": [
+      "FS-00 §6.2 (dated note of 2026-10-01: the Recipient List's versions and their index)",
+      "statutes Art. 7(1), (4), (5) and (6)",
+      "Financial Regulation §9(6) and (7)",
+      "Calculation Rules Nr. 11"
+    ],
+    "vsRefs": ["VS-05"],
+    "changelog": "CHANGELOG.md#recipient-listsv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "source", "versions", "removals"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The plane's envelope instant (FS-00 §6.2): derived from the rows the build read, never from a clock. The release, record and removal instants are among those rows, so it is never earlier than any `releasedAt`, `publishedAt` or `removedAt` here."
+    },
+    "source": {
+      "enum": ["sample", "fixture", "platform"],
+      "description": "Which plane produced this document, in the envelope's vocabulary (FS-00 §6.2), exactly as on `recipient-list.v1`: `platform` is `jobs.index-build` in `PSN_ENV=prod`, `fixture` every other environment, `sample` a sample plane; `sample` and `fixture` declare a NON-PRODUCTION plane, which a production deployment refuses to serve. Required although the envelope rule makes it optional, and `registry-v0` is not admitted, for the same reasons as there (FS-00 §6.2, the dated note of 2026-10-01). On a `sample` or `fixture` document no entry's `url` names a production address."
+    },
+    "versions": {
+      "type": "array",
+      "description": "The released versions, newest first, one entry per token. Empty until the first release.",
+      "items": { "$ref": "#/$defs/entry" }
+    },
+    "removals": {
+      "type": "array",
+      "description": "Every removal under statutes Art. 7(6), newest `removedAt` first, one entry per organisation. Empty until the first removal.",
+      "items": { "$ref": "#/$defs/removal" }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "source": { "enum": ["sample", "fixture"] } }, "required": ["source"] },
+      "then": {
+        "properties": {
+          "versions": { "items": { "properties": { "url": { "not": { "$ref": "#/$defs/productionAddress" } } } } }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "url", "status", "effectiveFrom", "releasedAt"],
+      "description": "One released version. `publishedAt` and `publishBatchId` travel together and are present exactly when `status` is `recorded` or `late`; `noticeGivenAt` is present exactly when `status` is `recorded`.",
+      "properties": {
+        "version": { "$ref": "#/$defs/versionToken", "description": "The version's token; the version document's own `version`." },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Where the version document is served: the plane's own API origin, then `/v1/recipient-list/{version}.json`. A non-production plane names its own origin, never production's (`$defs.productionAddress`)."
+        },
+        "status": {
+          "enum": ["released", "recorded", "late", "void"],
+          "description": "What became of the version's publication. There is deliberately no `adopted`: every released version publishes an adopted board decision (`recipient-list.v1` `status`), and what the platform can prove afterwards is a publication and its instant.\n\n`released` — two stewards approved the exact bytes and the second approval released the version; the document is on the plane, or will be within minutes; no steward has recorded its publication yet. A released version governs no month.\n\n`recorded` — a steward's record act read the version's bytes and the publish log from the public data plane, matched every member the document maps from the released body against the release, and found the earliest batch naming the version's path at those bytes' ETag (`publishedAt`, `publishBatchId`). The version's notice met the thirty whole UTC days before the first day of `effectiveFrom`, so the record holds the version with that notice (`noticeGivenAt`). It governs from `effectiveFrom` until a later recorded version takes effect (statutes Art. 7(1)).\n\n`late` — the same proof, but the version's notice could not meet the thirty days before `effectiveFrom`. Only the proof was written: no version is recorded, it governs no month, and its token is spent, so the board releases the change again under a later token.\n\n`void` — the release can never be recorded, and the owner's procedure closed it: for instance the bytes on the plane are not the approved bytes, or they were never published. It governs no month and carries no `publishedAt` or `publishBatchId`."
+        },
+        "effectiveFrom": { "$ref": "#/$defs/monthKey", "description": "The first month the version governs; the version document's own `effectiveFrom`." },
+        "releasedAt": { "type": "string", "format": "date-time", "description": "When the second approval released the version: the server's clock in that approval's transaction, which no writer can type, and the version document's `generatedAt`. It is the instant of the RELEASE, not of the publication." },
+        "publishedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The version's first proven publication, as the record act proved it: the `publishedAt` of the earliest `/meta/publish-log.json` batch whose `etags` name the version's path at its bytes' ETag. It is stamped after the bytes are written, so it never dates a publication early. An instant rather than a date, because a notice is counted from it in whole UTC days. Present on `recorded` and `late`, and only there."
+        },
+        "publishBatchId": {
+          "type": "string",
+          "pattern": "^evt_[0-9abcdefghjkmnpqrstvwxyz]{26}$",
+          "description": "The `batchId` of that earliest batch in `/meta/publish-log.json`, so a reader can find the batch and check the ETag and the instant for themselves. Present exactly when `publishedAt` is."
+        },
+        "noticeGivenAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the public notice for this version was given, at least thirty days before `effectiveFrom` (statutes Art. 7(4) and (5)), as the record holds it and never typed: the `publishedAt` of a proven publication — this version's own, or, for a version whose only changes are activations, that of the version which first listed the entries it activates (the newest of those). It is therefore never later than this entry's `publishedAt`. The founding List's notice is its own first publication, which counts as the thirty days' public notice for the entries on it (statutes Art. 7(4)). Present on `recorded` only, and never null there."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "enum": ["recorded", "late"] } }, "required": ["status"] },
+          "then": { "required": ["publishedAt", "publishBatchId"] },
+          "else": { "not": { "anyOf": [{ "required": ["publishedAt"] }, { "required": ["publishBatchId"] }] } }
+        },
+        {
+          "if": { "properties": { "status": { "const": "recorded" } }, "required": ["status"] },
+          "then": { "required": ["noticeGivenAt"] },
+          "else": { "not": { "required": ["noticeGivenAt"] } }
+        }
+      ]
+    },
+    "removal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recipientId", "name", "removedAt", "ground"],
+      "description": "One organisation removed under statutes Art. 7(6). The removal takes effect at once; the organisation's share for that month goes to the other active recipients of its category, except after a sanctions hit, when it is held as blocked while a legal ban stands (statutes Art. 7(6); Calculation Rules Nr. 11).",
+      "properties": {
+        "recipientId": { "type": "string", "pattern": "^rcp_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "The removed organisation's id, as the version documents that listed it carry it. Never reused." },
+        "name": { "type": "string", "minLength": 1, "maxLength": 200, "description": "The organisation's name as the List published it." },
+        "removedAt": { "type": "string", "format": "date-time", "description": "When the removal took effect: at once, not at a month boundary (statutes Art. 7(6))." },
+        "ground": {
+          "enum": ["requirement-lapsed", "registration-lost", "serious-misconduct", "own-request"],
+          "description": "The ground published with the removal (statutes Art. 7(6)). `requirement-lapsed`: a requirement of statutes Art. 7(2) is no longer met. A removal after a sanctions hit is published with this ground, because the ground named is the lapse of a requirement of Art. 7(2), never the list, the entry or the evidence (Financial Regulation §9(6)). `registration-lost`: the organisation lost its registration (Art. 7(6); Recipient Rules §6(1)). `serious-misconduct`: serious misconduct, in particular fraud, embezzlement or use of funds against their purpose, shown by an authority or by unambiguous documents (Art. 7(6)). `own-request`: the organisation withdrew its acceptance of the grant letter or declined further transfers, and was removed in the same way with the ground «auf eigenen Wunsch» (on its own request) — which is not a cause and is never rendered as one (Art. 7(6), last sentence). No other value is published."
+        }
+      }
+    },
+    "versionToken": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$" },
+    "monthKey": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" },
+    "productionAddress": {
+      "type": "string",
+      "pattern": ":\\\\?/\\\\?/((([Aa][Pp][Ii]|[Ww][Ww][Ww]|[Aa][Pp][Pp])\\.)?[Pp][Uu][Rr][Pp][Oo][Ss][Ee][Ss][Oo][Uu][Rr][Cc][Ee]\\.[Oo][Rr][Gg]|[Pp][Uu][Rr][Pp][Oo][Ss][Ee][Ss][Oo][Uu][Rr][Cc][Ee]\\.[Pp][Aa][Gg][Ee][Ss]\\.[Dd][Ee][Vv])",
+      "description": "Text naming one of production's addresses, exactly as on `allocation-key.v1`: any of the five origin markers of the platform's production-marker check (`://purposesource.org`, `://api.purposesource.org`, `://www.purposesource.org`, `://app.purposesource.org`, `://purposesource.pages.dev`), anywhere in the text, ASCII letters in any case, each slash optionally written `\\/`. `https://dev-api.purposesource.org/…` contains none of them."
+    }
+  }
+}

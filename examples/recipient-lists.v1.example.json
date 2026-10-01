@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-04-20T09:10:00Z",
+  "source": "fixture",
+  "versions": [
+    {
+      "version": "v2",
+      "url": "https://dev-api.purposesource.org/v1/recipient-list/v2.json",
+      "status": "released",
+      "effectiveFrom": "2027-07",
+      "releasedAt": "2027-04-20T09:10:00Z"
+    },
+    {
+      "version": "v1.2",
+      "url": "https://dev-api.purposesource.org/v1/recipient-list/v1.2.json",
+      "status": "void",
+      "effectiveFrom": "2027-05",
+      "releasedAt": "2027-03-09T08:30:00Z"
+    },
+    {
+      "version": "v1.1",
+      "url": "https://dev-api.purposesource.org/v1/recipient-list/v1.1.json",
+      "status": "late",
+      "effectiveFrom": "2027-04",
+      "releasedAt": "2027-02-26T16:05:12Z",
+      "publishedAt": "2027-03-03T06:00:41Z",
+      "publishBatchId": "evt_01mg4zkxs8nmeeg3ay4fz7jj48"
+    },
+    {
+      "version": "v1",
+      "url": "https://dev-api.purposesource.org/v1/recipient-list/v1.json",
+      "status": "recorded",
+      "effectiveFrom": "2027-01",
+      "releasedAt": "2026-12-04T10:15:00Z",
+      "publishedAt": "2026-12-04T10:19:26Z",
+      "publishBatchId": "evt_01m9091qxgwvp2aeh5gn8rm8wf",
+      "noticeGivenAt": "2026-11-20T09:04:17Z"
+    },
+    {
+      "version": "v0",
+      "url": "https://dev-api.purposesource.org/v1/recipient-list/v0.json",
+      "status": "recorded",
+      "effectiveFrom": "2027-01",
+      "releasedAt": "2026-11-20T09:00:00Z",
+      "publishedAt": "2026-11-20T09:04:17Z",
+      "publishBatchId": "evt_01m7w362k8aj3yrrydfbvp59f8",
+      "noticeGivenAt": "2026-11-20T09:04:17Z"
+    }
+  ],
+  "removals": [
+    {
+      "recipientId": "rcp_bdzk8dv1s58eyavk3g0m8g2ncj",
+      "name": "SAMPLE — Animal-welfare recipient 2",
+      "removedAt": "2027-02-03T11:42:09Z",
+      "ground": "registration-lost"
+    }
+  ]
+}

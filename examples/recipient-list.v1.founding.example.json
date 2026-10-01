@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-20T09:00:00Z",
+  "source": "fixture",
+  "version": "v0",
+  "status": "adopted",
+  "effectiveFrom": "2027-01",
+  "adoptedAt": "2026-11-19",
+  "decisionRef": "SAMPLE-MINUTE-2026-11-19-RECIPIENT-LIST-V0",
+  "categories": [
+    {
+      "slug": "health",
+      "name": "Health",
+      "fundId": "cat-health"
+    },
+    {
+      "slug": "education",
+      "name": "Education",
+      "fundId": "cat-education"
+    },
+    {
+      "slug": "poverty-relief",
+      "name": "Poverty relief",
+      "fundId": "cat-poverty-relief"
+    },
+    {
+      "slug": "humanitarian-aid",
+      "name": "Humanitarian aid",
+      "fundId": "cat-humanitarian-aid"
+    },
+    {
+      "slug": "environment",
+      "name": "Environment",
+      "fundId": "cat-environment"
+    },
+    {
+      "slug": "animal-welfare",
+      "name": "Animal welfare",
+      "fundId": "cat-animal-welfare"
+    },
+    {
+      "slug": "research",
+      "name": "Research",
+      "fundId": "cat-research"
+    }
+  ],
+  "recipients": [
+    {
+      "recipientId": "rcp_0svacmgratb4f4q0syghrz8ym4",
+      "name": "SAMPLE — Education recipient 1",
+      "country": "IN",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates IN",
+      "registrationRef": "SAMPLE-REGISTER-IN-0003",
+      "category": "education",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_28h7pz5ynzcftzy0pjrhjqsqmk",
+      "name": "SAMPLE — Humanitarian-aid recipient 2",
+      "country": "GB",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates GB",
+      "registrationRef": "SAMPLE-REGISTER-GB-0008",
+      "category": "humanitarian-aid",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_66ss8w31jg95dd6vc2kn7t5f8y",
+      "name": "SAMPLE — Animal-welfare recipient 1",
+      "country": "ZA",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates ZA",
+      "registrationRef": "SAMPLE-REGISTER-ZA-0011",
+      "category": "animal-welfare",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_814sdk80b8hzejd1wx7h12ea1s",
+      "name": "SAMPLE — Research recipient 2",
+      "country": "NL",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates NL",
+      "registrationRef": "SAMPLE-REGISTER-NL-0014",
+      "category": "research",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_8jf9xfejcgadg7cgyag0hmkcxb",
+      "name": "SAMPLE — Education recipient 2",
+      "country": "BR",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates BR",
+      "registrationRef": "SAMPLE-REGISTER-BR-0004",
+      "category": "education",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_92tq7q30k6a0gjvjrps04weeek",
+      "name": "SAMPLE — Humanitarian-aid recipient 1",
+      "country": "JO",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates JO",
+      "registrationRef": "SAMPLE-REGISTER-JO-0007",
+      "category": "humanitarian-aid",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_bdzk8dv1s58eyavk3g0m8g2ncj",
+      "name": "SAMPLE — Animal-welfare recipient 2",
+      "country": "DE",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates DE",
+      "registrationRef": "SAMPLE-REGISTER-DE-0012",
+      "category": "animal-welfare",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_bnpt0deptzcjgsm50wpvmrw7kn",
+      "name": "SAMPLE — Environment recipient 1",
+      "country": "ID",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates ID",
+      "registrationRef": "SAMPLE-REGISTER-ID-0009",
+      "category": "environment",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_f5cc8xgz81c00nrve04pdahejb",
+      "name": "SAMPLE — Health recipient 1",
+      "country": "KE",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates KE",
+      "registrationRef": "SAMPLE-REGISTER-KE-0001",
+      "category": "health",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_r8m8v0kcyttv527jz2m5rha2ps",
+      "name": "SAMPLE — Poverty-relief recipient 1",
+      "country": "BD",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates BD",
+      "registrationRef": "SAMPLE-REGISTER-BD-0005",
+      "category": "poverty-relief",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_tg8g3ps3smxzdpy1zt0zesjnx9",
+      "name": "SAMPLE — Health recipient 2",
+      "country": "CH",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates CH",
+      "registrationRef": "SAMPLE-REGISTER-CH-0002",
+      "category": "health",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_vztv7dk7w3wjbehnz4zr7vd9yz",
+      "name": "SAMPLE — Research recipient 1",
+      "country": "GH",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates GH",
+      "registrationRef": "SAMPLE-REGISTER-GH-0013",
+      "category": "research",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_wrfhyk9jj3awrx8dknj7r6yjcn",
+      "name": "SAMPLE — Environment recipient 2",
+      "country": "CA",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates CA",
+      "registrationRef": "SAMPLE-REGISTER-CA-0010",
+      "category": "environment",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    },
+    {
+      "recipientId": "rcp_zyjz8xjhrede9fhzq9hf84wc0w",
+      "name": "SAMPLE — Poverty-relief recipient 2",
+      "country": "PE",
+      "legalForm": "SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates PE",
+      "registrationRef": "SAMPLE-REGISTER-PE-0006",
+      "category": "poverty-relief",
+      "shareBps": 0,
+      "status": "pending",
+      "sample": true
+    }
+  ],
+  "shareRule": {
+    "mode": "equal-per-recipient-in-category",
+    "rounding": "largest-remainder",
+    "tiebreak": "list-order",
+    "status": "decided",
+    "note": "Decided (ops decision D40 item 7): what a category receives for the month, so far as it does not go to a named active recipient, goes in equal shares to every active listed recipient of the category, apportioned by largest remainder with ties broken by the order of this list (ascending recipientId), so the shares sum exactly to the category's amount. An organisation removed at once under statutes Art. 7(6) has no share from then on, and its share for that month goes to the other active recipients of its category, except after a sanctions hit."
+  }
+}
