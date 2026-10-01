@@ -4,7 +4,7 @@
   "title": "Waiver registry — /waivers/{node_id}.json and /waivers/all.json",
   "description": "The published waiver registry: one document per repository, plus a global `/waivers/all.json` whose entries each carry `repoNodeId`. The second of the three inputs to the coverage function (`cov-v2`, `cov-v1` before it; FS-10 §4.2); cov-v2 reads none for a repository with no published record, since a waiver is published under a record's node id. Waivers are gratis and are granted only by a claimed admin from the platform dashboard (D14) — they can never enter the registry by pull request, which is why the P-M2 registry source has no waivers field at all (FS02-060). At P-M2 every document is the honest empty state `waivers: []`, and the project page says so in words rather than showing a zero (VS-18). `coolingEndsAt` (= grantedAt + 72 h, D14 as amended) is consumed by VESTING only (FS05-063): a waiver inside its cooling window is coverage-eligible exactly like any other, because cooling governs whether vesting attaches permanently, never today's coverage answer. Revocation is PROSPECTIVE: `revokedAt` in the past removes coverage from that instant onward while the certificate verify record still attests the historical window (CERT-042).",
   "x-psn": {
-    "specVersion": "1.2.1",
+    "specVersion": "1.2.2",
     "phase": "P-M2 (honest empty state) · populated at P-M3",
     "artifactPath": "/waivers/{node_id}.json · /waivers/all.json",
     "authoritative": true,
@@ -56,7 +56,7 @@
         },
         "grantedAt": { "type": "string", "format": "date-time", "description": "Coverage starts at this instant, cooling window notwithstanding." },
         "coolingEndsAt": { "type": "string", "format": "date-time", "description": "grantedAt + 72 h (D14 as amended). Vesting-only input (FS05-063); cov-v1 ignores it." },
-        "revokedAt": { "type": ["string", "null"], "format": "date-time", "description": "Prospective revocation instant. Absent or null ⇒ live. Revocation INSIDE the cooling window voids the waiver ab initio and no vesting ever attaches." },
+        "revokedAt": { "type": ["string", "null"], "format": "date-time", "description": "Prospective revocation instant. Absent or null ⇒ live. A waiver gives permission from `grantedAt` and vests nothing before `coolingEndsAt`; one revoked INSIDE the cooling window vests nothing at all. Revocation never makes use permitted before it unlawful (Licence 1.0 §9)." },
         "grantedBy": { "enum": ["repo-admin"], "description": "Only a claimed repository admin can grant a waiver (D14). Recorded so the artifact carries its own provenance; no other value is issuable." },
         "note": { "type": "string", "maxLength": 300, "description": "Optional public note from the granting admin. Repository-side content — escaped on render." }
       }

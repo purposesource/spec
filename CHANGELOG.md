@@ -659,6 +659,15 @@ creating one.
   names `cov-v2`, `cov-v1` before it, and says cov-v2 reads no waiver list for a repository with
   no published record, since a waiver is published under a record's node id. No constraint moved.
 
+### 1.2.2 — unreleased (2026-10-01; ops decision D102 item 5)
+
+- Wording. `revokedAt` said a revocation inside the cooling window "voids the waiver ab initio".
+  Licence 1.0 §9 says otherwise: a Waiver gives permission from the moment it is recorded and
+  vests nothing in its first 72 hours, and revocation never makes earlier permitted use unlawful.
+  The description now says that a waiver revoked inside the window vests nothing and that use
+  permitted before the revocation stays lawful. No constraint moved, and the coverage answer is
+  unchanged.
+
 ## entitlement-record.v1.json
 
 ### 1.0.0 — unreleased
