@@ -102,27 +102,6 @@
       ]
     },
     {
-      "coId": "co_01j9smpz6th1j4x7v0p3d5wqfe",
-      "listed": true,
-      "name": "Oakhaven Municipal Utilities",
-      "terms": [
-        {
-          "entId": "ent_01j9smpz6th1j4x7v0p3d5wq01",
-          "lane": "donation",
-          "scope": {
-            "kind": "project",
-            "repos": [
-              "R_kgDOSMPL0003"
-            ]
-          },
-          "status": "active",
-          "periodStart": "2026-09-15T00:00:00Z",
-          "periodEnd": "2027-09-15T00:00:00Z",
-          "certId": null
-        }
-      ]
-    },
-    {
       "coId": "co_01j9smq1ex7n0q4b6d9s2h5tvj",
       "listed": false,
       "name": "Unlisted organisation",
@@ -145,12 +124,12 @@
     }
   ],
   "completeness": {
-    "lines": 6,
-    "entitlementRecords": 8,
+    "lines": 5,
+    "entitlementRecords": 7,
     "recordsWithoutTerm": 2,
     "linesWithFeeLaneTerm": 5,
     "payerIdsOnPoolInRows": 5,
-    "companiesCovered": 8,
+    "companiesCovered": 7,
     "companiesCoveredRule": "sample-active-at-clock-plus-waivers"
   }
 }

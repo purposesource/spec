@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.2.0
+  version: 1.2.1
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -109,6 +109,8 @@ paths:
       description: |
         Answers with one of exactly eight values, plus a `basis` block naming what
         produced the answer and a `proof` pointing at the signed artifact that backs it.
+        One of the eight, `yes-via-donation`, is retired and never returned (see
+        `CoverageAnswer`).
 
         **GET accepts an opaque company ULID only.** A domain in the `company` parameter
         is rejected with `invalid_company_ref`, because a third-party organisation's
@@ -1802,6 +1804,15 @@ components:
       description: |
         The eight coverage answers. Frozen: no ninth value will be added to `v1`, and the
         meaning of these eight will not change under you.
+
+        `yes-via-donation` is retired: it is never returned. It was the answer for a Donation
+        Entitlement, the credential of the direct donation route, and that route was dropped
+        before it opened (ops decisions D91 item 3 and D93 item 1, 2026-10-01). No Donation
+        Entitlement is issued, so no published entitlement record carries the `donation` term
+        the function's donation step looks for. The value stays in this enumeration: the set
+        of eight is frozen (FS-00 §6.3), `/v1/meta` lists all eight in `contracts.answerEnum`,
+        and both published coverage modules still name it, so keeping it is the smallest
+        change, wording only. A client that switches over all eight keeps working.
       enum:
         - yes-via-pass
         - yes-via-project
@@ -1873,6 +1884,9 @@ components:
             lane:
               type: string
               enum: [pass, project, portfolio, donation]
+              description: >-
+                The lane of the term that answered. `donation` is retired with `yes-via-donation`
+                (see `CoverageAnswer`): no Donation Entitlement is issued, so no answer names one.
             periodStart:
               type: string
               format: date-time
@@ -2139,7 +2153,9 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/CoverageAnswer'
-              description: The eight answers this deployment can produce.
+              description: >-
+                The eight frozen answers. `yes-via-donation` is listed and never returned (see
+                `CoverageAnswer`).
             schemaVersions:
               type: object
               additionalProperties:

@@ -137,7 +137,14 @@ what produced the answer:
 `yes-via-pass` · `yes-via-project` · `yes-via-portfolio` · `yes-via-waiver` ·
 `yes-via-donation` · `no` · `lapsed-in-grace` · `no-entitlement-required-under-threshold`
 
-It is a pure function over three published inputs and an explicit `now`. No I/O, no clock
+`yes-via-donation` is retired: it is never returned. It answered for a Donation Entitlement,
+the credential of the direct donation route, and that route was dropped before it opened (ops
+decisions D91 item 3 and D93 item 1, 2026-10-01). No Donation Entitlement is issued, so no
+published entitlement record carries the `donation` term the function's donation step looks for.
+The value stays in the frozen set of eight (FS-00 §6.3), which `/v1/meta` lists in full, and both
+modules keep the step, because their bytes are pinned.
+
+`cov-v2` is a pure function over three published inputs and an explicit `now`. No I/O, no clock
 read, no dependencies. Two calls with the same arguments return the same result forever,
 which is what makes the vector file a real test rather than a snapshot.
 

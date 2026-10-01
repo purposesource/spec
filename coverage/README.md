@@ -104,6 +104,15 @@ a record would be a new version beside cov-v2, not an edit to it.
 Frozen in FS-00 §6.3, semantics owned by URS COM-009, step order in FS-10 §4.3. cov-v2 adds
 no ninth: it answers a new question (a work with no record) with an existing answer.
 
+**`yes-via-donation` is retired: it is never returned.** It answered for a Donation
+Entitlement, the credential of the direct donation route, and that route was dropped before it
+opened (ops decisions D91 item 3 and D93 item 1, 2026-10-01). No Donation Entitlement is issued,
+so no published entitlement record carries a `donation` term for step 7 to find. Neither module
+is edited for it: both digests are pinned, and a published version is never mutated. Step 7 stays
+in both: VEC-11, carried into both suites, keeps testing it, and V2-17 keeps testing that a
+donation term does not reach a work with no record. The value stays in the frozen set of eight,
+which `/v1/meta` lists in full; keeping it is the smallest change.
+
 ## Things worth knowing before you read the code
 
 - **Waivers are evaluated early and answered late.** Eligibility is computed before any

@@ -760,6 +760,13 @@ creating one.
   donate-direct term), eight entitlement records, two of them without a term, and five payer ids
   on `pool-in` rows.
 
+*Dated note, 2026-10-01 (ops decisions D91 item 3 and D93 item 1): the direct donation route was
+dropped before it opened, and the website's sample plane no longer carries a donate-direct term.
+The example follows it, as it follows the sample list: five lines, seven entitlement records, two
+of them without a term, five payer ids on `pool-in` rows, and `companiesCovered` 7. The schema is
+not changed and its version does not move: `donation` stays in the lane enum, because removing a
+value inside `v1` is not additive (versioning policy 1).*
+
 ## certificate.v1.json
 
 ### 1.0.0 — unreleased
@@ -2401,6 +2408,28 @@ which kind of change each entry was.
 - Examples: the seven coverage and meta examples say `algoVersion: cov-v2`; the GET form gains
   `yesViaPassNoRecord`. The examples gate validates all 46.
 
+### 1.2.1 — unreleased (2026-10-01; ops decisions D91 item 3 and D93 item 1)
+
+- Wording only, a patch like 1.1.2: no route, status code, cache class, error code or enum value
+  moved. The direct donation route and its credential, the Donation Entitlement, were dropped on
+  2026-10-01 before the route opened (D91 item 3), and D93 item 1 asks this repository to mark the
+  coverage answer `yes-via-donation` retired, never returned.
+- `CoverageAnswer` says so: no Donation Entitlement is issued, so no published entitlement record
+  carries the `donation` term the function's donation step looks for. The value is NOT removed
+  from the enumeration. Keeping it is the smallest change and leaves everything published as it
+  was: the set of eight is frozen (FS-00 §6.3) and `CoverageAnswer` promises a client that the
+  eight will not change under it; `/v1/meta` lists all eight in `contracts.answerEnum`; both
+  pinned coverage modules name and compute the value; `check:vectors` asks for all eight; and a
+  client with an exhaustive switch over the eight keeps compiling. `CoverageBasis.entitlement.lane`
+  says the same of `donation`, `Meta.contracts.answerEnum` says the list keeps a value that is never
+  returned, and `getCoverage` points at `CoverageAnswer`.
+- `coverage/cov-v1.ts`, `coverage/cov-v2.ts` and their vector files are not changed: `check:module`
+  pins both digests and the edge mirrors cov-v2's bytes. The donation step stays in both modules:
+  VEC-11, carried into both suites, keeps testing it, and V2-17 keeps testing that a donation term
+  does not reach a work with no record, so the published code is still tested as published;
+  `check:vectors` still asks for all eight answers for the same reason. No example moved:
+  `check:openapi-examples` validates the same 46.
+
 ## coverage/cov-v2.ts
 
 The second version of the published coverage function, beside the first. The module, its
@@ -2463,3 +2492,8 @@ bytes and answers with them from its next deploy, so a later change is a cov-v3.
   pins and prints both digests; `check:vectors` validates both suites' inputs and allows
   `repo_not_registered` only for a vector with no record whose node id is no fixture's;
   `test:coverage` runs both runners.
+
+*Dated note, 2026-10-01 (ops decisions D91 item 3 and D93 item 1): `yes-via-donation` is retired and
+never returned, because no Donation Entitlement is issued. The module is not edited for it and its
+digest stays pinned; its step 7 answers only for a `donation` term, which no published
+entitlement record carries. The API description says so from `openapi/edge-public.v1.yaml` 1.2.1.*
