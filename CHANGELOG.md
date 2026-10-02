@@ -738,6 +738,13 @@ creating one.
   coverage by domain is answered.
 - No member, type, vector or answer changes.
 
+### 1.1.3 — unreleased (2026-10-03; ops decisions D102 and D103 items 3–4)
+
+- Wording. `name` cited the listing statement as "att-3 step 7". Until launch every versioned
+  page stays v1 (D102 item 2), and the purchase acceptance is now att-1, which carries the card
+  att-4 carried (D103 item 3); its optional public-listing statement keeps the number 7. The
+  description now cites "att-1 step 7". No member, type, vector or answer changes.
+
 ## covered-organisations.v1.json
 
 ### 1.0.0 — unreleased (2026-09-15; ops decision D44)
@@ -780,6 +787,13 @@ The example follows it, as it follows the sample list: five lines, seven entitle
 of them without a term, five payer ids on `pool-in` rows, and `companiesCovered` 7. The schema is
 not changed and its version does not move: `donation` stays in the lane enum, because removing a
 value inside `v1` is not additive (versioning policy 1).*
+
+### 1.0.1 — unreleased (2026-10-03; ops decisions D102 and D103 items 3–4)
+
+- Wording. `listed` cited the listing statement as "att-3 step 7"; the purchase acceptance is now
+  att-1, which carries the card att-4 carried (D102 item 2; D103 item 3), and its optional
+  public-listing statement keeps the number 7. The description now cites "att-1 step 7". No
+  member, type, example or count changes.
 
 ## certificate.v1.json
 

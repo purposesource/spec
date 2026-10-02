@@ -4,7 +4,7 @@
   "title": "Covered organisations — /entitlements/covered-organisations.json",
   "description": "The one public list of organisations holding an Entitlement term (ops decision D44; resolves URS OPEN-34 toward a complete list with names optional, subject to counsel and comms sign-off before real launch). ONE LINE PER ORGANISATION that has a signed entitlement record with at least one term, keyed by its public company id, carrying either the legal name the payer asked to be listed under or the fixed words `Unlisted organisation`, and every term with its lane, scope, published status, dates and certificate id.\n\nWHAT NO LINE CAN CARRY. There is no member for an amount, a revenue band, a domain, a contact or a declaration, and the objects are closed, so an unlisted line cannot leak one by accident. Unlisted is not anonymous and the list says so: the ledger rows keyed by the same company id publish their amounts, an amount can show the band, and a verified domain resolves to the same id through `/entitlements/domain-index.json` (TRN-033: coverage is answerable regardless of naming).\n\nCOMPLETENESS, CHECKABLE BY ANYONE. `completeness` states the counts a reader can recompute from other published artifacts: every line is an entitlement record with a term; every line with a fee-lane term (Project, Portfolio, the Pass) is a company id on at least one published `pool-in` ledger row and every such id has a line — a refunded term keeps its line with status `void` and its row beside a `refund-out` row, a charged-back term keeps its line with status `suspended`; and `stats.json`'s `companiesCovered` is stated beside the rule that derives it. The builder refuses to publish a list whose counts disagree.",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.0.1",
     "phase": "P-M2",
     "artifactPath": "/entitlements/covered-organisations.json",
     "authoritative": true,
@@ -210,7 +210,7 @@
         },
         "listed": {
           "type": "boolean",
-          "description": "True only when the payer asked to be listed (att-3 step 7, or a later recorded request). Never a default (WEB-130)."
+          "description": "True only when the payer asked to be listed (att-1 step 7, or a later recorded request). Never a default (WEB-130)."
         },
         "name": {
           "type": "string",
