@@ -1715,6 +1715,47 @@ reasoning: no month export has ever been published with a row in it.
   they now say the override is "written into the statutes set for adoption at the founding assembly of
   1 October 2026". No property, type, enum or meaning changes.
 
+### 1.2.0 — unreleased (2026-10-01; ops decisions D79 items 4.1, 4.3 and 4.4, and D80 item 4)
+
+- Additive (Calculation Rules Nr. 17; D79 item 4.1 as corrected, D80 item 4). A bill the operations
+  reserve advances is charged to the Purpose Fees once. When a close's fees cannot carry a direct
+  invoice, only its charge is deferred, and the invoice itself is paid when due.
+  - `$defs.directCost.reserveAdvanceMinor`, "advanced by the reserve": the part of an invoice the
+    reserve paid when it fell due. The month that paid it lists the invoice in full, outside the
+    charged line, beside the reserve's `direct-cost-out` movement of that amount. A named supporter
+    may settle the rest of the same invoice, and its line carries that rest.
+  - A top-level `deferredCharges[]` (`$defs.deferredCharge`), "deferred charge": the first close whose
+    fees can bear the charge makes it, once and whole, inside the charged line and the running
+    year's total against the cap, and the reserve's new `refill-from-fees` movement pays the reserve
+    back. That close is normally a later month's, and it is the paying month's own where its close
+    can carry the bill after all.
+  - Two written totals, `reserveAdvanceTotalMinor` and `deferredChargesTotalMinor`, each required
+    once its members appear. Identity (1) now reads max(0, C − S − A) + D, identity (2) S + A ≤ C,
+    and identity (5) names the two new sums. With neither member present, every identity reads as
+    it did, so every document written before still validates and reads the same.
+- Additive. `reserve.movements[].kind` gains `refill-from-fees`. `reserve.movements[].invoiceRef`
+  and `advancedIn` name the advance a `direct-cost-out` or `refill-from-fees` movement belongs to,
+  and no other kind carries them. An advance and its movement are one document's, because an
+  advanced invoice's `paidOn` is the day the reserve account books its payment. A deferred charge
+  carries no day: like the retention, its refill is listed by the month the reserve account books
+  it, the closing month itself or a later one.
+- **Pre-release tightening (versioning rule 5).** A `direct-cost-out` movement must now carry
+  `invoiceRef` and `advancedIn`. No stored document carries a `direct-cost-out` movement: no writer
+  could compose a reserve movement before 2026-09-27, and the platform's reader has refused this
+  kind since then. Nothing has been published under this file, so no document is affected.
+- Additive (D79 items 4.3 and 4.4). `$defs.supplier`, on a direct cost and on a deferred charge,
+  says who sent the invoice. A company is published by its legal name (`kind: company`,
+  `legalName`). A natural person, sole traders included, is published by role only
+  (`kind: natural-person`, `role`) and never by name. The schema refuses a name on a person and a
+  role on a company. A related-party mark is not part of this change.
+- Wording. The descriptions of `directCosts`, `supportTotalMinor`, `chargedToFeesMinor`,
+  `yearRunningTotalMinor`, `reserve`, `directCost.supporter` and `directCost.paidOn` say what the
+  advance changes. The reserve's description states the advance as the Calculation Rules state it:
+  "as far as statutes Art. 6g(3) allows".
+- Two further examples show a month whose reserve advances a bill, with a supporter settling the
+  rest, and the close that charges it: `examples/cost-support.v1.reserve-advance.example.json` and
+  `examples/cost-support.v1.deferred-charge.example.json`. The main example is unchanged.
+
 ## recipient-list.v1.json
 
 ### 1.0.0 — unreleased (2026-09-07; ops decision D33)

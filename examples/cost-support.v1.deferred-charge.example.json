@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "month": "2027-09",
+  "generatedAt": "2027-10-17T06:00:00Z",
+  "currency": "CHF",
+  "closed": true,
+  "financialYear": "2027",
+  "purposeFeesNetMinor": 60000,
+  "directCosts": [
+    {
+      "invoiceRef": "INV-EDGE-2027-09-0001",
+      "class": "dns-hosting-cdn-edge-storage",
+      "description": "DNS, edge compute and object storage for the movement's own properties, on the movement's own account.",
+      "amountMinor": 2400,
+      "paidOn": "2027-09-08",
+      "supplier": {
+        "kind": "company",
+        "legalName": "SAMPLE — Edge Hosting Ltd"
+      },
+      "evidence": [
+        {
+          "kind": "invoice",
+          "ref": "INV-EDGE-2027-09-0001"
+        }
+      ]
+    },
+    {
+      "invoiceRef": "INV-REVIEW-2027-09-0002",
+      "class": "scoped-review-engagement",
+      "description": "Review of the fees account and the routing for the second quarter of 2027, and nothing else.",
+      "amountMinor": 12000,
+      "paidOn": "2027-09-22",
+      "supplier": {
+        "kind": "natural-person",
+        "role": "independent reviewer of the fees account"
+      },
+      "evidence": [
+        {
+          "kind": "invoice",
+          "ref": "INV-REVIEW-2027-09-0002"
+        }
+      ]
+    }
+  ],
+  "directCostsTotalMinor": 14400,
+  "supporters": [],
+  "supportTotalMinor": 0,
+  "deferredCharges": [
+    {
+      "invoiceRef": "INV-DOMAIN-2027-08-0002",
+      "class": "domains-and-marks",
+      "advancedIn": "2027-08",
+      "amountMinor": 20000,
+      "description": "Annual renewal of the movement's own domain.",
+      "supplier": {
+        "kind": "company",
+        "legalName": "SAMPLE — Domain Registrar AG"
+      },
+      "note": "Deferred charge: advanced by the reserve in August 2027, when that month's Purpose Fees could not carry it, and charged here once, its money paid back to the reserve. A supporter settled the rest of the invoice in August.",
+      "evidence": [
+        {
+          "kind": "invoice",
+          "ref": "INV-DOMAIN-2027-08-0002"
+        }
+      ]
+    }
+  ],
+  "deferredChargesTotalMinor": 20000,
+  "chargedToFeesMinor": 34400,
+  "yearRunningTotalMinor": 53600,
+  "capBps": 1500,
+  "reserveRetentionMinor": 3000,
+  "reserveRetentionNote": "Retained at the published share of the month's Purpose Fees: the operations reserve is below its published target. Above target nothing is retained.",
+  "passedOnMinor": 22600,
+  "transfers": [
+    {
+      "recipientId": "rcp_f5cc8xgz81c00nrve04pdahejb",
+      "category": "health",
+      "amountMinor": 11300,
+      "status": "scheduled",
+      "endToEndId": "psn-2027-09-rcp_f5cc8xgz81c00nrve04pdahejb"
+    },
+    {
+      "recipientId": "rcp_tg8g3ps3smxzdpy1zt0zesjnx9",
+      "category": "health",
+      "amountMinor": 11300,
+      "status": "scheduled",
+      "endToEndId": "psn-2027-09-rcp_tg8g3ps3smxzdpy1zt0zesjnx9"
+    }
+  ],
+  "reserve": {
+    "balanceMinor": 21750,
+    "targetMinor": 2700000,
+    "note": "The month opened at 1500. On 16 September, once the month's payout had arrived, the fees account paid the reserve back the 20000 it advanced in August: this close's deferred charge of invoice INV-DOMAIN-2027-08-0002. A refill paid after the close is listed by the month that books it. August's retention moved on August's transfer day.",
+    "movements": [
+      {
+        "amountMinor": 20000,
+        "kind": "refill-from-fees",
+        "date": "2027-09-16",
+        "invoiceRef": "INV-DOMAIN-2027-08-0002",
+        "advancedIn": "2027-08",
+        "note": "The deferred charge of the domain renewal the reserve advanced in August.",
+        "evidence": [
+          {
+            "kind": "reserve-movement",
+            "ref": "STMT-RES-2027-09-0001"
+          }
+        ]
+      },
+      {
+        "amountMinor": 250,
+        "kind": "retention-from-fees",
+        "date": "2027-09-25",
+        "note": "August's reserve retention, moved to the reserve account, which is not the fees account.",
+        "evidence": [
+          {
+            "kind": "reserve-movement",
+            "ref": "STMT-RES-2027-09-0002"
+          }
+        ]
+      }
+    ]
+  },
+  "recipientListVersion": "v1",
+  "evidence": [
+    {
+      "kind": "rail-payout-statement",
+      "ref": "PAYOUT-2027-09",
+      "label": "The month's rail payout statement, net of the processing fee"
+    }
+  ],
+  "methodologyUrl": "https://purposesource.org/trust/money"
+}

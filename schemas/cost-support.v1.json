@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://purposesource.org/spec/schemas/cost-support.v1.json",
   "title": "Monthly cost-support table (v1)",
-  "description": "One calendar month of the published cost-support table: what the movement's running costs were, who paid them, and what the fees account passed on to the listed recipients (ops decision D29 §3, as amended 2026-09-06 by D33 and D34).\n\nONE DOCUMENT PER CALENDAR MONTH, AND THE SHAPE IS IDENTICAL IN EVERY MONTH — that invariance is the contract. Supporters are ROWS, never schema constants: when a supporter stops, its row goes to zero and falls off, and no heading, no rule text and no published claim changes (D29 §3). An empty month is the same document with empty arrays, zero amounts and its notes — never a month left out, and never a zero dressed up as a result.\n\nFOUR OUTGOING LINES AND NOTHING ELSE (D34 item 5; invariant I1): the direct invoices nobody supported, the reserve retention, the steward hardship pay, and one transfer per listed recipient. The fees account receives every Purpose Fee payout and nothing else; cost support NEVER passes through it (invariant I4) — a supporter settles a listed direct invoice IN PLACE OF the fees account, by name and amount, or the support did not happen (I5). The full bill is published even when support covers all of it (I6). No person other than the holder of the one essential operating role is ever paid from Purpose Fees, and only under the published hardship rule with its source declaration (I9, D34 item 3).\n\nTHE ARITHMETIC A READER CHECKS, stated here because JSON Schema cannot express a sum across items — the same treatment `purpose-yml.v1` gives its micro-share bound: (1) `chargedToFeesMinor` = max(0, `directCostsTotalMinor` − `supportTotalMinor`); (2) `supportTotalMinor` ≤ `directCostsTotalMinor` — whatever a supporter wants to give beyond the month's direct costs is that supporter's own donation, in its own name, and is not part of this model; (3) `passedOnMinor` = `purposeFeesNetMinor` − `chargedToFeesMinor` − `reserveRetentionMinor` (a document written before 2026-09-14 also subtracts `hardshipPayMinor`, a member struck on that date); (4) the `transfers[]` amounts sum to `passedOnMinor`; (5) `directCostsTotalMinor` is the sum of `directCosts[]` and `supportTotalMinor` the sum of `supporters[]`. Both totals are written rather than derived so a reader can check the arithmetic against the file it is published in.\n\nEVERY LINE CARRIES ITS EVIDENCE: the rail payout statement, the invoice, the supporter's payment, the bank line, each listed recipient's receipt (D29 §3, URS GOV-072). The proof is publication to the invoice, not a signature (D29 §8).\n\nMoney is integer minor units plus an ISO currency code, never a float; the period is one calendar month, the same unit as the sweep, and the annual report aggregates months without ever restating them. Every cap here is a figure in the statutes' own text (Art. 6(3) and Art. 6g(1)–(2); ops decision D43 item 1), and every cap can only ever fall (invariant I7). A closed month is never edited: a correction is a forward-dated `annotations[]` line, on the same never-restate doctrine as the ledger (FS07-042).",
+  "description": "One calendar month of the published cost-support table: what the movement's running costs were, who paid them, and what the fees account passed on to the listed recipients (ops decision D29 §3, as amended 2026-09-06 by D33 and D34).\n\nONE DOCUMENT PER CALENDAR MONTH, AND THE SHAPE IS IDENTICAL IN EVERY MONTH — that invariance is the contract. Supporters are ROWS, never schema constants: when a supporter stops, its row goes to zero and falls off, and no heading, no rule text and no published claim changes (D29 §3). An empty month is the same document with empty arrays, zero amounts and its notes — never a month left out, and never a zero dressed up as a result.\n\nFOUR OUTGOING LINES AND NOTHING ELSE (D34 item 5; invariant I1): the direct invoices nobody supported, the reserve retention, the steward hardship pay, and one transfer per listed recipient. The fees account receives every Purpose Fee payout and nothing else; cost support NEVER passes through it (invariant I4) — a supporter settles a listed direct invoice IN PLACE OF the fees account, by name and amount, or the support did not happen (I5). The full bill is published even when support covers all of it (I6). No person other than the holder of the one essential operating role is ever paid from Purpose Fees, and only under the published hardship rule with its source declaration (I9, D34 item 3).\n\nTHE ARITHMETIC A READER CHECKS, stated here because JSON Schema cannot express a sum across items — the same treatment `purpose-yml.v1` gives its micro-share bound: (1) `chargedToFeesMinor` = max(0, `directCostsTotalMinor` − `supportTotalMinor` − `reserveAdvanceTotalMinor`) + `deferredChargesTotalMinor`, each of the two last members 0 where the document carries none; (2) `supportTotalMinor` + `reserveAdvanceTotalMinor` ≤ `directCostsTotalMinor` — whatever a supporter wants to give beyond the month's direct costs is that supporter's own donation, in its own name, and is not part of this model; (3) `passedOnMinor` = `purposeFeesNetMinor` − `chargedToFeesMinor` − `reserveRetentionMinor` (a document written before 2026-09-14 also subtracts `hardshipPayMinor`, a member struck on that date); (4) the `transfers[]` amounts sum to `passedOnMinor`; (5) `directCostsTotalMinor` is the sum of `directCosts[]`, `supportTotalMinor` the sum of `supporters[]`, `reserveAdvanceTotalMinor` the sum of `directCosts[].reserveAdvanceMinor` and `deferredChargesTotalMinor` the sum of `deferredCharges[]`. Every total is written rather than derived so a reader can check the arithmetic against the file it is published in.\n\nA BILL THE RESERVE ADVANCES IS CHARGED ONCE (Calculation Rules Nr. 17; added 2026-10-01). When a close's Purpose Fees cannot carry a direct invoice, only its charge to the fees is deferred, and the invoice itself is paid when due: by the operations reserve as far as the reserve's opening balance for the month holds and statutes Art. 6g(3) allows, and by a named supporter for the rest. The month that pays it lists the invoice in full with its `reserveAdvanceMinor`, outside the charged line, and the reserve's `direct-cost-out` movement of that amount. The first close whose fees can bear the charge makes it, once and whole, as a `deferredCharges[]` line of the same amount, inside the charged line and the running year's total against the cap, and the reserve's `refill-from-fees` movement pays the reserve back. That close is normally a later month's, and it is the paying month's own where its close can carry the bill after all. Each movement names its invoice and the month of the advance (`invoiceRef`, `advancedIn`). The advance's movement is in the document that lists the advance, because an advanced invoice's `paidOn` is the day the reserve account books its payment. The refill is listed by the month the reserve account books it: the closing month itself where the fees account paid the reserve back before the close, and otherwise, like the retention, a later month, normally the next. The reserve's ordinary retention continues beside the refill until the target.\n\nEVERY LINE CARRIES ITS EVIDENCE: the rail payout statement, the invoice, the supporter's payment, the bank line, each listed recipient's receipt (D29 §3, URS GOV-072). The proof is publication to the invoice, not a signature (D29 §8).\n\nMoney is integer minor units plus an ISO currency code, never a float; the period is one calendar month, the same unit as the sweep, and the annual report aggregates months without ever restating them. Every cap here is a figure in the statutes' own text (Art. 6(3) and Art. 6g(1)–(2); ops decision D43 item 1), and every cap can only ever fall (invariant I7). A closed month is never edited: a correction is a forward-dated `annotations[]` line, on the same never-restate doctrine as the ledger (FS07-042).",
   "x-psn": {
-    "specVersion": "1.1.1",
+    "specVersion": "1.2.0",
     "phase": "P-M3 (producer). At v0 the table is hand-maintained and no calendar month with a Purpose Fee payout has closed, so nothing is published yet and the page says so.",
     "artifactPath": "no path in the FS-00 §6.2 catalogue yet — deliberately deferred; at v0 one hand-maintained file (`src/data/cost-support/index.json` in the website repo, one entry per closed month) rendered on the transparency page. The published per-month path is fixed when FS-00 §6.2 adopts this artifact.",
     "authoritative": true,
@@ -50,7 +50,7 @@
     },
     "directCosts": {
       "type": "array",
-      "description": "C, itemised — the month's direct costs, one entry per third-party invoice, complete even where a supporter settled all of it (invariant I6). A direct cost is a third-party invoice for a service that exists ONLY for the movement, billed to an account of the Association used only for the movement, in the eligible classes of the Cost Class Rules, the board rulebook under statutes Art. 22(7) (D29 §2.1; ops decision D43 item 1). It is never a bill that also serves another activity; a shared invoice is a direct cost only for the line items that serve the movement alone. Amended 2026-09-14 by the operator's override, written into the statutes set for adoption at the founding assembly of 1 October 2026: personnel cost IS now an eligible class inside C and inside the one running-cost cap, published as one line per function and never by name, and pay to a board member needs the prior minuted approval of at least two other board members with no interest of their own in any pay (statutes Art. 6f(3); ops decision D43 item 7). The former separate line `hardshipPayMinor` and the single essential operating role are struck.",
+      "description": "C, itemised — the month's direct costs, one entry per third-party invoice, complete even where a supporter settled all of it (invariant I6) or the operations reserve advanced it (`reserveAdvanceMinor`). A direct cost is a third-party invoice for a service that exists ONLY for the movement, billed to an account of the Association used only for the movement, in the eligible classes of the Cost Class Rules, the board rulebook under statutes Art. 22(7) (D29 §2.1; ops decision D43 item 1). It is never a bill that also serves another activity; a shared invoice is a direct cost only for the line items that serve the movement alone. Amended 2026-09-14 by the operator's override, written into the statutes set for adoption at the founding assembly of 1 October 2026: personnel cost IS now an eligible class inside C and inside the one running-cost cap, published as one line per function and never by name, and pay to a board member needs the prior minuted approval of at least two other board members with no interest of their own in any pay (statutes Art. 6f(3); ops decision D43 item 7). The former separate line `hardshipPayMinor` and the single essential operating role are struck.",
       "items": { "$ref": "#/$defs/directCost" }
     },
     "directCostsTotalMinor": { "type": "integer", "minimum": 0, "description": "The sum of `directCosts[].amountMinor`. Written, not derived, so a reader can check `chargedToFeesMinor` against this file alone." },
@@ -59,16 +59,23 @@
       "description": "S, by supporter — the named supporters that settled listed direct invoices in place of the fees account this month (D29 §2, §3). Supporters are ROWS, never constants, and the list is DATA: no supporter's name appears in any statute, pledge, constant or fixed copy (invariant I8). A supporter is listed for the months in which it paid something and drops off when it stops; an empty array is a valid month, and the document's shape does not change.",
       "items": { "$ref": "#/$defs/supporter" }
     },
-    "supportTotalMinor": { "type": "integer", "minimum": 0, "description": "The sum of `supporters[].amountMinor`, and never more than `directCostsTotalMinor` (D29 §2: support beyond the month's direct costs is the supporter's own donation, in its own name, outside this model)." },
+    "supportTotalMinor": { "type": "integer", "minimum": 0, "description": "The sum of `supporters[].amountMinor`, and, with `reserveAdvanceTotalMinor`, never more than `directCostsTotalMinor` (D29 §2: support beyond the month's direct costs is the supporter's own donation, in its own name, outside this model)." },
+    "reserveAdvanceTotalMinor": { "type": "integer", "minimum": 0, "description": "A — the sum of `directCosts[].reserveAdvanceMinor`: the part of the month's invoices the operations reserve advanced because the close's Purpose Fees could not carry them (Calculation Rules Nr. 17). Written, not derived, so a reader can check `chargedToFeesMinor` against this file alone. Required whenever an entry carries `reserveAdvanceMinor`; a document without one reads it as 0." },
+    "deferredCharges": {
+      "type": "array",
+      "description": "D, itemised — the deferred charges this close makes: one line per invoice the operations reserve advanced, in this month or an earlier one, whose charge to the Purpose Fees is made here, once and whole, its money paid back to the reserve (Calculation Rules Nr. 17; statutes Art. 6a(3): a direct third-party invoice no supporter settled). Every line is inside `chargedToFeesMinor`, and so inside the running year's total against the cap, and is published in the month it is charged (statutes Art. 6(5)). The invoice itself stays, in full, on the table of the month that paid it: a deferred charge is never a second listing of its cost, and an advance is never charged twice. Absent or empty: the close makes none.",
+      "items": { "$ref": "#/$defs/deferredCharge" }
+    },
+    "deferredChargesTotalMinor": { "type": "integer", "minimum": 0, "description": "The sum of `deferredCharges[].amountMinor`. Written, not derived, so a reader can check `chargedToFeesMinor` against this file alone. Required whenever `deferredCharges` is present; a document without it reads it as 0." },
     "chargedToFeesMinor": {
       "type": "integer",
       "minimum": 0,
-      "description": "max(0, `directCostsTotalMinor` − `supportTotalMinor`) — the direct invoices nobody supported, paid from the fees account. There is NO percentage levy: this figure is a sum of itemised invoices, each linked to its evidence (D29 §2, ops decision D31 item 6; URS ENG-026)."
+      "description": "max(0, `directCostsTotalMinor` − `supportTotalMinor` − `reserveAdvanceTotalMinor`) + `deferredChargesTotalMinor` — the direct invoices no supporter settled and the operations reserve did not advance, paid from the fees account, and the deferred charges this close makes for invoices the reserve advanced (each of the two last members 0 where the document carries none). There is NO percentage levy: this figure is a sum of itemised invoices, each linked to its evidence (D29 §2, ops decision D31 item 6; URS ENG-026)."
     },
     "yearRunningTotalMinor": {
       "type": "integer",
       "minimum": 0,
-      "description": "The financial year's running total of charged-to-fees, including this month. The cap test is ANNUAL and is tested here, never on a month: a month may exceed the cap (an annual domain renewal lands in one month), the year may not, and a year that would exceed it is met by dropping or deferring the service — never by charging (GOV-001, invariant ENG-077)."
+      "description": "The financial year's running total of charged-to-fees, including this month. The cap test is ANNUAL and is tested here, never on a month: a month may exceed the cap (an annual domain renewal lands in one month), the year may not, and a year that would exceed it is met by dropping or deferring the service — never by charging (GOV-001, invariant ENG-077). A deferred charge counts in the year of the close that makes it; an invoice the reserve advanced counts in no year until then, and never twice."
     },
     "capBps": {
       "type": ["integer", "null"],
@@ -123,7 +130,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["balanceMinor", "targetMinor", "note"],
-      "description": "The operations reserve's memo line (ops decision D34 item 4): movements, balance and target are published monthly. The reserve sits in an account that is NOT the fees account, is spent only on direct costs the cap would otherwise defer (personnel included) and on the transfer charges of the final sweep, and is never a refund reserve. Amended 2026-09-14: the essential operating role and the hardship rule are struck.",
+      "description": "The operations reserve's memo line (ops decision D34 item 4): movements, balance and target are published monthly. The reserve sits in an account that is NOT the fees account, is spent only on direct costs the cap would otherwise defer (personnel included) and on the transfer charges of the final sweep, and is never a refund reserve. Under Calculation Rules Nr. 17 it also advances, as far as statutes Art. 6g(3) allows, a direct invoice whose charge a close's Purpose Fees cannot carry, and the close that later charges it pays the reserve back (`direct-cost-out`, `refill-from-fees`). Amended 2026-09-14: the essential operating role and the hardship rule are struck.",
       "properties": {
         "balanceMinor": { "type": "integer", "minimum": 0, "description": "The reserve's balance at the end of the month." },
         "targetMinor": { "type": ["integer", "null"], "minimum": 0, "description": "The published target — CHF 27,000, a figure in the statutes' own text (Art. 6g(1); ops decision D43 item 1; the \"six months of the essential operating role's ceiling\" derivation was struck with the role on 2026-09-14). `null` on a table for a month before the statutes were adopted; nothing renders a figure nobody has approved." },
@@ -135,12 +142,22 @@
             "type": "object",
             "additionalProperties": false,
             "required": ["amountMinor", "kind", "date"],
+            "allOf": [
+              {
+                "$comment": "Added 2026-10-01 (Calculation Rules Nr. 17): the reserve's payment of an advanced invoice and its refill each name the advance they belong to, and no other movement names one.",
+                "if": { "properties": { "kind": { "enum": ["direct-cost-out", "refill-from-fees"] } }, "required": ["kind"] },
+                "then": { "required": ["invoiceRef", "advancedIn"] },
+                "else": { "not": { "anyOf": [{ "required": ["invoiceRef"] }, { "required": ["advancedIn"] }] } }
+              }
+            ],
             "properties": {
               "amountMinor": { "type": "integer", "description": "Positive into the reserve, negative out of it." },
-              "kind": { "enum": ["retention-from-fees", "unrestricted-income", "hardship-pay-out", "direct-cost-out"], "description": "`retention-from-fees` is the D34 item 4 retention (and equals this month's `reserveRetentionMinor` when it is the only one). `unrestricted-income` is a sponsor, another activity's profit or other unrestricted income — the failsafe does not depend on any one of them. The two `-out` kinds are the only permitted spends." },
+              "kind": { "enum": ["retention-from-fees", "unrestricted-income", "hardship-pay-out", "direct-cost-out", "refill-from-fees"], "description": "`retention-from-fees` is the D34 item 4 retention (and equals this month's `reserveRetentionMinor` when it is the only one). `unrestricted-income` is a sponsor, another activity's profit or other unrestricted income — the failsafe does not depend on any one of them. `direct-cost-out` is the reserve paying a direct invoice it advances (Calculation Rules Nr. 17), of exactly that invoice's `reserveAdvanceMinor`, on its `paidOn`. `refill-from-fees` is the fees account paying the reserve back the deferred charge a close made, of exactly that charge's `amountMinor`, in the month the reserve account books it: the closing month or a later one. Both name the advance (`invoiceRef`, `advancedIn`). The two `-out` kinds are the only permitted spends." },
               "date": { "type": "string", "format": "date" },
               "note": { "type": "string", "maxLength": 1000 },
               "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidenceLink" } },
+              "invoiceRef": { "type": "string", "minLength": 1, "maxLength": 200, "description": "On a `direct-cost-out` or `refill-from-fees` movement, and on no other: the invoice the reserve paid in advance or was paid back for, by its reference." },
+              "advancedIn": { "$ref": "#/$defs/monthKey", "description": "On a `direct-cost-out` or `refill-from-fees` movement, and on no other: the month whose table lists the invoice in full with its `reserveAdvanceMinor`. With `invoiceRef` it names the advance the movement belongs to." },
               "sponsorshipId": { "type": "string", "pattern": "^spn_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "On an `unrestricted-income` movement paid from a sponsorship’s unused balance (D44), the id of that sponsorship in the published sponsor register." }
             }
           }
@@ -178,6 +195,16 @@
       "$comment": "Historical only — the rule was struck 2026-09-14 and no document written after that date carries `hardshipPayMinor`. For documents that do: D34 item 3(c) and 3(e), pay above zero exists only with the month’s approval by the members other than the holder, inside a numbered episode of at most twelve months.",
       "if": { "properties": { "hardshipPayMinor": { "exclusiveMinimum": 0 } }, "required": ["hardshipPayMinor"] },
       "then": { "required": ["hardshipApprovalRef", "hardshipEpisodeMonth"] }
+    },
+    {
+      "$comment": "Added 2026-10-01 (Calculation Rules Nr. 17): the advances' total is written whenever an invoice carries an advance, so a reader can always check `chargedToFeesMinor` against the file.",
+      "if": { "properties": { "directCosts": { "contains": { "required": ["reserveAdvanceMinor"] } } }, "required": ["directCosts"] },
+      "then": { "required": ["reserveAdvanceTotalMinor"] }
+    },
+    {
+      "$comment": "Added 2026-10-01 (Calculation Rules Nr. 17): the deferred charges' total is written whenever the document lists them.",
+      "if": { "required": ["deferredCharges"] },
+      "then": { "required": ["deferredChargesTotalMinor"] }
     }
   ],
   "$defs": {
@@ -196,9 +223,11 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 200,
-          "description": "The named supporter that settled THIS invoice in place of the fees account (D29 §2, invariant I5). Absent means the fees account paid it, so the invoice sits inside `chargedToFeesMinor`. Support never passes through the fees account (I4), and undisclosed support is the one thing this model forbids — it is the only thing that could make the published cost line flatter than the truth."
+          "description": "The named supporter that settled THIS invoice in place of the fees account (D29 §2, invariant I5). Absent means the fees account paid it, so the invoice sits inside `chargedToFeesMinor` — unless `reserveAdvanceMinor` says the operations reserve advanced it. With both, the supporter settled the part the reserve did not advance, and its `supporters[]` line carries that part for this invoice. Support never passes through the fees account (I4), and undisclosed support is the one thing this model forbids — it is the only thing that could make the published cost line flatter than the truth."
         },
-        "paidOn": { "type": "string", "format": "date", "description": "When the invoice was actually paid. Charged-to-fees for a period is what the account paid in that period: an invoice for an earlier month paid late is charged in the period it is paid (D31 item 2), and the annual cap test is unaffected." },
+        "paidOn": { "type": "string", "format": "date", "description": "When the invoice was actually paid. Charged-to-fees for a period is what the account paid in that period: an invoice for an earlier month paid late is charged in the period it is paid (D31 item 2), and the annual cap test is unaffected. For an invoice the operations reserve advanced, the day the reserve account's statement books its payment, which is its `direct-cost-out` movement's date." },
+        "reserveAdvanceMinor": { "type": "integer", "exclusiveMinimum": 0, "description": "Advanced by the reserve: the part of THIS invoice the operations reserve paid when it fell due, because the close's Purpose Fees could not carry it (Calculation Rules Nr. 17), at most the invoice's `amountMinor`. It is not charged to fees in this month (it is subtracted as `reserveAdvanceTotalMinor`). The first close that can bear it charges it once, whole, as a `deferredCharges[]` line of the same amount, and this document lists the reserve's `direct-cost-out` movement of the same amount, naming this invoice and this month. The rest of the invoice, if any, is the named supporter's (`supporter`). Absent: the reserve advanced nothing." },
+        "supplier": { "$ref": "#/$defs/supplier" },
         "evidence": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/evidenceLink" }, "description": "At least the invoice; and where a supporter settled it, the supporter's payment as well." }
       }
     },
@@ -226,6 +255,43 @@
         "evidence": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/evidenceLink" }, "description": "The supporter's own payment. Support is listed with its evidence or it did not happen (invariant I5)." },
         "sponsorshipId": { "type": "string", "pattern": "^spn_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "When this support was paid from a sponsorship (ops decision D44): the id of that sponsorship in the published sponsor register (`sponsorship.v1`, `/sponsors.json`), so a reader can follow a named supporter line back to the invoice it came from. The supporter `name` is then the sponsor’s name exactly as the register prints it." }
       }
+    },
+    "deferredCharge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["invoiceRef", "class", "advancedIn", "amountMinor", "evidence"],
+      "description": "Deferred charge: one invoice the operations reserve advanced, charged to the Purpose Fees by this close, once and whole, its money paid back to the reserve (Calculation Rules Nr. 17). Published in the month it is charged, with a reference to its evidence (statutes Art. 6(5)), it becomes one `charged-to-fees` row, as every charged invoice does (FS07-021). It carries no day of its own: the close makes the charge, and the reserve's `refill-from-fees` movement is listed by the month the reserve account books it.",
+      "properties": {
+        "invoiceRef": { "type": "string", "minLength": 1, "maxLength": 200, "description": "The invoice's own reference, as the table of the month that advanced it carries it." },
+        "class": { "$ref": "#/$defs/directCostClass" },
+        "advancedIn": { "$ref": "#/$defs/monthKey", "description": "The month whose table lists the invoice in full with its `reserveAdvanceMinor`: this document's month, or an earlier one." },
+        "amountMinor": { "type": "integer", "exclusiveMinimum": 0, "description": "The deferred charge: exactly the invoice's `reserveAdvanceMinor`, which is less than its full amount where a supporter settled the rest. A charge is never split across closes." },
+        "description": { "type": "string", "maxLength": 500, "description": "What the invoice was for, as on the table of the month that advanced it." },
+        "supplier": { "$ref": "#/$defs/supplier" },
+        "note": { "type": "string", "maxLength": 1000 },
+        "evidence": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/evidenceLink" }, "description": "At least the invoice, as the table of the month that advanced it refers to it." }
+      }
+    },
+    "supplier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "description": "Who sent the invoice (ops decision D79 items 4.3 and 4.4; added 2026-10-01). A company is published by its legal name. A natural person, sole traders included, is never named: only by the role they served in, which is a function, never a name, an address or another detail that identifies them.",
+      "properties": {
+        "kind": { "enum": ["company", "natural-person"], "description": "`company`: a legal entity, published by its legal name. `natural-person`: a person, sole traders included, published by role only." },
+        "legalName": { "type": "string", "minLength": 1, "maxLength": 200, "description": "A company's legal name, as its register entry or its invoice states it. Only on `company`." },
+        "role": { "type": "string", "minLength": 1, "maxLength": 200, "description": "A natural person's role, for example \"independent reviewer of the fees account\". Only on `natural-person`, and never the person's name." }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "company" } }, "required": ["kind"] },
+          "then": { "required": ["legalName"], "not": { "required": ["role"] } }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "natural-person" } }, "required": ["kind"] },
+          "then": { "required": ["role"], "not": { "required": ["legalName"] } }
+        }
+      ]
     },
     "transfer": {
       "type": "object",

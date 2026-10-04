@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "month": "2027-08",
+  "generatedAt": "2027-09-18T06:00:00Z",
+  "currency": "CHF",
+  "closed": true,
+  "financialYear": "2027",
+  "purposeFeesNetMinor": 5000,
+  "directCosts": [
+    {
+      "invoiceRef": "INV-EDGE-2027-08-0001",
+      "class": "dns-hosting-cdn-edge-storage",
+      "description": "DNS, edge compute and object storage for the movement's own properties, on the movement's own account.",
+      "amountMinor": 2400,
+      "paidOn": "2027-08-08",
+      "supplier": {
+        "kind": "company",
+        "legalName": "SAMPLE — Edge Hosting Ltd"
+      },
+      "evidence": [
+        {
+          "kind": "invoice",
+          "ref": "INV-EDGE-2027-08-0001"
+        }
+      ]
+    },
+    {
+      "invoiceRef": "INV-DOMAIN-2027-08-0002",
+      "class": "domains-and-marks",
+      "description": "Annual renewal of the movement's own domain.",
+      "amountMinor": 30000,
+      "supporter": "SAMPLE — supporting activity of the Association",
+      "paidOn": "2027-08-14",
+      "reserveAdvanceMinor": 20000,
+      "supplier": {
+        "kind": "company",
+        "legalName": "SAMPLE — Domain Registrar AG"
+      },
+      "evidence": [
+        {
+          "kind": "invoice",
+          "ref": "INV-DOMAIN-2027-08-0002"
+        },
+        {
+          "kind": "reserve-movement",
+          "ref": "STMT-RES-2027-08-0002",
+          "label": "Advanced by the operations reserve"
+        },
+        {
+          "kind": "supporter-payment",
+          "ref": "SUP-2027-08-0001",
+          "label": "The rest, settled in place of the fees account"
+        }
+      ]
+    }
+  ],
+  "directCostsTotalMinor": 32400,
+  "supporters": [
+    {
+      "name": "SAMPLE — supporting activity of the Association",
+      "amountMinor": 10000,
+      "invoiceRefs": [
+        "INV-DOMAIN-2027-08-0002"
+      ],
+      "note": "Settled the part of the domain renewal the operations reserve could not advance; the payment never entered the fees account.",
+      "evidence": [
+        {
+          "kind": "supporter-payment",
+          "ref": "SUP-2027-08-0001"
+        }
+      ]
+    }
+  ],
+  "supportTotalMinor": 10000,
+  "reserveAdvanceTotalMinor": 20000,
+  "chargedToFeesMinor": 2400,
+  "yearRunningTotalMinor": 19200,
+  "capBps": 1500,
+  "reserveRetentionMinor": 250,
+  "reserveRetentionNote": "Retained at the published share of the month's Purpose Fees: the operations reserve is below its published target. Above target nothing is retained.",
+  "passedOnMinor": 2350,
+  "transfers": [
+    {
+      "recipientId": "rcp_f5cc8xgz81c00nrve04pdahejb",
+      "category": "health",
+      "amountMinor": 1175,
+      "status": "scheduled",
+      "endToEndId": "psn-2027-08-rcp_f5cc8xgz81c00nrve04pdahejb",
+      "note": "Published between the lock and the sweep: the share is computed and the money has not moved."
+    },
+    {
+      "recipientId": "rcp_tg8g3ps3smxzdpy1zt0zesjnx9",
+      "category": "health",
+      "amountMinor": 1175,
+      "status": "scheduled",
+      "endToEndId": "psn-2027-08-rcp_tg8g3ps3smxzdpy1zt0zesjnx9"
+    }
+  ],
+  "reserve": {
+    "balanceMinor": 1500,
+    "targetMinor": 2700000,
+    "note": "The month opened at 20000. The reserve advanced 20000 of invoice INV-DOMAIN-2027-08-0002, as far as its opening balance held, because the month's Purpose Fees could not carry the renewal; a supporter settled the rest. The first close whose fees can bear the advance charges it, and pays the reserve back. July's retention moved on July's transfer day.",
+    "movements": [
+      {
+        "amountMinor": -20000,
+        "kind": "direct-cost-out",
+        "date": "2027-08-14",
+        "invoiceRef": "INV-DOMAIN-2027-08-0002",
+        "advancedIn": "2027-08",
+        "note": "Advanced by the reserve: the domain renewal, paid when due.",
+        "evidence": [
+          {
+            "kind": "reserve-movement",
+            "ref": "STMT-RES-2027-08-0002"
+          }
+        ]
+      },
+      {
+        "amountMinor": 1500,
+        "kind": "retention-from-fees",
+        "date": "2027-08-25",
+        "note": "July's reserve retention, moved to the reserve account, which is not the fees account.",
+        "evidence": [
+          {
+            "kind": "reserve-movement",
+            "ref": "STMT-RES-2027-08-0003"
+          }
+        ]
+      }
+    ]
+  },
+  "recipientListVersion": "v1",
+  "evidence": [
+    {
+      "kind": "rail-payout-statement",
+      "ref": "PAYOUT-2027-08",
+      "label": "The month's rail payout statement, net of the processing fee"
+    }
+  ],
+  "methodologyUrl": "https://purposesource.org/trust/money"
+}
