@@ -1359,6 +1359,15 @@ row the new-file rule binds absolutely.
   after-the-fact context about a LOCKED month". No property, type, enum or meaning of an existing row
   changes.
 
+### 1.5.3 — unreleased (2026-10-05; ops decision D109 item 4)
+
+- Wording only. `holdStatus` no longer says a month's allocation is locked "no later than the
+  twentieth day" after the credit of the month's earliest rail payout. The founding papers dropped
+  that lock day (D109 item 4): the allocation is locked before the transfer, and the transfer
+  follows no later than the thirtieth day after each payout's credit (statutes Art. 6a(2) and (4);
+  Calculation Rules Nr. 2 to 4). The thirty-day deadline, the per-payout clock and the token's
+  name are unchanged. No property, type, enum or meaning of an existing row changes.
+
 ## ledger-export.v1.json
 
 ### 1.0.0 — unreleased
@@ -1573,6 +1582,16 @@ reasoning: no month export has ever been published with a row in it.
 - `x-psn.phase` names the P-M3 blocks. No existing member, type, enum or meaning changes; every
   document valid under 1.6.2 is valid under 1.7.0.
 
+### 1.7.1 — unreleased (2026-10-05; ops decision D109 item 4)
+
+- Wording only, mirroring `ledger-row.v1` 1.5.3. The methodology description and the export row's
+  `holdStatus` no longer lock a payout's allocation "no later than the twentieth day" (or "twenty
+  days") after its credit. The founding papers dropped that lock day (D109 item 4): the allocation
+  is locked before the transfer, and the transfers follow no later than the thirtieth day after the
+  credit (statutes Art. 6a(2) and (4); Calculation Rules Nr. 2 to 4). A joint month lock still meets
+  the deadlines of the month's earliest payout. The example's month-note says the same. No property,
+  type, enum or meaning changes.
+
 ## ledger-chain.v1.json
 
 ### 1.0.0 — unreleased
@@ -1755,6 +1774,15 @@ reasoning: no month export has ever been published with a row in it.
 - Two further examples show a month whose reserve advances a bill, with a supporter settling the
   rest, and the close that charges it: `examples/cost-support.v1.reserve-advance.example.json` and
   `examples/cost-support.v1.deferred-charge.example.json`. The main example is unchanged.
+
+### 1.2.1 — unreleased (2026-10-05; ops decision D109 item 4)
+
+- Wording only. `transfers` no longer computes the month's allocation at a lock "no later than the
+  twentieth day after the credit of the month's earliest rail payout". The founding papers dropped
+  that lock day (D109 item 4): the lock comes before the transfer, and each share is transferred no
+  later than the thirtieth day after that credit (statutes Art. 6a(2) and (4); Calculation Rules
+  Nr. 2 to 4). A row published between the lock and the sweep still carries `status: "scheduled"`.
+  No property, type, enum or meaning changes.
 
 ## recipient-list.v1.json
 
@@ -1972,6 +2000,38 @@ reasoning: no month export has ever been published with a row in it.
   `recipientId` order and keep their ids, so the `cost-support.v1` example's transfers still
   resolve against v1 id for id, to active entries, and `check:recipient-lists` proves that. Every
   share is 0 and every entry is marked `sample`.
+
+### 1.3.0 — unreleased (2026-10-05; ops decision D110 item 3)
+
+- Wording (D110 item 3, which amends D109 item 4; Recipient Rules §7(1); Financial Regulation
+  §4(10) and §12(3) and (6)). `standard` no longer says the Association publishes the "non-personal
+  parts" of each recipient file. The papers now publish only the List entry, the activation
+  decision, a reference to the evidence for Recipient Rules §3 items 1, 2 and 5 (the legal form, any
+  permit the law of the seat requires, the acceptance of the grant letter: here `registrationRef`,
+  `foreignReceiptEvidence` and `grantLetterRef`), the date of the last yearly review and, in the
+  monthly table, the receipts. A copy of the referenced evidence is given on request, with personal
+  data, account numbers and bank details blacked out; account details, personal data and the
+  screening records are never published.
+- Additive. `$defs.recipient.lastReviewedOn` (`format: date`): the date of the entry's last light
+  yearly review under Recipient Rules §3 item 8, which Recipient Rules §7(1) now publishes. No
+  member carried it before: `standard.annualStatementRef` is a reference, not a date. It is
+  optional on an `active` entry, because the first review falls due up to twelve months after the
+  activation, and absent on a `pending` one, by the same `else` rule that keeps the activation dates
+  off a pending entry. A document is written once, so it carries the date its released version
+  carries; a later review reaches the contract only with a later version. The description's list
+  of the members the mapping takes, its PENDING AND ACTIVE paragraph and the entry's description
+  name the member. `x-psn.fsRefs` add Recipient Rules §3 item 8 and Financial Regulation §4(10) and
+  §12(3) and (6).
+- Wording. `standard` now cites Financial Regulation §12(6) for what is never published: account
+  details, personal data and the rest of the file. `standard.annualStatementRef` no longer says the
+  Recipient Rules may ask for "a short statement or a published annual report": the yearly review
+  (Recipient Rules §3 item 8) asks for no annual report, no accounts and no statement of use. The
+  member stays optional under its D33 item 2 name, and the published fact of the review is
+  `lastReviewedOn`.
+- Minor bump, 1.2.0 to 1.3.0 (versioning policy §3): an optional property that §1 allows inside
+  `v1`. Not `pre-release`, because nothing is tightened: the rule that keeps the member off a
+  pending entry binds only the new member. Every document valid under 1.2.0 is valid under 1.3.0,
+  and both examples validate unchanged.
 
 ## recipient-lists.v1.json
 
