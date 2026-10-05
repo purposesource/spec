@@ -4,7 +4,7 @@
   "title": "Claim-language kit (v2) — /kits/{version}.json",
   "description": "The second shape of the claim-language kit (ops decision D44, 2026-09-15). A kit is still a versioned DOCUMENT whose `kitVersion` a certificate payload pins as `claimKitVersion` (D17), and still carries only PATTERNS with braced placeholders, never a filled-in claim. It is a new file rather than an edit of `claim-kit.v1.json` because v1 requires every variant's `prohibited` list to contain \"we give back\" and allows one pattern per variant, while D44 permits a give-something-back line, several lines, share templates and a coverage badge (versioning policy 2).\n\nWHAT THIS SHAPE MAKES STRUCTURAL. (1) THE MONEY LINE IS THE PLEDGE OR NOTHING: the only place the document states where a Purpose Fee goes is `pledge.text`, which must equal the canonical pledge of statutes Art. 5(5) byte for byte (a test in the publishing repositories holds that equality; JSON Schema cannot), and a line reaches it only through the `{pledge}` placeholder. (2) EVERY CLAIM ENDS WITH THE ONE VERIFICATION SENTENCE (CERT-027): every line whose `use` is `base`, `line` or `gated`, and every template, ends with it; a `clause` is added inside a line and does not. (3) THE SUPPORTER RULES ARE NAMED BY ID, and the ten ids D44 fixes are required, so a later edit cannot quietly drop one; the reviewer phrases \"we support charity\" and \"any unquantified social-impact framing\" stay required members of the supporter's `prohibited` list (FS-08 §8). (4) A BADGE IS A COVERAGE BADGE: its text is fixed to the Purpose Source name, the lane or the waiver designation, and the live status, and the supporter badge carries the EU consumer notice. (5) A GATED LINE IS CLOSED IN THE DOCUMENT: its gate names a fact the holder checks on the public record, and a published kit never opens a gate by editing itself.\n\nTwo variants are required: `supporter` for the payment class and `statusOnly` for the licence-status class. A third, `sponsor`, for the sponsor certificate (`supporter.sponsor`), is optional: kit-2 carries none, because that certificate's wording waits for the tax adviser's answer, and the later kit that publishes it needs no change to this schema. No figure of any kind appears in the document. The document carries no `generatedAt`; `publishedAt` is null until the document is first published at its permalink on the apex, and immutable from then on (D32).",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M2",
     "artifactPath": "/kits/{version}.json",
     "authoritative": true,
@@ -34,7 +34,7 @@
       "additionalProperties": false,
       "required": ["text", "source"],
       "properties": {
-        "text": { "type": "string", "minLength": 200, "maxLength": 600, "pattern": "^100% of net Purpose Fee proceeds ", "description": "The canonical pledge, byte for byte; `{pledge}` in a line is replaced by exactly this text." },
+        "text": { "type": "string", "minLength": 200, "maxLength": 600, "pattern": "^100% of net Purpose Fees ", "description": "The canonical pledge, byte for byte; `{pledge}` in a line is replaced by exactly this text." },
         "source": { "type": "string", "minLength": 5 }
       }
     },

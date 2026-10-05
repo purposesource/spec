@@ -1110,6 +1110,28 @@ value inside `v1` is not additive (versioning policy 1).*
   v2, and pairs each example with its own kit byte for byte. Each new rule has a self-test case
   that must fail.
 
+### 1.1.0 — unreleased (2026-10-05; ops decision D114) — **pre-release** change under versioning policy 5
+
+- `pledge.text` must match `^100% of net Purpose Fees ` (it was `^100% of net Purpose Fee
+  proceeds `). With D114 the canonical pledge (Finanzreglement § 12(7) in German; the English
+  wording the website pins; its floor is statutes Art. 5(5)) reads: "100% of net Purpose Fees go to
+  the listed charities within 30 days of each payout, after published, capped costs: running costs
+  at most 15% of a year's net fees, and the reserve at most 5% of each payout until it holds six
+  months of costs, so at least 80% every year. Listed supporters lower the costs, never what is
+  passed on. No cap is ever raised for a purchase already made. Every cost and transfer is published
+  monthly." It drops "every cap able only to fall", which stopped being true once statutes Art. 22
+  let all members raise a cap with notice, for later purchases only. Nothing has been published
+  under this schema (kit-2's `publishedAt` is null), so the pattern changes in place with a minor
+  bump. The length bounds (200 to 600) still hold the new text, 424 characters.
+- `kits/kit-2.json`, still unpublished, changes before publication (D32). `pledge.text` is the new
+  pledge. The two texts that quote it, the `give-back` line and the `linkedin` template, now close
+  the quotation without a full stop of their own (`“{pledge}” verify only at purposesource.org/verify`), because the
+  pledge ends with one. Its SHA-256 over the raw bytes is now
+  `3a60f57f140156e48a2799408fe80df670ff3d2334868931e8e78ee0e49e777a` (11,694 bytes, LF); it was
+  `63b6efcca1fe8278c0e71257fff4a36b6c03da72cec62e2ea1676aacd3a465c5` (11,615 bytes).
+  `examples/claim-kit.v2.example.json` is still that document, byte for byte, and the website
+  vendors the same bytes.
+
 ## ct-segment.v1.json
 
 ### 1.0.0 — unreleased
@@ -1592,6 +1614,20 @@ reasoning: no month export has ever been published with a row in it.
   the deadlines of the month's earliest payout. The example's month-note says the same. No property,
   type, enum or meaning changes.
 
+### 1.7.2 — unreleased (2026-10-05; ops decision D114)
+
+- Wording only. `policy.reserveTargetMinor` no longer calls the reserve's target CHF 27,000 in the
+  statutes' own text. Since D114, statutes Art. 6g(1) sets it by a rule: half of the previous
+  financial year's direct costs of the Purpose Source activity, personnel included, whatever funds
+  paid them, annualised where that year was shorter than twelve months, set and published by the
+  board each January from the published monthly tables; in the first financial year, the direct
+  costs incurred since founding, annualised. The member still carries the figure the board set
+  for the month's financial year.
+- `reserveTargetMinor` and `reserveRetentionBpsMax` no longer say they "can only fall". No cap is
+  ever raised for a purchase already made (statutes Art. 22(4)); raising one for later purchases
+  needs the consent of all members after published notice (Art. 22(2) and (3)). The struck
+  hardship members keep their historical wording. No property, type, enum or meaning changes.
+
 ## ledger-chain.v1.json
 
 ### 1.0.0 — unreleased
@@ -1783,6 +1819,27 @@ reasoning: no month export has ever been published with a row in it.
   later than the thirtieth day after that credit (statutes Art. 6a(2) and (4); Calculation Rules
   Nr. 2 to 4). A row published between the lock and the sweep still carries `status: "scheduled"`.
   No property, type, enum or meaning changes.
+
+### 1.2.2 — unreleased (2026-10-05; ops decision D114)
+
+- Wording only. `reserve.targetMinor` follows the rule of statutes Art. 6g(1) as D114 amends it:
+  half of the previous financial year's direct costs under Art. 6, personnel included, whatever
+  funds paid them (Purpose Fees, cost support, the operations reserve or free funds), annualised
+  where that year was shorter than twelve months. The board sets and publishes it each January
+  from the published monthly tables; in the first financial year it uses the direct costs incurred
+  since founding, annualised. This replaces the fixed CHF 27,000 of D43 item 1. `null` still
+  marks a month before the statutes were adopted.
+- `yearRunningTotalMinor` no longer says that a year which would exceed the cap "is met by
+  dropping or deferring the service". The statutes never required that: whatever would exceed the
+  cap for the year is not charged to Purpose Fees, and is paid from money of the Association that
+  is not Purpose Fees (Art. 6(4)). The `reserve` block uses the words of Art. 6g(3): the reserve
+  pays direct costs that are not charged to Purpose Fees because of the cap.
+- The top-level description no longer says that every cap "can only ever fall". The cap and the
+  retention limit are the statutes' own figures (Art. 6(3) and 6g(2)), the target follows the
+  rule of Art. 6g(1), and no cap is ever raised for a purchase already made (Art. 22(4);
+  invariant I7). No property, type, enum or answer changes. The examples carry illustrative
+  targets and validate unchanged; the `sponsorship-schedule.v1` example's `use-order` rule follows
+  (see that section).
 
 ## recipient-list.v1.json
 
@@ -2289,6 +2346,10 @@ reasoning: no month export has ever been published with a row in it.
   quietly drop one. The words of each rule are the published document's.
 - The example is a `draft` with three illustrative tiers; the board adopts the real amounts, and
   the example's rule texts stand in for the words the published schedule takes.
+- *(Example only, 2026-10-05, ops decision D114: the example's `use-order` rule names the
+  reserve's target as the published target of statutes Art. 6g(1), half of the previous financial
+  year's direct costs, instead of the fixed CHF 27,000 the statutes no longer carry. No schema
+  change.)*
 
 ## sponsorship.v1.json
 

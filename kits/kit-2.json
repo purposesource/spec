@@ -6,7 +6,7 @@
   "language": "en",
   "verify": "verify only at purposesource.org/verify",
   "pledge": {
-    "text": "100% of net Purpose Fee proceeds go to the listed recipients after published, capped costs — running costs charged to fees capped at 15% and the operations reserve at 5%, every cap able only to fall — and listed cost support lowers those costs, never what is passed on (every invoice, support line, reserve movement and transfer published)",
+    "text": "100% of net Purpose Fees go to the listed charities within 30 days of each payout, after published, capped costs: running costs at most 15% of a year's net fees, and the reserve at most 5% of each payout until it holds six months of costs, so at least 80% every year. Listed supporters lower the costs, never what is passed on. No cap is ever raised for a purchase already made. Every cost and transfer is published monthly.",
     "source": "statutes Art. 5(5)"
   },
   "variants": {
@@ -23,7 +23,7 @@
         {
           "id": "give-back",
           "use": "line",
-          "text": "Purpose Source asks the biggest users of the software it registers to give something back, and we pay the Purpose Fee it asks for. The Purpose Source Association's pledge for Purpose Fees: “{pledge}”. verify only at purposesource.org/verify"
+          "text": "Purpose Source asks the biggest users of the software it registers to give something back, and we pay the Purpose Fee it asks for. The Purpose Source Association's pledge for Purpose Fees: “{pledge}” verify only at purposesource.org/verify"
         },
         {
           "id": "give-back-short",
@@ -62,7 +62,7 @@
         {
           "id": "linkedin",
           "channel": "long-post",
-          "text": "{organisation} now holds a Purpose Source {lane} Entitlement for {period} — the credential that meets the condition the Purpose Source License sets for organisations that are not small under the licence, for the repositories it covers. Purpose Source asks the biggest users of the software it registers to give something back, and we pay the Purpose Fee it asks for. The Purpose Source Association's pledge for Purpose Fees: “{pledge}”. verify only at purposesource.org/verify"
+          "text": "{organisation} now holds a Purpose Source {lane} Entitlement for {period} — the credential that meets the condition the Purpose Source License sets for organisations that are not small under the licence, for the repositories it covers. Purpose Source asks the biggest users of the software it registers to give something back, and we pay the Purpose Fee it asks for. The Purpose Source Association's pledge for Purpose Fees: “{pledge}” verify only at purposesource.org/verify"
         },
         {
           "id": "short-post",
