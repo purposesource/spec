@@ -2,7 +2,7 @@
 #
 # You do not need this file. Adoption is one committed LICENSE file and is complete
 # without a manifest; when there is no manifest the published defaults apply (weight
-# class standard, steward-default allocation, no attribution overrides). This example
+# class standard, the board's published allocation key, no attribution overrides). This example
 # shows what is POSSIBLE, not what is expected.
 #
 # Validate it:  npx ajv validate -s schemas/purpose-yml.v1.json -d <your file>

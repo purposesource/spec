@@ -283,6 +283,13 @@ The entry as first recorded, kept as history:
   alternative (`R_[A-Za-z0-9_-]{6,118}`): that would tighten eleven files, which is a different
   instrument from this one.
 
+### 1.1.1 — unreleased (2026-10-06; ops decision D117)
+
+- Wording only. The published defaults and `allocation`'s precedence name the board's published
+  allocation key (equal shares to all active recipients while none is published) where they said
+  "steward-default allocation" and "the steward default": D117 retires the word. No property, type,
+  enum or meaning changes.
+
 ## registry-v0-record.v1.json
 
 ### 1.0.0 — unreleased
@@ -620,6 +627,12 @@ creating one.
   function"; it now names `cov-v2`, `cov-v1` before it, and says that cov-v2 reports a `verified`
   record as `registered` and answers a Pass's `yes-via-pass` about a repository with no record
   (`coverage/cov-v2.ts`). No constraint moved.
+
+### 1.4.2 — unreleased (2026-10-06; ops decision D117)
+
+- Wording only. The project's own categories say what applies when absent: the board's published
+  allocation key, where they said "the steward default" (D117 retires the word). No property, type,
+  enum or meaning changes.
 
 ## waiver.v1.json
 

@@ -4,7 +4,7 @@
   "title": "Repo record — /registry/repo/{node_id}.json",
   "description": "The published per-repository record: one of the three inputs to the coverage function (`cov-v2`, `cov-v1` before it; FS-10 §4.2) and the data behind the public project page (WEB-080). Published for every registered repository, whether or not its admins have claimed it, in state `registered`, and for `suspended`, `quit` and `delisted` ones (ops decision D82 item 1); a record published before D82 carries `verified` where one published since carries `registered`. *(Amended 2026-09-30, D82 and its dated note (d) of 2026-09-29: it said \"Published for repositories in state `verified`, `suspended`, `quit` or `delisted`; `detected` repositories appear in aggregate counts only (FS02-062, GH-014).\")* A delisted or quit repository still HAS a record and still computes coverage — entitlements and vesting stand (D12) — and `state` is what the answer reports as `basis.repoState` (FS-10 §4.3 step 1), cov-v2 reporting a `verified` record as `registered`. A repository with no record is answered only for an organisation holding a Pass inside its term, with `basis.repoState` `no-record` (cov-v2; ops decisions D48 item 5 and D82 item 10). At P-M2 the `stats` block is deliberately ABSENT: Purpose-Points and charity figures do not exist before the first disbursed ledger row, and publishing a zero would be theatre (VS-18, NEV-017).",
   "x-psn": {
-    "specVersion": "1.4.1",
+    "specVersion": "1.4.2",
     "phase": "P-M2",
     "artifactPath": "/registry/repo/{node_id}.json",
     "authoritative": true,
@@ -107,7 +107,7 @@
       "maxItems": 7,
       "uniqueItems": true,
       "items": { "$ref": "#/$defs/categorySlug" },
-      "description": "The project's own default public-benefit categories (FS02-050 tier 3), in the project's stated order. Absent means the steward default applies — a project that chose nothing is not a project that chose none. *(Renamed 2026-09-08, pre-release: the member was `allocationDefaults`, which is the name no other contract uses; `registry-v0-record.v1` 1.1.0 already validates `impact_category_defaults` and the curated registry records carry it, so one vocabulary now spans the record and the artifact built from it. Its items were `^[a-z][a-z0-9-]{1,31}$` with `maxItems: 8`; the menu is a closed set of seven, so an open pattern admitted a slug no allocation surface could render. Superseded, kept as history: `allocationDefaults`, an eight-item open-pattern array.)*"
+      "description": "The project's own default public-benefit categories (FS02-050 tier 3), in the project's stated order. Absent means the board's published allocation key applies (equal shares to all active recipients while none is published; the word “steward default” is retired, ops decision D117) — a project that chose nothing is not a project that chose none. *(Renamed 2026-09-08, pre-release: the member was `allocationDefaults`, which is the name no other contract uses; `registry-v0-record.v1` 1.1.0 already validates `impact_category_defaults` and the curated registry records carry it, so one vocabulary now spans the record and the artifact built from it. Its items were `^[a-z][a-z0-9-]{1,31}$` with `maxItems: 8`; the menu is a closed set of seven, so an open pattern admitted a slug no allocation surface could render. Superseded, kept as history: `allocationDefaults`, an eight-item open-pattern array.)*"
     },
     "canonicalOf": { "$ref": "#/$defs/githubNodeId" },
     "links": {
