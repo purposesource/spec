@@ -874,6 +874,41 @@ value inside `v1` is not additive (versioning policy 1).*
   `{schema key}.{state}.example.json` beside the main one, and refuses an example file that
   belongs to no schema.
 
+### 1.4.0 — unreleased (2026-10-06; ops decision D117 item 3)
+
+- Additive. A top-level `associationSharePpm`, an integer from 0 to 1000000, on contributor
+  payloads only. A contributor certificate states what the holder left to the Association
+  through *All*, the designation form's first option (D117 item 3; D64 item 2). `categoryVotes` could not
+  say it: its items are `{fund, sharePpm}`, and a share left to the Association has no fund.
+- How the share adds up over a certificate that covers several projects and months. For
+  each project in `scope.repos` and each locked month in `period`, the amount attributed to
+  the holder's credit is the part of the project's `repo-pool` row that the month's
+  Purpose-Points snapshot attributes to the holder (FS07-026's split). Contributors never
+  receive money (D15): the amount is only the weight. Each project-month weighs by that
+  amount, so the value is the fraction of the holder's credited amount in the period that the
+  holder left to the Association, rounded down. A project-month with no designation of the
+  holder's in force counts in the divisor only. The value states the holder's recorded
+  designation and does not say that it routed money (Calculation Rules Nr. 26; D27). It is
+  absent when the period attributes no amount to the holder's credit in the projects shown,
+  because then there is nothing to weigh.
+- The bound. `associationSharePpm` plus the sum of `categoryVotes[].sharePpm` never exceeds
+  1000000. JSON Schema cannot express a sum across members, so the signer enforces it, as the
+  manifest parser enforces `purpose-yml.v1`'s sum of manual splits. Rounding each value down
+  keeps the bound true by construction.
+- Wording on an existing member. `categoryVotes[].sharePpm` gets the meaning the record left
+  open (the orchestrator's note of 2026-10-04 to Conductor, §2 item 4): a share of the same
+  amount, weighted in the same way, stating a recorded designation. `categoryVotes` now says that a category is named only
+  when a verified transfer in the period shows it received money (D64 item 2; D117 item 3).
+  No certificate has ever carried `categoryVotes`, because every contributor row leaves it
+  NULL until a reader of verified transfers exists. So no published value changes meaning.
+- One new rule: a payload that carries `associationSharePpm` has `typ: contributor`. It
+  constrains only the new member. A statement on a project's certificate of an
+  administrator's *All* would be its own change.
+- Every payload valid under 1.3.0 still validates and means the same. The new
+  `examples/certificate.v1.contributor.example.json` validates: an annual certificate over two
+  projects that names no category and states 600000 ppm left to the Association. The schema
+  refuses the member on a supporter certificate, and refuses a value outside 0 to 1000000.
+
 ## certificate-record.v1.json
 
 ### 1.0.0 — unreleased
@@ -1627,6 +1662,39 @@ reasoning: no month export has ever been published with a row in it.
   ever raised for a purchase already made (statutes Art. 22(4)); raising one for later purchases
   needs the consent of all members after published notice (Art. 22(2) and (3)). The struck
   hardship members keep their historical wording. No property, type, enum or meaning changes.
+
+### 1.8.0 — unreleased (2026-10-06; ops decision D117)
+
+- Additive. The shadow rows' `voteSource` gains `association` and `no-designation`. Each
+  source a month's close reports now has a name (Calculation Rules Nr. 30, with the key's
+  limb split in two as the orchestrator's D117 order §3 asks):
+  - `contributor`: a contributor's own designation, for the categories it names;
+  - `project-default`: the project's default, set by the repository's administrators, for
+    the categories it names;
+  - `association`: a share expressly left to the Association through *All*, by either
+    designation;
+  - `no-designation`: a share with no effective designation at the lock.
+
+  The last two both follow the board's published allocation key (Nr. 29). They are named
+  apart because D117 needs the difference between leaving a share to the Association and
+  never choosing.
+- Retired, not removed: `steward-default`. D117 retires the word "steward default". The value
+  named a share with no designation before *All* existed, and `no-designation` is its
+  successor. It is never written again, and it stays so that a document written under 1.7.2
+  or earlier keeps validating (versioning policy 1). No producer has written it: the
+  platform's month writer writes `contributor` alone.
+- `voteSource` gains its description. `contributor` and `project-default` keep their meaning,
+  the amount a designation sent to a category it names. Before *All* a designation had no
+  other kind of line, and a share either one now leaves to the Association is `association`.
+- The `policy` block's description gains its second source. A month locked while no
+  allocation key is in force (D117 item 4; Calculation Rules Nr. 29) carries the statutes' cap
+  (Art. 6(3)) and retention ceiling (Art. 6g(2)), the reserve target the board set for the
+  financial year (Art. 6g(1)) as that month's cost-support document carries it, the routing
+  mode and the algorithm version. The block never names the key; the month-lock note names the
+  key in force or says that none is. No policy block has been published yet, so the change is
+  minor (versioning policy 5).
+- No member, type or existing meaning changes. Every document valid under 1.7.2 is valid
+  under 1.8.0.
 
 ## ledger-chain.v1.json
 

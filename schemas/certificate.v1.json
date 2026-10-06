@@ -4,7 +4,7 @@
   "title": "Certificate JWS payload profile (v1)",
   "description": "The signed payload of a certificate. Header is fixed: `{\"alg\":\"ES256\",\"kid\":\"psn-{env}-{yyyy}-{n}\",\"typ\":\"application/psn-cert+jws\",\"cty\":\"application/json\"}`; the payload is canonicalised with RFC 8785 (JCS) before signing, the compact serialisation IS the certificate, and `SHA-256(compact JWS string)` is the hash that enters the transparency log (FS08-050). Keys are born non-exportable inside the movement's own Key Vault and only one principal may sign (FS-00 §6.4, FS-00 §3).\n\nVERIFICATION ORDER (published in the Trust Center, CERT-025): resolve `kid` in the JWKS → verify ES256 over the compact JWS → check `SHA-256(jws)` appears in the transparency log → fetch the certificate record for live status. Steps 1–2 work fully offline with a JWKS copy. A signature that verifies while its hash is ABSENT from the log renders UNVERIFIED — that is the rogue-issuance detector, not a soft warning (CERT-030).\n\nFUNDING TRUTH (CERT-002/013, D14, COM-066): `amountMinor` + `cur` appear ONLY where money actually moved, and never without `amountKind`, which distinguishes a fee paid from an impact figure routed from a documented donation. One payload never conflates them. A waived organisation that funded nothing can only ever hold `license-status.waiver`.\n\nMATERIALITY (CERT-014/054, D15): a per-contributor monetary figure enters the payload only if it meets the published floor for the attested period; otherwise the payload carries `impactBelowFloor: true` and no figure at all, so a template cannot leak a gated number it never received (FS08-091). No field can express a cross-contributor ranking (CERT-015 by construction).\n\nAt P-M2 only `supporter.entitlement` and `license-status.*` are issuable, by an operator-run signing script with the same profile (FS08-040/041). Impact figures do not exist before the first disbursed ledger row (NEV-017).",
   "x-psn": {
-    "specVersion": "1.3.0",
+    "specVersion": "1.4.0",
     "phase": "P-M2 (supporter.entitlement + license-status.* only)",
     "artifactPath": "(compact JWS; embedded in the PDF and in the certificate record's `jws` field)",
     "authoritative": true,
@@ -105,16 +105,22 @@
     "categoryVotes": {
       "type": "array",
       "maxItems": 8,
-      "description": "Contributor payloads only: which category funds this contributor directed. 'Helped direct', never received (MKT-037).",
+      "description": "Contributor payloads only: which category funds this contributor directed. 'Helped direct', never received (MKT-037). A category is named only when a verified transfer in the attested period shows that it received money (ops decisions D64 item 2 and D117 item 3).",
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["fund"],
         "properties": {
           "fund": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" },
-          "sharePpm": { "type": "integer", "minimum": 0, "maximum": 1000000 }
+          "sharePpm": { "type": "integer", "minimum": 0, "maximum": 1000000, "description": "The share of the amount attributed to the holder's credit in the attested period that the holder's own designations named for this category, in parts per million, rounded down. It states a recorded designation, not money routed. The amount and its weighting are those of `associationSharePpm`, so the two are shares of the same total and their sum is bounded there. A vote without this member counts zero towards that bound." }
         }
       }
+    },
+    "associationSharePpm": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000000,
+      "description": "Contributor payloads only (ops decision D117 item 3): the share of the amount attributed to the holder's credit in the attested period that the holder's own designations left to the Association through the designation form's first option, *All*, in parts per million. Contributors never receive money (D15): the amount is the weight of the holder's credit, not money the holder had or gave.\n\nTHE AMOUNT AND ITS WEIGHT. For each project in `scope.repos` and each locked month in `period`, the amount attributed to the holder's credit is the part of that project's monthly pool (its `repo-pool` ledger row, `ledger-row.v1`) that the month's Purpose-Points snapshot attributes to the holder, split as FS07-026 splits a pool by micro-shares. Each project-month weighs by that amount. The value is the sum over the project-months of (amount × the share the holder's designation in force for that project and month leaves to the Association), divided by the sum of the amounts, in parts per million, rounded down. A project-month with no designation of the holder's in force adds its amount to the divisor and nothing to the sum.\n\nWHAT IT STATES. The holder's recorded designation. It does not say that the designation routed money: contributors' designations route money only once the condition of Calculation Rules Nr. 26 is met (D27), and until then the project's default or the board's allocation key routes it.\n\nTHE BOUND. This value plus the sum of `categoryVotes[].sharePpm` never exceeds 1000000, because all of them are shares of the same amount. The rest is the part the holder designated to a category this certificate does not name, or did not designate at all. JSON Schema cannot express a sum across members, so the signer enforces it.\n\nAbsent when no locked month in the period attributes any amount to the holder's credit in the projects shown, because there is then nothing to weigh. Absence says nothing about the holder's choices. Added in 1.4.0."
     },
     "impactMinor": { "type": "integer", "minimum": 0, "description": "Contributor impact figure, minor units. Present only when the materiality floor is met AND a ledger row exists; always accompanied by `cur` and `amountKind: \"impact-routed\"` (FS08-090)." },
     "impactBelowFloor": { "type": "boolean", "description": "True when the attested period's figure is below the published materiality floor. The payload then carries NO monetary figure at all (D15/CERT-054b)." },
@@ -192,6 +198,11 @@
         },
         "not": { "required": ["band"] }
       }
+    },
+    {
+      "$comment": "D117 item 3: the share left to the Association is stated on a contributor certificate and on nothing else (1.4.0). The rule constrains only the new member.",
+      "if": { "required": ["associationSharePpm"] },
+      "then": { "properties": { "typ": { "const": "contributor" } }, "required": ["typ"] }
     },
     {
       "$comment": "D44: scope kind `none` and the `sponsorship-paid` label belong to the sponsor variant and to nothing else.",

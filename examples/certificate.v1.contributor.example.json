@@ -1,0 +1,24 @@
+{
+  "cid": "cert_01jk2m4p6r8t0v2x4z6b8d0f2h",
+  "typ": "contributor",
+  "variant": "participation",
+  "sub": "example-contributor",
+  "subId": "U_kgDOexample01",
+  "subjectKind": "individual",
+  "scope": {
+    "kind": "project",
+    "repos": ["R_kgDOAbc123", "R_kgDODef456"]
+  },
+  "period": {
+    "validFrom": "2027-01-01",
+    "validUntil": "2027-12-31"
+  },
+  "iat": 1831507200,
+  "iss": "https://api.purposesource.org",
+  "claimKitVersion": "kit-2",
+  "verify": "https://purposesource.org/verify/cert_01jk2m4p6r8t0v2x4z6b8d0f2h",
+  "factRefs": {},
+  "supersedes": null,
+  "ppAlgoVersion": "PP-v0",
+  "associationSharePpm": 600000
+}
