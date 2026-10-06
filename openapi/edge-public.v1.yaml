@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.2.2
+  version: 1.3.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -43,7 +43,10 @@ info:
       published entitlement JWS plus the human verify page; the endpoint activates later
       with no schema change. The two allocation-key routes are P-M3 as well: their
       producer is the platform's index build, and until its first run writes the index
-      both answer `404`.
+      both answer `404`. The three contributor-page routes are P-M3 too: nothing is
+      published under them until a person publishes a page, and production publishes none
+      until its publishing switch is on, so until then each answers as for a page that does
+      not exist.
     - `P-M4` — the change feed and the sandbox tenant, both demand-gated.
 
     ## Machine-readable schemas
@@ -92,6 +95,8 @@ tags:
     description: The board's allocation key for each month, published before the month, and the index of what became of each.
   - name: badges
     description: README badge endpoints in the shields.io endpoint format.
+  - name: contributor-pages
+    description: A contributor's own public page — which version is public, its card and its badge. The page itself is HTML on the site host, never JSON.
   - name: counters
     description: Public counters, with an explicit state machine so an absent number is a documented state.
   - name: changes
@@ -650,6 +655,224 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+
+  /v1/p/{pid}/version:
+    get:
+      operationId: getContributorPageVersion
+      summary: Which version of one contributor page is public
+      description: |
+        The published version of a contributor page, a person's own public page (ops decision
+        D116). The dashboard polls it after "Publish" until the `versionId` it was given appears,
+        and after "Hide" until this route answers `404`, so the screen never claims success early.
+        It answers from the live page document (`contributor-page.v1`, unlisted at `p/{pid}.json`
+        in the published plane), read without a cache.
+
+        The page itself is HTML on the site host — `https://purposesource.org/p/{pid}`, and the
+        address the person chose, `/u/{login}` or `/u/{login}/{pid}` — rendered by the same worker
+        from that document, with no script and no third-party request. The document is never
+        served as JSON, and this route names nobody.
+
+        **A page that is not public answers exactly like one that never existed.** Unknown,
+        hidden, deleted and erased pages, a permanent link the person replaced, and a
+        non-production plane on production all answer the same `404 page_not_found`, so probing an
+        id reveals nothing about a person who withdrew their page. Ids are 80 random bits, so they
+        cannot be enumerated either.
+      tags: [contributor-pages]
+      x-psn-phase: P-M3
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          description: The page's permanent id — 16 lower-case Crockford base32 characters of 80 random bits; not a ULID, so it dates nothing.
+          schema:
+            type: string
+            pattern: '^[0-9a-hjkmnp-tv-z]{16}$'
+          example: 7k2m9xq4tpz3r8vd
+      responses:
+        '200':
+          description: The page is public, and this is the version being served. Never cached and never indexed.
+          headers:
+            Cache-Control:
+              description: The answer must follow a publish or a hide within seconds.
+              schema:
+                type: string
+              example: no-store
+            X-Robots-Tag:
+              description: No person route is ever indexed.
+              schema:
+                type: string
+              example: noindex
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageVersion'
+              examples:
+                published:
+                  summary: A published page
+                  value:
+                    schemaVersion: 1
+                    pid: 7k2m9xq4tpz3r8vd
+                    versionId: pgv_vg0hnfg53ns86tr52cs6pxetbg
+        '404':
+          description: |
+            No public contributor page has this id — unknown, hidden, deleted, erased, replaced by
+            a new permanent link, or served from a non-production plane on production. Every one of
+            them answers this same body but for its trace id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                pageNotFound:
+                  summary: No public page at this id, whatever the reason
+                  value:
+                    error:
+                      code: page_not_found
+                      message: There is no public contributor page at this address.
+                      traceId: 01jp4c8j5tv9x3df1y6b0z2e4h
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /cards/p/{cardFile}:
+    get:
+      operationId: getContributorPageCard
+      summary: The card of one contributor page (PNG)
+      description: |
+        The image a person embeds in a README, on a website or in a signature, and the page's
+        link-preview image (D116 item 1). It follows the page: it shows only what the page shows
+        and the person's card switches allow — the picture, the name, the verified login, one
+        summary line, one adopter line and up to five platform marks — and never a figure, a
+        status or a QR code. The render job draws it from the published page document, and this
+        route serves the files that document names, through the live document only.
+
+        Five files per page: `{pid}.png` (480×160, for Markdown), `{pid}@2x.png` (960×320, for
+        HTML), `{pid}-dark.png` and `{pid}-dark@2x.png` (for `<picture>` in dark mode), and
+        `{pid}-og.png` (1200×630, the page's `og:image`, addressed with `?v=`).
+
+        **An unknown, hidden, deleted or erased page, a wrong `v`, or a card not drawn yet answers
+        `200` with one neutral image**, the same bytes in every case ("This contributor page is not
+        public"), so no embed ever shows a broken image and no probe tells a withdrawn page from one
+        that never existed. Only a file name of none of the five shapes is a `404`.
+      tags: [contributor-pages]
+      x-psn-phase: P-M3
+      parameters:
+        - name: cardFile
+          in: path
+          required: true
+          description: The page's permanent id followed by one of the five card suffixes.
+          schema:
+            type: string
+            pattern: '^[0-9a-hjkmnp-tv-z]{16}(?:(?:-dark)?(?:@2x)?|-og)\.png$'
+          example: 7k2m9xq4tpz3r8vd@2x.png
+        - name: v
+          in: query
+          required: false
+          description: >-
+            The first eight hex characters of the card's file id, which the page's `og:image` URL
+            carries so that a link-preview cache fetches again after the card changes. A value that
+            is not the current one answers the neutral image.
+          schema:
+            type: string
+            pattern: '^[0-9a-f]{8}$'
+          example: 78169a78
+      responses:
+        '200':
+          description: |
+            The card, or the neutral image. Cached `max-age=300, s-maxage=3600,
+            stale-while-revalidate=600` and never `stale-if-error`, so a hidden page's card is not
+            kept alive by an outage, and purged on production at every publish, hide, rename, new
+            permanent link and erasure. Sent with `X-Robots-Tag: noindex`,
+            `Access-Control-Allow-Origin: *` and `Cross-Origin-Resource-Policy: cross-origin` (so the
+            dashboard can hand the file to the phone's share sheet) and
+            `Content-Security-Policy: default-src 'none'; sandbox`.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+              example: max-age=300, s-maxage=3600, stale-while-revalidate=600
+            X-Robots-Tag:
+              schema:
+                type: string
+              example: noindex
+          content:
+            image/png:
+              schema:
+                type: string
+                contentMediaType: image/png
+        '404':
+          description: The file name is none of the five card shapes. Nothing was read.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                notACard:
+                  summary: Not a card file name
+                  value:
+                    error:
+                      code: artifact_not_found
+                      message: no such card file
+                      traceId: 01jp4c9k6vw0y4eg2z7c1a3f5j
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /badge/p/{pid}.svg:
+    get:
+      operationId: getContributorPageBadge
+      summary: The flat README badge of one contributor page (SVG)
+      description: |
+        A flat, 20-pixel badge that sits beside other shields in a README and links to the page's
+        permanent address `https://purposesource.org/p/{pid}`. The edge draws it from the live page
+        document, its words as pre-outlined glyphs, so it looks the same behind GitHub's image proxy,
+        in dark mode and with no fonts. It carries no login, no figure and no point; its fixed words
+        are the edge slice's.
+
+        **Every id with no public page answers `200` with the same neutral badge, "no public
+        page"** — unknown, hidden, deleted and erased alike — because a README must not show a
+        broken image, and a withdrawn page must not be told apart from one that never existed. It is
+        cached like the card, without `stale-if-error`, and purged with it.
+      tags: [contributor-pages]
+      x-psn-phase: P-M3
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          description: The page's permanent id.
+          schema:
+            type: string
+            pattern: '^[0-9a-hjkmnp-tv-z]{16}$'
+          example: 7k2m9xq4tpz3r8vd
+      responses:
+        '200':
+          description: The badge, or the neutral badge, sent with the `noindex` robots header.
+          headers:
+            X-Robots-Tag:
+              schema:
+                type: string
+              example: noindex
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                contentMediaType: image/svg+xml
+        '404':
+          description: The id is not a page id shape. Nothing was read.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                notAPageId:
+                  summary: Not a page id
+                  value:
+                    error:
+                      code: artifact_not_found
+                      message: no such badge
+                      traceId: 01jp4cam7wx1z5fh3a8d2b4g6k
+        '429':
+          $ref: '#/components/responses/RateLimited'
 
   /stats.json:
     get:
@@ -1807,6 +2030,7 @@ components:
                 - rate_limited
                 - artifacts_unavailable
                 - internal
+                - page_not_found
               description: The stable machine code.
             message:
               type: string
@@ -2294,6 +2518,28 @@ components:
         responseTarget:
           type: string
           description: The published response-time target. Best effort, and stated as such — there is no service level agreement.
+
+    PageVersion:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, pid, versionId]
+      description: |
+        Which published version of a contributor page is being served: the page document's
+        `pid` and `versionId` (`contributor-page.v1`), and nothing else — no name, no login, no
+        date.
+      properties:
+        schemaVersion:
+          const: 1
+        pid:
+          type: string
+          pattern: '^[0-9a-hjkmnp-tv-z]{16}$'
+        versionId:
+          type: string
+          pattern: '^pgv_[0-9a-hjkmnp-tv-z]{26}$'
+          description: >-
+            Opaque: 130 random bits, never a ULID, whose leading characters would be a millisecond
+            timestamp and so would date each publish on this public route. The dashboard compares
+            it with the id its publish was given.
 
   responses:
     BadRequest:

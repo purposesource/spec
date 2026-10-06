@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-03-01T00:00:00Z",
+  "source": "fixture",
+  "pid": "m3q8zt0v5k1x9r2c",
+  "versionId": "pgv_mbpc3jstp765jf1rpqse0qkhh1",
+  "address": "anonymous",
+  "search": false,
+  "layout": "profile",
+  "theme": { "preset": "midnight" },
+  "picture": { "kind": "github", "letters": "S" },
+  "cover": { "kind": "preset", "preset": "dusk" },
+  "identity": { "displayName": "Sam" },
+  "sections": [
+    { "id": "summary", "projects": 2, "since": 2026, "certificates": 1 },
+    {
+      "id": "certificates",
+      "items": [
+        {
+          "cid": "cert_01jm8q3s5v7x9z1b3d5f7h9k1m",
+          "typ": "contributor",
+          "variant": "participation",
+          "years": { "from": 2026, "to": 2026 },
+          "status": "expired",
+          "disclosure": "status-only"
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "items": [
+        { "platform": "codeberg", "handle": "sam-codes", "url": "https://codeberg.org/sam-codes" }
+      ]
+    }
+  ],
+  "card": { "picture": true, "name": true, "login": false, "summary": true, "adopter": false, "links": true },
+  "autoUpdated": ["summary", "certificate-status", "github-picture"],
+  "factsAsOf": "2027-02"
+}

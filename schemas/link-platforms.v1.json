@@ -1,0 +1,322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/link-platforms.v1.json",
+  "title": "link platforms — the pinned link table of the contributor page",
+  "description": "The one table every link on a contributor page is checked against and rebuilt from (ops decision D116 item 1 and its dated notes of 2026-10-06; design PROFILE-PAGE-2026-10-06 §5). A person picks a platform and pastes a full address, a domain and path, or just the username: loose input. What is kept is only `{platform, form, handle}` (and a Mastodon `instance`), never the pasted text, and every address a page shows is rebuilt from this table's `output` templates on a host the table fixes: strict output. Nothing in this table is ever fetched, so no check depends on a third party answering. It also holds the data the text rules read (design §6.2: the impersonation terms) and the logins that cannot take the login address (§7.4), so a steward changes any of them by a data change.\n\nONE PUBLICATION, PINNED BY HASH. The table is published once, as `examples/link-platforms.v1.example.json` in this repository, and that file IS the table, byte for byte, as `category-menu.v1`'s example is the menu. The platform (the api's save check and index-build's rebuild, in C#) and the website edge (the renderer's second check, in JavaScript) vendor it byte for byte and pin its SHA-256; `examples/link-rules.v1.golden.json` records the SHA-256 it was last run against, and every implementation runs every case of that file. A changed answer is a data change with a golden case, reviewed by a steward.\n\nTHE STEPS FOR ONE LINK (`{platform}` chosen from the menu, `input` pasted). Each step either refuses with one code of `$defs.refusalCode` or passes on.\n(1) Clean up: remove ASCII space, tab, CR and LF at both ends; refuse `too_long` above `pipeline.inputMaxLength` code points, `whitespace` if any character of Unicode White_Space remains, `control_character` for any character of general category Cc, Cf, Co, Cs, Cn, Zl or Zp; apply NFC; strip one leading `@`; refuse `empty` if nothing is left. Before anything else, an id the table does not list is refused `platform_unknown`, and a platform whose `typed` is false `platform_not_typed`.\n(2) Refused schemes: text beginning with a scheme (`[A-Za-z][A-Za-z0-9+.-]*:`) whose lower-case name is in `pipeline.refusedSchemes` is refused `scheme_not_allowed`, whatever follows it.\n(3) URL or handle: the text is a URL if it contains `://`, or if the text before its first `/` (which must not be its first character), lower-cased, is a host the platform admits (step 4g's hosts, or a match rule's `hostPattern`). Anything else is a bare handle (step 5).\n(4) A URL. (a) Every character must be in `pipeline.urlCharacters` (RFC 3986's sets, so no backslash, no non-ASCII; this closes the parser differences between .NET and JavaScript), else `character_not_allowed`. (b) With `://`, the scheme must be `http` or `https` in any case, else `scheme_not_allowed` (`not_a_url` if it is not a scheme at all); without, `https://` is prefixed. (c) An `@` in the raw authority is `userinfo`, and a `%` in it is `character_not_allowed`: a percent-encoded host is decoded by a WHATWG parser (`https://%78.com/` is `x.com`), and refusing it before any parser runs closes one more window in which .NET and JavaScript could read one input as two hosts. (d) A `.` or `..` segment, or `%2e` in any case, in the raw path is `path_invalid`. (e) Parse with a WHATWG URL parser (in .NET a conformant one, never System.Uri), else `not_a_url`. (f) A port other than none or 443 is `port`. (g) The host, as the parser serialises it (lower case), must be in `hosts`, match one of `hostPatterns`, be on `mastodonInstances` when `hostsFrom` names it, or match a match rule's `hostPattern`, never by suffix; else `host_not_allowed` (`instance_not_allowed` for Mastodon). (h) `refusedPaths`, scoped to their `hosts`, are matched against the parsed path and refuse with their own code. (i) With `query: refuse`, a non-empty query is `query_not_allowed`. (j) Forms in table order, and each form's `match` rules in order: a rule applies when its host condition holds (the host is in its `hosts`; else it matches its `hostPattern`; else it is in the platform's `hosts`, matches one of its `hostPatterns` or is on `mastodonInstances` where `hostsFrom` names it) and its `path` matches the parsed path. Its candidate handle is the `h` capture of its `hostPattern` or `path`, or the value of its `query` parameter, or the `h` capture of its `fragment` matched against the fragment without the `#`; a rule that yields no candidate is passed over. The form's `fold` is applied, and the first candidate its `handle` grammar admits is judged by step 6, whose answer is final. If no grammar admits any, the answer is `handle_invalid` where some rule yielded a candidate and `path_not_recognised` where none did. Otherwise the query and the fragment are dropped.\n(5) A bare handle. For a platform whose form has `bareInstance`, the text must be `{user}@{instance}` (`instance_required` without the `@`), and the instance, lower-cased, must be on `mastodonInstances` (`instance_not_allowed`). Then the forms with `bare: true`, in order: `bareSuffix` is appended when the text has no `.` and no `:`, `fold` is applied, and the first form whose `handle` grammar admits it is judged by step 6; none is `handle_invalid`.\n(6) Judge the handle: one of `reserved`, compared in lower case, is `handle_reserved`; each of `checks` runs (`orcid-checksum`: the ISO 7064 MOD 11-2 check character; `refused-tld`: the handle's last DNS label must not be in `refusedTlds`), refusing `checksum` or `tld_refused`.\n(7) Rebuild: `{h}` (and `{instance}`) substituted into the form's `output`. The result must match `pipeline.outputPattern`, be at most `pipeline.outputMaxLength` characters, and have exactly the template's host. The answer is `{form, handle[, instance], url}`; only the first three are stored, and the url is rebuilt at every build and checked again at render.\n\nTHE STEPS FOR THE ONE PERSONAL WEBSITE (§5.4). Step (1) without the `@` strip, then step (2), then 4(a). A scheme of `http` is `http_not_allowed` (never silently upgraded) and any other but `https` is `scheme_not_allowed`; without a scheme the text must begin with a letter or a digit (`not_a_url`) and gets `https://`. An `@` in the raw authority is `userinfo`, and a `%` in it `character_not_allowed`, as in 4(c); a `?` or `#` anywhere is `query_or_fragment`; a dot segment, `%2e`, or one of `website.refusedPathSequences` (in any case) in the raw path is `path_invalid`. Parse as in 4(e); a port as in 4(f). The host: bracketed, or dotted-quad as the WHATWG parser serialises every IPv4 form (so `2130706433` and `0x7f.1` too), is `ip_address`; at least two labels, each LDH and at most 63 characters, at most 253 in all, the last alphabetic (2 to 63) or `xn--`, else `host_invalid`; a last label in `refusedTlds` is `tld_refused`; one of `website.ownDomains` or a subdomain of one, or a host whose skeleton contains `text.skeletonTerm`, is `own_domain` (the skeleton: lower case, `text.digitFolds`, then letters only; for an `xn--` host, the same over the TR39 confusable skeleton of its Unicode form); a host on `website.redirectors` or a subdomain of one is `redirector`; a parsed path longer than `website.pathMaxLength` is `path_invalid`. The answer is `https://{host}{path}`, at most `website.maxLength` characters (`too_long`). Last, the stewards' private domain blocklist, which is not in this table and is checked at save and at every rebuild (`blocked_domain`). The visible text shows the host in full; it shows the Unicode form only when every label is in a single script of `website.displayScripts`, and `xn--…` otherwise.\n\nREGULAR EXPRESSIONS. Every pattern in the table is an ECMAScript pattern compiled with the `u` flag that .NET compiles to the same meaning: anchored `^…$`, ASCII classes written out, non-capturing groups and lookahead, and the one named group `h`; never `\\d`, `\\w`, `\\s`, `\\b` or `\\p` (their meaning differs between the engines), lookbehind, inline flags or backreferences. Grammars are matched after step 1, so a candidate never ends in a line feed, which .NET's `$` would otherwise admit. `check:links` holds the table to these rules, runs every golden case through the steps above, and proves each refusal able to fail.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (with the contributor page). Nothing reads this table yet: the api's save check and index-build's rebuild (slice P24, C#) and the edge renderer's check (P24 and P26, JavaScript) are built against it.",
+    "artifactPath": "(this repository) examples/link-platforms.v1.example.json — the table itself, byte for byte; vendored byte-identically by the platform and the website edge, each pinning its SHA-256",
+    "authoritative": true,
+    "producer": "authored in this repository; a steward reviews every data change with its golden cases (design §5.1: a refused real handle becomes a data change)",
+    "consumers": [
+      "the api's link check at every draft save and again at publish (`page.link_invalid {reason}`, `page.website_invalid`)",
+      "`jobs.index-build`, which rebuilds every link of `contributor-page.v1` from the table at each build",
+      "the website edge renderer, which checks every link of the document again before it draws it",
+      "the editor's live line under each field (\"Will link to …\" or the refusal)",
+      "the text rules of `contributor-page-settings.v1` (impersonation terms) and the address rules of `contributor-page-alias.v1` (reserved logins)"
+    ],
+    "fsRefs": [
+      "D116 item 1 (links checked against the platforms' known domains; nothing malicious through any link or embed)",
+      "D116 dated note of 2026-10-06 ~09:40Z (eight sponsorship platforms; one website link; only the GitHub login verified; Discord, Matrix, Twitch, Reddit and Telegram added)",
+      "PROFILE-PAGE-2026-10-06 §5.1-§5.7, §6.2, §7.4"
+    ],
+    "vsRefs": ["VS-05"],
+    "changelog": "CHANGELOG.md#link-platformsv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "pipeline", "refusedTlds", "platforms", "mastodonInstances", "website", "text", "reservedLogins"],
+  "properties": {
+    "schemaVersion": {
+      "const": 1,
+      "description": "Artifact schema version (FS-00 §6.2). This file is a committed source, not a build product, so it carries no `generatedAt`, as the category menu does not."
+    },
+    "_comment": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "A human note, the way a JSON file carries one. Consumers ignore it. It exists because the table is vendored: the copy a reader finds in another repository must say, in place, where the canonical copy lives."
+    },
+    "pipeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inputMaxLength", "outputMaxLength", "refusedSchemes", "urlCharacters", "outputPattern"],
+      "description": "The values the steps of the description read for every platform.",
+      "properties": {
+        "inputMaxLength": { "type": "integer", "minimum": 1, "description": "Step 1: the longest input accepted, in code points after the ends are trimmed." },
+        "outputMaxLength": { "type": "integer", "minimum": 1, "description": "Step 7: the longest rebuilt address." },
+        "refusedSchemes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9+.-]*$" },
+          "description": "Step 2: schemes refused before anything else is read, in lower case and sorted. `http` and `https` are never on it; `javascript` and `data` always are."
+        },
+        "urlCharacters": { "$ref": "#/$defs/regex", "description": "Step 4(a): the characters a URL may be pasted with — RFC 3986's unreserved, reserved and `%`, nothing else." },
+        "outputPattern": { "$ref": "#/$defs/regex", "description": "Step 7: every rebuilt address of a social or sponsorship link matches this, as well as its own template." }
+      }
+    },
+    "refusedTlds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z]{2,63}$" },
+      "description": "Special-use and private top-level labels (design §5.4), sorted: refused for the personal website and, through the `refused-tld` check, for a Bluesky handle and a Matrix server."
+    },
+    "platforms": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/platform" },
+      "description": "Every platform a page may name, in the editor's menu order within each `kind`. `id` is unique; exactly one platform is `verified` (GitHub, never typed); eight are `sponsorship` (the D116 dated note of ~09:40Z). Each `id` is copied into the `platform` enums of `contributor-page-settings.v1` and `contributor-page.v1`, and `check:links` asserts the copies are identical."
+    },
+    "mastodonInstances": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/host" },
+      "description": "The Mastodon instances a link may name, sorted (design §5.5). A Mastodon handle carries its own server, so accepting any server would be a second, unchecked website link; any other instance goes in the website slot. A steward extends the list by a data change."
+    },
+    "website": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxLength", "pathMaxLength", "refusedPathSequences", "ownDomains", "redirectors", "displayScripts"],
+      "description": "The rules of the one personal website (design §5.4), read by the website steps of the description.",
+      "properties": {
+        "maxLength": { "type": "integer", "minimum": 1, "description": "The longest rebuilt website address." },
+        "pathMaxLength": { "type": "integer", "minimum": 1, "description": "The longest path." },
+        "refusedPathSequences": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Sequences refused anywhere in the raw path, compared in lower case: `//`, and the encoded slash, backslash and NUL."
+        },
+        "ownDomains": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/host" },
+          "description": "Our own names: no page may link to them or to any subdomain of them, so a page cannot look like an official one. `check:links` asserts the list holds `spec.config.json`'s `apexDomain`, so a renamed domain cannot leave the old one here unnoticed."
+        },
+        "redirectors": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/host" },
+          "description": "Link shorteners and redirectors, sorted; each and every subdomain of each is refused. Link-in-bio pages are not on it: they are the person's own."
+        },
+        "displayScripts": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-Z][a-z]{3}$" },
+          "description": "ISO 15924 codes of the scripts whose Unicode host may be shown as Unicode (design §5.4: scripts not confusable with Latin). The `href` always carries the A-label; the renderer decides the visible text."
+        }
+      }
+    },
+    "text": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["skeletonTerm", "digitFolds", "nameTokens", "bioTokens", "bioAfterPurposeSource", "refusedCharacters"],
+      "description": "The data the text rules of the display name, pronouns and bio read (design §6.1 and §6.2), kept here so a steward adjusts them by a data change. The api checks at save, and index-build again at every rebuild; a published name a newer list refuses is published without the name and flagged to the stewards.",
+      "properties": {
+        "skeletonTerm": {
+          "type": "string",
+          "pattern": "^[a-z]+$",
+          "description": "The fold of our own name. The fold of a text is: NFKC, case fold, the TR39 confusable skeleton, `digitFolds`, separators removed. A name or pronouns whose fold contains this, a website host whose skeleton contains it (the website steps), and a login whose fold contains it (it cannot take the login or mixed address, `contributor-page-alias.v1`) are refused. `check:links` asserts it is `spec.config.json`'s `org`."
+        },
+        "digitFolds": {
+          "type": "object",
+          "additionalProperties": false,
+          "propertyNames": { "pattern": "^[0-9]$" },
+          "patternProperties": { "^[0-9]$": { "type": "string", "pattern": "^[a-z]$" } },
+          "description": "Digits folded to the letters they imitate, as part of the fold."
+        },
+        "nameTokens": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z]+$" },
+          "description": "Whole tokens refused in a display name or pronouns after the fold (impersonation: §6.2). Sorted."
+        },
+        "bioTokens": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z]+$" },
+          "description": "Whole tokens refused in a bio after the fold."
+        },
+        "bioAfterPurposeSource": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["within", "tokens"],
+          "description": "In a bio, \"purpose source\" may not be followed within `within` tokens by one of `tokens`; \"I contribute through Purpose Source\" stays allowed.",
+          "properties": {
+            "within": { "type": "integer", "minimum": 1 },
+            "tokens": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z]+$" } }
+          }
+        },
+        "refusedCharacters": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^U\\+[0-9A-F]{4,6}$" },
+          "description": "Check-mark and badge look-alikes refused in every text field (§6.1), so no text can fake our verified mark, which is chrome and never user text."
+        }
+      }
+    },
+    "reservedLogins": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+      "description": "Logins that cannot take the login address `purposesource.org/u/{login}` (design §7.4), sorted; the mixed and anonymous addresses still work for them. A login whose fold contains `text.skeletonTerm` gets the anonymous address only, because the mixed address would still carry it."
+    }
+  },
+  "$defs": {
+    "platform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "label", "provisional", "forms"],
+      "description": "One platform: the hosts a pasted address may name, the forms its handles take, and the template each form's address is rebuilt from.",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$", "description": "The stored `platform`. Never renamed: a renamed id would orphan every stored link." },
+        "kind": {
+          "enum": ["verified", "social", "sponsorship"],
+          "description": "`verified`: the GitHub account the person signed in with, shown only with \"Show my login\" and marked verified by our chrome; never typed. `social`: the \"Elsewhere\" section. `sponsorship`: the \"Support {name} directly\" section — our own buttons, \"Support on {label}\", never a widget, iframe or script (§5.7)."
+        },
+        "label": { "type": "string", "minLength": 1, "maxLength": 40, "description": "The platform's name as the page prints it, beside the handle." },
+        "verified": { "type": "boolean", "description": "True only for GitHub. No other account is marked verified at launch (D116 dated note of ~09:40Z)." },
+        "typed": { "type": "boolean", "description": "False only for GitHub: its address comes from the sign-in, so the link fields refuse it (`platform_not_typed`). Absent means true." },
+        "provisional": { "type": "boolean", "description": "True where the platform publishes no handle rule and this table's is a conservative guess (design §5.1). The build slice records at least ten real handles for each; a refused real handle becomes a data change. Safety never depends on a rule being exact, because the address is rebuilt on a fixed host." },
+        "hosts": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/host" }, "description": "Hosts a pasted address may name, matched exactly, never by suffix." },
+        "hostPatterns": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/regex" }, "description": "Further admitted hosts by anchored pattern, without a capture (country subdomains)." },
+        "hostsFrom": { "const": "mastodonInstances", "description": "The admitted hosts are the table's Mastodon instances; the host becomes the stored `instance`." },
+        "query": { "enum": ["drop", "refuse"], "description": "What a query does on a pasted address. Absent means `drop`; Discord refuses one (design §5.2)." },
+        "relMe": { "type": "boolean", "description": "The link carries `rel=\"me\"`, so the person's own profile can verify the page on their side (Mastodon, §5.5)." },
+        "reserved": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" },
+          "description": "Handles that are the platform's own pages, not people (`explore`, `home`, …), in lower case and sorted. `check:links` refuses an entry no form of the platform could admit, because it would be dead data."
+        },
+        "refusedPaths": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["pattern", "code"],
+            "properties": {
+              "hosts": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/host" } },
+              "pattern": { "$ref": "#/$defs/regex" },
+              "code": { "$ref": "#/$defs/refusalCode" }
+            }
+          },
+          "description": "Paths refused with a specific code before the forms are tried, each scoped to `hosts` when given (PayPal's amount and currency suffixes)."
+        },
+        "checks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["orcid-checksum", "refused-tld"] },
+          "description": "Further checks of step 6."
+        },
+        "forms": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/form" },
+          "description": "The shapes a handle of this platform takes, tried in this order. The stored `form` names one; an absent stored `form` means the first."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "verified" } }, "required": ["kind"] },
+          "then": { "required": ["verified", "typed"], "properties": { "verified": { "const": true }, "typed": { "const": false } } },
+          "else": { "properties": { "verified": { "const": false }, "typed": { "const": true } } }
+        },
+        {
+          "if": { "properties": { "typed": { "const": false } }, "required": ["typed"] },
+          "then": { "not": { "anyOf": [{ "required": ["hosts"] }, { "required": ["hostPatterns"] }, { "required": ["hostsFrom"] }] } },
+          "else": { "anyOf": [{ "required": ["hosts"] }, { "required": ["hostsFrom"] }] }
+        }
+      ]
+    },
+    "form": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "handle", "bare", "output"],
+      "description": "One shape of handle: how a pasted address yields it (`match`), its grammar (`handle`), whether a bare handle may be it (`bare`), and the address it is rebuilt as (`output`).",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$", "description": "The stored `form`, unique within the platform." },
+        "label": { "type": "string", "minLength": 1, "maxLength": 40, "description": "A label the page prints instead of the platform's, for this form (\"Discord server\" for an invite)." },
+        "match": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/rule" }, "description": "How a pasted address yields the handle, tried in order (step 4j). Absent only on a platform that is never typed." },
+        "handle": { "$ref": "#/$defs/regex", "description": "The handle's grammar, applied after `fold`. ASCII only, and it never admits `/ ? # % \\ @`, whitespace or a control character, except where a platform's identifier needs `:` (a Bluesky DID, a Matrix id) or Matrix's `/ = +` in a user id's local part. That one exception to design §5.1's rule that a handle never holds `/` is recorded here as a ruling of this table: the Matrix specification's user-id grammar admits `/`, and the id is rebuilt only inside matrix.to's fragment, which no server receives as a path. Even so, the local part may not start or end with `/`, may not hold `//`, and no `/`-separated segment of it may be `.` or `..`, so no rebuilt id ever looks like a path (golden cases L182-L188)." },
+        "fold": { "enum": ["lower", "upper"], "description": "Case applied to the candidate before the grammar: `lower` where the platform's identifiers are lower case (a Bluesky handle, a Matrix id, an Open Collective slug), `upper` for ORCID's check character." },
+        "bare": { "type": "boolean", "description": "Whether a bare handle (step 5) may take this form." },
+        "bareSuffix": { "type": "string", "pattern": "^\\.[a-z0-9.-]+$", "description": "Appended to a bare handle with no `.` and no `:` (Bluesky: `alice` is `alice.bsky.social`, and the editor shows it)." },
+        "bareInstance": { "const": true, "description": "A bare handle is `{user}@{instance}` (Mastodon)." },
+        "output": {
+          "type": "string",
+          "pattern": "^https://([a-z0-9.-]+|\\{instance\\})/[A-Za-z0-9._@:/?=#+-]*\\{h\\}[A-Za-z0-9._@:/?=#+-]*$",
+          "description": "The address rebuilt from the handle: `https://`, a host fixed here (or `{instance}`, only where the hosts come from the Mastodon instances), and a path containing `{h}` once."
+        }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "description": "One way a pasted address yields a handle. Exactly one of `hostPattern`, `path`, `query` and `fragment` supplies the candidate: a `hostPattern` or `path` with the named group `h`, the `query` parameter's value, or the `fragment`'s `h`.",
+      "properties": {
+        "hosts": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/host" }, "description": "The rule applies only on these hosts, which must also be the platform's." },
+        "hostPattern": { "$ref": "#/$defs/regex", "description": "The rule applies on hosts matching this, which may capture `h` (a Medium subdomain)." },
+        "path": { "$ref": "#/$defs/regex", "description": "Matched against the parsed path, which starts with `/`." },
+        "query": { "type": "string", "pattern": "^[a-z]+$", "description": "The candidate is this query parameter's value (Facebook's `profile.php?id=`, rebuilt by us)." },
+        "fragment": { "$ref": "#/$defs/regex", "description": "Matched against the fragment without its `#`; captures `h` (matrix.to)." }
+      },
+      "not": { "required": ["hosts", "hostPattern"] }
+    },
+    "host": {
+      "type": "string",
+      "maxLength": 253,
+      "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$",
+      "description": "A lower-case DNS name of at least two labels, written as the WHATWG parser serialises it."
+    },
+    "regex": {
+      "type": "string",
+      "minLength": 2,
+      "pattern": "^\\^.*\\$$",
+      "not": { "pattern": "\\\\[dDwWsSbBpPk1-9]|\\(\\?<(?!h>)|\\(\\?[A-Za-z]" },
+      "description": "An anchored pattern in the portable subset the description names: no `\\d \\w \\s \\b \\p`, no lookbehind, no inline flags, no backreference, and no named group but `h`."
+    },
+    "refusalCode": {
+      "enum": [
+        "empty",
+        "too_long",
+        "whitespace",
+        "control_character",
+        "platform_unknown",
+        "platform_not_typed",
+        "scheme_not_allowed",
+        "http_not_allowed",
+        "character_not_allowed",
+        "not_a_url",
+        "userinfo",
+        "port",
+        "path_invalid",
+        "host_not_allowed",
+        "instance_not_allowed",
+        "instance_required",
+        "query_not_allowed",
+        "path_not_recognised",
+        "handle_invalid",
+        "handle_reserved",
+        "checksum",
+        "tld_refused",
+        "amount",
+        "own_login_hidden",
+        "query_or_fragment",
+        "ip_address",
+        "host_invalid",
+        "own_domain",
+        "redirector",
+        "blocked_domain"
+      ],
+      "description": "Why a link or the website was refused: the `reason` of the api's `page.link_invalid` and of `page.website_invalid`, and the `refused` of a golden case. Each is produced by one step of the description, except `own_login_hidden`: GitHub Sponsors naming the person's own login while the page does not show the login is refused at save and at publish (design §2.2), because it would show the login without the opt-in."
+    }
+  }
+}

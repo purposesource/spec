@@ -1,0 +1,172 @@
+{
+  "$comment": [
+    "The contrast matrix of the eight colour presets of the contributor page (design PROFILE-PAGE-2026-10-06 §4.3), as WCAG 2.2 figures every preset must meet. `purpose`, the default, follows the visitor and has a row per mode; the other presets have their own mode.",
+    "Each row names the preset's ground, ink, muted text, accent, the text on an accent button (white or black, whichever contrasts more with the accent) and the focus ring of its mode. `ratios` are the contrast ratios of ink, muted and accent against the ground, of the button text against the accent, and of the focus ring against the ground, rounded half up to two decimals.",
+    "WCAG 2.2: each sRGB channel c/255 is linearised (c/12.92 at or below 0.04045, else ((c+0.055)/1.055)^2.4); L = 0.2126 R + 0.7152 G + 0.0722 B; the ratio is (L1 + 0.05)/(L2 + 0.05), the lighter over the darker. check:contributor-page recomputes every figure and holds it to `minimums`: 4.5 for text (SC 1.4.3, AA) and 3 for the focus ring (SC 1.4.11).",
+    "The preset tables of the theme slice (P25) add the surface, rule and status tokens and the print ground; their rows are added here then, and every implementation's CI computes the same matrix (design §4.3)."
+  ],
+  "specVersion": "1.0.0",
+  "minimums": {
+    "text": 4.5,
+    "focus": 3
+  },
+  "focusRings": {
+    "light": "#0f4f8a",
+    "dark": "#8ec2f0"
+  },
+  "rows": [
+    {
+      "preset": "purpose",
+      "mode": "light",
+      "ground": "#faf8f2",
+      "ink": "#14170f",
+      "muted": "#4d5347",
+      "accent": "#1d5c3c",
+      "onAccent": "#ffffff",
+      "focus": "#0f4f8a",
+      "ratios": {
+        "ink": 17.06,
+        "muted": 7.48,
+        "accent": 7.47,
+        "onAccent": 7.93,
+        "focus": 7.89
+      }
+    },
+    {
+      "preset": "purpose",
+      "mode": "dark",
+      "ground": "#0f1411",
+      "ink": "#ece8dc",
+      "muted": "#b4b3a5",
+      "accent": "#8fcaa6",
+      "onAccent": "#000000",
+      "focus": "#8ec2f0",
+      "ratios": {
+        "ink": 15.19,
+        "muted": 8.8,
+        "accent": 9.9,
+        "onAccent": 11.17,
+        "focus": 9.86
+      }
+    },
+    {
+      "preset": "mocha",
+      "mode": "light",
+      "ground": "#f6efe7",
+      "ink": "#2a1d14",
+      "muted": "#5e4a3c",
+      "accent": "#7a4a2a",
+      "onAccent": "#ffffff",
+      "focus": "#0f4f8a",
+      "ratios": {
+        "ink": 14.34,
+        "muted": 7.31,
+        "accent": 6.48,
+        "onAccent": 7.39,
+        "focus": 7.35
+      }
+    },
+    {
+      "preset": "mint",
+      "mode": "light",
+      "ground": "#eef7f2",
+      "ink": "#10261c",
+      "muted": "#3f5a4d",
+      "accent": "#0f6b52",
+      "onAccent": "#ffffff",
+      "focus": "#0f4f8a",
+      "ratios": {
+        "ink": 14.61,
+        "muted": 6.91,
+        "accent": 5.92,
+        "onAccent": 6.47,
+        "focus": 7.67
+      }
+    },
+    {
+      "preset": "mustard",
+      "mode": "light",
+      "ground": "#fbf5e3",
+      "ink": "#241d08",
+      "muted": "#5b5131",
+      "accent": "#7a5c00",
+      "onAccent": "#ffffff",
+      "focus": "#0f4f8a",
+      "ratios": {
+        "ink": 15.37,
+        "muted": 7.23,
+        "accent": 5.74,
+        "onAccent": 6.25,
+        "focus": 7.69
+      }
+    },
+    {
+      "preset": "earth",
+      "mode": "light",
+      "ground": "#f7f1ec",
+      "ink": "#2b1a12",
+      "muted": "#5f4a3f",
+      "accent": "#9a3f1f",
+      "onAccent": "#ffffff",
+      "focus": "#0f4f8a",
+      "ratios": {
+        "ink": 14.89,
+        "muted": 7.39,
+        "accent": 6.04,
+        "onAccent": 6.76,
+        "focus": 7.48
+      }
+    },
+    {
+      "preset": "midnight",
+      "mode": "dark",
+      "ground": "#0e1726",
+      "ink": "#e8edf5",
+      "muted": "#a9b6c9",
+      "accent": "#8cb8ff",
+      "onAccent": "#000000",
+      "focus": "#8ec2f0",
+      "ratios": {
+        "ink": 15.28,
+        "muted": 8.74,
+        "accent": 8.91,
+        "onAccent": 10.42,
+        "focus": 9.52
+      }
+    },
+    {
+      "preset": "gold",
+      "mode": "dark",
+      "ground": "#14110a",
+      "ink": "#f3ecd9",
+      "muted": "#c2b48f",
+      "accent": "#e0b04a",
+      "onAccent": "#000000",
+      "focus": "#8ec2f0",
+      "ratios": {
+        "ink": 15.98,
+        "muted": 9.17,
+        "accent": 9.4,
+        "onAccent": 10.48,
+        "focus": 9.98
+      }
+    },
+    {
+      "preset": "signal",
+      "mode": "dark",
+      "ground": "#0b0f14",
+      "ink": "#e6f1ff",
+      "muted": "#9fb3c8",
+      "accent": "#3ee6c1",
+      "onAccent": "#000000",
+      "focus": "#8ec2f0",
+      "ratios": {
+        "ink": 16.83,
+        "muted": 8.93,
+        "accent": 12.17,
+        "onAccent": 13.29,
+        "focus": 10.18
+      }
+    }
+  ]
+}

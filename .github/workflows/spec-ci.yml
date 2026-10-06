@@ -84,6 +84,25 @@ jobs:
         # example. Each rule is proved able to fail first.
         run: npm run check:allocation-keys
 
+      - name: The contributor page's link table keeps its rules and gives every golden answer
+        # After the examples step, because the table is an example (it IS the published table, as
+        # the category menu's example is the menu) and has to be a valid instance first. The schema
+        # can say what a platform row carries; only this step can say that every pattern compiles,
+        # that every template's host is one the platform admits, that the eight sponsorship
+        # platforms and the operator's five additions are there, that the two page schemas copy the
+        # platform ids exactly, that the golden file is pinned to these bytes, and that every one of
+        # its cases (hostile ones included) gets its recorded answer from the table's steps. Each
+        # rule is proved able to fail first.
+        run: npm run check:links
+
+      - name: The contributor page contracts say what the design ruled
+        # The contrast matrix is recomputed under WCAG 2.2, the preview hash vectors are
+        # recomputed from their documents, the login-address MACs from their test key, the
+        # builder's vectors keep a hidden login off the repository list, no page member or example
+        # carries points, money or a GitHub id, the settings defaults are the schema's, and the
+        # schemas refuse what the design rules out. Each rule is proved able to fail first.
+        run: npm run check:contributor-page
+
       - name: Coverage vectors use valid published artifacts
         # The vector suite proves the function computes the right answer; this proves it
         # does so over inputs that are shaped like real artifacts, and that all eight

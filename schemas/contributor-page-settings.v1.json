@@ -1,0 +1,416 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/contributor-page-settings.v1.json",
+  "title": "contributor page settings — the person's private choices for their page",
+  "description": "What a person chooses for their contributor page (ops decision D116 and its dated notes of 2026-10-06; design PROFILE-PAGE-2026-10-06 §2): the look, the header, which sections show and in which order, links, the address and the search-engine switch, and the card. One document per person, held by the api as the person's private draft; publishing freezes a copy as an immutable version. It is NEVER PUBLISHED: index-build has no read of drafts at all (the database refuses it, design §2.3), and the public document is `contributor-page.v1`, which the one builder makes from a version, the person's facts and the published records. Its schema is published because three codebases build against it: the api (C#), the editor in the dashboard and the builder.\n\nANYONE SIGNED IN MAY BUILD AND PREVIEW A PAGE; only a person with at least one credited repository, one certificate or one repository where they adopted the licence may publish it (`409 page.not_eligible`; the D116 dated note of ~11:50Z, item 1). A draft is saved whatever its facts; eligibility is a publish check, and so is the rule that a published page shows at least one vouched section (`contributor-page.v1`). The two together mean that a person whose only fact is an adopter fact can publish only a page that shows the login: the adopter section needs `identity.showLogin`, and the summary counts credited repositories and certificates, never adopter facts, so a page of theirs without the login has no vouched section with anything in it. The editor says so before the person reaches Publish.\n\nCHECKED AT EVERY SAVE AND AGAIN AT PUBLISH. This schema holds what JSON Schema can say: the closed lists, the limits, the shapes, and three cross-field rules — an address carrying the login needs `identity.showLogin` (`page.login_required`); the search switch needs the login address (`page.search_unavailable`); the adopter section on needs `identity.showLogin` (`page.login_required`). The api checks the rest at every save, and again at publish against the facts of that moment, answering `422 page.settings_invalid {errors:[{path, code, message}]}`: (a) every link and the website against `link-platforms.v1` (`page.link_invalid {reason}`, `page.website_invalid {reason}`); (b) GitHub Sponsors naming the person's own login while `identity.showLogin` is off is refused (`page.link_invalid`, reason `own_login_hidden`), because it would show the login without the opt-in; (c) a certificate listed on a page with `identity.showLogin` must have the display `full`, and on a page without it `status-only`, and each must be the caller's own, a cid that is not the caller's getting the same code as an unknown one (`page.certificate_not_allowed`); (d) each repository and adopter id must be among the caller's own facts (`page.repository_not_yours`); (e) a reserved or look-alike login cannot take the `login` address, and a look-alike cannot take `mixed` either (`page.address_unavailable`; `contributor-page-alias.v1`); (f) the text rules of `identity` (`page.text_invalid`, `page.name_reserved`); (g) an upload must be the caller's own, re-encoded output (`page.upload_not_yours`), and it must still exist: an upload deleted under `$defs.upload`'s rule (when the page was hidden, for instance) is `page.upload_invalid` until the person uploads again or chooses another picture or cover; (h) the accent colour is adjusted for contrast and the person is told (design §4.3); (i) the whole document is at most 16 KB as JSON (`page.settings_too_large`); (j) while `identity.showLogin` is off, a repository whose owner is the caller's own GitHub login (the current one, compared without regard to case) is refused in `repositories.selected` (`page.repository_shows_login`), because its group would print the login as the owner's name on a page that does not show it — the reason design §2.2 refuses GitHub Sponsors under the person's own login. In `all` mode such a repository is not refused but left out: the builder never lists it on a page without the login, at the preview, at publish or at any rebuild (so one that comes under the person's own account later is left out too), the summary's counts leave it out with it, and the editor shows it greyed out with that reason (`contributor-page.v1` `repositoriesSection`). Two choices are allowed with a warning the editor shows: the GitHub picture without `identity.showLogin` (`page.warn.picture_identifies`: a reverse image search can find the person) and the repositories section without it (`page.warn.repositories_identify`: a small project points to a person).\n\nNO MONEY. There is no member for an amount, a share, a point or a rank, and none for showing one: the design's two amount switches (§2.1) are left out of 1.0.0, because nothing carries money at launch (§8.4) and which shape amounts take, if any, is the operator's decision at the first disbursement. The editor shows them disabled from the api's `choices.amounts`, not from a stored member. Adding one later is an additive change.\n\nVERSIONS. A stored draft is upgraded on read by a pure function (a section id missing from an older draft is added as off), and a published version keeps the specVersion it was saved under.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (with the contributor page). Never published at any phase: the api stores it (the drafts and versions tables of slice P14b) and returns it only to its owner (`GET /v1/me/page`).",
+    "artifactPath": "(never published) the api's private store — the draft's and each version's `settings` column (design §2.3) — read and written only through `GET /v1/me/page` and `PUT /v1/me/page/draft` by the signed-in owner",
+    "authoritative": true,
+    "producer": "the person, through the editor at /contributor/page and the api's `PUT /v1/me/page/draft` (slices P14d, P14i)",
+    "consumers": [
+      "the api's save and publish checks",
+      "the one builder (`ContributorPageBuilder`), which the api calls for the private preview and index-build calls for the public document",
+      "the editor and its live preview",
+      "the person's own data export"
+    ],
+    "fsRefs": [
+      "D116 items 1, 2, 3 and 10",
+      "D116 dated note of 2026-10-06 ~09:40Z (four open points answered)",
+      "D116 dated note of 2026-10-06 ~11:50Z (who may publish; the picture is the person's free choice; own picture and cover uploads at launch, lean)",
+      "PROFILE-PAGE-2026-10-06 §2.1, §2.2, §2.4, §4.2-§4.4, §4.9, §5, §6.1-§6.3, §7.1, §7.5",
+      "PLAN-2026-10-05 corrections 9 and 11 (status-only by default)"
+    ],
+    "vsRefs": ["VS-05"],
+    "changelog": "CHANGELOG.md#contributor-page-settingsv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "start", "layout", "theme", "picture", "cover", "identity", "address", "search", "sections", "summary", "certificates", "repositories", "adopter", "links", "website", "sponsors", "card"],
+  "properties": {
+    "schemaVersion": { "const": 1, "description": "The document's schema version. The minor version it was saved under is this schema's `x-psn.specVersion` at the time." },
+    "start": {
+      "enum": ["named", "unnamed", null],
+      "default": null,
+      "description": "The answer to the editor's first question, \"How do you want to appear?\", with nothing pre-selected (design §2.4). It only seeds defaults and decides nothing afterwards. `named` (\"Under my GitHub name\") sets `identity.showLogin`, the login address (the mixed one where the login address is unavailable), the repositories section on, and the adopter section on where adopter facts exist. `unnamed` (\"Without my name\") keeps the stored defaults: the anonymous address and no login. Until the person answers, the stored defaults are the anonymous ones (status-only by default: the plan's item a and corrections 9 and 11). The picture is not part of either answer: it starts on the GitHub picture in both (`picture`)."
+    },
+    "layout": {
+      "enum": ["paper", "profile", "minimal"],
+      "default": "paper",
+      "description": "One of three layouts (design §4.2). `paper`, the default, is the approved certificate look (D116 item 4): cream frame, serif name, the rosette watermark, the QR bottom right. `profile` is Gravatar-like: a cover band with the picture overlapping it. `minimal` is one typographic column with no cover and no frame. All three use the same tokens, type and footer. A value outside the list is `page.layout_invalid`."
+    },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preset", "accent"],
+      "description": "The colours (design §4.3). A value outside the lists is `page.theme_invalid`; a malformed colour is `page.colour_invalid`.",
+      "properties": {
+        "preset": {
+          "$ref": "#/$defs/preset",
+          "default": "purpose"
+        },
+        "accent": {
+          "anyOf": [{ "$ref": "#/$defs/colour" }, { "type": "null" }],
+          "default": null,
+          "description": "An optional accent colour, `#rrggbb` in lower case, or null for the preset's own. The api adjusts it for contrast once at save, in C#, for each ground the page can show (the preset's light ground, its dark ground for `purpose`, and white for print): for k = 0 to 64 it mixes the raw colour toward the preset's ink by k/64, rounding each channel half up, and takes the first mix with a contrast of at least 4.6 against the ground and the surface; at k = 64 the mix is the ink itself. It tells the person when k > 0. Only the raw colour is stored here; the adjusted ones travel in the public document."
+        }
+      }
+    },
+    "picture": {
+      "$ref": "#/$defs/picture",
+      "default": { "kind": "github" },
+      "description": "The picture in the header and on the card: the person's free choice of their GitHub picture, the rosette, the monogram or their own upload, independent of whether the GitHub login is shown (the D116 dated note of ~11:50Z, item 2). The editor starts on the GitHub picture; nothing is public before the person previews and publishes. Without `identity.showLogin`, the GitHub picture is allowed with the warning `page.warn.picture_identifies`. A malformed choice is `page.picture_invalid`."
+    },
+    "cover": {
+      "$ref": "#/$defs/cover",
+      "default": { "kind": "preset", "preset": "meadow" },
+      "description": "The cover band above the header (design §4.4): none, one of eight colour presets, a solid colour, a two-colour gradient, the rosette pattern, or the person's own upload (the D116 dated note of ~11:50Z, item 2). No text ever sits on a cover, so no contrast rule applies to it. The `paper` layout shrinks it to an 8 px band; `minimal` draws none. A malformed choice is `page.cover_invalid`."
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["displayName", "pronouns", "bio", "showLogin"],
+      "description": "The header's words (design §6.1 and §6.2). Each text is stored after NFC and after collapsing runs of whitespace to one space and trimming the ends (the bio keeps its line breaks). Beyond what this schema checks, the api refuses at save (`page.text_invalid`): characters of general category Cc (the bio keeps the line feed), Cf except ZWJ, ZWNJ and VS16, private-use and unassigned characters, a lone surrogate (Cs: a UTF-16 surrogate code unit not part of a pair, which JSON can carry as a `\\u` escape but no UTF-8 encoder writes the same way, so every text is well-formed Unicode as RFC 8785 assumes; it is refused in prose here because a JSON Schema pattern for it means different things in .NET and in JavaScript), tag characters, more than three combining marks in a row, the check-mark and badge look-alikes of `link-platforms.v1` `text.refusedCharacters`, `://`, `www.` and e-mail addresses; and in the display name, emoji and symbols beyond `. , ' ’ - ( ) & ·`, ™ ® ©, a leading `@` and any domain-shaped token. The impersonation terms of `link-platforms.v1` `text` are refused as `page.name_reserved` (in the bio, as `page.text_invalid`), after the fold that table describes. index-build checks again at every rebuild. There is no Markdown and no HTML; text is escaped at render and the bio is never turned into links. Profanity is not filtered: reports and the stewards' hide handle it.",
+      "properties": {
+        "displayName": {
+          "anyOf": [
+            { "type": "string", "minLength": 1, "maxLength": 50, "not": { "anyOf": [{ "pattern": "[\\u0000-\\u001f\\u007f-\\u009f\\u00ad\\u0600-\\u0605\\u061c\\u06dd\\u070f\\u08e2\\u180e\\u200b\\u200e\\u200f\\u2028-\\u202e\\u2060-\\u2064\\u2066-\\u206f\\ufeff\\ufff9-\\ufffb]" }, { "pattern": "^@" }] } },
+            { "type": "null" }
+          ],
+          "default": null,
+          "description": "A typed display name: 1 to 50 code points, at most 200 bytes of UTF-8, or null. The page's `h1`; without one, the header reads \"@{login}\" where the login is shown and \"A Purpose Source contributor\" otherwise."
+        },
+        "pronouns": {
+          "anyOf": [
+            { "type": "string", "minLength": 1, "maxLength": 24, "not": { "pattern": "[\\u0000-\\u001f\\u007f-\\u009f\\u00ad\\u0600-\\u0605\\u061c\\u06dd\\u070f\\u08e2\\u180e\\u200b\\u200e\\u200f\\u2028-\\u202e\\u2060-\\u2064\\u2066-\\u206f\\ufeff\\ufff9-\\ufffb]" } },
+            { "type": "null" }
+          ],
+          "default": null,
+          "description": "Pronouns, at most 24 code points of letters, `/`, space and `-`, or null."
+        },
+        "bio": {
+          "anyOf": [
+            { "type": "string", "minLength": 1, "maxLength": 280, "not": { "anyOf": [{ "pattern": "[\\u0000-\\u0009\\u000b-\\u001f\\u007f-\\u009f\\u00ad\\u0600-\\u0605\\u061c\\u06dd\\u070f\\u08e2\\u180e\\u200b\\u200e\\u200f\\u2028-\\u202e\\u2060-\\u2064\\u2066-\\u206f\\ufeff\\ufff9-\\ufffb]" }, { "pattern": "(?:\\n[^\\n]*){4}" }] } },
+            { "type": "null" }
+          ],
+          "default": null,
+          "description": "A short bio: at most 280 code points and at most three line breaks (U+000A), emoji allowed, or null. Plain text, never linked; a domain written in it stays text, so bare domains are not refused here (they are in the display name)."
+        },
+        "showLogin": {
+          "type": "boolean",
+          "default": false,
+          "description": "\"Show my GitHub login (@login)\": the login appears in the header as \"@login on GitHub\" with our verified mark, and only then. Off by default (status-only by default: the plan's item a and correction 11). The `login` and `mixed` addresses and the adopter section need it."
+        }
+      }
+    },
+    "address": {
+      "enum": ["anonymous", "login", "mixed"],
+      "default": "anonymous",
+      "description": "The page's public address (D116 item 2; design §7.1): `anonymous` is `https://purposesource.org/p/{pid}`, the permanent link itself; `login` is `/u/{login}`, found by anyone who knows the login; `mixed` is `/u/{login}/{pid}`, which carries the login but cannot be found from it. Whatever the shape, `/p/{pid}` always serves the page, and snippets, the QR and badges use it. `login` and `mixed` need `identity.showLogin`; an unavailable address is `page.address_unavailable`."
+    },
+    "search": {
+      "type": "boolean",
+      "default": false,
+      "description": "\"Let search engines list this page\" (D116 item 3; design §7.5). Off by default: every page answers `noindex`. On, the edge leaves the robots header out on the login address only, never on `/p/{pid}`; there is no people sitemap. Only with the `login` address (`page.search_unavailable`), and behind the same switch as publishing on production."
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "on"],
+        "properties": {
+          "id": { "$ref": "#/$defs/sectionId" },
+          "on": { "type": "boolean" }
+        }
+      },
+      "allOf": [
+        { "contains": { "properties": { "id": { "const": "summary" } } }, "maxContains": 1 },
+        { "contains": { "properties": { "id": { "const": "certificates" } } }, "maxContains": 1 },
+        { "contains": { "properties": { "id": { "const": "repositories" } } }, "maxContains": 1 },
+        { "contains": { "properties": { "id": { "const": "adopter" } } }, "maxContains": 1 },
+        { "contains": { "properties": { "id": { "const": "links" } } }, "maxContains": 1 },
+        { "contains": { "properties": { "id": { "const": "sponsors" } } }, "maxContains": 1 }
+      ],
+      "default": [
+        { "id": "summary", "on": true },
+        { "id": "certificates", "on": true },
+        { "id": "repositories", "on": false },
+        { "id": "adopter", "on": false },
+        { "id": "links", "on": false },
+        { "id": "sponsors", "on": false }
+      ],
+      "description": "The six sections below the fixed header, each exactly once, each on or off; the array order is the page order (design §2.1). The header is always first and the footer always last, and neither is listed. A section that is on but has nothing to show is not drawn, and the editor shows the server's reason. Anything else is `page.sections_invalid`."
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["projects", "organisations", "since", "certificates"],
+      "description": "What the lifetime summary line shows (\"Credited on 7 projects in 3 organisations since 2026 · 2 certificates\"), each part on or off. The counts are over what the page's repository and certificate choices show (design §8.1), and they are kept up to date automatically after each month closes. No amount: see the description of the document.",
+      "properties": {
+        "projects": { "type": "boolean", "default": true },
+        "organisations": { "type": "boolean", "default": true },
+        "since": { "type": "boolean", "default": true },
+        "certificates": { "type": "boolean", "default": true }
+      }
+    },
+    "certificates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "description": "Which of the person's own certificates the page lists. `all-eligible` lists every one allowed on this page, new ones included; `selected` lists the chosen ones. A certificate is allowed only with the display that matches the page (the document's check (c)): `full` with `identity.showLogin`, `status-only` without, and certificates are status-only until their holder chooses otherwise.",
+      "properties": {
+        "mode": { "enum": ["all-eligible", "selected"], "default": "all-eligible" },
+        "selected": {
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/certId" },
+          "description": "The chosen certificates, with `mode: selected` only."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "mode": { "const": "selected" } }, "required": ["mode"] },
+          "then": { "required": ["selected"] },
+          "else": { "not": { "required": ["selected"] } }
+        }
+      ]
+    },
+    "repositories": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "hidden", "years"],
+      "description": "Which credited repositories the page lists, grouped by organisation (D116 item 1). `all` lists every credited one, new ones added automatically, less `hidden`; `selected` lists the chosen ones. Each id must be among the person's own credited repositories (`page.repository_not_yours`). While `identity.showLogin` is off, a repository under the person's own GitHub account is refused in `selected` and left out in `all` (`page.repository_shows_login`, check (j) of the document's description), because its owner's name is the login.",
+      "properties": {
+        "mode": { "enum": ["all", "selected"], "default": "all" },
+        "selected": { "type": "array", "maxItems": 200, "uniqueItems": true, "items": { "$ref": "#/$defs/githubNodeId" }, "description": "The chosen repositories, with `mode: selected` only." },
+        "hidden": { "type": "array", "maxItems": 200, "uniqueItems": true, "items": { "$ref": "#/$defs/githubNodeId" }, "default": [], "description": "Repositories left out." },
+        "years": { "type": "boolean", "default": true, "description": "\"Show the years I was credited\": each row reads \"Credited 2026–2027\". Years only: never months, shares or month counts (design §8.1)." }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "mode": { "const": "selected" } }, "required": ["mode"] },
+          "then": { "required": ["selected"] },
+          "else": { "not": { "required": ["selected"] } }
+        }
+      ]
+    },
+    "adopter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hidden"],
+      "description": "The adopter section (D116 item 7; design §8.5): the registered repositories where this person merged the adoption change or edited the LICENSE file themselves on GitHub, with a hide switch per item. It needs `identity.showLogin`, because its evidence links name the login on GitHub.",
+      "properties": {
+        "hidden": { "type": "array", "maxItems": 200, "uniqueItems": true, "items": { "$ref": "#/$defs/githubNodeId" }, "default": [] }
+      }
+    },
+    "links": {
+      "type": "array",
+      "maxItems": 10,
+      "items": { "$ref": "#/$defs/link" },
+      "allOf": [
+        { "contains": { "properties": { "platform": { "const": "gitlab" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "codeberg" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "linkedin" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "x" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "bluesky" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "mastodon" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "youtube" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "facebook" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "instagram" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "threads" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "tiktok" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "orcid" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "stackoverflow" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "devto" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "medium" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "huggingface" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "discord" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "matrix" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "twitch" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "reddit" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "telegram" } } }, "minContains": 0, "maxContains": 1 }
+      ],
+      "default": [],
+      "description": "Social links, at most ten and one per platform, in the order the person chose (design §5.2). Each is the parsed `{platform, form, handle}` (and a Mastodon `instance`), never the pasted text, never a URL: the address is rebuilt from `link-platforms.v1` at every build. GitHub is not here: it is the verified header link, from the sign-in."
+    },
+    "website": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["url"],
+          "properties": { "url": { "$ref": "#/$defs/websiteUrl" } }
+        },
+        { "type": "null" }
+      ],
+      "default": null,
+      "description": "The one personal website (D116 dated note of ~09:40Z; design §5.4), as the website steps of `link-platforms.v1` rebuild it: https only, the host in its A-label form, no query, no fragment. Shown with the full domain, `rel=\"me nofollow ugc noopener noreferrer\"`."
+    },
+    "sponsors": {
+      "type": "array",
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/sponsor" },
+      "allOf": [
+        { "contains": { "properties": { "platform": { "const": "github-sponsors" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "opencollective" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "patreon" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "ko-fi" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "buymeacoffee" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "liberapay" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "paypal" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "platform": { "const": "polar" } } }, "minContains": 0, "maxContains": 1 }
+      ],
+      "default": [],
+      "description": "Sponsorship links, at most four and one per platform (design §5.3): our own \"Support on {platform}\" buttons, never a third-party widget, iframe or script (the D116 dated note of ~09:40Z), with no amount, goal or count. They go to other services; Purpose Source takes no part in these payments."
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["picture", "name", "login", "summary", "adopter", "links"],
+      "description": "What the embeddable card shows (D116 item 1; design §4.9). Each element shows only if the page shows it too and its switch here is on. The card never carries a figure, a status or a QR.",
+      "properties": {
+        "picture": { "type": "boolean", "default": true },
+        "name": { "type": "boolean", "default": true },
+        "login": { "type": "boolean", "default": true },
+        "summary": { "type": "boolean", "default": true },
+        "adopter": { "type": "boolean", "default": true },
+        "links": { "type": "boolean", "default": false, "description": "Up to five platform marks." }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "Design §2.2: the URL of the login and mixed addresses contains the login.",
+      "if": { "properties": { "address": { "enum": ["login", "mixed"] } }, "required": ["address"] },
+      "then": { "properties": { "identity": { "properties": { "showLogin": { "const": true } } } } }
+    },
+    {
+      "$comment": "Design §2.2 and §7.5: listing a mixed or anonymous page would undo the point of choosing it.",
+      "if": { "properties": { "search": { "const": true } }, "required": ["search"] },
+      "then": { "properties": { "address": { "const": "login" } } }
+    },
+    {
+      "$comment": "Design §2.2 and §8.5: the adopter section's evidence links name the login on GitHub.",
+      "if": { "properties": { "sections": { "contains": { "properties": { "id": { "const": "adopter" }, "on": { "const": true } }, "required": ["id", "on"] } } }, "required": ["sections"] },
+      "then": { "properties": { "identity": { "properties": { "showLogin": { "const": true } } } } }
+    }
+  ],
+  "$defs": {
+    "preset": {
+      "enum": ["purpose", "mocha", "mint", "mustard", "earth", "midnight", "gold", "signal"],
+      "description": "The eight colour presets (design §4.3), Purpose Source's own colours (`purpose`) the default (D116 item 1). `purpose` follows the visitor's light or dark mode; `mocha`, `mint`, `mustard` and `earth` are light; `midnight`, `gold` and `signal` are dark. Every text pair of every preset meets WCAG 2.2 AA, and `examples/contributor-page-contrast.v1.golden.json` records each ratio. The names are our own."
+    },
+    "colour": { "type": "string", "pattern": "^#[0-9a-f]{6}$", "description": "`#rrggbb`, lower case. The page's style block is built only from values of this shape." },
+    "sectionId": {
+      "enum": ["summary", "certificates", "repositories", "adopter", "links", "sponsors"],
+      "description": "`summary`: the lifetime summary line. `certificates`: the person's certificates. `repositories`: the credited repositories grouped by organisation. `adopter`: the licence-adopter section. `links`: \"Elsewhere\", with the personal website. `sponsors`: \"Support {name} directly\". The first four are the vouched sections: a published page shows at least one of them."
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "upload": {
+      "$ref": "#/$defs/sha256",
+      "description": "The person's own uploaded picture or cover, named by the SHA-256 of the page-size file the render job made from it (the picture's 256-pixel WebP; the cover's 1600-pixel WebP). Never a URL and never a storage path: the api resolves it in the caller's own private uploads only (`page.upload_not_yours`). LEAN, AS THE OPERATOR RULED (the D116 dated note of ~11:50Z, item 2). What may be uploaded: a JPEG, PNG or WebP file, or a GIF of which the first frame is used, recognised by its first bytes and never by its name or declared type; at most 5 MB (5,242,880 bytes); SVG and every other type are refused (`page.upload_invalid`). The original stays in private storage and is never served: the render job decodes it in a sandbox with no network, takes the first frame, crops it to the centre (1:1 for a picture, 4:1 for a cover), and re-encodes it to fixed sizes — a picture to 256×256 WebP and 96×96 PNG, a cover to 1600×400 and 800×200 WebP — so location and every other metadata (EXIF, GPS, XMP, ICC, comments) are gone; the original is then deleted. What is kept is the re-encoded files in private storage, and their public copies while the page shows them: index-build copies them into the public plane when a version naming them is published, and the edge serves them only while the live document names them. HOW LONG THE FILES LIVE, under the note's item 2 (\"published only with the page, deleted when it is hidden or deleted\") and item 3 (\"old versions of person files are deleted one day after they are replaced or hidden\"): (1) An upload's files live only while the current draft or the live published version names its hash, and never past a hide (3). A version row is immutable and kept until \"Delete my page\" (design §2.3), so it keeps the hash and never the bytes: an older version that named an upload keeps nothing alive. (2) An upload that neither the draft nor the live version names — replaced by another upload or another choice, or uploaded and never chosen — loses its public copies when the document that named them is replaced (index-build's replaced files, design §8.3), and its private files are deleted one day after it stopped being named, or one day after it was made if nothing ever named it. (3) Hiding the page, by the person or by a steward, deletes at once every upload the person has at that moment, the private files together with the public copies (an upload made afterwards, while the page is hidden, follows (1) and (2)): this contract reads \"deleted when it is hidden\" as the whole upload, not only its public copies, so nothing the person uploaded outlives a hide except the hash in their draft and versions. The draft still names that hash, and from then on the reference is `page.upload_invalid` at every save and at publish until the person uploads again or chooses another picture or cover; the editor says so as soon as it opens the draft. \"Delete my page and its history\" and account erasure delete them the same way. (4) Previous blob versions of every upload file, private or public, are removed one day after they were replaced or deleted (item 3): slice P14g's lifecycle rule for the public prefixes `p/` and `u/` covers the private prefix the uploads live under too. Item 3's one day is therefore the only retention figure uploads add to the data map and the DPIA. No review comes before publishing; a report hides first (item 4 of the note: reports reach legal@purposesource.org through the existing abuse form). The Terms of use carry a user-content clause for these files before production publishes any (slice P19)."
+    },
+    "picture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "enum": ["github", "rosette", "monogram", "upload"],
+          "description": "`github`: the person's GitHub picture, copied and re-encoded by the render job so that visitors never contact GitHub; its source address names the person's numeric GitHub id and never enters the public document (design §6.3). `rosette`: drawn from the page id, decoration and never proof. `monogram`: the first grapheme of the first and last words of the display name, or of the login where it is shown, and otherwise the rosette. `upload`: the person's own upload, named by `file`."
+        },
+        "file": { "$ref": "#/$defs/upload" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "upload" } }, "required": ["kind"] },
+          "then": { "required": ["file"] },
+          "else": { "not": { "required": ["file"] } }
+        }
+      ]
+    },
+    "cover": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["none", "preset", "solid", "gradient", "rosette", "upload"] },
+        "preset": { "$ref": "#/$defs/coverPreset" },
+        "colour": { "$ref": "#/$defs/colour" },
+        "from": { "$ref": "#/$defs/colour" },
+        "to": { "$ref": "#/$defs/colour" },
+        "angle": { "enum": [90, 135, 180], "description": "The gradient's angle in degrees. No other value and no free CSS: the page's style block is generated only from colours and these angles." },
+        "file": { "$ref": "#/$defs/upload" }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "preset" } }, "required": ["kind"] }, "then": { "required": ["preset"] }, "else": { "not": { "required": ["preset"] } } },
+        { "if": { "properties": { "kind": { "const": "solid" } }, "required": ["kind"] }, "then": { "required": ["colour"] }, "else": { "not": { "required": ["colour"] } } },
+        { "if": { "properties": { "kind": { "const": "gradient" } }, "required": ["kind"] }, "then": { "required": ["from", "to", "angle"] }, "else": { "not": { "anyOf": [{ "required": ["from"] }, { "required": ["to"] }, { "required": ["angle"] }] } } },
+        { "if": { "properties": { "kind": { "const": "upload" } }, "required": ["kind"] }, "then": { "required": ["file"] }, "else": { "not": { "required": ["file"] } } }
+      ]
+    },
+    "coverPreset": {
+      "enum": ["meadow", "forest", "dawn", "sand", "clay", "dusk", "night", "gold-leaf"],
+      "description": "The eight gradient covers (design §4.4): meadow #1d5c3c→#8fcaa6, forest #12291c→#1d5c3c, dawn #f5eddb→#ddc99a, sand #fbf5e3→#eadfb8, clay #9a3f1f→#e2a37f, dusk #142036→#8cb8ff, night #0b0f14→#1f2a36, gold leaf #14110a→#e0b04a."
+    },
+    "link": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "handle"],
+      "properties": {
+        "platform": { "$ref": "#/$defs/socialPlatform" },
+        "form": { "$ref": "#/$defs/formId" },
+        "handle": { "type": "string", "minLength": 1, "maxLength": 318, "description": "The handle as the table's steps left it. This schema checks only a coarse character class per platform; the table's grammar decides." },
+        "instance": { "$ref": "#/$defs/host", "description": "The Mastodon instance, on the table's list; Mastodon only." }
+      },
+      "allOf": [
+        { "if": { "properties": { "platform": { "const": "mastodon" } }, "required": ["platform"] }, "then": { "required": ["instance"] }, "else": { "not": { "required": ["instance"] } } },
+        { "if": { "properties": { "platform": { "const": "matrix" } }, "required": ["platform"] }, "then": { "properties": { "handle": { "pattern": "^[a-z0-9._=/+-]{1,64}:[a-z0-9.-]{1,253}$", "not": { "pattern": "^/|//|/:|^\\.{1,2}[/:]|/\\.{1,2}[/:]" } } } } },
+        { "if": { "properties": { "platform": { "const": "bluesky" } }, "required": ["platform"] }, "then": { "properties": { "handle": { "pattern": "^(?:did:plc:[a-z2-7]{24}|[a-z0-9.-]{3,253})$" } } } },
+        { "if": { "properties": { "platform": { "enum": ["matrix", "bluesky"] } }, "required": ["platform"] }, "then": true, "else": { "properties": { "handle": { "pattern": "^[A-Za-z0-9._-]{1,100}$" } } } }
+      ]
+    },
+    "sponsor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "handle"],
+      "properties": {
+        "platform": { "$ref": "#/$defs/sponsorPlatform" },
+        "form": { "$ref": "#/$defs/formId" },
+        "handle": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,100}$" }
+      }
+    },
+    "formId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$", "description": "The table's form of the platform; absent means the platform's first form." },
+    "socialPlatform": {
+      "enum": ["gitlab", "codeberg", "linkedin", "x", "bluesky", "mastodon", "youtube", "facebook", "instagram", "threads", "tiktok", "orcid", "stackoverflow", "devto", "medium", "huggingface", "discord", "matrix", "twitch", "reddit", "telegram"],
+      "description": "The `social` platforms of `link-platforms.v1`, copied here because a published schema validates on its own download; `check:links` asserts the copy equals the table."
+    },
+    "sponsorPlatform": {
+      "enum": ["github-sponsors", "opencollective", "patreon", "ko-fi", "buymeacoffee", "liberapay", "paypal", "polar"],
+      "description": "The eight `sponsorship` platforms of `link-platforms.v1`, copied as `socialPlatform` is."
+    },
+    "host": {
+      "type": "string",
+      "maxLength": 253,
+      "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$"
+    },
+    "websiteUrl": {
+      "type": "string",
+      "maxLength": 256,
+      "pattern": "^https://(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})/[A-Za-z0-9._~!$&'()*+,;=:@%/-]{0,200}$",
+      "not": { "pattern": "//.*//|/\\.{1,2}(?:/|$)|%2[eEfF]|%5[cC]|%00" },
+      "description": "A website address as the website steps of `link-platforms.v1` rebuild it: `https://`, a lower-case host of at least two labels (A-labels for an IDN), and a path of at most 200 characters with no query and no fragment, no empty segment, no dot segment and no encoded dot, slash, backslash or NUL."
+    },
+    "githubNodeId": {
+      "type": "string",
+      "pattern": "^(R_[A-Za-z0-9_-]{1,126}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$",
+      "description": "A GitHub repository node id in either form GitHub has issued for a repository: the current `R_…` form, or the legacy base64 form of \"010:Repository…\". Narrower than the house pattern `repo-record.v1` carries, which also admits other objects' ids: every id here is a repository's, and a user's node id (`U_…`, or the legacy \"04:User…\") must never be storable where a repository id belongs."
+    },
+    "certId": { "type": "string", "pattern": "^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$" }
+  }
+}

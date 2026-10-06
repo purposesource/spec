@@ -1,0 +1,47 @@
+{
+  "$comment": [
+    "Worked vectors of the contributor page alias's addressMac (design PROFILE-PAGE-2026-10-06 §2.3, §7.2; the definition is in schemas/contributor-page-alias.v1.json): HMAC-SHA256 under the key over the UTF-8 bytes of \"u-login:\" and the login in ASCII lower case, then the first 26 characters of the lower-case RFC 4648 base32 encoding of the 32-byte digest, without padding.",
+    "The api (C#) computes the MAC when it assigns or retires an address, and the website edge (JavaScript) computes it for every /u/{login} request. If the two disagree by one character, every login address answers 404, so both run every vector here, and check:contributor-page recomputes each one. `hmacSha256Hex` is the digest before base32, so a failing implementation can tell a wrong message or key from a wrong encoding.",
+    "`keyHex` is a PUBLISHED TEST KEY, the SHA-256 of a fixed sentence, and is never PSN_PAGE_ALIAS_KEY in any environment. The real key is 32 random bytes held as 64 lower-case hex characters, and the HMAC key is always the 32 decoded bytes, never the hex text."
+  ],
+  "specVersion": "1.0.0",
+  "keyHex": "4cd22bf54ae912968adeaa5e7fe5305186dc1d9196666cee2636a7fac9f69bf8",
+  "vectors": [
+    {
+      "id": "AV-1",
+      "note": "The login of examples/contributor-page.v1.example.json, whose page has the login address; the alias at this path is examples/contributor-page-alias.v1.example.json.",
+      "login": "example-contributor",
+      "message": "u-login:example-contributor",
+      "hmacSha256Hex": "4b64630c35c6e02f3d77952be81479e7cd91ec578f244b972e4eb869faca85c7",
+      "addressMac": "jnsggdbvy3qc6plxsuv6qfdz47",
+      "path": "u/k/jnsggdbvy3qc6plxsuv6qfdz47.json"
+    },
+    {
+      "id": "AV-2",
+      "note": "The same login in mixed case: GitHub logins are case-insensitive, the message lower-cases it, so the MAC and the path are AV-1's.",
+      "login": "Example-Contributor",
+      "message": "u-login:example-contributor",
+      "hmacSha256Hex": "4b64630c35c6e02f3d77952be81479e7cd91ec578f244b972e4eb869faca85c7",
+      "addressMac": "jnsggdbvy3qc6plxsuv6qfdz47",
+      "path": "u/k/jnsggdbvy3qc6plxsuv6qfdz47.json"
+    },
+    {
+      "id": "AV-3",
+      "note": "The shortest login.",
+      "login": "a",
+      "message": "u-login:a",
+      "hmacSha256Hex": "c410480d76772743269416d9c5e2c781cf81f03d347bb4be002afcbebe1a4994",
+      "addressMac": "yqieqdlwo4tugjuuc3m4lywhqh",
+      "path": "u/k/yqieqdlwo4tugjuuc3m4lywhqh.json"
+    },
+    {
+      "id": "AV-4",
+      "note": "The longest login, 39 characters.",
+      "login": "a12345678901234567890123456789012345678",
+      "message": "u-login:a12345678901234567890123456789012345678",
+      "hmacSha256Hex": "8b9ca298f42bca95a0fb54f77860b1072abe5919d8dccf40776c5353737fed60",
+      "addressMac": "rookfghufpfjlih3kt3xqyfra4",
+      "path": "u/k/rookfghufpfjlih3kt3xqyfra4.json"
+    }
+  ]
+}

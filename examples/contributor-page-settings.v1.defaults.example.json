@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "start": null,
+  "layout": "paper",
+  "theme": { "preset": "purpose", "accent": null },
+  "picture": { "kind": "github" },
+  "cover": { "kind": "preset", "preset": "meadow" },
+  "identity": { "displayName": null, "pronouns": null, "bio": null, "showLogin": false },
+  "address": "anonymous",
+  "search": false,
+  "sections": [
+    { "id": "summary", "on": true },
+    { "id": "certificates", "on": true },
+    { "id": "repositories", "on": false },
+    { "id": "adopter", "on": false },
+    { "id": "links", "on": false },
+    { "id": "sponsors", "on": false }
+  ],
+  "summary": { "projects": true, "organisations": true, "since": true, "certificates": true },
+  "certificates": { "mode": "all-eligible" },
+  "repositories": { "mode": "all", "hidden": [], "years": true },
+  "adopter": { "hidden": [] },
+  "links": [],
+  "website": null,
+  "sponsors": [],
+  "card": { "picture": true, "name": true, "login": true, "summary": true, "adopter": true, "links": false }
+}

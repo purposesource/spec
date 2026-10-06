@@ -1,0 +1,479 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/contributor-page.v1.json",
+  "title": "contributor page — the public document of one person's published page",
+  "description": "The one public document of a contributor page (FS04-057's \"public impact page\", as ops decision D116 makes it customisable; design PROFILE-PAGE-2026-10-06 §4 and §8). `jobs.index-build`, the only writer of the public plane, writes it at `p/{pid}.json` from the person's newest published version of `contributor-page-settings.v1`, their current facts, the certificate records, the registry's names and their adopter facts, with every link rebuilt from `link-platforms.v1` and every colour checked. The website edge turns it into the HTML page on each request, with no script and no third-party request, at `https://purposesource.org/p/{pid}`, `/u/{login}` or `/u/{login}/{pid}`; the render job draws the card from it. It is written only while the page is published, and deleted when the person hides or deletes the page or their account (D116 item 10: hiding deletes the files); a hidden page answers exactly like one that never existed.\n\nWHAT IT NEVER CARRIES (design §8.7). No points, shares, bands, ranks, percentiles, months or amounts: no member has such a name, and the sections are never ordered by any measure. No `subId` and no other GitHub account id of the person (the plan's correction 11; design correction 5): the GitHub picture's source address names the numeric id, so it never enters this document either, and the picture travels only as our own re-encoded file. No draft: index-build has no read of drafts. No claim status: a repository is `registered` or `no-longer-registered`, never `verified` (D82 item 3). Facts are years only. No login the person did not choose to show: without `login`, no repository group is owned by the person's own account, because its owner's name is the login (`repositoriesSection`), and no GitHub Sponsors button names it (`contributor-page-settings.v1` check (b)). No date finer than a day: `generatedAt` is truncated to its UTC day, and `versionId` is random bits, never a ULID.\n\nWHAT A READER CHECKS. It is a contributor's own page: Purpose Source checks the certificates and the repository facts on it, not the owner's words or links (the fixed footer, design §4.6). Each certificate row links to its verify page, where the signature is checked; each repository row links to its registry record; each adopter item links to the evidence on GitHub. Where this document and a certificate record or a registry record disagree, those records govern and the difference is a defect to report, so `x-psn.authoritative` is false. The footer's fixed \"Report this page\" opens the site's existing abuse form with the page's address in the fragment; reports reach legal@purposesource.org, are answered within five business days by the operator or a steward, a page is hidden first when in doubt, and a threat to life or safety is escalated at once (the D116 dated note of ~11:50Z, item 4). A steward's hide deletes this document like the person's own.\n\nTHE PREVIEW HASH (design §3.6). The person publishes exactly what they previewed: the private preview is this document as the builder would write it, and publishing sends its `previewSha256`, which the api recomputes from the current draft, facts, certificate displays, registry names and address, answering `409 page.preview_changed` with the new preview on a mismatch. `previewSha256` is the lowercase hex SHA-256 of the UTF-8 bytes of the RFC 8785 (JCS) serialisation of the PREIMAGE, which is this document with exactly these changes: (1) the members `generatedAt` and `versionId` removed; (2) `card.h16` removed, where present; (3) a `picture` whose `kind` is `github` replaced by `{\"kind\":\"github\"}`. Nothing else is removed or changed: `source`, `pid`, `factsAsOf`, `autoUpdated`, every section, the letters of a monogram and the `h16` of an uploaded picture or cover all stay, so an upload is pinned to the exact file the person previewed. Every string in the document is well-formed Unicode, with no lone surrogate (I-JSON, RFC 7493, which RFC 8785 assumes): the text rules refuse one at save (`contributor-page-settings.v1` `identity`), and a builder that met one would fail rather than serialise it, because JSON.stringify, UTF-8 encoders and System.Text.Json each write it differently. Every number in the document is an integer and every member name is ASCII, so JCS here is: members sorted by their UTF-16 code units, no whitespace, strings escaped as ECMAScript's JSON.stringify escapes them (non-ASCII characters are written as themselves, never as `\\u` escapes). `examples/contributor-page-preview.v1.golden.json` holds worked vectors, and `check:contributor-page` recomputes them. After publishing, only what `autoUpdated` lists may change without a new preview.\n\nFILES. Our own re-encoded files are named by `h16`, the first 16 hex characters of the SHA-256 of a drawing's first file, and live beside the document under `p/{pid}/`: a picture as `a-{h16}-256.webp` (the page) and `a-{h16}-96.png` (the card); an uploaded cover as `c-{h16}-1600.webp` and `c-{h16}-800.webp`; the card as `card-{h16}.png`, `card-{h16}@2x.png`, `card-{h16}-dark.png`, `card-{h16}-dark@2x.png` and `og-{h16}.png`. The edge serves a file only while the live document names it. Every path is unlisted: counted in the publish log, never named. An uploaded picture or cover lives only as long as `contributor-page-settings.v1` `$defs.upload` says: its public copies leave with the document that named them, and hiding the page deletes the upload itself, so a page published again after a hide needs a new upload.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (producer: `jobs.index-build`, slice P14g). Nothing is published under this contract yet: no page can be published before the api (P14d) and the editor (P14i) exist, and production publishes none until the published privacy notice describes the page and the operator turns `PSN_PAGE_PUBLISH` on (D116 item 10; slice P18).",
+    "artifactPath": "/p/{pid}.json in the public plane — unlisted (counted in /meta/publish-log.json, never named), read by the website edge only, rendered at https://purposesource.org/p/{pid}, /u/{login} and /u/{login}/{pid}; never served as JSON at a public route (/v1/p/{pid}/version answers its versionId)",
+    "authoritative": false,
+    "producer": "`jobs.index-build` (P14g) through the one builder (`ContributorPageBuilder`, packages/Psn.Artifacts), which the api also calls for the private preview, so the preview is byte-equal to what is published",
+    "consumers": [
+      "the website edge renderer (`website/src/lib/contributor-page/`), for the page, the private preview and `?view=card`",
+      "the render job, which draws the card from it",
+      "the edge's `/v1/p/{pid}/version`, `/cards/p/…` and `/badge/p/…` routes, which answer only through the live document",
+      "the editor's publish polling"
+    ],
+    "fsRefs": [
+      "FS04-057 (the public impact page, generated share-card image)",
+      "D116 items 1, 2, 3, 7, 8 and 10, and its dated notes of 2026-10-06 ~09:40Z and ~11:50Z",
+      "D115 item 3",
+      "D82 item 3 (no claim status)",
+      "PROFILE-PAGE-2026-10-06 §3.6, §4.1-§4.9, §5, §6.3, §7.1, §8.1-§8.7",
+      "PLAN-2026-10-05 corrections 3, 4, 9, 11 and 19"
+    ],
+    "vsRefs": ["VS-05"],
+    "changelog": "CHANGELOG.md#contributor-pagev1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "source", "pid", "versionId", "address", "search", "layout", "theme", "picture", "cover", "identity", "sections", "card", "autoUpdated", "factsAsOf"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "T00:00:00Z$",
+      "description": "The plane's envelope instant (FS-00 §6.2), derived from the rows the build read — the version row among them — and TRUNCATED TO ITS UTC DAY, so it always ends `T00:00:00Z`. The document is readable at storage by anyone holding the pid, and the version row's instant to the second would date the person's publish more finely than the page itself ever does: the print footer already shows the day (\"Page as published {date}\"), and the fine print's \"Repository names as listed in the registry on {date}\" prints the same UTC date, so the day is accepted and nothing finer is published. The alias leaves its `generatedAt` out for the same reason. Rebuilt pages carry a new one when the day moves; unchanged bytes but for it are not rewritten. Left out of the preview hash."
+    },
+    "source": {
+      "enum": ["sample", "fixture", "platform"],
+      "description": "Which plane produced the document, in the envelope's vocabulary (FS-00 §6.2): `platform` is `jobs.index-build` in `PSN_ENV=prod`, `fixture` every other environment, `sample` a sample plane. `sample` and `fixture` declare a non-production plane, which a production deployment refuses to serve (T5), answering the same 404 as for a page that never existed."
+    },
+    "pid": {
+      "$ref": "#/$defs/pid",
+      "description": "The page's permanent id and its anonymous address `/p/{pid}`: 16 lower-case Crockford base32 characters of 80 random bits, not a ULID, so it dates nothing (design §2.3, §7.1). Printed in the footer and the QR. \"Start over with a new permanent link\" mints a new one, and the old answers like a page that never existed."
+    },
+    "versionId": {
+      "type": "string",
+      "pattern": "^pgv_[0-9a-hjkmnp-tv-z]{26}$",
+      "description": "The published version this document was built from: `pgv_` and 26 lower-case Crockford base32 characters of 130 random bits, opaque to a reader. RANDOM, NEVER A ULID: the house mints certificate ids as ULIDs, whose first ten characters are a millisecond timestamp, and a ULID here would date each publish to the millisecond on a public route (`/v1/p/{pid}/version`) — design §2.3's reason for the pid. `/v1/p/{pid}/version` answers it, and the editor polls that route until it matches. Left out of the preview hash: it is assigned at publish."
+    },
+    "address": {
+      "enum": ["anonymous", "login", "mixed"],
+      "description": "The address the person chose (D116 item 2; design §7.1). The edge serves `/u/{login}` only when this is `login` and `login` matches, and `/u/{login}/{pid}` only when this is `mixed` and `login` matches; otherwise 404, never a redirect. `/p/{pid}` always serves the page. The page's canonical link and `og:url` name the chosen address; the edge builds every URL from its own origin, so this document names no host."
+    },
+    "search": {
+      "type": "boolean",
+      "description": "Whether search engines may list the page (D116 item 3). False sends `X-Robots-Tag: noindex, nofollow` and the robots meta everywhere; true leaves both out on the `login` address only, never on `/p/{pid}`. True only with `address: login`."
+    },
+    "login": {
+      "$ref": "#/$defs/githubLogin",
+      "description": "The person's GitHub login, present only when they chose \"Show my login\" (status-only by default: the plan's item a and correction 11), and then shown as \"@login on GitHub\" with our verified mark — the only verified mark on the page (D116 dated note of ~09:40Z). The current login: a rename is followed automatically, the old login address retired (`contributor-page-alias.v1`). The `login` and `mixed` addresses and the adopter section need it."
+    },
+    "layout": { "enum": ["paper", "profile", "minimal"], "description": "As `contributor-page-settings.v1` `layout`." },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preset"],
+      "description": "The preset and, where the person chose one, the accent the api adjusted (design §4.3). The renderer never adjusts: it checks each adjusted colour against its ground at 4.5:1 and falls back to the preset's own accent if one fails. Status chips always use fixed status tokens with an icon and words, so an accent cannot fake \"Verified\" or \"Revoked\".",
+      "properties": {
+        "preset": { "enum": ["purpose", "mocha", "mint", "mustard", "earth", "midnight", "gold", "signal"] },
+        "accent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["raw", "light", "print"],
+          "description": "The accent as stored (`raw`, used only for decoration: the cover tint, the rules, the picture ring) and as adjusted for each ground (links, headings, buttons): `light` for the preset's ground, `dark` for the dark ground of `purpose` (and only there), `print` for white.",
+          "properties": {
+            "raw": { "$ref": "#/$defs/colour" },
+            "light": { "$ref": "#/$defs/colour" },
+            "dark": { "$ref": "#/$defs/colour" },
+            "print": { "$ref": "#/$defs/colour" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "preset": { "const": "purpose" } }, "required": ["preset"] },
+          "then": { "properties": { "accent": { "required": ["dark"] } } },
+          "else": { "properties": { "accent": { "not": { "required": ["dark"] } } } }
+        }
+      ]
+    },
+    "picture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "description": "The header's picture (design §6.3; the D116 dated note of ~11:50Z, item 2). `upload`: the person's own upload, at `p/{pid}/a-{h16}-256.webp` and `-96.png`. `github`: the person's GitHub picture as the render job copied and re-encoded it, at the same names once `h16` is present; until the copy exists the page draws the monogram from `letters`, or else the rosette, and the editor says the picture appears within a few minutes. `monogram`: `letters` on the accent. `rosette`: drawn from SHA-256(\"contributor-page:\" + pid), decoration and never proof. Never a URL: no visitor's browser contacts GitHub or any other host.",
+      "properties": {
+        "kind": { "enum": ["github", "rosette", "monogram", "upload"] },
+        "h16": { "$ref": "#/$defs/h16" },
+        "letters": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16,
+          "description": "The monogram's one or two graphemes, computed by the builder (the first grapheme of the first and last words of the display name, or of the login where it is shown), so the renderer segments nothing."
+        }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "upload" } }, "required": ["kind"] }, "then": { "required": ["h16"], "not": { "required": ["letters"] } } },
+        { "if": { "properties": { "kind": { "const": "monogram" } }, "required": ["kind"] }, "then": { "required": ["letters"], "not": { "required": ["h16"] } } },
+        { "if": { "properties": { "kind": { "const": "rosette" } }, "required": ["kind"] }, "then": { "not": { "anyOf": [{ "required": ["h16"] }, { "required": ["letters"] }] } } }
+      ]
+    },
+    "cover": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "description": "The cover band (design §4.4). An `upload` lives at `p/{pid}/c-{h16}-1600.webp` and `-800.webp`. No text ever sits on it.",
+      "properties": {
+        "kind": { "enum": ["none", "preset", "solid", "gradient", "rosette", "upload"] },
+        "preset": { "enum": ["meadow", "forest", "dawn", "sand", "clay", "dusk", "night", "gold-leaf"] },
+        "colour": { "$ref": "#/$defs/colour" },
+        "from": { "$ref": "#/$defs/colour" },
+        "to": { "$ref": "#/$defs/colour" },
+        "angle": { "enum": [90, 135, 180] },
+        "h16": { "$ref": "#/$defs/h16" }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "preset" } }, "required": ["kind"] }, "then": { "required": ["preset"] }, "else": { "not": { "required": ["preset"] } } },
+        { "if": { "properties": { "kind": { "const": "solid" } }, "required": ["kind"] }, "then": { "required": ["colour"] }, "else": { "not": { "required": ["colour"] } } },
+        { "if": { "properties": { "kind": { "const": "gradient" } }, "required": ["kind"] }, "then": { "required": ["from", "to", "angle"] }, "else": { "not": { "anyOf": [{ "required": ["from"] }, { "required": ["to"] }, { "required": ["angle"] }] } } },
+        { "if": { "properties": { "kind": { "const": "upload" } }, "required": ["kind"] }, "then": { "required": ["h16"] }, "else": { "not": { "required": ["h16"] } } }
+      ]
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The header's words, as the settings hold them and index-build checked them again at this build; a member the person left empty is absent. Escaped at render; the bio keeps its line breaks and is never linked.",
+      "properties": {
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 50, "not": { "pattern": "[\\u0000-\\u001f\\u007f-\\u009f\\u00ad\\u0600-\\u0605\\u061c\\u06dd\\u070f\\u08e2\\u180e\\u200b\\u200e\\u200f\\u2028-\\u202e\\u2060-\\u2064\\u2066-\\u206f\\ufeff\\ufff9-\\ufffb]" } },
+        "pronouns": { "type": "string", "minLength": 1, "maxLength": 24, "not": { "pattern": "[\\u0000-\\u001f\\u007f-\\u009f\\u00ad\\u0600-\\u0605\\u061c\\u06dd\\u070f\\u08e2\\u180e\\u200b\\u200e\\u200f\\u2028-\\u202e\\u2060-\\u2064\\u2066-\\u206f\\ufeff\\ufff9-\\ufffb]" } },
+        "bio": { "type": "string", "minLength": 1, "maxLength": 280, "not": { "anyOf": [{ "pattern": "[\\u0000-\\u0009\\u000b-\\u001f\\u007f-\\u009f\\u00ad\\u0600-\\u0605\\u061c\\u06dd\\u070f\\u08e2\\u180e\\u200b\\u200e\\u200f\\u2028-\\u202e\\u2060-\\u2064\\u2066-\\u206f\\ufeff\\ufff9-\\ufffb]" }, { "pattern": "(?:\\n[^\\n]*){4}" }] } }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/summarySection" },
+          { "$ref": "#/$defs/certificatesSection" },
+          { "$ref": "#/$defs/repositoriesSection" },
+          { "$ref": "#/$defs/adopterSection" },
+          { "$ref": "#/$defs/linksSection" },
+          { "$ref": "#/$defs/sponsorsSection" }
+        ]
+      },
+      "allOf": [
+        { "contains": { "properties": { "id": { "const": "summary" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "id": { "const": "certificates" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "id": { "const": "repositories" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "id": { "const": "adopter" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "id": { "const": "links" } } }, "minContains": 0, "maxContains": 1 },
+        { "contains": { "properties": { "id": { "const": "sponsors" } } }, "minContains": 0, "maxContains": 1 },
+        {
+          "$comment": "Design §2.2: a published page shows at least one vouched section. It is about contribution, not free link or fundraising hosting on our domain.",
+          "contains": { "properties": { "id": { "enum": ["summary", "certificates", "repositories", "adopter"] } }, "required": ["id"] }
+        }
+      ],
+      "description": "The sections the person switched on and that have something to show, in the person's order, each at most once, below the fixed header and above the fixed footer. At least one is a vouched section (summary, certificates, repositories or adopter): the api refuses to publish otherwise, and index-build leaves the page as it was published rather than write one without."
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["picture", "name", "login", "summary", "adopter", "links"],
+      "description": "What the card shows (design §4.9): each element already the AND of the person's switch and of the page showing it. `h16` names the card's files once the render job has drawn them and index-build has copied them; until then the card URLs answer the generic card. The card never carries a figure, a status or a QR.",
+      "properties": {
+        "picture": { "type": "boolean" },
+        "name": { "type": "boolean" },
+        "login": { "type": "boolean" },
+        "summary": { "type": "boolean" },
+        "adopter": { "type": "boolean" },
+        "links": { "type": "boolean" },
+        "h16": { "$ref": "#/$defs/h16", "description": "The card's files `card-{h16}.png`, `card-{h16}@2x.png`, `card-{h16}-dark.png`, `card-{h16}-dark@2x.png` and `og-{h16}.png`; the og image's URL carries `?v=` and its first eight characters. Left out of the preview hash: the card is drawn from the published document." }
+      }
+    },
+    "autoUpdated": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["summary", "repositories", "adopter", "certificate-status", "registry-names", "login", "github-picture"] },
+      "description": "What may change after publishing without a new preview (design §3.6), and the editor says so beside each switch (\"Updated automatically after each month closes\"): `summary`, the counts; `repositories`, the list in `all` mode; `adopter`, the adopter list; `certificate-status`, each certificate's status; `registry-names`, repository and owner names; `login`, the login after a GitHub rename; `github-picture`, the GitHub picture where it is the chosen picture. Nothing else changes until the person publishes again."
+    },
+    "factsAsOf": {
+      "anyOf": [{ "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" }, { "type": "null" }],
+      "description": "The last locked month whose credit records the facts include (design §8.1-§8.2): the summary's \"updated\" line. Null before any locked month has been read, as on production before the first monthly credit run. A month is the network's, the same for every page, so it dates nothing about a person."
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "Design §2.2 and §7.1: the login and mixed addresses carry the login.",
+      "if": { "properties": { "address": { "enum": ["login", "mixed"] } }, "required": ["address"] },
+      "then": { "required": ["login"] }
+    },
+    {
+      "$comment": "Design §2.2 and §7.5: only the login address may be listed.",
+      "if": { "properties": { "search": { "const": true } }, "required": ["search"] },
+      "then": { "properties": { "address": { "const": "login" } } }
+    },
+    {
+      "$comment": "Design §2.2: a full record's verify page shows the login and would unmask a page without it; listing a status-only certificate on a named page would undo the person's own status-only choice.",
+      "if": { "required": ["login"] },
+      "then": { "properties": { "sections": { "items": { "if": { "properties": { "id": { "const": "certificates" } }, "required": ["id"] }, "then": { "properties": { "items": { "items": { "properties": { "disclosure": { "const": "full" } } } } } } } } } },
+      "else": { "properties": { "sections": { "items": { "if": { "properties": { "id": { "const": "certificates" } }, "required": ["id"] }, "then": { "properties": { "items": { "items": { "properties": { "disclosure": { "const": "status-only" } } } } } } } } } }
+    },
+    {
+      "$comment": "Design §2.2 and §8.5: the adopter evidence names the login on GitHub.",
+      "if": { "properties": { "sections": { "contains": { "properties": { "id": { "const": "adopter" } }, "required": ["id"] } } }, "required": ["sections"] },
+      "then": { "required": ["login"] }
+    },
+    {
+      "if": { "not": { "required": ["login"] } },
+      "then": { "properties": { "card": { "properties": { "login": { "const": false } } }, "autoUpdated": { "not": { "contains": { "const": "login" } } } } }
+    },
+    {
+      "if": { "properties": { "sections": { "not": { "contains": { "properties": { "id": { "const": "summary" } }, "required": ["id"] } } } } },
+      "then": { "properties": { "card": { "properties": { "summary": { "const": false } } } } }
+    },
+    {
+      "if": { "properties": { "sections": { "not": { "contains": { "properties": { "id": { "const": "adopter" } }, "required": ["id"] } } } } },
+      "then": { "properties": { "card": { "properties": { "adopter": { "const": false } } } } }
+    },
+    {
+      "if": { "properties": { "sections": { "not": { "contains": { "properties": { "id": { "const": "links" } }, "required": ["id"] } } } } },
+      "then": { "properties": { "card": { "properties": { "links": { "const": false } } } } }
+    },
+    {
+      "if": { "properties": { "autoUpdated": { "contains": { "const": "github-picture" } } }, "required": ["autoUpdated"] },
+      "then": { "properties": { "picture": { "properties": { "kind": { "const": "github" } } } } }
+    }
+  ],
+  "$defs": {
+    "pid": { "type": "string", "pattern": "^[0-9a-hjkmnp-tv-z]{16}$" },
+    "h16": { "type": "string", "pattern": "^[0-9a-f]{16}$", "description": "The first 16 hex characters of the SHA-256 of a drawing's first file (a picture's 256-pixel WebP, a cover's 1600-pixel WebP, a card's 1x light PNG); the drawing's other files share it." },
+    "colour": { "type": "string", "pattern": "^#[0-9a-f]{6}$" },
+    "year": { "type": "integer", "minimum": 2026, "maximum": 9999 },
+    "years": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": { "from": { "$ref": "#/$defs/year" }, "to": { "$ref": "#/$defs/year" } },
+      "description": "Calendar years only, `from` no later than `to` — never months, shares or month counts (design §8.1: monthly detail would recreate a public trace of which months a person worked)."
+    },
+    "githubLogin": { "type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$" },
+    "githubNodeId": {
+      "type": "string",
+      "pattern": "^(R_[A-Za-z0-9_-]{1,126}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$",
+      "description": "A repository's GitHub node id, in the current `R_…` form or the legacy base64 form of \"010:Repository…\". Narrower than the house pattern `repo-record.v1` carries, which admits any object's id: this is the one document that must never carry the person's own id (the plan's correction 11), so a user's node id (`U_…`, or the legacy \"04:User…\") cannot pass where a repository id belongs."
+    },
+    "repoName": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,100}$" },
+    "fullName": { "type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}/[A-Za-z0-9._-]{1,100}$", "description": "`owner/name` as the registry lists it at this build, so renames follow." },
+    "summarySection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "description": "\"Contribution\" — \"Credited on 7 projects in 3 organisations since 2026 · 2 certificates\" (design §4.5, §8.1). Each count is present when the person switched it on and it is not zero; counts are over what the page's choices show, so a count never reveals a hidden repository, and on a page without `login` they leave out the repositories under the person's own account, as `repositoriesSection` does. The facts are locked monthly credit records (`micro_shares > 0` read only inside a function that answers years) and the person's own certificates; a year stays only while the monthly records hold it, or for good when a certificate covers it. Never titled \"Impact\" and never carrying an amount.",
+      "properties": {
+        "id": { "const": "summary" },
+        "projects": { "type": "integer", "minimum": 1 },
+        "organisations": { "type": "integer", "minimum": 1 },
+        "since": { "$ref": "#/$defs/year" },
+        "certificates": { "type": "integer", "minimum": 1 }
+      },
+      "anyOf": [{ "required": ["projects"] }, { "required": ["certificates"] }],
+      "dependentRequired": { "organisations": ["projects"] }
+    },
+    "certificatesSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "items"],
+      "description": "The person's own certificates the page lists, each with its type words, years and live status chip — \"Verified: attests participation in 2026\", \"Revoked\", \"Updated, see new\" — and \"Check this certificate\", linking to `/verify/{cid}`, where the signature is checked. On a page that shows the login every item is `full` and lists its projects; on a page that does not, every item is `status-only` and shows its type, years and status only (the plan's correction 9: certificates are status-only by default).",
+      "properties": {
+        "id": { "const": "certificates" },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["cid", "typ", "variant", "years", "status", "disclosure"],
+            "properties": {
+              "cid": { "type": "string", "pattern": "^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
+              "typ": { "const": "contributor", "description": "A person's own certificates are contributor certificates (FS08-010); a later type is an additive widening." },
+              "variant": { "const": "participation" },
+              "years": { "$ref": "#/$defs/years", "description": "The years of the certificate's validity period, as its record states them." },
+              "status": { "enum": ["valid", "expired", "revoked", "superseded"], "description": "The record's status at this build (`certificate-status` in `autoUpdated`). A participation certificate `expired` only by the clock still reads \"Verified: attests participation in {year}\"; print shows no chip." },
+              "disclosure": { "enum": ["full", "status-only"], "description": "The record's own disclosure (`certificate-record.v1` `disclosure`), which this page must match." },
+              "repos": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 50,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["nodeId", "fullName"],
+                  "properties": { "nodeId": { "$ref": "#/$defs/githubNodeId" }, "fullName": { "$ref": "#/$defs/fullName" } }
+                },
+                "description": "A `full` item's projects, by their registry names at this build. Never on a `status-only` item, whose record drops its scope."
+              }
+            },
+            "allOf": [
+              { "if": { "properties": { "disclosure": { "const": "status-only" } }, "required": ["disclosure"] }, "then": { "not": { "required": ["repos"] } } }
+            ]
+          }
+        }
+      }
+    },
+    "repositoriesSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "groups"],
+      "description": "\"Projects\" — the credited repositories the person chose, grouped by owner, groups and rows in name order and never by contribution size (design §4.5, §8.1). Each row links to `/registry/repo/{nodeId}`; with the person's `years` switch on, every row carries its years and reads \"Credited 2026–2027\", and with it off none does. ON A PAGE WITHOUT `login`, NO GROUP IS THE PERSON'S OWN ACCOUNT: a repository whose owner is the person's GitHub login (the current one, compared without regard to case) would print that login in plain text as its group's name, the very disclosure the person declined by leaving \"Show my login\" off (the plan's item a and correction 11; the reason design §2.2 refuses GitHub Sponsors under the person's own login). The one builder therefore leaves such repositories out of this section and out of the summary's counts, at the preview and at every build, and the api refuses one the person selects by hand (`page.repository_shows_login`, `contributor-page-settings.v1` check (j)). This document cannot show the rule, because the login it compares with is exactly what the document leaves out; `examples/contributor-page-build.v1.golden.json` holds the builder's vectors for it, and `check:contributor-page` runs them.",
+      "properties": {
+        "id": { "const": "repositories" },
+        "groups": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["owner", "repos"],
+            "properties": {
+              "owner": { "$ref": "#/$defs/githubLogin", "description": "The owner's login, already public beside every registry row." },
+              "repos": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["nodeId", "name", "listing"],
+                  "properties": {
+                    "nodeId": { "$ref": "#/$defs/githubNodeId" },
+                    "name": { "$ref": "#/$defs/repoName" },
+                    "years": { "$ref": "#/$defs/years" },
+                    "listing": { "enum": ["registered", "no-longer-registered"], "description": "Never `verified`: that internal state means claimed, and D82 item 3 keeps claim status from anyone but the admins. \"(no longer registered)\" is printed beside a row whose repository left the registry." }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "adopterSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "items"],
+      "description": "\"Licence adopter\" — \"Merged the Purpose Source License into N repositories\" (D116 item 7; design §8.5): registered repositories where this person merged the adoption pull request (`merged-pr`) or committed the licence text themselves (`direct-commit`), read from GitHub with the person's own authorisation. GitHub already publishes both facts; the page puts them side by side by the person's choice. It reads no claim data. Each item links to its registry record and to the evidence, rebuilt by the renderer as `https://github.com/{fullName}/pull/{number}` or `…/commit/{oid}`.",
+      "properties": {
+        "id": { "const": "adopter" },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["nodeId", "fullName", "evidence"],
+            "properties": {
+              "nodeId": { "$ref": "#/$defs/githubNodeId" },
+              "fullName": { "$ref": "#/$defs/fullName" },
+              "evidence": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["kind"],
+                "properties": {
+                  "kind": { "enum": ["merged-pr", "direct-commit"] },
+                  "number": { "type": "integer", "minimum": 1 },
+                  "oid": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+                },
+                "allOf": [
+                  { "if": { "properties": { "kind": { "const": "merged-pr" } }, "required": ["kind"] }, "then": { "required": ["number"], "not": { "required": ["oid"] } }, "else": { "required": ["oid"], "not": { "required": ["number"] } } }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "linksSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "description": "\"Elsewhere\" (design §5.2, §5.4, §5.6): the social links, rebuilt from `link-platforms.v1` at this build, and the one personal website. Each is drawn as the platform's name and the handle, with `rel=\"nofollow ugc noopener noreferrer\"` (plus `me` for Mastodon and the website) and no `target`; the fine print says the links are added by the page owner and only the GitHub account is verified. THE RENDERER DRAWS A LINK ONLY WHEN IT REBUILDS THE SAME ADDRESS: from the item's `{platform, form, handle, instance}` it checks the handle against the form's grammar (an absent `form` being the platform's first), judges it (the table's step 6), finds a Mastodon `instance` on the table's list, and rebuilds the address (step 7: the template filled in, the output rule asserted), and draws the item only when the result equals `url`, character for character; otherwise it leaves the item out. So the visible text, which names the handle, and the `href` can never name two different accounts. The handle's character class is checked here too, per platform as `contributor-page-settings.v1` `$defs.link` checks it, so no bidi control or other stray character reaches the link text even before the renderer runs.",
+      "properties": {
+        "id": { "const": "links" },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["platform", "handle", "url"],
+            "properties": {
+              "platform": { "$ref": "#/$defs/socialPlatform" },
+              "form": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$" },
+              "handle": { "type": "string", "minLength": 1, "maxLength": 318, "description": "The handle as the table's steps left it, its character class checked per platform below (the same coarse classes as `contributor-page-settings.v1` `$defs.link`); the table's grammar decides the rest, and the renderer rebuilds `url` from it." },
+              "instance": { "type": "string", "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$" },
+              "url": { "$ref": "#/$defs/linkUrl" }
+            },
+            "allOf": [
+              { "if": { "properties": { "platform": { "const": "mastodon" } }, "required": ["platform"] }, "then": { "required": ["instance"] }, "else": { "not": { "required": ["instance"] } } },
+              { "if": { "properties": { "platform": { "const": "matrix" } }, "required": ["platform"] }, "then": { "properties": { "handle": { "pattern": "^[a-z0-9._=/+-]{1,64}:[a-z0-9.-]{1,253}$", "not": { "pattern": "^/|//|/:|^\\.{1,2}[/:]|/\\.{1,2}[/:]" } } } } },
+              { "if": { "properties": { "platform": { "const": "bluesky" } }, "required": ["platform"] }, "then": { "properties": { "handle": { "pattern": "^(?:did:plc:[a-z2-7]{24}|[a-z0-9.-]{3,253})$" } } } },
+              { "if": { "properties": { "platform": { "enum": ["matrix", "bluesky"] } }, "required": ["platform"] }, "then": true, "else": { "properties": { "handle": { "pattern": "^[A-Za-z0-9._-]{1,100}$" } } } }
+            ]
+          }
+        },
+        "website": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["url"],
+          "properties": {
+            "url": {
+              "type": "string",
+              "maxLength": 256,
+              "pattern": "^https://(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})/[A-Za-z0-9._~!$&'()*+,;=:@%/-]{0,200}$",
+              "not": { "pattern": "//.*//|/\\.{1,2}(?:/|$)|%2[eEfF]|%5[cC]|%00" }
+            }
+          },
+          "description": "The one personal website, with its full host shown (the renderer decides the Unicode or `xn--` form, `link-platforms.v1` `website.displayScripts`)."
+        }
+      },
+      "anyOf": [{ "required": ["items"] }, { "required": ["website"] }]
+    },
+    "sponsorsSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "items"],
+      "description": "\"Support {name} directly\" (design §5.3): our own buttons, \"Support on {platform}\", no amount, goal or count, and the fixed line, marked for counsel: \"These links go to other services. Purpose Source takes no part in these payments. They are not Purpose Fees or donations to the listed charities.\" Each button is drawn only when the renderer, rebuilding the address from `{platform, form, handle}` as for a link (`linksSection`), gets exactly `url`.",
+      "properties": {
+        "id": { "const": "sponsors" },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["platform", "handle", "url"],
+            "properties": {
+              "platform": { "$ref": "#/$defs/sponsorPlatform" },
+              "form": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$" },
+              "handle": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,100}$" },
+              "url": { "$ref": "#/$defs/linkUrl" }
+            }
+          }
+        }
+      }
+    },
+    "linkUrl": {
+      "type": "string",
+      "maxLength": 300,
+      "pattern": "^https://[a-z0-9.-]+/[A-Za-z0-9._@:/?=#+-]*$",
+      "description": "An address rebuilt from `link-platforms.v1`: its form's template with the handle substituted, on the host the template fixes (strict output). No input reaches it except through the handle's grammar."
+    },
+    "socialPlatform": {
+      "enum": ["gitlab", "codeberg", "linkedin", "x", "bluesky", "mastodon", "youtube", "facebook", "instagram", "threads", "tiktok", "orcid", "stackoverflow", "devto", "medium", "huggingface", "discord", "matrix", "twitch", "reddit", "telegram"],
+      "description": "The `social` platforms of `link-platforms.v1`; `check:links` asserts this copy equals the table."
+    },
+    "sponsorPlatform": {
+      "enum": ["github-sponsors", "opencollective", "patreon", "ko-fi", "buymeacoffee", "liberapay", "paypal", "polar"],
+      "description": "The eight `sponsorship` platforms of `link-platforms.v1`; `check:links` asserts this copy equals the table."
+    }
+  }
+}

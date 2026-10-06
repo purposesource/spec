@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-03-01T00:00:00Z",
+  "source": "fixture",
+  "pid": "7k2m9xq4tpz3r8vd",
+  "versionId": "pgv_vg0hnfg53ns86tr52cs6pxetbg",
+  "address": "login",
+  "search": true,
+  "login": "example-contributor",
+  "layout": "paper",
+  "theme": {
+    "preset": "purpose",
+    "accent": { "raw": "#3a7bd5", "light": "#3670bf", "dark": "#4280d5", "print": "#3875c9" }
+  },
+  "picture": { "kind": "upload", "h16": "6616e65bafbcf60a" },
+  "cover": { "kind": "gradient", "from": "#1d5c3c", "to": "#e0b04a", "angle": 135 },
+  "identity": {
+    "displayName": "Alex Example",
+    "pronouns": "they/them",
+    "bio": "Maintainer of small accounting libraries.\nI contribute through Purpose Source."
+  },
+  "sections": [
+    { "id": "summary", "projects": 3, "organisations": 2, "since": 2026, "certificates": 1 },
+    {
+      "id": "repositories",
+      "groups": [
+        {
+          "owner": "example-org",
+          "repos": [
+            { "nodeId": "R_kgDOSMPL0001", "name": "ledger-tools", "years": { "from": 2026, "to": 2027 }, "listing": "registered" },
+            { "nodeId": "R_kgDOSMPL0002", "name": "tax-tables", "years": { "from": 2027, "to": 2027 }, "listing": "registered" }
+          ]
+        },
+        {
+          "owner": "other-org",
+          "repos": [
+            { "nodeId": "R_kgDOSMPL0003", "name": "invoice-kit", "years": { "from": 2026, "to": 2026 }, "listing": "no-longer-registered" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adopter",
+      "items": [
+        { "nodeId": "R_kgDOSMPL0001", "fullName": "example-org/ledger-tools", "evidence": { "kind": "merged-pr", "number": 42 } },
+        { "nodeId": "R_kgDOSMPL0004", "fullName": "example-contributor/csv-split", "evidence": { "kind": "direct-commit", "oid": "a0e2126a4d92cd0cf93496ede3f10827e8fa1865" } }
+      ]
+    },
+    {
+      "id": "certificates",
+      "items": [
+        {
+          "cid": "cert_01jk2m4p6r8t0v2x4z6b8d0f2h",
+          "typ": "contributor",
+          "variant": "participation",
+          "years": { "from": 2026, "to": 2026 },
+          "status": "expired",
+          "disclosure": "full",
+          "repos": [
+            { "nodeId": "R_kgDOSMPL0001", "fullName": "example-org/ledger-tools" },
+            { "nodeId": "R_kgDOSMPL0003", "fullName": "other-org/invoice-kit" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "items": [
+        { "platform": "linkedin", "handle": "alex-example", "url": "https://www.linkedin.com/in/alex-example" },
+        { "platform": "mastodon", "handle": "alex", "instance": "fosstodon.org", "url": "https://fosstodon.org/@alex" },
+        { "platform": "matrix", "handle": "alex:matrix.org", "url": "https://matrix.to/#/@alex:matrix.org" },
+        { "platform": "discord", "form": "invite", "handle": "ledgertools", "url": "https://discord.gg/ledgertools" },
+        { "platform": "orcid", "handle": "0000-0002-1825-0097", "url": "https://orcid.org/0000-0002-1825-0097" }
+      ],
+      "website": { "url": "https://alex.dev/" }
+    },
+    {
+      "id": "sponsors",
+      "items": [
+        { "platform": "github-sponsors", "handle": "example-contributor", "url": "https://github.com/sponsors/example-contributor" },
+        { "platform": "liberapay", "handle": "alex.example", "url": "https://liberapay.com/alex.example" }
+      ]
+    }
+  ],
+  "card": { "picture": true, "name": true, "login": true, "summary": true, "adopter": true, "links": true, "h16": "78169a7818d4e20f" },
+  "autoUpdated": ["summary", "repositories", "adopter", "certificate-status", "registry-names", "login"],
+  "factsAsOf": "2027-02"
+}

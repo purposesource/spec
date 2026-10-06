@@ -1,0 +1,357 @@
+{
+  "$comment": [
+    "Vectors of the one builder (`ContributorPageBuilder`, design PROFILE-PAGE-2026-10-06 §3.6, §8.1) for a rule the public document cannot show: on a page without the login, no repository under the person's own GitHub account is listed or counted, because its group would print the login as the owner's name (schemas/contributor-page.v1.json `repositoriesSection`; contributor-page-settings.v1 check (j)). The document leaves out the very login the rule compares with, so neither schema can enforce it; this file is where the builder's tests (slice P14d) and check:contributor-page meet it.",
+    "`input` is the slice of the builder's inputs the rule reads: the person's current GitHub login, `showLogin`, the settings' `repositories` choice, and the credited repositories as the facts and the registry give them at this build (`owner` and `name` are the registry's). `expect` is either the repositories section (null when it has nothing to show and is not drawn), the two counts the summary takes from the same list (each printed only when switched on and not zero), and `leftOut`, every repository the rule removed with the code the editor shows beside it; or `{refused}`, the api's code at save.",
+    "Groups are in owner order and rows in name order (design §8.1). Every owner and name that is listed here is lower-case ASCII, and no two that are sorted together share a first letter, so any name order gives the same answer; the collation itself is the builder's."
+  ],
+  "specVersion": "1.0.0",
+  "vectors": [
+    {
+      "id": "BV-1",
+      "note": "The login is hidden and the choice is `all`: the person's own `sam-codes/dotfiles` is left out of the section and of both counts, because its group would print the login; `other-org/invoice-kit` is the person's own hide.",
+      "input": {
+        "login": "sam-codes",
+        "showLogin": false,
+        "repositories": {
+          "mode": "all",
+          "hidden": [
+            "R_kgDOSMPL0023"
+          ],
+          "years": true
+        },
+        "credited": [
+          {
+            "nodeId": "R_kgDOSMPL0021",
+            "owner": "sam-codes",
+            "name": "dotfiles",
+            "from": 2026,
+            "to": 2026,
+            "listing": "registered"
+          },
+          {
+            "nodeId": "R_kgDOSMPL0022",
+            "owner": "example-org",
+            "name": "ledger-tools",
+            "from": 2026,
+            "to": 2027,
+            "listing": "registered"
+          },
+          {
+            "nodeId": "R_kgDOSMPL0023",
+            "owner": "other-org",
+            "name": "invoice-kit",
+            "from": 2026,
+            "to": 2026,
+            "listing": "registered"
+          },
+          {
+            "nodeId": "R_kgDOSMPL0024",
+            "owner": "example-org",
+            "name": "budget-cli",
+            "from": 2027,
+            "to": 2027,
+            "listing": "no-longer-registered"
+          }
+        ]
+      },
+      "expect": {
+        "repositories": {
+          "id": "repositories",
+          "groups": [
+            {
+              "owner": "example-org",
+              "repos": [
+                {
+                  "nodeId": "R_kgDOSMPL0024",
+                  "name": "budget-cli",
+                  "years": {
+                    "from": 2027,
+                    "to": 2027
+                  },
+                  "listing": "no-longer-registered"
+                },
+                {
+                  "nodeId": "R_kgDOSMPL0022",
+                  "name": "ledger-tools",
+                  "years": {
+                    "from": 2026,
+                    "to": 2027
+                  },
+                  "listing": "registered"
+                }
+              ]
+            }
+          ]
+        },
+        "counts": {
+          "projects": 2,
+          "organisations": 1
+        },
+        "leftOut": [
+          {
+            "nodeId": "R_kgDOSMPL0021",
+            "code": "page.repository_shows_login"
+          }
+        ]
+      }
+    },
+    {
+      "id": "BV-2",
+      "note": "The same person with \"Show my login\" on: the login is on the page anyway, so their own repository is listed under its owner like any other.",
+      "input": {
+        "login": "sam-codes",
+        "showLogin": true,
+        "repositories": {
+          "mode": "all",
+          "hidden": [
+            "R_kgDOSMPL0023"
+          ],
+          "years": true
+        },
+        "credited": [
+          {
+            "nodeId": "R_kgDOSMPL0021",
+            "owner": "sam-codes",
+            "name": "dotfiles",
+            "from": 2026,
+            "to": 2026,
+            "listing": "registered"
+          },
+          {
+            "nodeId": "R_kgDOSMPL0022",
+            "owner": "example-org",
+            "name": "ledger-tools",
+            "from": 2026,
+            "to": 2027,
+            "listing": "registered"
+          },
+          {
+            "nodeId": "R_kgDOSMPL0023",
+            "owner": "other-org",
+            "name": "invoice-kit",
+            "from": 2026,
+            "to": 2026,
+            "listing": "registered"
+          },
+          {
+            "nodeId": "R_kgDOSMPL0024",
+            "owner": "example-org",
+            "name": "budget-cli",
+            "from": 2027,
+            "to": 2027,
+            "listing": "no-longer-registered"
+          }
+        ]
+      },
+      "expect": {
+        "repositories": {
+          "id": "repositories",
+          "groups": [
+            {
+              "owner": "example-org",
+              "repos": [
+                {
+                  "nodeId": "R_kgDOSMPL0024",
+                  "name": "budget-cli",
+                  "years": {
+                    "from": 2027,
+                    "to": 2027
+                  },
+                  "listing": "no-longer-registered"
+                },
+                {
+                  "nodeId": "R_kgDOSMPL0022",
+                  "name": "ledger-tools",
+                  "years": {
+                    "from": 2026,
+                    "to": 2027
+                  },
+                  "listing": "registered"
+                }
+              ]
+            },
+            {
+              "owner": "sam-codes",
+              "repos": [
+                {
+                  "nodeId": "R_kgDOSMPL0021",
+                  "name": "dotfiles",
+                  "years": {
+                    "from": 2026,
+                    "to": 2026
+                  },
+                  "listing": "registered"
+                }
+              ]
+            }
+          ]
+        },
+        "counts": {
+          "projects": 3,
+          "organisations": 2
+        },
+        "leftOut": []
+      }
+    },
+    {
+      "id": "BV-3",
+      "note": "The login is hidden and the person selects their own repository by hand: the api refuses the save rather than leave out what was chosen in so many words.",
+      "input": {
+        "login": "sam-codes",
+        "showLogin": false,
+        "repositories": {
+          "mode": "selected",
+          "selected": [
+            "R_kgDOSMPL0021",
+            "R_kgDOSMPL0022"
+          ],
+          "hidden": [],
+          "years": true
+        },
+        "credited": [
+          {
+            "nodeId": "R_kgDOSMPL0021",
+            "owner": "sam-codes",
+            "name": "dotfiles",
+            "from": 2026,
+            "to": 2026,
+            "listing": "registered"
+          },
+          {
+            "nodeId": "R_kgDOSMPL0022",
+            "owner": "example-org",
+            "name": "ledger-tools",
+            "from": 2026,
+            "to": 2027,
+            "listing": "registered"
+          },
+          {
+            "nodeId": "R_kgDOSMPL0023",
+            "owner": "other-org",
+            "name": "invoice-kit",
+            "from": 2026,
+            "to": 2026,
+            "listing": "registered"
+          },
+          {
+            "nodeId": "R_kgDOSMPL0024",
+            "owner": "example-org",
+            "name": "budget-cli",
+            "from": 2027,
+            "to": 2027,
+            "listing": "no-longer-registered"
+          }
+        ]
+      },
+      "expect": {
+        "refused": "page.repository_shows_login"
+      }
+    },
+    {
+      "id": "BV-4",
+      "note": "GitHub logins are case-insensitive, so an owner the registry spells `Sam-Codes` is the person's own `sam-codes` and is left out; with `years` off no row carries its years.",
+      "input": {
+        "login": "sam-codes",
+        "showLogin": false,
+        "repositories": {
+          "mode": "all",
+          "hidden": [],
+          "years": false
+        },
+        "credited": [
+          {
+            "nodeId": "R_kgDOSMPL0031",
+            "owner": "Sam-Codes",
+            "name": "notes",
+            "from": 2026,
+            "to": 2026,
+            "listing": "registered"
+          },
+          {
+            "nodeId": "R_kgDOSMPL0032",
+            "owner": "example-org",
+            "name": "ledger-tools",
+            "from": 2026,
+            "to": 2027,
+            "listing": "registered"
+          }
+        ]
+      },
+      "expect": {
+        "repositories": {
+          "id": "repositories",
+          "groups": [
+            {
+              "owner": "example-org",
+              "repos": [
+                {
+                  "nodeId": "R_kgDOSMPL0032",
+                  "name": "ledger-tools",
+                  "listing": "registered"
+                }
+              ]
+            }
+          ]
+        },
+        "counts": {
+          "projects": 1,
+          "organisations": 1
+        },
+        "leftOut": [
+          {
+            "nodeId": "R_kgDOSMPL0031",
+            "code": "page.repository_shows_login"
+          }
+        ]
+      }
+    },
+    {
+      "id": "BV-5",
+      "note": "Every credited repository is under the person's own account and the login is hidden: the section has nothing to show and is not drawn, and the summary counts no project. Without a certificate such a person can publish only with the login shown, and the editor says why.",
+      "input": {
+        "login": "sam-codes",
+        "showLogin": false,
+        "repositories": {
+          "mode": "all",
+          "hidden": [],
+          "years": true
+        },
+        "credited": [
+          {
+            "nodeId": "R_kgDOSMPL0041",
+            "owner": "sam-codes",
+            "name": "dotfiles",
+            "from": 2026,
+            "to": 2026,
+            "listing": "registered"
+          },
+          {
+            "nodeId": "R_kgDOSMPL0042",
+            "owner": "sam-codes",
+            "name": "zettel",
+            "from": 2026,
+            "to": 2027,
+            "listing": "registered"
+          }
+        ]
+      },
+      "expect": {
+        "repositories": null,
+        "counts": {
+          "projects": 0,
+          "organisations": 0
+        },
+        "leftOut": [
+          {
+            "nodeId": "R_kgDOSMPL0041",
+            "code": "page.repository_shows_login"
+          },
+          {
+            "nodeId": "R_kgDOSMPL0042",
+            "code": "page.repository_shows_login"
+          }
+        ]
+      }
+    }
+  ]
+}

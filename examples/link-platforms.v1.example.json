@@ -1,0 +1,970 @@
+{
+  "schemaVersion": 1,
+  "_comment": [
+    "The pinned link table of the contributor page (ops decision D116 item 1 and its dated notes of 2026-10-06; design PROFILE-PAGE-2026-10-06 §5). Published once, here; the platform and the website edge vendor it byte for byte and pin its SHA-256.",
+    "A person picks a platform and pastes a full https address, a domain and path, or just the username. Only {platform, form, handle, instance} is kept, and every address shown is rebuilt from `output` below: loose input, strict output. Nothing here is ever fetched.",
+    "The steps that read this table are described in schemas/link-platforms.v1.json; examples/link-rules.v1.golden.json holds the shared cases every implementation runs. A changed answer is a data change with a golden case, reviewed by a steward."
+  ],
+  "pipeline": {
+    "inputMaxLength": 300,
+    "outputMaxLength": 300,
+    "refusedSchemes": [
+      "about",
+      "blob",
+      "chrome",
+      "data",
+      "file",
+      "filesystem",
+      "ftp",
+      "intent",
+      "jar",
+      "javascript",
+      "mailto",
+      "sms",
+      "tel",
+      "vbscript",
+      "view-source",
+      "ws",
+      "wss"
+    ],
+    "urlCharacters": "^[A-Za-z0-9._~:/?#\\[\\]@!$&'()*+,;=%-]+$",
+    "outputPattern": "^https://[a-z0-9.-]+/[A-Za-z0-9._@:/?=#+-]*$"
+  },
+  "refusedTlds": ["alt", "arpa", "example", "internal", "invalid", "lan", "local", "localhost", "onion", "test"],
+  "platforms": [
+    {
+      "id": "github",
+      "kind": "verified",
+      "label": "GitHub",
+      "verified": true,
+      "typed": false,
+      "provisional": false,
+      "forms": [
+        {
+          "id": "profile",
+          "handle": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$",
+          "bare": false,
+          "output": "https://github.com/{h}"
+        }
+      ]
+    },
+    {
+      "id": "gitlab",
+      "kind": "social",
+      "label": "GitLab",
+      "provisional": true,
+      "hosts": ["gitlab.com", "www.gitlab.com"],
+      "reserved": ["admin", "api", "dashboard", "explore", "groups", "help", "projects", "search", "snippets", "users"],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^(?!.*\\.(?:git|atom)$)[A-Za-z0-9_](?:[A-Za-z0-9_]|[.-](?=[A-Za-z0-9_])){0,63}$",
+          "bare": true,
+          "output": "https://gitlab.com/{h}"
+        }
+      ]
+    },
+    {
+      "id": "codeberg",
+      "kind": "social",
+      "label": "Codeberg",
+      "provisional": true,
+      "hosts": ["codeberg.org"],
+      "reserved": [
+        "admin",
+        "api",
+        "assets",
+        "explore",
+        "issues",
+        "milestones",
+        "notifications",
+        "org",
+        "pulls",
+        "repo",
+        "user"
+      ],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9](?:[A-Za-z0-9]|[\\-_.](?=[A-Za-z0-9])){0,39}$",
+          "bare": true,
+          "output": "https://codeberg.org/{h}"
+        }
+      ]
+    },
+    {
+      "id": "linkedin",
+      "kind": "social",
+      "label": "LinkedIn",
+      "provisional": false,
+      "hosts": ["linkedin.com", "www.linkedin.com"],
+      "hostPatterns": ["^[a-z]{2}\\.linkedin\\.com$"],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/in/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){2,99}$",
+          "bare": true,
+          "output": "https://www.linkedin.com/in/{h}"
+        }
+      ]
+    },
+    {
+      "id": "x",
+      "kind": "social",
+      "label": "X",
+      "provisional": false,
+      "hosts": ["x.com", "www.x.com", "mobile.x.com", "twitter.com", "www.twitter.com", "mobile.twitter.com"],
+      "reserved": [
+        "about",
+        "account",
+        "communities",
+        "compose",
+        "download",
+        "explore",
+        "hashtag",
+        "home",
+        "i",
+        "intent",
+        "jobs",
+        "lists",
+        "login",
+        "logout",
+        "messages",
+        "notifications",
+        "privacy",
+        "search",
+        "settings",
+        "share",
+        "signup",
+        "tos"
+      ],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9_]{1,15}$",
+          "bare": true,
+          "output": "https://x.com/{h}"
+        }
+      ]
+    },
+    {
+      "id": "bluesky",
+      "kind": "social",
+      "label": "Bluesky",
+      "provisional": false,
+      "hosts": ["bsky.app"],
+      "checks": ["refused-tld"],
+      "forms": [
+        {
+          "id": "did",
+          "match": [
+            { "path": "^/profile/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^did:plc:[a-z2-7]{24}$",
+          "fold": "lower",
+          "bare": true,
+          "output": "https://bsky.app/profile/{h}"
+        },
+        {
+          "id": "handle",
+          "match": [
+            { "path": "^/profile/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^(?=.{3,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+          "fold": "lower",
+          "bare": true,
+          "bareSuffix": ".bsky.social",
+          "output": "https://bsky.app/profile/{h}"
+        }
+      ]
+    },
+    {
+      "id": "mastodon",
+      "kind": "social",
+      "label": "Mastodon",
+      "provisional": false,
+      "hostsFrom": "mastodonInstances",
+      "relMe": true,
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/@(?<h>[^/]+)/?$" },
+            { "path": "^/users/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9_]{1,30}$",
+          "bare": true,
+          "bareInstance": true,
+          "output": "https://{instance}/@{h}"
+        }
+      ]
+    },
+    {
+      "id": "youtube",
+      "kind": "social",
+      "label": "YouTube",
+      "provisional": false,
+      "hosts": ["youtube.com", "www.youtube.com", "m.youtube.com"],
+      "forms": [
+        {
+          "id": "handle",
+          "match": [
+            { "path": "^/@(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9_.-]{3,30}$",
+          "bare": true,
+          "output": "https://www.youtube.com/@{h}"
+        },
+        {
+          "id": "channel",
+          "match": [
+            { "path": "^/channel/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^UC[A-Za-z0-9_-]{22}$",
+          "bare": false,
+          "output": "https://www.youtube.com/channel/{h}"
+        }
+      ]
+    },
+    {
+      "id": "facebook",
+      "kind": "social",
+      "label": "Facebook",
+      "provisional": false,
+      "hosts": ["facebook.com", "www.facebook.com", "m.facebook.com", "web.facebook.com"],
+      "reserved": [
+        "business",
+        "dialog",
+        "events",
+        "friends",
+        "gaming",
+        "groups",
+        "hashtag",
+        "login",
+        "marketplace",
+        "messages",
+        "notifications",
+        "pages",
+        "people",
+        "photos",
+        "plugins",
+        "privacy",
+        "reels",
+        "search",
+        "settings",
+        "share",
+        "sharer",
+        "stories",
+        "watch"
+      ],
+      "forms": [
+        {
+          "id": "name",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^(?=[A-Za-z0-9.]{5,50}$)(?=[^A-Za-z]*[A-Za-z])(?!.*\\.(?:php|html?)$)[A-Za-z0-9](?:[A-Za-z0-9]|\\.(?=[A-Za-z0-9]))*$",
+          "bare": true,
+          "output": "https://www.facebook.com/{h}"
+        },
+        {
+          "id": "id",
+          "match": [
+            { "path": "^/profile\\.php$", "query": "id" }
+          ],
+          "handle": "^[0-9]{5,20}$",
+          "bare": true,
+          "output": "https://www.facebook.com/profile.php?id={h}"
+        }
+      ]
+    },
+    {
+      "id": "instagram",
+      "kind": "social",
+      "label": "Instagram",
+      "provisional": false,
+      "hosts": ["instagram.com", "www.instagram.com"],
+      "reserved": [
+        "about",
+        "accounts",
+        "challenge",
+        "developer",
+        "direct",
+        "emails",
+        "explore",
+        "legal",
+        "p",
+        "reel",
+        "reels",
+        "stories",
+        "tv",
+        "web"
+      ],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9_](?:[A-Za-z0-9_]|\\.(?=[A-Za-z0-9_])){0,29}$",
+          "bare": true,
+          "output": "https://www.instagram.com/{h}/"
+        }
+      ]
+    },
+    {
+      "id": "threads",
+      "kind": "social",
+      "label": "Threads",
+      "provisional": false,
+      "hosts": ["threads.com", "www.threads.com", "threads.net", "www.threads.net"],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/@(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9_](?:[A-Za-z0-9_]|\\.(?=[A-Za-z0-9_])){0,29}$",
+          "bare": true,
+          "output": "https://www.threads.com/@{h}"
+        }
+      ]
+    },
+    {
+      "id": "tiktok",
+      "kind": "social",
+      "label": "TikTok",
+      "provisional": false,
+      "hosts": ["tiktok.com", "www.tiktok.com", "m.tiktok.com"],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/@(?<h>[^/]+)(?:/video/[0-9]+)?/?$" }
+          ],
+          "handle": "^[A-Za-z0-9_](?:[A-Za-z0-9_]|\\.(?=[A-Za-z0-9_])){1,23}$",
+          "bare": true,
+          "output": "https://www.tiktok.com/@{h}"
+        }
+      ]
+    },
+    {
+      "id": "orcid",
+      "kind": "social",
+      "label": "ORCID",
+      "provisional": false,
+      "hosts": ["orcid.org", "www.orcid.org"],
+      "checks": ["orcid-checksum"],
+      "forms": [
+        {
+          "id": "id",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$",
+          "fold": "upper",
+          "bare": true,
+          "output": "https://orcid.org/{h}"
+        }
+      ]
+    },
+    {
+      "id": "stackoverflow",
+      "kind": "social",
+      "label": "Stack Overflow",
+      "provisional": false,
+      "hosts": ["stackoverflow.com", "www.stackoverflow.com"],
+      "forms": [
+        {
+          "id": "user",
+          "match": [
+            { "path": "^/users/(?<h>[^/]+)(?:/[^/]+)?/?$" }
+          ],
+          "handle": "^[1-9][0-9]{0,9}$",
+          "bare": true,
+          "output": "https://stackoverflow.com/users/{h}"
+        }
+      ]
+    },
+    {
+      "id": "devto",
+      "kind": "social",
+      "label": "DEV",
+      "provisional": true,
+      "hosts": ["dev.to"],
+      "reserved": [
+        "about",
+        "api",
+        "contact",
+        "dashboard",
+        "enter",
+        "faq",
+        "latest",
+        "listings",
+        "new",
+        "notifications",
+        "pod",
+        "podcasts",
+        "privacy",
+        "readinglist",
+        "search",
+        "settings",
+        "shop",
+        "sponsors",
+        "t",
+        "tags",
+        "terms",
+        "top",
+        "videos"
+      ],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9_]{1,30}$",
+          "bare": true,
+          "output": "https://dev.to/{h}"
+        }
+      ]
+    },
+    {
+      "id": "medium",
+      "kind": "social",
+      "label": "Medium",
+      "provisional": true,
+      "hosts": ["medium.com", "www.medium.com"],
+      "reserved": ["m", "www"],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/@(?<h>[^/]+)/?$" },
+            { "hostPattern": "^(?<h>[a-z0-9_]{1,30})\\.medium\\.com$", "path": "^/$" }
+          ],
+          "handle": "^[A-Za-z0-9_](?:[A-Za-z0-9_]|\\.(?=[A-Za-z0-9_])){0,29}$",
+          "bare": true,
+          "output": "https://medium.com/@{h}"
+        }
+      ]
+    },
+    {
+      "id": "huggingface",
+      "kind": "social",
+      "label": "Hugging Face",
+      "provisional": true,
+      "hosts": ["huggingface.co", "www.huggingface.co"],
+      "reserved": [
+        "api",
+        "blog",
+        "chat",
+        "collections",
+        "datasets",
+        "docs",
+        "enterprise",
+        "join",
+        "learn",
+        "login",
+        "models",
+        "new",
+        "notifications",
+        "organizations",
+        "papers",
+        "posts",
+        "pricing",
+        "privacy",
+        "search",
+        "settings",
+        "spaces",
+        "tasks",
+        "terms-of-service"
+      ],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9](?:[A-Za-z0-9]|[\\-_.](?=[A-Za-z0-9])){0,41}$",
+          "bare": true,
+          "output": "https://huggingface.co/{h}"
+        }
+      ]
+    },
+    {
+      "id": "discord",
+      "kind": "social",
+      "label": "Discord",
+      "provisional": true,
+      "query": "refuse",
+      "hosts": ["discord.gg", "discord.com", "www.discord.com"],
+      "forms": [
+        {
+          "id": "user",
+          "label": "Discord",
+          "match": [
+            {
+              "hosts": ["discord.com", "www.discord.com"],
+              "path": "^/users/(?<h>[^/]+)/?$"
+            }
+          ],
+          "handle": "^[0-9]{17,20}$",
+          "bare": true,
+          "output": "https://discord.com/users/{h}"
+        },
+        {
+          "id": "invite",
+          "label": "Discord server",
+          "match": [
+            {
+              "hosts": ["discord.gg"],
+              "path": "^/(?<h>[^/]+)/?$"
+            },
+            {
+              "hosts": ["discord.com", "www.discord.com"],
+              "path": "^/invite/(?<h>[^/]+)/?$"
+            }
+          ],
+          "handle": "^[A-Za-z0-9-]{2,32}$",
+          "bare": true,
+          "output": "https://discord.gg/{h}"
+        }
+      ]
+    },
+    {
+      "id": "matrix",
+      "kind": "social",
+      "label": "Matrix",
+      "provisional": false,
+      "hosts": ["matrix.to"],
+      "checks": ["refused-tld"],
+      "forms": [
+        {
+          "id": "user",
+          "match": [
+            { "path": "^/$", "fragment": "^/@(?<h>.+)$" }
+          ],
+          "handle": "^(?!/)(?![^:]*//)(?![^:]*/:)(?!\\.{1,2}[/:])(?![^:]*/\\.{1,2}[/:])[a-z0-9._=/+-]{1,64}:(?=[a-z0-9.-]{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+          "fold": "lower",
+          "bare": true,
+          "output": "https://matrix.to/#/@{h}"
+        }
+      ]
+    },
+    {
+      "id": "twitch",
+      "kind": "social",
+      "label": "Twitch",
+      "provisional": false,
+      "hosts": ["twitch.tv", "www.twitch.tv", "m.twitch.tv"],
+      "reserved": [
+        "about",
+        "directory",
+        "downloads",
+        "drops",
+        "following",
+        "friends",
+        "inventory",
+        "jobs",
+        "login",
+        "messages",
+        "payments",
+        "prime",
+        "privacy",
+        "search",
+        "settings",
+        "signup",
+        "store",
+        "subscriptions",
+        "turbo",
+        "videos",
+        "wallet"
+      ],
+      "forms": [
+        {
+          "id": "channel",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9_]{4,25}$",
+          "bare": true,
+          "output": "https://www.twitch.tv/{h}"
+        }
+      ]
+    },
+    {
+      "id": "reddit",
+      "kind": "social",
+      "label": "Reddit",
+      "provisional": false,
+      "hosts": ["reddit.com", "www.reddit.com", "old.reddit.com", "new.reddit.com"],
+      "forms": [
+        {
+          "id": "user",
+          "match": [
+            { "path": "^/user/(?<h>[^/]+)/?$" },
+            { "path": "^/u/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9_-]{3,20}$",
+          "bare": true,
+          "output": "https://www.reddit.com/user/{h}"
+        }
+      ]
+    },
+    {
+      "id": "telegram",
+      "kind": "social",
+      "label": "Telegram",
+      "provisional": false,
+      "hosts": ["t.me", "telegram.me"],
+      "reserved": [
+        "addemoji",
+        "addstickers",
+        "addtheme",
+        "boost",
+        "confirmphone",
+        "contact",
+        "joinchat",
+        "login",
+        "proxy",
+        "setlanguage",
+        "share",
+        "socks"
+      ],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z][A-Za-z0-9_]{4,31}$",
+          "bare": true,
+          "output": "https://t.me/{h}"
+        }
+      ]
+    },
+    {
+      "id": "github-sponsors",
+      "kind": "sponsorship",
+      "label": "GitHub Sponsors",
+      "provisional": false,
+      "hosts": ["github.com", "www.github.com"],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/sponsors/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$",
+          "bare": true,
+          "output": "https://github.com/sponsors/{h}"
+        }
+      ]
+    },
+    {
+      "id": "opencollective",
+      "kind": "sponsorship",
+      "label": "Open Collective",
+      "provisional": true,
+      "hosts": ["opencollective.com", "www.opencollective.com"],
+      "reserved": ["about", "create", "discover", "faq", "help", "home", "pricing", "search", "signin", "signup"],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[a-z0-9](?:[a-z0-9]|-(?=[a-z0-9])){0,63}$",
+          "fold": "lower",
+          "bare": true,
+          "output": "https://opencollective.com/{h}"
+        }
+      ]
+    },
+    {
+      "id": "patreon",
+      "kind": "sponsorship",
+      "label": "Patreon",
+      "provisional": true,
+      "hosts": ["patreon.com", "www.patreon.com"],
+      "reserved": [
+        "about",
+        "c",
+        "create",
+        "explore",
+        "home",
+        "login",
+        "messages",
+        "notifications",
+        "posts",
+        "pricing",
+        "search",
+        "settings",
+        "signup",
+        "user"
+      ],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" },
+            { "path": "^/c/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9_]{1,64}$",
+          "bare": true,
+          "output": "https://www.patreon.com/{h}"
+        }
+      ]
+    },
+    {
+      "id": "ko-fi",
+      "kind": "sponsorship",
+      "label": "Ko-fi",
+      "provisional": true,
+      "hosts": ["ko-fi.com", "www.ko-fi.com"],
+      "reserved": ["about", "account", "explore", "gold", "home", "login", "manage", "register", "s", "settings", "shop"],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9_]{1,50}$",
+          "bare": true,
+          "output": "https://ko-fi.com/{h}"
+        }
+      ]
+    },
+    {
+      "id": "buymeacoffee",
+      "kind": "sponsorship",
+      "label": "Buy Me a Coffee",
+      "provisional": true,
+      "hosts": ["buymeacoffee.com", "www.buymeacoffee.com"],
+      "reserved": ["about", "dashboard", "explore", "faq", "login", "signup"],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9_]{1,50}$",
+          "bare": true,
+          "output": "https://buymeacoffee.com/{h}"
+        }
+      ]
+    },
+    {
+      "id": "liberapay",
+      "kind": "sponsorship",
+      "label": "Liberapay",
+      "provisional": true,
+      "hosts": ["liberapay.com", "www.liberapay.com"],
+      "hostPatterns": ["^[a-z]{2}\\.liberapay\\.com$"],
+      "reserved": ["about", "admin", "callbacks", "explore", "for", "migrate", "search", "sign-in", "sign-up"],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9_](?:[A-Za-z0-9_]|[.-](?=[A-Za-z0-9_])){0,31}$",
+          "bare": true,
+          "output": "https://liberapay.com/{h}"
+        }
+      ]
+    },
+    {
+      "id": "paypal",
+      "kind": "sponsorship",
+      "label": "PayPal",
+      "provisional": false,
+      "hosts": ["paypal.me", "www.paypal.me", "paypal.com", "www.paypal.com"],
+      "refusedPaths": [
+        {
+          "hosts": ["paypal.me", "www.paypal.me"],
+          "pattern": "^/[^/]+/.+$",
+          "code": "amount"
+        },
+        {
+          "hosts": ["paypal.com", "www.paypal.com"],
+          "pattern": "^/paypalme/[^/]+/.+$",
+          "code": "amount"
+        }
+      ],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            {
+              "hosts": ["paypal.me", "www.paypal.me"],
+              "path": "^/(?<h>[^/]+)/?$"
+            },
+            {
+              "hosts": ["paypal.com", "www.paypal.com"],
+              "path": "^/paypalme/(?<h>[^/]+)/?$"
+            }
+          ],
+          "handle": "^[A-Za-z0-9]{1,20}$",
+          "bare": true,
+          "output": "https://paypal.me/{h}"
+        }
+      ]
+    },
+    {
+      "id": "polar",
+      "kind": "sponsorship",
+      "label": "Polar",
+      "provisional": true,
+      "hosts": ["polar.sh", "www.polar.sh"],
+      "reserved": ["api", "checkout", "dashboard", "docs", "embed", "login", "settings", "signup"],
+      "forms": [
+        {
+          "id": "profile",
+          "match": [
+            { "path": "^/(?<h>[^/]+)/?$" }
+          ],
+          "handle": "^[A-Za-z0-9](?:[A-Za-z0-9]|[\\-_](?=[A-Za-z0-9])){0,63}$",
+          "bare": true,
+          "output": "https://polar.sh/{h}"
+        }
+      ]
+    }
+  ],
+  "mastodonInstances": [
+    "chaos.social",
+    "floss.social",
+    "fosstodon.org",
+    "front-end.social",
+    "hachyderm.io",
+    "infosec.exchange",
+    "mas.to",
+    "mastodon.art",
+    "mastodon.online",
+    "mastodon.social",
+    "mastodon.world",
+    "mathstodon.xyz",
+    "mstdn.social",
+    "phpc.social",
+    "ruby.social",
+    "scholar.social",
+    "sigmoid.social",
+    "social.coop",
+    "social.vivaldi.net",
+    "techhub.social",
+    "toot.community"
+  ],
+  "website": {
+    "maxLength": 256,
+    "pathMaxLength": 200,
+    "refusedPathSequences": ["//", "%00", "%2f", "%5c"],
+    "ownDomains": ["purposesource.org"],
+    "redirectors": [
+      "bit.ly",
+      "bitly.com",
+      "buff.ly",
+      "cutt.ly",
+      "goo.gl",
+      "href.li",
+      "is.gd",
+      "l.facebook.com",
+      "l.instagram.com",
+      "lm.facebook.com",
+      "lnkd.in",
+      "out.reddit.com",
+      "ow.ly",
+      "rb.gy",
+      "rebrand.ly",
+      "shorturl.at",
+      "t.co",
+      "t.ly",
+      "tiny.cc",
+      "tinyurl.com"
+    ],
+    "displayScripts": ["Arab", "Beng", "Deva", "Ethi", "Geor", "Hang", "Hani", "Hebr", "Hira", "Kana", "Taml", "Thai"]
+  },
+  "text": {
+    "skeletonTerm": "purposesource",
+    "digitFolds": { "0": "o", "1": "l", "3": "e", "5": "s" },
+    "nameTokens": [
+      "admin",
+      "administrator",
+      "association",
+      "certified",
+      "github",
+      "helpdesk",
+      "moderator",
+      "official",
+      "security",
+      "staff",
+      "steward",
+      "stewards",
+      "support",
+      "team",
+      "verein",
+      "verified",
+      "verify"
+    ],
+    "bioTokens": ["official", "verified"],
+    "bioAfterPurposeSource": {
+      "within": 2,
+      "tokens": ["admin", "association", "board", "official", "staff", "support", "team", "verein"]
+    },
+    "refusedCharacters": ["U+2611", "U+2705", "U+2713", "U+2714", "U+1F396", "U+1F3C5", "U+1F5F8", "U+1F6E1"]
+  },
+  "reservedLogins": [
+    "about",
+    "abuse",
+    "admin",
+    "administrator",
+    "api",
+    "app",
+    "assets",
+    "contact",
+    "edit",
+    "help",
+    "img",
+    "index",
+    "legal",
+    "mail",
+    "mod",
+    "moderator",
+    "new",
+    "official",
+    "p",
+    "press",
+    "preview",
+    "privacy",
+    "psn",
+    "purpose-source",
+    "purposesource",
+    "registry",
+    "report",
+    "root",
+    "security",
+    "settings",
+    "staff",
+    "static",
+    "steward",
+    "stewards",
+    "support",
+    "team",
+    "u",
+    "verified",
+    "verify",
+    "www"
+  ]
+}

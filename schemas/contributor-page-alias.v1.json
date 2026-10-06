@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/contributor-page-alias.v1.json",
+  "title": "contributor page alias — from a login address to a page's permanent id",
+  "description": "The pointer the edge reads to serve `https://purposesource.org/u/{login}` (ops decision D116 item 2 and its dated note of ~09:40Z; design PROFILE-PAGE-2026-10-06 §7.1-§7.4): `{schemaVersion, pid}` and nothing else, at `u/k/{addressMac}.json` in the public plane. It exists only while a page is published under the `login` address. The mixed address `/u/{login}/{pid}` and the anonymous one `/p/{pid}` need no alias: they carry the pid.\n\nNO PUBLIC FILE IS KEYED BY A LOGIN (the plan's correction 3). `addressMac` is the first 26 characters of the lower-case RFC 4648 base32 encoding, without padding, of HMAC-SHA256 under the key `PSN_PAGE_ALIAS_KEY` over the UTF-8 bytes of `u-login:` followed by the login in ASCII lower case — 130 bits. The key is one random secret of 32 bytes, held as 64 lower-case hex characters in Key Vault for the api and as a Worker secret for the edge; the HMAC key is always the 32 decoded bytes, never the hex text, so the two implementations cannot key it differently. Because the api (C#) and the edge (JavaScript) must compute the same MAC or every login address answers 404, `examples/contributor-page-alias.v1.golden.json` holds worked vectors under a published test key (never the real one), with the digest before base32 so a failure can be placed, and `check:contributor-page` recomputes them. index-build never needs the key, because it reads each address's MAC from the database. The container allows anonymous reads but not listing, so without the key nobody can test at storage which logins have a page.\n\nHOW THE EDGE USES IT. For `/u/{segment}` (lower case, after the edge's normalisation): compute the MAC, read this document, then read `p/{pid}.json` (`contributor-page.v1`), and answer 200 only if that document's `address` is `login` and its `login`, lower-cased, equals the segment. Every other outcome — no alias, no page, another shape, another login, a non-production plane on production — answers the same 404 with the same bytes as a page that never existed (the plan's correction 4).\n\nRENAMES AND RETIREMENT (§7.3). When the person's GitHub login changes, the old login's address is retired: its alias is deleted and purged, and a retired address answers 404 forever, is never redirected and is never given to another account; the database keeps only its MAC, never the login's text, so nothing readable outlives an erasure. The new login takes the login address if it is free and not retired by someone else; otherwise the page falls back to `mixed` and the person is told. The alias is also deleted when the page is hidden, deleted or erased, and when its address leaves `login`. Old versions of the file are deleted one day after they are replaced or deleted (the D116 dated note of ~11:50Z, item 3).\n\nWHO MAY HAVE ONE (§7.4). A login on `link-platforms.v1` `reservedLogins` cannot take the login address (the mixed and anonymous ones still work), so `purposesource.org/u/verify` cannot look official; a login whose fold contains `text.skeletonTerm` gets the anonymous address only, because the mixed address would still carry it. The address sits under `/u/` rather than at the site's root, so no site path can ever collide with a login.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (producer: `jobs.index-build`, slice P14g; reader: the website edge, slice P26). Nothing is published under this contract yet.",
+    "artifactPath": "/u/k/{addressMac}.json in the public plane — unlisted (counted in /meta/publish-log.json, never named), read by the website edge only, never served at a route",
+    "authoritative": false,
+    "producer": "`jobs.index-build` (P14g), from the address rows the api writes at publish and on a rename (design §2.3)",
+    "consumers": ["the website edge, for `/u/{login}` (P26)"],
+    "fsRefs": [
+      "D116 item 2 (three address shapes) and its dated note of 2026-10-06 ~09:40Z (the address under /u/, /p/ the permanent link, renamed logins retired)",
+      "PROFILE-PAGE-2026-10-06 §4.1, §7.1-§7.4, §8.3",
+      "PLAN-2026-10-05 corrections 3, 4 and 19"
+    ],
+    "vsRefs": ["VS-05"],
+    "changelog": "CHANGELOG.md#contributor-page-aliasv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "pid"],
+  "properties": {
+    "schemaVersion": {
+      "const": 1,
+      "description": "Artifact schema version. Like the badge body, this document carries no `generatedAt`, deliberately: it says nothing but where the page is, its bytes change only when the page's permanent id does, and an instant would date the person's choice of the login address."
+    },
+    "pid": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{16}$",
+      "description": "The page's permanent id: the `pid` of `contributor-page.v1` at `p/{pid}.json`."
+    }
+  }
+}

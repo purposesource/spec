@@ -17,10 +17,10 @@ a procurement reviewer can consume all of it the way they consume a static file.
 
 | Directory | Contents |
 |---|---|
-| `schemas/` | 30 JSON Schemas (draft 2020-12), one per published artifact class. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
+| `schemas/` | 34 JSON Schemas (draft 2020-12): one per published artifact class, and `contributor-page-settings.v1` for a person's private page settings, which are never published. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v2.ts`, the published coverage function in force, with `cov-v2.vectors.json` and its test suite; `cov-v1.ts`, the first version, frozen beside it with `vectors.json`. Zero dependencies. |
-| `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in three cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json` and `claim-kit.v2.example.json`, the example IS the published document, byte for byte. |
+| `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in four cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json`, `claim-kit.v2.example.json` and `link-platforms.v1.example.json`, the example IS the published document, byte for byte. Beside them, five golden files the implementations run: `link-rules.v1.golden.json` (the contributor page's link cases, hostile ones included), `contributor-page-contrast.v1.golden.json` (the WCAG matrix of the page's colour presets), `contributor-page-preview.v1.golden.json` (worked preview-hash vectors), `contributor-page-alias.v1.golden.json` (worked login-address MACs under a published test key) and `contributor-page-build.v1.golden.json` (the builder's vectors for keeping a hidden login off the repository list). |
 | `kits/` | The claim-language kits — `kit-{version}.json`, the wording a certificate holder may publish and the framing that is excluded (FS08-070). Versioned documents, not pages: a certificate pins the kit that was in force when it was issued. Each is published at `/kits/v{n}` and validated by `check:kits`. |
 | `scripts/` | The CI gates. Each one refuses to pass on an empty input set. |
 | `spec.config.json` | The organisation and domain names, in one place. Every `$id`, server URL and printed host derives from it, and the gates name any file that disagrees. |
@@ -38,7 +38,10 @@ own name implies and carries no figure; the category menu is a single list whose
 is identical; the Recipient List examples keep the List's order, their dates and notices, and
 agree with their index and with the cost-support example, and the two List contracts refuse what
 they must; every example allocation key hashes to the approved text it carries, is the key its
-weights give over the List version it names, and the key index agrees with it; the coverage
+weights give over the List version it names, and the key index agrees with it; the contributor
+page's link table keeps its rules and gives every golden link answer; the page contracts meet the
+contrast matrix, recompute their preview hashes, carry no points, money or GitHub id, and refuse
+what the design rules out; the coverage
 vectors use valid artifacts and still cover all eight answers; the coverage module is
 dependency-free and clock-free (and its SHA-256 is printed); the copy law holds; the published
 module typechecks under `erasableSyntaxOnly`; the frozen vector suite passes; the OpenAPI lints;
@@ -55,6 +58,11 @@ npm run check:menu              # the category menu is one list; every copy of i
 npm run check:recipient-lists   # the List examples: order, dates, notices, index agreement, refusals
 npm run check:allocation-keys   # example keys hash to their approved text and derive from their
                                 #   weights over the List; the key index agrees
+npm run check:links             # the contributor page's link table keeps its rules; every golden
+                                #   link case gets its recorded answer from the table's steps
+npm run check:contributor-page  # contrast matrix, preview-hash and alias-MAC vectors, the builder's
+                                #   hidden-login vectors, no points/money/GitHub id, the settings
+                                #   defaults, and the refusals the design rules
 npm run check:vectors           # vector inputs are valid artifacts; all eight answers covered
 npm run check:module            # coverage module: no imports, no clock, no I/O; prints its digest
 npm run check:copy              # claim rules and leak guards over published copy
@@ -109,6 +117,10 @@ needs a toolchain is not really published.
 | `stats.v1.json` | `/stats.json` | first public version |
 | `publish-log.v1.json` | `/meta/publish-log.json` | first public version |
 | `change-event.v1.json` | one item of `/v1/changes` | later, demand-gated |
+| `contributor-page-settings.v1.json` | never published: a person's private page settings, held by the api as a draft and frozen as versions; its schema is here because the api, the editor and the builder build against it | P-M3 (never published) |
+| `contributor-page.v1.json` | `/p/{pid}.json`, unlisted — the public document of one published contributor page, which the edge renders as HTML at `/p/{pid}`, `/u/{login}` or `/u/{login}/{pid}` (ops decision D116) | P-M3 producer |
+| `contributor-page-alias.v1.json` | `/u/k/{addressMac}.json`, unlisted — from a login address to a page, keyed by a keyed hash and never by the login | P-M3 producer |
+| `link-platforms.v1.json` | `examples/link-platforms.v1.example.json` — the pinned link table every contributor page link is checked against and rebuilt from; the example is the table, vendored by the platform and the edge | with the contributor page |
 
 Each schema carries an `x-psn` block naming its artifact path, its milestone, the spec
 clauses it implements, and its changelog section. CI fails if any of that is missing —
@@ -140,6 +152,14 @@ recorded — so anyone can recompute that hash from the published text with one 
 the key back out of the same text. It is written once, at the release; the date it was
 published is proven afterwards from the publish log and stated in the index, which is also where
 a key that came too late, or was voided, keeps its line.
+
+The four contributor page rows (2026-10-06; ops decision D116) describe a person's own public page,
+which they build in private, preview and publish when ready, and hide whenever they like. The
+public document carries no points, ranks, money or GitHub id, and every link on it is rebuilt from
+one pinned table (`link-platforms.v1`): a person pastes an address loosely, and the page shows only
+an `https` address on a host the table fixes. Only the page document and the alias are published;
+the settings are the person's private draft, and their schema is published so the codebases that
+handle them agree on it.
 
 ## The coverage function
 

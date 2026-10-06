@@ -63,6 +63,13 @@ The Recipient List's versions and their index (2026-10-01; FS-00 §6.2's dated n
 every released List version with what became of its publication, and of every immediate removal
 with its published ground — thirty schemas in all.
 
+The contributor page (2026-10-06; ops decision D116 and its dated notes) adds four, each with its
+own section below: `contributor-page-settings.v1.json`, the person's private choices, published as
+a schema and never as a document; `contributor-page.v1.json`, the public document of a published
+page; `contributor-page-alias.v1.json`, the pointer from a login address to a page; and
+`link-platforms.v1.json`, the pinned link table, whose example is the table itself —
+thirty-four schemas in all.
+
 ### Contracts published beyond the initially-scoped ten
 
 Seven schemas were added because another repository's acceptance test names a schema
@@ -987,6 +994,18 @@ value inside `v1` is not additive (versioning policy 1).*
   reader and trust renderer.
 - New example `examples/certificate-record.v1.status-only.example.json`; its `jwsSha256` is a
   placeholder. The existing example validates unchanged.
+
+### 1.3.1 — unreleased (2026-10-06; ops decisions D115 and D116)
+
+- Wording. `disclosure` described `status-only` as a corporate record only. Since D115 (plan
+  correction 11, slice P03) a person's certificate is status-only too unless its holder chose full
+  display, and the platform's trust renderer already withholds a person's `scope` on such a record
+  as well as `sub`, `band` and `jws` (`ArtifactRenderer.Trust.cs`, the branch that keeps `scope`
+  only for a company). The description now says both: a company's status-only record keeps its
+  `scope`, a person's carries none, because the projects a person was credited on identify them.
+  `contributor-page.v1` relies on it: an anonymous page lists a person's status-only certificates,
+  and their records must not name the projects. No constraint moved (`scope` was and stays
+  optional), and every record valid under 1.3.0 is valid and means the same.
 
 ## certificate-policy.v1.json
 
@@ -2663,6 +2682,233 @@ reasoning: no month export has ever been published with a row in it.
   separate authority, and policy rule 3 gives an additive change its own minor. Authority:
   FS-10 FS10-011 steps 3 and 4, and ops decision D35 of 2026-09-10.
 
+## contributor-page-settings.v1.json
+
+### 1.0.0 — unreleased (2026-10-06; ops decision D116 and its dated notes of ~09:40Z and ~11:50Z)
+
+- Initial publication, **pre-release**: nothing is published under it at any phase. The person's
+  private choices for their contributor page (design PROFILE-PAGE-2026-10-06 §2.1): one document
+  per person, the api's private draft, frozen as an immutable version at publish. Its schema is
+  published because three codebases build against it (the api, the editor and the one builder);
+  the document itself never reaches the public plane, and index-build has no read of drafts.
+- THE PICTURE IS THE PERSON'S FREE CHOICE (the ~11:50Z note, item 2): `picture.kind` is
+  `github`, `rosette`, `monogram` or `upload`, independent of `identity.showLogin`, and the
+  editor starts on `github`. This replaces the design's `avatar` member (`github | monogram |
+  rosette | none`, default `rosette`): the operator named four choices and the GitHub picture as
+  the start, and `none` is not among them. The GitHub picture without the login is allowed with
+  the warning `page.warn.picture_identifies`.
+- OWN PICTURE AND COVER UPLOADS AT LAUNCH, LEAN (the same note, reversing the ~09:40Z answer on
+  the operator's word): `picture` and `cover` admit `{kind: upload, file}`, where `file` is the
+  SHA-256 of the page-size file the render job made, never a URL or a storage path, resolved in
+  the caller's own uploads only. `$defs.upload` states the whole rule: JPEG, PNG or WebP, or a
+  GIF's first frame, recognised by its first bytes; at most 5 MB (5,242,880 bytes); never SVG;
+  re-encoded in a sandbox to fixed sizes (picture 256×256 WebP and 96×96 PNG, cover 1600×400 and
+  800×200 WebP, centre-cropped) so every metadata is gone, the original deleted; no review before
+  publishing, a report hides first (item 4: reports reach legal@purposesource.org). The fixed
+  sizes are this file's reading of "fixed sizes"; the render slice (P27) may move them in place
+  while nothing is published.
+- HOW LONG AN UPLOAD LIVES (items 2 and 3 of the note: "published only with the page, deleted
+  when it is hidden or deleted"; "old versions of person files are deleted one day after they are
+  replaced or hidden"). An upload's files live only while the current draft or the live published
+  version names its hash. A version row is immutable and kept until "Delete my page", so it keeps
+  the hash and never the bytes: an older version naming an upload keeps nothing alive, and nothing
+  a person once published and later replaced stays in private storage for the life of the page.
+  An upload no longer named loses its public copies with the document that named them and its
+  private files one day later (one day after it was made, if nothing ever named it). Hiding the
+  page, by the person or a steward, deletes every upload of the person at once, private files and
+  public copies alike: "deleted when it is hidden" is read as the whole upload, so the draft's
+  reference then answers `page.upload_invalid` until the person uploads again or picks another
+  picture or cover. Delete and erasure do the same. Previous blob versions of upload files,
+  private or public, go one day after they were replaced or deleted (P14g's lifecycle rule,
+  extended to the private prefix). Item 3's one day is the only retention figure uploads add to
+  the data map and the DPIA.
+- The rest is the design's §2.1 table: `start`, three `layout`s, `theme` with eight presets and
+  an optional `#rrggbb` accent, `cover` (none, eight gradient presets, solid, two-colour gradient
+  at 90, 135 or 180 degrees, the rosette pattern, or an upload), `identity` with the §6.1 limits,
+  three `address` shapes, `search`, the six `sections` exactly once each in page order, the
+  `summary` switches, `certificates`, `repositories` and `adopter` choices, up to ten social
+  `links` one per platform, one `website`, up to four `sponsors` one per platform, and the six
+  `card` switches. Every member is required, so a stored document is always complete; each has
+  its `default`, and `examples/contributor-page-settings.v1.defaults.example.json` is exactly
+  those defaults (`check:contributor-page` holds the two together): status-only by default (the
+  plan's item a and corrections 9 and 11), the anonymous address, `noindex`, the GitHub picture.
+- A link is `{platform, form?, handle, instance?}`: the design's `{platform, handle, instance?}`
+  plus an optional `form`, because three platforms have two shapes of handle that a handle alone
+  cannot always tell apart (a YouTube channel id is a valid YouTube handle; a Discord user id is a
+  valid invite code; a Facebook numeric id against a name). Absent means the platform's first
+  form. The platform enums are copies of `link-platforms.v1`'s ids, asserted equal by
+  `check:links`; the handle is checked here only against a coarse class per platform.
+- CROSS-FIELD RULES. In the schema: the `login` and `mixed` addresses need `identity.showLogin`;
+  `search` needs the `login` address; the adopter section on needs `identity.showLogin`. In the
+  description, checked by the api at every save and again at publish: the links against the
+  table, GitHub Sponsors naming the person's own hidden login (`own_login_hidden`), certificate
+  display against the page, ownership of every id and upload, reserved and look-alike logins,
+  the text rules (a lone surrogate among them, so every text is well-formed Unicode for the
+  preview hash), the accent's contrast adjustment, the 16 KB limit, and check (j): while the login
+  is hidden, a repository under the person's own GitHub account is refused when selected by hand
+  and left out in `all` mode (`page.repository_shows_login`), because its group would print the
+  login as the owner's name — the case design §2.2 already refuses for GitHub Sponsors, which the
+  design did not cover for the repository list. Publishing needs the operator's eligibility (a
+  credited repository, a certificate or an adopted-licence repository; the ~11:50Z note, item 1)
+  and a vouched section; anyone signed in may build and preview. The description says what the two
+  together mean for a person whose only fact is an adopter fact: they can publish only with the
+  login shown, since the adopter section needs it and the summary counts no adopter facts.
+- Repository ids (`repositories.selected`, `repositories.hidden`, `adopter.hidden`) take only a
+  repository's node id, `R_…` or the legacy "010:Repository…" form, not the house pattern that
+  admits any object's id, so a user's node id cannot be stored where a repository's belongs.
+- A Matrix handle may not be shaped like a path: no leading `/`, no `//`, no `/` before the server,
+  and no `.` or `..` segment, as `link-platforms.v1` now rules.
+- NO AMOUNT SWITCHES. The design's `summary.amounts` and `repositories.amounts` (always refused
+  at launch) are left out: design §8.7 rules that no schema has a member for amounts, §8.4 builds
+  nothing for amounts now, and adding the member when the operator decides at the first
+  disbursement is additive. `check:contributor-page` refuses a document that carries one.
+
+## contributor-page.v1.json
+
+### 1.0.0 — unreleased (2026-10-06; ops decision D116 and its dated notes of ~09:40Z and ~11:50Z)
+
+- Initial publication, **pre-release**: nothing is published under it yet. The public document of
+  one published contributor page, which `jobs.index-build` writes unlisted at `p/{pid}.json` and
+  the website edge renders as HTML at `/p/{pid}`, `/u/{login}` or `/u/{login}/{pid}` (design
+  §4). It replaces the plan's `contributor-page.v1` draft of 2026-10-05, which was never pushed:
+  the name is kept, as the design's correction 21 rules, and the shape is the design's.
+- NO `subId` (the plan's correction 11; design correction 5), no points, shares, bands, ranks,
+  percentiles, months or amounts (§8.7), no draft, no claim status (`listing` is `registered` or
+  `no-longer-registered`), facts as years only. The GitHub picture's source address names the
+  person's numeric id, so it never enters the document: a picture is `{kind, h16?, letters?}`,
+  our own re-encoded files named by `h16`. `check:contributor-page` scans the three page schemas
+  for banned member names and every page example and vector for currency figures, person node
+  ids and GitHub's picture host, and proves each scan can fail.
+- SECTIONS AS OBJECTS, IN THE PERSON'S ORDER. `sections` carries only the sections that are on
+  and have something to show, each with its content: the summary counts (each at least one,
+  computed over what the page shows), the certificates (`full` with the projects on a page that
+  shows the login, `status-only` on one that does not — enforced by the schema), the repositories
+  grouped by owner with their years, the adopter items with their GitHub evidence (merged pull
+  request or direct commit), the links with the website, and the sponsorship buttons. Every link
+  and sponsorship item carries the `url` rebuilt from `link-platforms.v1` (strict output); a
+  published page shows at least one vouched section (summary, certificates, repositories or
+  adopter), each section at most once.
+- THE PREVIEW HASH, DEFINED EXACTLY (§3.6): SHA-256 over the UTF-8 bytes of the RFC 8785 text of
+  the document less `generatedAt`, `versionId` and `card.h16`, with a GitHub picture reduced to
+  `{"kind":"github"}`. The design said "without `generatedAt` and `versionId`, and with the
+  picture reduced to `{kind}`"; two refinements follow from facts the design did not yet have.
+  `card.h16` is dropped because the card is drawn from the published document, so no preview can
+  know it. An uploaded picture or cover keeps its `h16`, because uploads came into launch after
+  the design (the ~11:50Z note), and the person must publish the very file they previewed; only
+  the GitHub picture, which the person may change on GitHub at any time and which is listed in
+  `autoUpdated`, is reduced. `examples/contributor-page-preview.v1.golden.json` holds three
+  worked vectors. Every string of the preimage is well-formed Unicode (I-JSON, as RFC 8785
+  assumes): a lone surrogate is refused at save and would fail the builder rather than be
+  serialised, because each serialiser writes it differently; the gate refuses one in a vector.
+- NO LOGIN THE PERSON DID NOT CHOOSE TO SHOW. Without `login`, the repositories section has no
+  group under the person's own account, and the summary's counts leave such repositories out:
+  the group's name would be the login. The document cannot show this rule, because the login it
+  compares with is what the document leaves out, so `examples/contributor-page-build.v1.golden.json`
+  holds five vectors of the builder's rule (left out in `all` mode, refused when selected, listed
+  when the login is shown, compared without regard to case, a section with nothing left), which
+  `check:contributor-page` runs through its own reading of the rule.
+- NO DATE FINER THAN A DAY. `versionId` is 130 random bits, never a ULID, which would date each
+  publish to the millisecond on the public `/v1/p/{pid}/version`. `generatedAt` is truncated to
+  its UTC day (the schema requires `T00:00:00Z`): it is derived from the rows the build read, the
+  version row among them, and anyone holding the pid can read the document at storage; the print
+  footer shows the day anyway, so the day is accepted and nothing finer is published.
+- Repository node ids (repositories, adopter items, a full certificate's projects) take only a
+  repository's id, `R_…` or the legacy "010:Repository…" form: this is the one document that must
+  never carry the person's own id, and the house pattern also admits a user's. The gate's scan for
+  a person's node id now catches the legacy "04:User…" form as well as `U_…`.
+- A link's `handle` carries the settings' coarse character class per platform, so a bidi control
+  or a slash cannot reach the link text, and the renderer draws a link or sponsorship button only
+  when it rebuilds exactly the item's `url` from `{platform, form, handle, instance}`, so the text
+  and the address can never name two accounts.
+- The card's elements are carried already reduced to what the page shows (the schema refuses a
+  card showing the login, the summary, the adopter line or the platform marks of a page that does
+  not), with `h16` naming its five files once drawn. `autoUpdated` lists what may change after
+  publishing without a new preview. `factsAsOf` is the network's last locked month read, or null.
+- `x-psn.authoritative` is false: the certificate records and the registry govern the facts the
+  page shows, and the fixed footer says Purpose Source checks those facts, not the owner's words
+  or links.
+
+## contributor-page-alias.v1.json
+
+### 1.0.0 — unreleased (2026-10-06; ops decision D116 item 2 and its dated note of ~09:40Z)
+
+- Initial publication, **pre-release**: nothing is published under it yet. `{schemaVersion, pid}`
+  at `u/k/{addressMac}.json`, written only while a page is public under the `login` address, so
+  the edge can serve `/u/{login}` (design §4.1, §7.1-§7.4). No public file is keyed by a login
+  (the plan's correction 3): the MAC is HMAC-SHA256 under `PSN_PAGE_ALIAS_KEY` over
+  `u-login:{lower-case login}`, the first 26 characters of its lower-case unpadded base32, and the
+  container cannot be listed.
+- The description states the edge's use (200 only for a `login`-shape page whose login matches;
+  every other outcome the same 404 as a page that never existed, the plan's correction 4), the
+  retirement of a renamed login's address for good, kept only as a MAC, and who may have one
+  (`link-platforms.v1` `reservedLogins` and the look-alike fold of `text.skeletonTerm`).
+- Like the badge body, it carries no `generatedAt`: its bytes change only when the page's
+  permanent id does, and an instant would date the person's choice of the login address.
+- THE KEY'S FORM AND WORKED VECTORS. `PSN_PAGE_ALIAS_KEY` is 32 random bytes held as 64
+  lower-case hex characters, and the HMAC key is always the decoded bytes, so the api (C#) and the
+  edge (JavaScript) cannot key it differently. `examples/contributor-page-alias.v1.golden.json`
+  holds four vectors under a published test key (never the real one) — the login of the named
+  page example, the same login in mixed case, the shortest and the longest login — each with the
+  message, the digest before base32 and the MAC, because if the two implementations disagree by
+  one character every login address answers 404. `check:contributor-page` recomputes them.
+
+## link-platforms.v1.json
+
+### 1.0.0 — unreleased (2026-10-06; ops decision D116 item 1 and its dated note of ~09:40Z)
+
+- Initial publication, **pre-release**: nothing reads it yet. The pinned table every link on a
+  contributor page is checked against and rebuilt from (design §5), published as DATA the way the
+  category menu is: `examples/link-platforms.v1.example.json` IS the table, byte for byte, for the
+  platform and the website edge to vendor and pin by SHA-256. The design named the file
+  `spec/data/link-platforms.v1.json`; this repository publishes data as the example of its schema
+  (`category-menu.v1`), so the example is the publication and no new directory was made.
+- THIRTY PLATFORMS. GitHub, the one `verified` platform, never typed (the header link from the
+  sign-in, shown only with "Show my login"); twenty-one social platforms — the design's sixteen
+  and the operator's five, Discord, Matrix, Twitch, Reddit and Telegram (the ~09:40Z note); and
+  the eight sponsorship platforms: GitHub Sponsors, Open Collective, Patreon, Ko-fi, Buy Me a
+  Coffee, Liberapay, PayPal.me and Polar, as our own buttons. Each has its exact hosts (never
+  matched by suffix), its forms (how a pasted address yields the handle, the handle's grammar,
+  the address it is rebuilt as), its reserved words and its refused paths. Twelve rules the
+  platforms publish nowhere are marked `provisional`, as the design asks.
+- THE STEPS ARE THE CONTRACT. The schema's description states the seven steps for a link and the
+  steps for the one personal website (§5.1, §5.4) precisely enough to implement twice: clean-up,
+  refused schemes, URL or handle, the URL's characters, scheme, userinfo, dot segments, WHATWG
+  parse, port, exact host, refused paths, the match rules, the bare handle, the reserved words
+  and checks, and the rebuild. Thirty refusal codes, the `reason` of `page.link_invalid` and
+  `page.website_invalid`, are in `$defs.refusalCode`. Four refinements of §5.1 were needed to make
+  the steps deterministic across .NET and JavaScript: the ends are trimmed of ASCII whitespace
+  only and any remaining White_Space refuses (the engines' trims differ); a URL is refused if any
+  character falls outside RFC 3986's sets, as §5.4 already ruled for the website; dot segments
+  and `%2e` are refused in the raw path rather than resolved by the parser; and a scheme on a
+  refused list (`javascript`, `data`, …) is refused before anything else is read. A `%` in the raw
+  authority is refused too, for links and the website alike (`character_not_allowed`), as an `@`
+  is: a WHATWG parser decodes a percent-encoded host (`https://%78.com/` is `x.com`), and refusing
+  it before any parser runs closes one more window in which .NET and JavaScript could read one
+  input as two hosts. The website's input is ASCII too, so an IDN host is entered as its A-label
+  and shown as Unicode only for a script on `website.displayScripts`.
+- ONE RECORDED EXCEPTION, MATRIX. Design §5.1 says a handle never holds `/`, while §5.2's Matrix
+  row admits `/`, `=` and `+` in a user id's local part, as the Matrix specification does. The
+  table keeps §5.2's grammar and records the exception as its own ruling (the id is rebuilt only
+  inside matrix.to's fragment, which no server receives as a path), and closes what made it look
+  like a path: the local part may not start or end with `/`, hold `//`, or have a `.` or `..`
+  segment. Golden cases L182-L188 pin both sides.
+- THE MASTODON ALLOWLIST (§5.5, twenty-one instances), the refused special-use top-level labels,
+  the website's redirector list and our own domain, the impersonation terms of §6.2 and the
+  reserved logins of §7.4 are in the table too, so a steward adjusts each by a data change.
+- Every pattern is in a portable subset (anchored, ASCII classes, lookahead, the one named group
+  `h`; never `\d`, `\w`, `\s`, `\b`, `\p`, lookbehind, inline flags or backreferences), which the
+  schema enforces and `check:links` compiles. `examples/link-rules.v1.golden.json` holds 240
+  shared cases (190 links and 50 websites, the hostile ones tagged: IDN look-alikes in Unicode and
+  in punycode, `javascript:` and `data:`, userinfo, ports, path traversal plain and encoded,
+  backslashes, open redirects, bidi and zero-width characters, IP literals in every IPv4 spelling,
+  percent-encoded hosts, path-shaped Matrix ids, our own name and its digit look-alikes), pinned
+  to the table's SHA-256. The design sized the
+  file at about 300 cases; slice P24 adds the rest, starting with ten real handles for every
+  provisional platform.
+- `check:links` (new) holds the table to what its shape cannot say and runs every golden case
+  through `scripts/lib/link-rules.mjs`, the gate's own reading of the steps (not the platform's
+  pipeline), proving each rule able to fail first.
+
 ## openapi/edge-public.v1.yaml
 
 The API description's own section. It is not a schema file, so the per-schema rules above
@@ -2891,6 +3137,41 @@ which kind of change each entry was.
 - The Recipient List's two edge routes, `/v1/recipient-list/{version}.json` and
   `/v1/recipient-list/index.json` (FS-00 §6.2, the dated note of 2026-10-01), are not described
   here yet.
+
+### 1.3.0 — unreleased (2026-10-06; ops decision D116 and its dated notes; design PROFILE-PAGE-2026-10-06 §3.4, §4.7, §4.9)
+
+- Minor: three new routes, one new component, one new error code; nothing that existed moved.
+  All three routes are the contributor page's and P-M3 (the phase list in `info.description`
+  says why: nothing is published under them until a person publishes a page, and production
+  publishes none until its publishing switch is on). The edge serves none of them yet; slice P13
+  builds them against this description.
+- `GET /v1/p/{pid}/version` answers `PageVersion` (`schemaVersion`, `pid`, `versionId`, nothing
+  that names or dates the person: `versionId` is random bits, never a ULID, whose leading
+  characters would be a millisecond timestamp of the publish), `no-store` and `noindex`, from the
+  live page document. The
+  dashboard polls it after Publish and after Hide (design §3.4). Every page that is not public —
+  unknown, hidden, deleted, erased, replaced by a new permanent link, or on a non-production
+  plane on production — answers the same `404 page_not_found` (the plan's correction 4), which is
+  the one code added to `ErrorEnvelope.error.code`, additively.
+- `GET /cards/p/{cardFile}` serves the page's card as PNG in its five files — `{pid}.png`,
+  `@2x`, `-dark`, `-dark@2x` and `-og` with `?v=` — through the live document only, with the
+  headers of design §4.9 (no `stale-if-error`; `noindex`; CORS and CORP open for the share sheet;
+  a sandboxing CSP). Every pid with no public page, a wrong `v` and an undrawn card answer `200`
+  with one neutral image, the same bytes in every case.
+- `GET /badge/p/{pid}.svg` serves the flat person badge (plan §2.2), with the same neutral answer
+  ("no public page") for every pid with no public page, cached like the card. The plan's person
+  card badges (`-card.svg`, `-card-dark.svg`) are not described: design §4.9 replaces them with
+  the PNG card. The plan's shields-format `/badge/p/{pid}.json` is not described either: its words
+  would be a `badge.v1` description change, and the plan put it first in its cut order, so it waits
+  for slice P13's decision.
+- Nothing under `/v1/contributors/*` was described, so nothing was dropped: the plan's
+  `/v1/contributors/{login}` and `/v1/p/{pid}` (the document as JSON) never reached this file, and
+  the design retires both (the edge renders the page from the document instead).
+- Checked before the routes were added: neither the website's tests nor the platform's compare
+  this description's paths with what the edge serves. The website reads `components.schemas` only
+  (`Meta` in `workers/edge/test/meta.test.ts`; `DomainIndex`, `Jwks` and `CtCheckpointArtifact` in
+  `scripts/check-artifacts-schema.mjs`), and so does the platform (`SpecCheckout.cs`); none of
+  them is touched here. `check:openapi-examples` validates 50 examples (46 before).
 
 ## coverage/cov-v2.ts
 

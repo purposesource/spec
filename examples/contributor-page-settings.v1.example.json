@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "start": "named",
+  "layout": "paper",
+  "theme": { "preset": "purpose", "accent": "#3a7bd5" },
+  "picture": { "kind": "upload", "file": "6616e65bafbcf60abbfbf4dcb3c86cb5f0c4efdb8772934906f98bfdbfa73092" },
+  "cover": { "kind": "gradient", "from": "#1d5c3c", "to": "#e0b04a", "angle": 135 },
+  "identity": {
+    "displayName": "Alex Example",
+    "pronouns": "they/them",
+    "bio": "Maintainer of small accounting libraries.\nI contribute through Purpose Source.",
+    "showLogin": true
+  },
+  "address": "login",
+  "search": true,
+  "sections": [
+    { "id": "summary", "on": true },
+    { "id": "repositories", "on": true },
+    { "id": "adopter", "on": true },
+    { "id": "certificates", "on": true },
+    { "id": "links", "on": true },
+    { "id": "sponsors", "on": true }
+  ],
+  "summary": { "projects": true, "organisations": true, "since": true, "certificates": true },
+  "certificates": { "mode": "all-eligible" },
+  "repositories": { "mode": "all", "hidden": ["R_kgDOSMPL0009"], "years": true },
+  "adopter": { "hidden": [] },
+  "links": [
+    { "platform": "linkedin", "handle": "alex-example" },
+    { "platform": "mastodon", "handle": "alex", "instance": "fosstodon.org" },
+    { "platform": "matrix", "handle": "alex:matrix.org" },
+    { "platform": "discord", "form": "invite", "handle": "ledgertools" },
+    { "platform": "orcid", "handle": "0000-0002-1825-0097" }
+  ],
+  "website": { "url": "https://alex.dev/" },
+  "sponsors": [
+    { "platform": "github-sponsors", "handle": "example-contributor" },
+    { "platform": "liberapay", "handle": "alex.example" }
+  ],
+  "card": { "picture": true, "name": true, "login": true, "summary": true, "adopter": true, "links": true }
+}
