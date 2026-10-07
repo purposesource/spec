@@ -765,6 +765,22 @@ creating one.
   att-4 carried (D103 item 3); its optional public-listing statement keeps the number 7. The
   description now cites "att-1 step 7". No member, type, vector or answer changes.
 
+### 1.2.0 — unreleased (2026-10-07; PS-1381, the orchestrator's answer 1 (a))
+
+- `$defs.domain` (each element of `domains`) is a pattern instead of `format: hostname`. The two
+  validators the contract set runs read that format differently: .NET's JsonSchema.Net refused
+  every A-label (`xn--`) under RFC 5891's rule on hyphens in the third and fourth places, and ajv's
+  `ajv-formats` admitted A-labels and a final dot. The pattern says what the api stores
+  (`OrgDomains.cs`: the ASCII form only, never the Unicode one): labels of 1 to 63 letters, digits
+  and hyphens, none beginning or ending with a hyphen, no final dot, and hyphens third and fourth
+  only in a label beginning `xn--`. So a company that verified an internationalised domain can have
+  it stated in its record, instead of the composer leaving it out. `ab--cd.example` stays refused.
+- Additive for what .NET accepted: every domain .NET accepted still validates, and A-labels join.
+  **Pre-release** where ajv's reading narrows: a final dot (`example.com.`), which ajv admitted and
+  .NET refused, is refused by both now. Nothing has been published against this file (policy 5), and
+  the signer (`EntitlementRecordValidation.IsHostname`) refused a final dot from the start.
+- `maxLength` 253 is unchanged.
+
 ## covered-organisations.v1.json
 
 ### 1.0.0 — unreleased (2026-09-15; ops decision D44)
