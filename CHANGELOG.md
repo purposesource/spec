@@ -1975,6 +1975,22 @@ reasoning: no month export has ever been published with a row in it.
   targets and validate unchanged; the `sponsorship-schedule.v1` example's `use-order` rule follows
   (see that section).
 
+### 1.3.0 — unreleased (2026-10-07; ops FS07-062, the ruling on the transfer reference)
+
+- `transfers[].endToEndId` admits the short form `psn-YYYYMM-<the last 12 characters of the
+  recipient's ULID>`, 23 characters. The platform composes every new transfer reference this way
+  (one function, `Psn.Allocation.TransferReference`, for the batch key, the bank file's
+  `EndToEndId` and the ledger's `disburse` note).
+- **Why:** ISO 20022 types `EndToEndId` as Max35Text, and the earlier form
+  `psn-{month}-{recipientId}` is 42 characters, so no bank file could carry it.
+  - Truncating it at the bank, or letting the published reference differ from the bank's, was
+    refused: the bank echoes the reference back, and the receipt is matched to the transfer by it.
+  - The month keeps references unique across months. Within one month the 60 random bits of the
+    tail keep them apart, and the sweep refuses a month in which two recipients would share one.
+- **Additive:** the earlier form stays valid, so any row written before the change validates
+  unchanged. The examples keep the earlier form. No other property, type, enum or meaning
+  changes.
+
 ## recipient-list.v1.json
 
 ### 1.0.0 — unreleased (2026-09-07; ops decision D33)
