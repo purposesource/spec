@@ -929,6 +929,16 @@ value inside `v1` is not additive (versioning policy 1).*
   projects that names no category and states 600000 ppm left to the Association. The schema
   refuses the member on a supporter certificate, and refuses a value outside 0 to 1000000.
 
+### 1.5.0 — unreleased (2026-10-07; PS-1302's question, answered 1)
+
+- Additive. `subId` admits GitHub's legacy user and repository node ids, padding included:
+  `MDQ6VXNlcj[A-Za-z0-9+/=]{1,96}` (`04:User` + the number) and
+  `MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96}` (`010:Repository` + the number), beside the two
+  alternatives it had. A legacy user id is padded with `=` whenever the number has 1, 3, 4, 6, 7 or
+  9 digits, and legacy ids are standard base64, so `+` and `/` occur too; before this change such a
+  person, often a long-standing contributor, could not be named by any certificate.
+- Every payload valid under 1.4.0 still validates and means the same.
+
 ## certificate-record.v1.json
 
 ### 1.0.0 — unreleased
