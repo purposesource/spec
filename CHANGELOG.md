@@ -634,6 +634,14 @@ creating one.
   allocation key, where they said "the steward default" (D117 retires the word). No property, type,
   enum or meaning changes.
 
+### 1.4.3 — unreleased (2026-10-07; D-016, PS-1183 and PS-1184)
+
+- Wording only. `owner.orgId` says where the id comes from now: discovery records it for every
+  repository it confirms (PS-1183, since 2026-09-29), and a repository registered before that, or
+  confirmed while GitHub answered only the legacy id form, gets it from an `owner-recorded` event
+  (migration 0061, PS-1184), which fills a missing id and never moves a recorded one. A change of owner
+  stays a transfer (FS02-022). No property, type, enum or meaning changes.
+
 ## waiver.v1.json
 
 ### 1.0.0 — unreleased
