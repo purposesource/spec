@@ -3322,6 +3322,32 @@ which kind of change each entry was.
   `scripts/check-artifacts-schema.mjs`), and so does the platform (`SpecCheckout.cs`); none of
   them is touched here. `check:openapi-examples` validates 50 examples (46 before).
 
+### 1.4.0 — unreleased (2026-10-08; ops decision D117 §6, FS-00 §6.2's dated note of 2026-10-08)
+
+- Additive, a minor bump like 1.1.0: one new GET operation serves the artifact
+  `designations-summary.v1` 1.0.0 adds, and nothing that existed moved. `getDesignationsSummary` at
+  `/v1/designations/{month}.json` answers `designations-summary.v1`. The plane path is
+  `/designations/{YYYY-MM}.json`, outside `ledger/`, as the allocation key's is; platform
+  `d6b3b35d`'s index build writes it and its purge list already names the edge path.
+- `x-psn-phase: P-M3`, and the phase list in `info.description` says so: the producer is the
+  platform's index build, and a month no run rendered answers `404`. A new tag, `designations`,
+  because the summary is neither the ledger nor the allocation key.
+- Cached 300 s, the allocation keys' class: the document is re-rendered on every index-build run for
+  the plane's month, so it changes within its month, and a `404` read before a month's first run is
+  not held for longer than that. A past month's document stays as last rendered.
+- The description says what the schema's own rule says and nothing more: `projects` is always
+  present, `contributors` is absent below the floor (5), the number of distinct contributors is never
+  published, and nothing names a person.
+- Errors: `404` for a month with no document, `429`, and `503`, as the allocation key's month.
+- The two examples are `examples/designations-summary.v1.example.json` (`withContributors`, a
+  fixture month with both halves) and `examples/designations-summary.v1.below-floor.example.json`
+  (`belowFloor`, a sample month with the contributors' half absent), copied member for member, as
+  `getAllocationKey` inlines its example. `check:openapi-examples` validates 52 examples (50
+  before). `redocly.yaml` is untouched: the route has no literal sibling to overlap.
+- The website's tests still read `components.schemas` only, as 1.3.0 found, so none of them
+  compares this description's paths with what the edge serves. The edge serves the route from
+  website branch `edge-designations`.
+
 ## coverage/cov-v2.ts
 
 The second version of the published coverage function, beside the first. The module, its

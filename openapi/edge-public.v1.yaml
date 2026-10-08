@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.3.0
+  version: 1.4.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -43,8 +43,10 @@ info:
       published entitlement JWS plus the human verify page; the endpoint activates later
       with no schema change. The two allocation-key routes are P-M3 as well: their
       producer is the platform's index build, and until its first run writes the index
-      both answer `404`. The three contributor-page routes are P-M3 too: nothing is
-      published under them until a person publishes a page, and production publishes none
+      both answer `404`. The designations summary route is P-M3 as well, for the same
+      producer: a month no index-build run rendered answers `404`. The three
+      contributor-page routes are P-M3 too: nothing is published under them until a
+      person publishes a page, and production publishes none
       until its publishing switch is on, so until then each answers as for a page that does
       not exist.
     - `P-M4` — the change feed and the sandbox tenant, both demand-gated.
@@ -93,6 +95,8 @@ tags:
     description: The append-only allocation ledger and its hash chain.
   - name: allocation-keys
     description: The board's allocation key for each month, published before the month, and the index of what became of each.
+  - name: designations
+    description: "Designations in summary: the projects' and, behind a floor, the contributors' designations for each month (advisory; routes money only after the fairness review, D27)."
   - name: badges
     description: README badge endpoints in the shields.io endpoint format.
   - name: contributor-pages
@@ -1728,6 +1732,104 @@ paths:
                     releasedAt: '2026-12-14T16:20:31Z'
                     approvedBody: '{"actKind":"policy-adopt","algoVersion":"ALLOC-v1","capBps":1500,"categoryFunds":[{"fundId":"cat-animal-welfare","name":"Animal welfare"},{"fundId":"cat-education","name":"Education"},{"fundId":"cat-environment","name":"Environment"},{"fundId":"cat-health","name":"Health"},{"fundId":"cat-humanitarian-aid","name":"Humanitarian aid"},{"fundId":"cat-poverty-relief","name":"Poverty relief"},{"fundId":"cat-research","name":"Research"}],"decisionRef":"SAMPLE-MINUTE-2026-12-10-ALLOCATION-KEY-2027-01","effectiveMonth":"2027-01","listVersion":"v1","reserveRetentionBpsMax":500,"reserveTargetMinor":2700000,"routingMode":"shadow","stewardDefaultVector":{"cat-animal-welfare":1111,"cat-education":2223,"cat-environment":1111,"cat-health":2222,"cat-humanitarian-aid":1111,"cat-poverty-relief":1111,"cat-research":1111},"weights":{"rcp_0svacmgratb4f4q0syghrz8ym4":2,"rcp_28h7pz5ynzcftzy0pjrhjqsqmk":1,"rcp_66ss8w31jg95dd6vc2kn7t5f8y":1,"rcp_814sdk80b8hzejd1wx7h12ea1s":1,"rcp_8jf9xfejcgadg7cgyag0hmkcxb":2,"rcp_92tq7q30k6a0gjvjrps04weeek":1,"rcp_bdzk8dv1s58eyavk3g0m8g2ncj":1,"rcp_bnpt0deptzcjgsm50wpvmrw7kn":1,"rcp_f5cc8xgz81c00nrve04pdahejb":2,"rcp_r8m8v0kcyttv527jz2m5rha2ps":1,"rcp_tg8g3ps3smxzdpy1zt0zesjnx9":2,"rcp_vztv7dk7w3wjbehnz4zr7vd9yz":1,"rcp_wrfhyk9jj3awrx8dknj7r6yjcn":1,"rcp_zyjz8xjhrede9fhzq9hf84wc0w":1}}'
                     bodySha256: e5337e2cfbd58e914df1945ae871692c09d44e0f4e78fd2f9504107187e85e37
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/designations/{month}.json:
+    get:
+      operationId: getDesignationsSummary
+      summary: The designations in force for one month, in summary
+      description: |
+        The registry-wide summary of the designations in force for one month (statutes
+        Art. 8(4): designations are advisory, recorded and published in summary; Annex C,
+        the Calculation Rules, Nr. 26): the totals over all repositories of the projects'
+        own designations and, behind a floor, of the contributors' designations, each with
+        its count of designations. Every figure is a sum of whole percents, so in each half
+        the totals in `categories` and `association` make exactly 100 times
+        `designations`, and a mean is a total divided by `designations`. Each repository's
+        own statements are in its record.
+
+        Re-rendered on every run of the platform's index build for the plane's month, the
+        UTC calendar month of the run's `generatedAt`: within its month the document
+        changes from run to run, and its `ETag` and `Last-Modified` with it. A past month's
+        document stays as it was last rendered. A month no run rendered has no document
+        and answers `404`; nothing is back-filled.
+
+        `projects` is always present. The contributors' half, `contributors`, is absent
+        below the floor: it is present only when at least 5 distinct contributors have a
+        designation in force for the month over all repositories, and the designations of
+        repositories below their own floor of 5 designators, which no repository summary
+        covers, are none or are held by at least 5 distinct contributors. The schema states
+        the rule in full. The number of distinct contributors is never published.
+        Contributors' designations are advisory and route money only after the fairness
+        review (D27).
+
+        It names no person: no repository, contributor, administrator, account, node id,
+        version or instant is published, and every object is closed, so no member can
+        carry one.
+
+        Cached 300 s, like the allocation keys: the document changes within its month, and
+        a month asked for before its first run is not held as `404` for longer than that.
+      tags: [designations]
+      x-psn-phase: P-M3
+      parameters:
+        - name: month
+          in: path
+          required: true
+          description: The month the designations are in force for, `YYYY-MM`.
+          schema:
+            type: string
+            pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$'
+          example: 2026-11
+      responses:
+        '200':
+          description: The month's summary. Cached 300 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/designations-summary.v1.json'
+              examples:
+                withContributors:
+                  summary: A month with both halves, the contributors' at or above the floor (development plane)
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2026-11-02T05:00:00Z'
+                    source: fixture
+                    month: 2026-11
+                    projects:
+                      designations: 3
+                      categories:
+                        health: 50
+                        education: 30
+                        environment: 60
+                        research: 100
+                      association: 60
+                    contributors:
+                      designations: 14
+                      categories:
+                        health: 420
+                        education: 260
+                        environment: 350
+                        animal-welfare: 90
+                      association: 280
+                belowFloor:
+                  summary: A month below the floor, the contributors' half absent (sample plane)
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2026-10-27T09:00:00Z'
+                    source: sample
+                    month: 2026-10
+                    projects:
+                      designations: 2
+                      categories:
+                        health: 100
+                        education: 30
+                        environment: 50
+                      association: 20
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
