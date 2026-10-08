@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-02T05:00:00Z",
+  "source": "fixture",
+  "month": "2026-11",
+  "projects": {
+    "designations": 3,
+    "categories": { "health": 50, "education": 30, "environment": 60, "research": 100 },
+    "association": 60
+  },
+  "contributors": {
+    "designations": 14,
+    "categories": { "health": 420, "education": 260, "environment": 350, "animal-welfare": 90 },
+    "association": 280
+  }
+}

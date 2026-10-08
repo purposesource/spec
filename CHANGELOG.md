@@ -70,6 +70,10 @@ page; `contributor-page-alias.v1.json`, the pointer from a login address to a pa
 `link-platforms.v1.json`, the pinned link table, whose example is the table itself —
 thirty-four schemas in all.
 
+The designations' publication in summary (2026-10-08; ops decisions D117 §6 and D121 item 1) adds one
+more, with its own section below: `designations-summary.v1.json`, the registry-wide monthly totals of
+the projects' designations and, from 5 designators, of the contributors' — thirty-five schemas in all.
+
 ### Contracts published beyond the initially-scoped ten
 
 Seven schemas were added because another repository's acceptance test names a schema
@@ -645,15 +649,74 @@ creating one.
 ### 1.5.0 — unreleased (2026-10-08; ops decision D117 §6, statutes Art. 8(4))
 
 - Additive. Optional `designation`: the project's own designation as its administrators saved it,
-  the version in force for the month the record was built — `effectiveFrom` (`YYYY-MM`, the month
-  after the save in Europe/Zurich), `categories` (slug → whole percent 1-100) and `association` (the
+  the version in force for the record's month (the UTC calendar month of `generatedAt`) —
+  `effectiveFrom` (`YYYY-MM`), `categories` (slug → whole percent 1-100) and `association` (the
   whole percent expressly left to the Association, which the board's key distributes). The two make
   exactly 100, which the producer guarantees (JSON Schema cannot state a sum). Published per repository with no
   floor: it is the project's statement and names nobody. Contributors' designations are never
-  published per person, and their summary is not in this version.
+  published per person; their summary is 1.6.0's.
+- `effectiveFrom` is the first month of the unbroken run of months, ending with the record's month, in
+  which the designation in force had exactly these shares: ordinarily the month the version in force
+  took effect (the month after the save, in Europe/Zurich), earlier only when that version restated
+  the shares in force before it. Defined by what was in force, not by a version's own month, because
+  the producer's read (`designations_in_force(month)`, platform migration 0077) publishes no version
+  and no instant: it derives the run by reading earlier months until the shares differ.
+  *(Amended 2026-10-08 before the version left its branch: the draft said "the month after the save",
+  which that read cannot give.)*
 - `impactCategoryDefaults` is unchanged in shape and is now derived from `designation` when one is in
-  force: its category slugs, largest share first, ties in menu order.
+  force: its category slugs above 0, largest share first, ties in the menu's order (the statutes'
+  order of `category-menu.v1`); `[]` when the designation leaves everything to the Association.
 - The example carries a designation of 60 to `environment` and 40 left to the Association.
+
+### 1.6.0 — unreleased (2026-10-08; ops decisions D117 §6 and D121 item 1, statutes Art. 8(4), Calculation Rules Nr. 26)
+
+- Additive. Optional `contributorDesignations`: the contributors' designations for the repository in
+  summary — `designators` (how many contributors have a designation in force for the record's month)
+  and the mean percent per category and for the Association across all of them (`categories`,
+  `association`). Contributors' designations: advisory; routes money only after the fairness review
+  (D27).
+- **The floor.** Present only from 5 designators (N = 5, D121 item 1; OPEN-25 closed): `designators`
+  has `minimum: 5`, so a document below the floor that carried the object is refused. Below it the
+  object is absent and the repository's contributors count only in the registry-wide monthly summary
+  (`designations-summary.v1`), so that no one person's choice can be read off a small project.
+- **The means.** Over ALL designators: a designator with no line for a member counts 0. Each value is
+  the sum of whole percents divided by `designators`, rounded to one decimal with halves rounded up —
+  tenths = floor((20 × T + n) / (2 × n)) in integers — so the members make 100 within rounding: within
+  100 ± 0.05 × (the number of members), at most ± 0.4. A category is a member when any designator
+  gave it a share; `association` is always present. New `$defs.meanPercent` (a number from 0 to 100;
+  one decimal is the producer's guarantee, because JSON Schema cannot hold a number to one decimal
+  without floating-point error).
+- Nothing names a person: the object is closed and carries a count and means only — no contributor,
+  account, node id, version or instant.
+- The example carries 7 designators with means of 28.6 to `health`, 42.9 to `environment` and 28.6
+  left to the Association (totals 200, 300 and 200 over 7): they sum to 100.1, inside the stated bound,
+  which is why the bound is stated.
+
+## designations-summary.v1.json
+
+### 1.0.0 — unreleased (2026-10-08; ops decisions D117 §6 and D121 item 1, statutes Art. 8(4), Calculation Rules Nr. 25 and Nr. 26)
+
+- New. The registry-wide summary of the designations in force for one month, at
+  `/designations/{YYYY-MM}.json` (the month in the path, outside `ledger/`, as the allocation key's
+  `/allocation-keys/{YYYY-MM}.json`; FS-00 §6.2's dated note of 2026-09-28). Rendered by
+  `jobs.index-build` for the plane's month (the UTC month of its `generatedAt`) from
+  `designations_in_force(month)` (platform migration 0077); regenerated, not written once, and a past
+  month's document stays as last rendered. No dated FS-00 §6.2 note adopts the path yet; the schema's
+  `x-psn.artifactPath` is the proposal that note would adopt.
+- Two halves of totals, each `{ designations, categories, association }`: sums of whole percents, so
+  each half's totals make exactly 100 × `designations`. `projects` is always present (a project's
+  designation is published per repository with no floor, D121 item 1). `contributors` is present only
+  when (1) at least 5 distinct contributors have a designation in force overall and (2) the
+  designations no published repository summary covers are none or are held by at least 5 distinct
+  contributors — (2) so that subtracting the published repository summaries cannot isolate fewer than
+  5 people's choices. The number of distinct contributors is not published. Contributors'
+  designations: advisory; routes money only after the fairness review (D27).
+- `source` is required and admits `sample`, `fixture` and `platform` only, as the allocation key's
+  does: the curated registry never recorded a designation.
+- Nothing names a person or a repository: every object is closed.
+- Examples: `designations-summary.v1.example.json` (a fixture month with both halves) and
+  `designations-summary.v1.below-floor.example.json` (a sample month whose contributors' half is
+  absent).
 
 ## waiver.v1.json
 

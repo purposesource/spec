@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/designations-summary.v1.json",
+  "title": "Designations summary — /designations/{YYYY-MM}.json",
+  "description": "The registry-wide summary of the designations in force for one month (statutes Art. 8(4): designations are advisory, recorded and published in summary; Calculation Rules Nr. 25 and Nr. 26): the totals over all repositories of the projects' own designations and, behind a floor, of the contributors' designations, each with its count of designations. It names nobody: no repository, contributor, administrator, account, node id, version or instant is published, and its objects are closed, so no member can carry one. Each repository's own statements are in its record (`repo-record.v1`): `designation`, the project's, and `contributorDesignations`, its contributors' in summary from 5 designators.\n\nTHE PATH. One document per month at `/designations/{YYYY-MM}.json` on the public data plane (FS-00 §6.2), its month in the path the way the allocation key's is (`/allocation-keys/{YYYY-MM}.json`, the dated note of 2026-09-28) and, like it, outside `ledger/`, which the platform's index build reads as months. `jobs.index-build` renders it on every run for the plane's month — the UTC calendar month of the run's `generatedAt`, the month the plane's repository records state designations for — and a past month's document stays as it was last rendered. It is regenerated, not written once: within its month a run renders it again, and an account's erasure can merge two holders' histories under one pseudonym (platform migration 0077 ⑥) and so change a month's counts. A month no run rendered has no document, and nothing is back-filled.\n\nTOTALS, NOT MEANS. Every figure is a sum of whole percents. A category's total is the sum, over the designations counted, of their share to it; `association` is the sum of the shares they left to the Association, which the board's published allocation key distributes (Art. 8(4); Nr. 29). Each designation's lines make exactly 100, so in each half the totals in `categories` and `association` sum to exactly 100 × `designations` — a check any reader can make, which JSON Schema cannot state — and a mean is a total divided by `designations`. A category no designation names is not a member. In force for the month means, per designation (a repository's own, or one contributor's for one repository), the newest saved version whose first month is at or before `month`.\n\nTHE FLOOR ON THE CONTRIBUTORS' HALF. `projects` is always present: a project's designation is its own statement and is published per repository with no floor (ops decision D121 item 1), so its totals add nothing the records do not already say. `contributors` is present only when both of these hold, and is absent otherwise: (1) at least 5 distinct contributors have a designation in force for the month, over all repositories (N = 5, D121 item 1); and (2) the contributors' designations it counts that no published per-repository summary covers — those of repositories below the floor, which count only here — are none, or are held by at least 5 distinct contributors. Condition (2) is what keeps the floor whole: without it, subtracting the published repository summaries from these totals could isolate fewer than 5 people's choices, down to one person's. The number of distinct contributors is never published: `designations` counts designations, and a contributor who designated three repositories holds three. Contributors' designations: advisory; routes money only after the fairness review (D27). They route no money until a quarter's data and the board's published fairness and abuse review (Nr. 26); until then the project's own designation applies to their part, and without one the board's published allocation key (Nr. 29).\n\nADVISORY. Every designation is advisory (Art. 8(4)): it is recorded, published in summary and honoured under the published allocation rule as far as the Association's duties allow, and it never binds the Association. A project's designation routes its repository's money from the market start (Nr. 26).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (producer: `jobs.index-build`, from `designations_in_force(month)`, platform migration 0077). Nothing is published under this contract yet.",
+    "artifactPath": "/designations/{YYYY-MM}.json — one per month, regenerated for the plane's month",
+    "authoritative": true,
+    "producer": "`jobs.index-build` (P-M3), from `designations_in_force(month)` (platform migration 0077), applying the floor; a sample plane's builder renders it from its sample dataset",
+    "consumers": [
+      "the public transparency surfaces that report designations in summary",
+      "auditors and researchers reading how projects and contributors designate"
+    ],
+    "fsRefs": [
+      "FS-00 §6.2",
+      "statutes Art. 8(4)",
+      "Calculation Rules Nr. 25, Nr. 26, Nr. 29",
+      "ops decision D117 §6 (design/d117/PUBLICATION-IN-SUMMARY-PLAN-2026-10-08.md)",
+      "ops decision D121 item 1 (N = 5)",
+      "ops decision D27 (the fairness review)"
+    ],
+    "vsRefs": ["VS-05"],
+    "changelog": "CHANGELOG.md#designations-summaryv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "source", "month", "projects"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The plane's envelope instant (FS-00 §6.2): derived from the rows the build read, never from a clock. Its first seven characters are `month`."
+    },
+    "source": {
+      "enum": ["sample", "fixture", "platform"],
+      "description": "Which plane produced this document, in the envelope's vocabulary (FS-00 §6.2): `platform` is `jobs.index-build` in `PSN_ENV=prod`, `fixture` every other environment of it, `sample` a sample plane. `sample` and `fixture` declare a NON-PRODUCTION plane, which a production deployment refuses to serve (`sandbox_artifact_on_prod`). Required, and `registry-v0` is not admitted: the curated registry never recorded a designation, so no registry-v0 plane carries this document."
+    },
+    "month": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+      "description": "The month the designations counted are in force for, `YYYY-MM`. It names the document's path and equals the first seven characters of `generatedAt`."
+    },
+    "projects": {
+      "$ref": "#/$defs/totals",
+      "description": "The projects' own designations in force for `month`, one per repository that has one, set by its administrators: their count and totals. Always present; with no designation in force, `designations` is 0, `categories` empty and `association` 0."
+    },
+    "contributors": {
+      "$ref": "#/$defs/totals",
+      "description": "The contributors' designations in force for `month`, over all repositories, those below a repository's floor included: their count and totals. Present only under the two conditions of this document's description (at least 5 distinct contributors overall, and no fewer than 5 behind the designations no repository summary covers), absent otherwise. Contributors' designations: advisory; routes money only after the fairness review (D27).",
+      "properties": {
+        "designations": { "minimum": 5 }
+      }
+    }
+  },
+  "$defs": {
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["designations", "categories", "association"],
+      "properties": {
+        "designations": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many designations the totals sum: for `projects` the repositories with a designation of their own in force, for `contributors` the (contributor, repository) designations in force. The totals in `categories` and `association` sum to exactly 100 times this."
+        },
+        "categories": {
+          "type": "object",
+          "maxProperties": 7,
+          "propertyNames": { "$ref": "#/$defs/categorySlug" },
+          "additionalProperties": { "type": "integer", "minimum": 1 },
+          "description": "Category slug → the sum of the whole-percent shares the designations counted give it. A category no designation names is not a member."
+        },
+        "association": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The sum of the whole-percent shares the designations counted leave to the Association (\"All\"), which the board's published allocation key distributes (Art. 8(4)); 0 when none leaves anything to it."
+        }
+      }
+    },
+    "categorySlug": {
+      "enum": ["animal-welfare", "education", "environment", "health", "humanitarian-aid", "poverty-relief", "research"],
+      "description": "The seven published categories of the statutes' Art. 7 (D33 item 1). A copy of `category-menu.v1.json#/$defs/slug`, asserted identical to it by the publishing repository's gate — schemas here are self-contained, so one downloaded file validates on its own and cross-file references do not exist."
+    }
+  }
+}

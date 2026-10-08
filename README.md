@@ -17,7 +17,7 @@ a procurement reviewer can consume all of it the way they consume a static file.
 
 | Directory | Contents |
 |---|---|
-| `schemas/` | 34 JSON Schemas (draft 2020-12): one per published artifact class, and `contributor-page-settings.v1` for a person's private page settings, which are never published. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
+| `schemas/` | 35 JSON Schemas (draft 2020-12): one per published artifact class, and `contributor-page-settings.v1` for a person's private page settings, which are never published. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v2.ts`, the published coverage function in force, with `cov-v2.vectors.json` and its test suite; `cov-v1.ts`, the first version, frozen beside it with `vectors.json`. Zero dependencies. |
 | `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in four cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json`, `claim-kit.v2.example.json` and `link-platforms.v1.example.json`, the example IS the published document, byte for byte. Beside them, five golden files the implementations run: `link-rules.v1.golden.json` (the contributor page's link cases, hostile ones included), `contributor-page-contrast.v1.golden.json` (the WCAG matrix of the page's colour presets), `contributor-page-preview.v1.golden.json` (worked preview-hash vectors), `contributor-page-alias.v1.golden.json` (worked login-address MACs under a published test key) and `contributor-page-build.v1.golden.json` (the builder's vectors for keeping a hidden login off the repository list). |
@@ -38,7 +38,10 @@ own name implies and carries no figure; the category menu is a single list whose
 is identical; the Recipient List examples keep the List's order, their dates and notices, and
 agree with their index and with the cost-support example, and the two List contracts refuse what
 they must; every example allocation key hashes to the approved text it carries, is the key its
-weights give over the List version it names, and the key index agrees with it; the contributor
+weights give over the List version it names, and the key index agrees with it; every published
+designation makes 100 and derives its slug list, every contributors' summary keeps the floor of
+5 and the published rounding, every monthly summary's totals make 100 per designation, and the
+two designation contracts refuse what would name a person or breach the floor; the contributor
 page's link table keeps its rules and gives every golden link answer; the page contracts meet the
 contrast matrix, recompute their preview hashes, carry no points, money or GitHub id, and refuse
 what the design rules out; the coverage
@@ -58,6 +61,8 @@ npm run check:menu              # the category menu is one list; every copy of i
 npm run check:recipient-lists   # the List examples: order, dates, notices, index agreement, refusals
 npm run check:allocation-keys   # example keys hash to their approved text and derive from their
                                 #   weights over the List; the key index agrees
+npm run check:designations      # designations make 100 and derive their slug list; the contributors'
+                                #   summary keeps the floor of 5 and the rounding; monthly totals; refusals
 npm run check:links             # the contributor page's link table keeps its rules; every golden
                                 #   link case gets its recorded answer from the table's steps
 npm run check:contributor-page  # contrast matrix, preview-hash and alias-MAC vectors, the builder's
@@ -93,6 +98,7 @@ needs a toolchain is not really published.
 | `registry-index.v1.json` | `/registry/index/{shard}.json` and `/registry/export.json` | first public version |
 | `registry-index-meta.v1.json` | `/registry/index/meta.json` | first public version |
 | `repo-record.v1.json` | `/registry/repo/{node_id}.json` | first public version |
+| `designations-summary.v1.json` | `/designations/{YYYY-MM}.json` — the designations in force for one month, in summary over all repositories: the projects' totals, and the contributors' from 5 designators, each with its count of designations (ops decisions D117 §6 and D121) | P-M3 producer |
 | `waiver.v1.json` | `/waivers/{node_id}.json`, `/waivers/all.json` | first public version (honest empty state) |
 | `entitlement-record.v1.json` | decoded payload of `/entitlements/{co_ulid}.jws` | first public version |
 | `covered-organisations.v1.json` | `/entitlements/covered-organisations.json` — one line per organisation holding an Entitlement term, named only where it asked to be (ops decision D44) | first public version |
@@ -152,6 +158,16 @@ recorded — so anyone can recompute that hash from the published text with one 
 the key back out of the same text. It is written once, at the release; the date it was
 published is proven afterwards from the publish log and stated in the index, which is also where
 a key that came too late, or was voided, keeps its line.
+
+The designation members and the `designations-summary.v1` row (2026-10-08; ops decisions D117 §6
+and D121 item 1) publish designations as the statutes say they are published: recorded, and
+published in summary (Art. 8(4)), contributors' from the first day (Calculation Rules Nr. 26). A
+repository's record carries the project's own designation, set by its administrators, with no
+floor, and its contributors' designations only as a count and mean shares, and only from 5
+designators; below that they count only in the registry-wide monthly totals, which carry the
+contributors' half only when no fewer than 5 people stand behind what the repository summaries
+do not already show. Nothing published names a person. Contributors' designations are advisory
+and route money only after the fairness review (D27).
 
 The four contributor page rows (2026-10-06; ops decision D116) describe a person's own public page,
 which they build in private, preview and publish when ready, and hide whenever they like. The

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-27T09:00:00Z",
+  "source": "sample",
+  "month": "2026-10",
+  "projects": {
+    "designations": 2,
+    "categories": { "health": 100, "education": 30, "environment": 50 },
+    "association": 20
+  }
+}
