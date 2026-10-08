@@ -707,8 +707,8 @@ creating one.
   each half's totals make exactly 100 × `designations`. `projects` is always present (a project's
   designation is published per repository with no floor, D121 item 1). `contributors` is present only
   when (1) at least 5 distinct contributors have a designation in force overall and (2) the
-  designations no published repository summary covers are none or are held by at least 5 distinct
-  contributors — (2) so that subtracting the published repository summaries cannot isolate fewer than
+  designations no published repository summary covers (below a repository's floor, or of a
+  repository with no published record) are none or are held by at least 5 distinct contributors — (2) so that subtracting the published repository summaries cannot isolate fewer than
   5 people's choices. The number of distinct contributors is not published. Contributors'
   designations: advisory; routes money only after the fairness review (D27).
 - `source` is required and admits `sample`, `fixture` and `platform` only, as the allocation key's
