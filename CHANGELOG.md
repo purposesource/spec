@@ -678,7 +678,10 @@ creating one.
 - **The floor.** Present only from 5 designators (N = 5, D121 item 1; OPEN-25 closed): `designators`
   has `minimum: 5`, so a document below the floor that carried the object is refused. Below it the
   object is absent and the repository's contributors count only in the registry-wide monthly summary
-  (`designations-summary.v1`), so that no one person's choice can be read off a small project.
+  (`designations-summary.v1`) and are shown there only when at least 5 people stand behind what the
+  repository summaries do not show, so that no one person's choice can be read off a small project.
+  `designators` counts one per holder: a node id, or the pseudonym an erasure left; a person erased
+  and back under the same identity is two holders.
 - **The means.** Over ALL designators: a designator with no line for a member counts 0. Each value is
   the sum of whole percents divided by `designators`, rounded to one decimal with halves rounded up —
   tenths = floor((20 × T + n) / (2 × n)) in integers — so the members make 100 within rounding: within
@@ -707,10 +710,17 @@ creating one.
   each half's totals make exactly 100 × `designations`. `projects` is always present (a project's
   designation is published per repository with no floor, D121 item 1). `contributors` is present only
   when (1) at least 5 distinct contributors have a designation in force overall and (2) the
-  designations no published repository summary covers (below a repository's floor, or of a
-  repository with no published record) are none or are held by at least 5 distinct contributors — (2) so that subtracting the published repository summaries cannot isolate fewer than
-  5 people's choices. The number of distinct contributors is not published. Contributors'
+  designations of repositories below the floor (fewer than 5 designators in force), which no
+  repository summary can cover, are none or are held by at least 5 distinct contributors; a
+  repository at or above the floor needs no cover whether or not a record carries its summary —
+  (2) so that subtracting the published repository summaries cannot isolate fewer than 5 people's
+  choices. The number of distinct contributors is not published. Contributors'
   designations: advisory; routes money only after the fairness review (D27).
+  *(Amended 2026-10-08 before the version left its branch: condition (2) counted a repository with
+  no published record as uncovered, so one with 5 or more designators could stand in for the 5
+  people behind designations below the floor. Listing changes over time — a departed repository
+  keeps its record, and a repository that joins later publishes while older month files stay
+  public — so listing cannot decide what the month may show; the floor alone does.)*
 - `source` is required and admits `sample`, `fixture` and `platform` only, as the allocation key's
   does: the curated registry never recorded a designation.
 - Nothing names a person or a repository: every object is closed.
