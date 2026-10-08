@@ -642,6 +642,19 @@ creating one.
   (migration 0061, PS-1184), which fills a missing id and never moves a recorded one. A change of owner
   stays a transfer (FS02-022). No property, type, enum or meaning changes.
 
+### 1.5.0 — unreleased (2026-10-08; ops decision D117 §6, statutes Art. 8(4))
+
+- Additive. Optional `designation`: the project's own designation as its administrators saved it,
+  the version in force for the month the record was built — `effectiveFrom` (`YYYY-MM`, the month
+  after the save in Europe/Zurich), `categories` (slug → whole percent 1-100) and `association` (the
+  whole percent expressly left to the Association, which the board's key distributes). The two make
+  exactly 100, which the producer guarantees (JSON Schema cannot state a sum). Published per repository with no
+  floor: it is the project's statement and names nobody. Contributors' designations are never
+  published per person, and their summary is not in this version.
+- `impactCategoryDefaults` is unchanged in shape and is now derived from `designation` when one is in
+  force: its category slugs, largest share first, ties in menu order.
+- The example carries a designation of 60 to `environment` and 40 left to the Association.
+
 ## waiver.v1.json
 
 ### 1.0.0 — unreleased

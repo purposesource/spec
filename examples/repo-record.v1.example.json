@@ -44,6 +44,11 @@
     "url": "https://api.purposesource.org/badge/R_kgDOAbc123.json",
     "state": "registered"
   },
+  "designation": {
+    "effectiveFrom": "2026-11",
+    "categories": { "environment": 60 },
+    "association": 40
+  },
   "impactCategoryDefaults": ["environment"],
   "links": {
     "repository": "https://github.com/acme/widget-engine",
