@@ -4,7 +4,7 @@
   "title": "Registry index shard — /registry/index/{shard}.json (and the bulk export)",
   "description": "One shard of the published registry index, sharded by the first character of the repository name plus a `0` shard for everything non-alphabetic (FS02-062). THE SAME DOCUMENT SHAPE serves the bulk export `/registry/export.json` (apex alias `/registry.json`, FS10-060): that document sets `shard: \"export\"` and carries every entry. Entries are the minimum a browse page or a scanner needs; the full per-repository facts live in the repo record, whose URL each entry carries. Every registered repository appears (ops decision D82 item 1): an entry's `state` is `registered` for a repository registered under the network's rules, whether or not its admins have claimed it, and `suspended`, `quit` or `delisted` as before. No entry says whether a repository's admins have claimed it (D82 item 3). *(Amended 2026-09-30, D82 and its dated note (d) of 2026-09-29, which close OPEN-33: it said \"Only `verified`, `suspended`, `quit` and `delisted` repositories appear — `detected` repositories are counted, never listed (GH-014, OPEN-33 default).\")*",
   "x-psn": {
-    "specVersion": "1.4.0",
+    "specVersion": "1.5.0",
     "phase": "P-M2",
     "artifactPath": "/registry/index/{shard}.json · /registry/export.json",
     "authoritative": true,
@@ -50,7 +50,7 @@
         "ownerOrgId": { "$ref": "#/$defs/githubOwnerNodeId", "description": "The owner node_id the curated record carries as `owner_node_id` (`O_…` or `U_…`) — the same value `repo-record.v1` publishes as `owner.orgId`, and the key a Portfolio Entitlement's `scope.org` names (ops decision D42). On the entry so a Portfolio picker or a scanner can list an owner's repositories from the index alone. Absent when the registry records none. `owner` stays a display-cache login." },
         "name": { "type": "string", "minLength": 1, "maxLength": 100 },
         "state": { "enum": ["registered", "verified", "suspended", "quit", "delisted"], "description": "`registered`: the repository is registered under the network's rules and not suspended, whether or not its admins have claimed it. It is the one state an artifact published from ops decision D82 on shows for both of the platform's internal states `detected` and `verified` (D82 item 1 and its dated note (d) of 2026-09-29). A suspended repository is registered in D82 item 1's sense too, and its entry shows `suspended`, as before. `verified` is the state artifacts published before D82 carried for a claimed repository; it stays valid for them (versioning policy 4), and a producer writes `registered` in its place from D82 on, never both in one document (see `entries`). `suspended`, `quit` and `delisted` are unchanged. The internal state `detected` never appears." },
-        "weightClass": { "enum": ["standard", "major"] },
+        "weightClass": { "enum": ["standard", "major", "utility"], "description": "As in repo-record.v1. `utility` (1.5.0; D103 item 2, FS02-073; platform migration 0079): set only by the steward's recorded line count." },
         "licenseId": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9.+-]{1,63}$" },
         "licenseVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
         "adoptedAt": { "type": "string", "format": "date", "description": "Adoption date. `recentlyRegistered` ordering on the browse landing view uses this — cold-start fairness (WEB-073)." },

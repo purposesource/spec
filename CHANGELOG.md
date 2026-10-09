@@ -448,6 +448,10 @@ remembering the same rule.
   `suspended`, as before.
 - The example's first entry carries `registered`.
 
+### 1.5.0 — unreleased (2026-10-09; ops decision D103 item 2, FS02-073; platform migration 0079, PS-1445)
+
+- Additive. An entry's `weightClass` gains `utility`, as repo-record.v1 1.7.0.
+
 ## registry-index-meta.v1.json
 
 ### 1.0.0 — unreleased
@@ -694,6 +698,13 @@ creating one.
 - The example carries 7 designators with means of 28.6 to `health`, 42.9 to `environment` and 28.6
   left to the Association (totals 200, 300 and 200 over 7): they sum to 100.1, inside the stated bound,
   which is why the bound is stated.
+
+### 1.7.0 — unreleased (2026-10-09; ops decision D103 item 2, FS02-073; platform migration 0079, PS-1445)
+
+- Additive. `weightClass` gains `utility`: the class the steward sets by a recorded count of a
+  registered release's library lines (under 5,000), which the owner may ask to have recounted but
+  cannot choose. A Project of a Utility repository is priced at its band's Utility row. A reader that
+  knows only `standard` and `major` sees an unknown value only on a counted repository.
 
 ## designations-summary.v1.json
 
