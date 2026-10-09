@@ -2936,6 +2936,15 @@ reasoning: no month export has ever been published with a row in it.
 
 ## contributor-page.v1.json
 
+### 1.0.1 — unreleased (2026-10-09; ops decision D116, slice P25)
+
+- Wording only, a patch under policy 3: no member, value or constraint moves. `theme`'s description
+  said the renderer checks each adjusted colour "against its ground" and falls back "to the preset's
+  own accent". It checks the row's ground and surface in the theme table
+  (`examples/contributor-page-contrast.v1.golden.json` 1.1.0) and falls back on that ground alone to
+  the row's own accent, the print row's for print: a dark preset's own accent is about 2:1 on the
+  white print ground, so the old words, read literally, would print an unreadable link.
+
 ### 1.0.0 — unreleased (2026-10-06; ops decision D116 and its dated notes of ~09:40Z and ~11:50Z)
 
 - Initial publication, **pre-release**: nothing is published under it yet. The public document of
