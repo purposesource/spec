@@ -1318,6 +1318,14 @@ value inside `v1` is not additive (versioning policy 1).*
   `63b6efcca1fe8278c0e71257fff4a36b6c03da72cec62e2ea1676aacd3a465c5` (11,615 bytes).
   `examples/claim-kit.v2.example.json` is still that document, byte for byte, and the website
   vendors the same bytes.
+- *(Kit and example only, 2026-10-09, ops decision D125: the statutes' outer limit for passing on
+  Purpose Fees becomes 60 days (Art. 6a(2) and (4), changed before the register filing), so the
+  pledge reads "within 60 days of each payout" where it read "within 30 days of each payout".
+  Nothing else in the pledge or the kit changes, and the pledge is still 424 characters.
+  `kits/kit-2.json` is still unpublished (D32). Its SHA-256 over the raw bytes is now
+  `e5ca21ad419bc1ce790e1e19c1871347555a726f14c3bd38b0236558a8df0fe2` (11,694 bytes, LF); it was
+  `3a60f57f140156e48a2799408fe80df670ff3d2334868931e8e78ee0e49e777a`. The example is still the
+  same document, byte for byte, and the website vendors the same bytes. No schema change.)*
 
 ## ct-segment.v1.json
 
@@ -1576,6 +1584,17 @@ row the new-file rule binds absolutely.
   follows no later than the thirtieth day after each payout's credit (statutes Art. 6a(2) and (4);
   Calculation Rules Nr. 2 to 4). The thirty-day deadline, the per-payout clock and the token's
   name are unchanged. No property, type, enum or meaning of an existing row changes.
+
+### 1.5.4 — unreleased (2026-10-09; ops decisions D124 and D125)
+
+- Wording only. `holdStatus` no longer names the number of days. The statutes' outer limit for
+  passing on Purpose Fees becomes 60 days (D125: Art. 6a(2) and (4), changed before the register
+  filing), and the payouts credited in a month are transferred, as a rule, on the first bank
+  working day of the following month (D124; Financial Regulation §4(4)). The description now
+  says the share is transferred within the deadline of statutes Art. 6a(4), counted from the
+  credit of the month's earliest rail payout, so it holds whatever number the statutes carry.
+  The per-payout clock and the token's name are unchanged. No property, type, enum or meaning
+  of an existing row changes.
 
 ## ledger-export.v1.json
 
@@ -1848,6 +1867,19 @@ reasoning: no month export has ever been published with a row in it.
 - No member, type or existing meaning changes. Every document valid under 1.7.2 is valid
   under 1.8.0.
 
+### 1.8.1 — unreleased (2026-10-09; ops decisions D124 and D125)
+
+- Wording only, mirroring `ledger-row.v1` 1.5.4. The methodology description and the export
+  row's `holdStatus` no longer say "the thirtieth day" or "thirty days". D125 makes the
+  statutes' outer limit 60 days (Art. 6a(2) and (4), changed before the register filing), and
+  D124 makes the first bank working day of the following month the usual transfer day
+  (Financial Regulation §4(4)). Both descriptions now name the deadline of statutes Art. 6a(4),
+  counted from each payout's credit, without its number. A joint month lock still meets the
+  deadline of the month's earliest payout.
+- The example's month-note says the share is transferred normally on the first bank working day
+  of the following month and no later than sixty days after the credit of the month's earliest
+  rail payout. No property, type, enum or meaning changes.
+
 ## ledger-chain.v1.json
 
 ### 1.0.0 — unreleased
@@ -2076,6 +2108,16 @@ reasoning: no month export has ever been published with a row in it.
 - **Additive:** the earlier form stays valid, so any row written before the change validates
   unchanged. The examples keep the earlier form. No other property, type, enum or meaning
   changes.
+
+### 1.3.1 — unreleased (2026-10-09; ops decisions D124 and D125)
+
+- Wording only, as `ledger-row.v1` 1.5.4 and `ledger-export.v1` 1.8.1. The `transfers`
+  description no longer says "no later than the thirtieth day". The statutes' outer limit
+  becomes 60 days (D125; Art. 6a(2) and (4)), and the transfers are, as a rule, initiated on
+  the first bank working day of the month after the credit (D124; Financial Regulation
+  §4(4)). The description now names the deadline of statutes Art. 6a(4), counted from the
+  credit of the month's earliest rail payout, without its number. No property, type, enum or
+  meaning changes.
 
 ## recipient-list.v1.json
 
