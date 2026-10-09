@@ -4,11 +4,25 @@
  * JSON Schema can say on its own (ops decision D116 and its dated notes of 2026-10-06; design
  * PROFILE-PAGE-2026-10-06).
  *
- *   contrast   `examples/contributor-page-contrast.v1.golden.json`: every figure is the WCAG 2.2
- *              ratio of its colours, recomputed here; every text pair reaches 4.5 and every focus
- *              ring 3; the button text on each accent is whichever of white and black contrasts
- *              more; the rows are the eight presets of the two schemas, `purpose` in both modes
- *              (design §4.3).
+ *   contrast   `examples/contributor-page-contrast.v1.golden.json`, the theme table (slice P25): every
+ *              figure is the WCAG 2.2 ratio of its colours, recomputed here; every text pair reaches
+ *              4.5 on the ground and on the surface and every focus ring 3; the button text on each
+ *              accent is whichever of white and black contrasts more; the rows are the eight presets
+ *              of the two schemas, `purpose` in both modes, and a print row for each (design §4.3,
+ *              §4.8). Beside it: `guard-ends`, every row's ink reaches the guard's 4.6 on its ground
+ *              and its surface, so the accent guard always ends at k = 64 at the latest; `status`,
+ *              the fixed chip tokens reach 4.5 in every mode and name a tone for every certificate
+ *              status and repository listing the page schema has; `covers`, the eight gradients are
+ *              the schemas' cover presets.
+ *   accent     `examples/contributor-page-accent.v1.golden.json`: the gate's own reference of the
+ *              accent guard (the settings schema's `theme.accent`) recomputes every case, k, stored
+ *              colour and button text, for every ground; each expected accent is a valid
+ *              `contributor-page.v1` `theme`; the cases cover each preset's own accent, white,
+ *              black, the grounds, greys, primaries and pairs one channel step apart whose k
+ *              differs; the seeded cases are exactly the generator's; no case is decided within
+ *              1e-9 of 4.6, so .NET and V8 cannot split one; the file names the theme table's
+ *              SHA-256. `--print-accent-golden` prints the file recomputed from its own
+ *              hand-picked cases and generator, for when the theme table moves.
  *   preview    `examples/contributor-page-preview.v1.golden.json`: each vector's document is a
  *              valid `contributor-page.v1`, its preimage is the document reduced exactly as that
  *              schema's description defines, its text is the RFC 8785 form of the preimage, and
@@ -53,7 +67,7 @@
  * Run: node scripts/check-contributor-page.mjs
  */
 import { createHash, createHmac } from 'node:crypto';
-import { readdirSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { EXAMPLE_DIR, config, createValidatorWithAllSchemas, readJson, fail } from './lib/spec.mjs';
@@ -72,14 +86,19 @@ const PAGE_EXAMPLES = ['contributor-page.v1.example.json', 'contributor-page.v1.
 const GOLDENS = [
   'link-rules.v1.golden.json',
   'contributor-page-contrast.v1.golden.json',
+  'contributor-page-accent.v1.golden.json',
   'contributor-page-preview.v1.golden.json',
   'contributor-page-alias.v1.golden.json',
   'contributor-page-build.v1.golden.json'
 ];
 
 const table = example('link-platforms.v1.example.json');
+const THEME_FILE = 'contributor-page-contrast.v1.golden.json';
+const ACCENT_FILE = 'contributor-page-accent.v1.golden.json';
 const real = {
-  contrast: example('contributor-page-contrast.v1.golden.json'),
+  contrast: example(THEME_FILE),
+  themeSha256: createHash('sha256').update(readFileSync(join(EXAMPLE_DIR, THEME_FILE))).digest('hex'),
+  accent: example(ACCENT_FILE),
   preview: example('contributor-page-preview.v1.golden.json'),
   aliasGolden: example('contributor-page-alias.v1.golden.json'),
   build: example('contributor-page-build.v1.golden.json'),
@@ -108,6 +127,11 @@ const ratio = (a, b) => {
 const twoDecimals = (x) => Math.round(x * 100) / 100;
 const HEX = /^#[0-9a-f]{6}$/;
 
+/** Whichever of white and black contrasts more with a colour (white on a tie). */
+const buttonText = (hex) => (ratio('#ffffff', hex) >= ratio('#000000', hex) ? '#ffffff' : '#000000');
+const ROW_COLOURS = ['ground', 'surface', 'ink', 'muted', 'accent', 'onAccent', 'focus', 'rule'];
+const TONE_KEYS = ['text', 'background', 'border'];
+
 function contrastProblems(golden, settingsSchema, pageSchema) {
   const found = [];
   const add = (rule, message) => found.push([rule, `examples/contributor-page-contrast.v1.golden.json: ${message}`]);
@@ -116,38 +140,276 @@ function contrastProblems(golden, settingsSchema, pageSchema) {
   if (presets.join(',') !== pagePresets.join(',')) add('contrast', 'the two schemas list different presets');
   const rows = golden.rows ?? [];
   if (rows.length === 0) add('contrast', 'no rows — this gate would pass vacuously');
+  if (golden.minimums?.text !== 4.5 || golden.minimums?.focus !== 3) add('contrast', 'the minimums are 4.5 for text (WCAG 2.2 AA) and 3 for a focus ring');
+  if (golden.minimums?.guard !== 4.6) add('guard-ends', 'the guard minimum is 4.6: the renderer requires 4.5, and the 0.1 between them absorbs float differences (design §4.3)');
   const modes = new Map();
   for (const row of rows) {
     const where = `${row.preset}/${row.mode}`;
     modes.set(row.preset, [...(modes.get(row.preset) ?? []), row.mode]);
-    for (const key of ['ground', 'ink', 'muted', 'accent', 'onAccent', 'focus']) if (!HEX.test(row[key] ?? '')) add('contrast', `${where}: ${key} is not #rrggbb`);
-    if (found.length > 0) continue;
-    if (row.focus !== golden.focusRings?.[row.mode]) add('contrast', `${where}: the focus ring is not the ${row.mode} ring of focusRings`);
-    const better = ratio('#ffffff', row.accent) >= ratio('#000000', row.accent) ? '#ffffff' : '#000000';
-    if (row.onAccent !== better) add('contrast', `${where}: the button text must be ${better}, whichever of white and black contrasts more with the accent`);
-    const computed = {
+    const malformed = ROW_COLOURS.filter((key) => !HEX.test(row[key] ?? ''));
+    if (malformed.length > 0) {
+      add('contrast', `${where}: ${malformed.join(', ')} not #rrggbb`);
+      continue;
+    }
+    const ring = golden.focusRings?.[row.mode === 'print' ? 'light' : row.mode];
+    if (row.focus !== ring) add('contrast', `${where}: the focus ring is not the ${row.mode === 'print' ? 'light (print)' : row.mode} ring of focusRings`);
+    if (row.onAccent !== buttonText(row.accent)) add('contrast', `${where}: the button text must be ${buttonText(row.accent)}, whichever of white and black contrasts more with the accent`);
+    if (row.mode === 'print' && (row.ground !== '#ffffff' || row.surface !== '#ffffff')) add('print', `${where}: print is one column on white (design §4.8), so its ground and surface are #ffffff`);
+    const onGround = {
       ink: ratio(row.ink, row.ground),
       muted: ratio(row.muted, row.ground),
       accent: ratio(row.accent, row.ground),
       onAccent: ratio(row.onAccent, row.accent),
       focus: ratio(row.focus, row.ground)
     };
-    for (const [pair, value] of Object.entries(computed)) {
-      if (row.ratios?.[pair] !== twoDecimals(value)) add('contrast', `${where}: ${pair} is recorded as ${row.ratios?.[pair]}, WCAG 2.2 gives ${twoDecimals(value)}`);
-      const minimum = pair === 'focus' ? golden.minimums.focus : golden.minimums.text;
-      if (value < minimum) add('contrast', `${where}: ${pair} at ${twoDecimals(value)}:1 is below ${minimum}:1`);
+    const onSurface = {
+      ink: ratio(row.ink, row.surface),
+      muted: ratio(row.muted, row.surface),
+      accent: ratio(row.accent, row.surface),
+      focus: ratio(row.focus, row.surface)
+    };
+    for (const [member, rule, computed] of [['ratios', 'contrast', onGround], ['surfaceRatios', 'surface', onSurface]]) {
+      if (Object.keys(row[member] ?? {}).sort().join(',') !== Object.keys(computed).sort().join(',')) add(rule, `${where}: ${member} must name exactly ${Object.keys(computed).join(', ')}`);
+      for (const [pair, value] of Object.entries(computed)) {
+        if (row[member]?.[pair] !== twoDecimals(value)) add(rule, `${where}: ${member}.${pair} is recorded as ${row[member]?.[pair]}, WCAG 2.2 gives ${twoDecimals(value)}`);
+        const minimum = pair === 'focus' ? golden.minimums.focus : golden.minimums.text;
+        if (value < minimum) add(rule, `${where}: ${pair} at ${twoDecimals(value)}:1 on the ${member === 'ratios' ? 'ground' : 'surface'} is below ${minimum}:1`);
+      }
+    }
+    const inkWorst = Math.min(onGround.ink, onSurface.ink);
+    if (inkWorst < golden.minimums.guard) {
+      add('guard-ends', `${where}: the ink reaches only ${twoDecimals(inkWorst)}:1 on the ground or the surface; the accent guard ends at the ink (k = 64), so the ink must reach ${golden.minimums.guard}`);
     }
   }
-  if (golden.minimums?.text !== 4.5 || golden.minimums?.focus !== 3) add('contrast', 'the minimums are 4.5 for text (WCAG 2.2 AA) and 3 for a focus ring');
   for (const preset of presets) {
-    const seen = (modes.get(preset) ?? []).sort().join(',');
-    const expected = preset === 'purpose' ? 'dark,light' : null;
-    if (expected ? seen !== expected : !['light', 'dark'].includes(seen)) {
+    const seen = (modes.get(preset) ?? []).sort();
+    const screen = seen.filter((m) => m !== 'print').join(',');
+    if (preset === 'purpose' ? screen !== 'dark,light' : !['light', 'dark'].includes(screen)) {
       add('contrast', `${preset} has rows for [${seen}]; \`purpose\` follows the visitor and needs both modes, every other preset one`);
+    } else if (seen.filter((m) => m === 'print').length !== 1) {
+      add('print', `${preset} has rows for [${seen}]; every preset has exactly one print row (design §4.8)`);
     }
   }
   for (const preset of modes.keys()) if (!presets.includes(preset)) add('contrast', `${preset} is not a preset of the schemas`);
+  found.push(...statusProblems(golden.status, pageSchema, golden.minimums.text));
+  found.push(...coverProblems(golden.covers, settingsSchema, pageSchema));
   return found;
+}
+
+/** The fixed status tokens: per mode, each tone's text on its background; a tone for every status the page can carry. */
+function statusProblems(status, pageSchema, minimum) {
+  const found = [];
+  const add = (message) => found.push(['status', `examples/contributor-page-contrast.v1.golden.json: status: ${message}`]);
+  const tones = status?.tones ?? {};
+  if (Object.keys(tones).sort().join(',') !== 'dark,light,print') add('tones are needed for exactly the modes light, dark and print');
+  const names = Object.keys(tones.light ?? {});
+  if (names.length === 0) add('no tones — this gate would pass vacuously');
+  for (const [mode, set] of Object.entries(tones)) {
+    if (Object.keys(set).join(',') !== names.join(',')) add(`${mode} names the tones [${Object.keys(set)}], light names [${names}]`);
+    for (const [tone, token] of Object.entries(set)) {
+      const where = `${mode}/${tone}`;
+      if (Object.keys(token).join(',') !== TONE_KEYS.join(',') || TONE_KEYS.some((key) => !HEX.test(token[key] ?? ''))) {
+        add(`${where}: a tone is exactly {text, background, border}, each #rrggbb`);
+        continue;
+      }
+      const value = ratio(token.text, token.background);
+      if (status.ratios?.[mode]?.[tone] !== twoDecimals(value)) add(`${where}: recorded as ${status.ratios?.[mode]?.[tone]}, WCAG 2.2 gives ${twoDecimals(value)}`);
+      if (value < minimum) add(`${where}: the chip's text at ${twoDecimals(value)}:1 on its background is below ${minimum}:1`);
+      if (mode === 'print' && token.background !== '#ffffff') add(`${where}: a printer may drop backgrounds, so a print chip is drawn on white`);
+    }
+  }
+  const items = pageSchema.$defs.certificatesSection.properties.items.items.properties;
+  const listing = pageSchema.$defs.repositoriesSection.properties.groups.items.properties.repos.items.properties.listing;
+  for (const [kind, values] of [['certificate', items.status.enum], ['listing', listing.enum]]) {
+    const show = status?.show?.[kind] ?? {};
+    if (Object.keys(show).join(',') !== values.join(',')) add(`show.${kind} names [${Object.keys(show)}]; contributor-page.v1 can carry [${values}], in that order`);
+    for (const [value, tone] of Object.entries(show)) if (tone !== null && !names.includes(tone)) add(`show.${kind}.${value} names the tone ${tone}, which is not one of [${names}]`);
+  }
+  if (Object.keys(status?.show ?? {}).join(',') !== 'certificate,listing') add('show names exactly certificate and listing');
+  return found;
+}
+
+function coverProblems(covers, settingsSchema, pageSchema) {
+  const found = [];
+  const add = (message) => found.push(['covers', `examples/contributor-page-contrast.v1.golden.json: covers: ${message}`]);
+  const names = Object.keys(covers?.presets ?? {});
+  if (names.join(',') !== settingsSchema.$defs.coverPreset.enum.join(',') || names.join(',') !== pageSchema.properties.cover.properties.preset.enum.join(',')) {
+    add(`the presets are [${names}]; the schemas' cover presets are [${settingsSchema.$defs.coverPreset.enum}], in that order`);
+  }
+  if (!pageSchema.properties.cover.properties.angle.enum.includes(covers?.angle)) add(`the angle ${covers?.angle} is not one of the schema's [${pageSchema.properties.cover.properties.angle.enum}]`);
+  for (const [name, gradient] of Object.entries(covers?.presets ?? {})) {
+    if (Object.keys(gradient).join(',') !== 'from,to' || !HEX.test(gradient.from ?? '') || !HEX.test(gradient.to ?? '')) add(`${name} is exactly {from, to}, each #rrggbb`);
+  }
+  return found;
+}
+
+/* ----------------------------------------------------------------------- accent guard */
+
+const GUARD_STEPS = 64;
+const KNIFE_EDGE = 1e-9;
+const channels = (hex) => {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+};
+const toHex = (rgb) => `#${rgb.map((c) => c.toString(16).padStart(2, '0')).join('')}`;
+
+/** The raw colour mixed toward the ink by k/64, each channel floor((raw × (64 − k) + ink × k + 32) / 64): rounded half up. */
+function mix(raw, ink, k) {
+  const a = channels(raw);
+  const b = channels(ink);
+  return toHex(a.map((c, i) => Math.floor((c * (GUARD_STEPS - k) + b[i] * k + 32) / GUARD_STEPS)));
+}
+
+/** The rows a preset's accent is adjusted for, under the keys contributor-page.v1 `theme.accent` stores them by. */
+function guardRows(theme, preset) {
+  const rows = theme.rows.filter((r) => r.preset === preset);
+  const own = preset === 'purpose' ? rows.find((r) => r.mode === 'light') : rows.find((r) => r.mode !== 'print');
+  return {
+    light: own,
+    ...(preset === 'purpose' ? { dark: rows.find((r) => r.mode === 'dark') } : {}),
+    print: rows.find((r) => r.mode === 'print')
+  };
+}
+
+/**
+ * The accent guard as contributor-page-settings.v1 `theme.accent` defines it (design §4.3 and its
+ * P25 reading): the gate's own reference, not the api's C#. For one ground: the first k whose mix
+ * toward that row's ink reaches the guard minimum against both the row's ground and its surface,
+ * with the decisive figures at k and at k − 1.
+ */
+function guard(raw, row, minimum) {
+  const worst = (colour) => Math.min(ratio(colour, row.ground), ratio(colour, row.surface));
+  for (let k = 0; k <= GUARD_STEPS; k++) {
+    const colour = mix(raw, row.ink, k);
+    const at = worst(colour);
+    if (at >= minimum) return { k, colour, at, before: k > 0 ? worst(mix(raw, row.ink, k - 1)) : null };
+  }
+  return null;
+}
+
+/** One case as the golden file records it, recomputed. */
+function accentCase(theme, preset, raw) {
+  const rows = guardRows(theme, preset);
+  const accent = { raw };
+  const k = {};
+  const onAccent = {};
+  const margins = [];
+  for (const [ground, row] of Object.entries(rows)) {
+    const answer = row ? guard(raw, row, theme.minimums.guard) : null;
+    if (!answer) return null;
+    accent[ground] = answer.colour;
+    k[ground] = answer.k;
+    onAccent[ground] = buttonText(answer.colour);
+    margins.push(answer.at - theme.minimums.guard);
+    if (answer.before !== null) margins.push(theme.minimums.guard - answer.before);
+  }
+  return { accent, k, onAccent, margin: Math.min(...margins) };
+}
+
+/** xorshift32 (Marsaglia 2003: shifts 13, 17, 5) over an unsigned 32-bit state. */
+function seededRaws(generator, presets) {
+  let x = generator.seed >>> 0;
+  const next = () => {
+    x ^= x << 13;
+    x ^= x >>> 17;
+    x ^= x << 5;
+    x >>>= 0;
+    return x;
+  };
+  const out = [];
+  for (let i = 0; i < generator.count; i++) {
+    const a = next();
+    const b = next();
+    out.push({ id: `AS-${String(i + 1).padStart(3, '0')}`, preset: presets[a % presets.length], raw: `#${(b & 0xffffff).toString(16).padStart(6, '0')}` });
+  }
+  return out;
+}
+
+const SEEDED = /^AS-\d{3}$/;
+const PRIMARIES = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff'];
+const isGrey = (hex) => new Set(channels(hex)).size === 1 && hex !== '#000000' && hex !== '#ffffff';
+const validateTheme = ajv.getSchema(`${cfg.schemaBaseUrl}/${PAGE}#/properties/theme`);
+
+function accentProblems(golden, theme, themeSha256, presets) {
+  const found = [];
+  const add = (message) => found.push(['accent', `examples/contributor-page-accent.v1.golden.json: ${message}`]);
+  if (golden.themeSha256 !== themeSha256) add(`themeSha256 is ${golden.themeSha256}; the theme table these cases were computed against hashes to ${themeSha256}`);
+  const cases = golden.cases ?? [];
+  if (cases.length === 0) add('no cases — this gate would pass vacuously');
+  const ids = new Set();
+  for (const c of cases) {
+    if (ids.has(c.id)) add(`${c.id} appears twice`);
+    ids.add(c.id);
+    if (!presets.includes(c.preset) || !HEX.test(c.raw ?? '')) {
+      add(`${c.id}: a case names one of the presets and a raw #rrggbb in lower case`);
+      continue;
+    }
+    const got = accentCase(theme, c.preset, c.raw);
+    if (!got) {
+      add(`${c.id}: the guard did not end for ${c.preset} ${c.raw}`);
+      continue;
+    }
+    for (const member of ['accent', 'k', 'onAccent']) {
+      if (JSON.stringify(sortDeep(c[member])) !== JSON.stringify(sortDeep(got[member]))) add(`${c.id}: ${member} is ${JSON.stringify(c[member])}, the guard gives ${JSON.stringify(got[member])}`);
+    }
+    if (got.margin < KNIFE_EDGE) add(`${c.id}: decided within ${KNIFE_EDGE} of ${theme.minimums.guard}, where two float implementations could answer differently; choose another colour`);
+    if (!validateTheme({ preset: c.preset, accent: c.accent })) add(`${c.id}: the stored accent is not a valid contributor-page.v1 theme (${ajv.errorsText(validateTheme.errors)})`);
+  }
+  // The seeded cases are exactly the generator's.
+  const generator = golden.generator ?? {};
+  if (generator.algorithm !== 'xorshift32' || !Number.isInteger(generator.seed) || generator.seed <= 0 || generator.seed > 0xffffffff || !Number.isInteger(generator.count)) {
+    add('generator is {algorithm: "xorshift32", seed: a positive 32-bit integer, count}');
+  } else {
+    const expected = seededRaws(generator, presets);
+    const seeded = cases.filter((c) => SEEDED.test(c.id));
+    if (generator.count < 120) add(`the generator gives ${generator.count} cases; at least 120 are required`);
+    if (JSON.stringify(seeded.map((c) => [c.id, c.preset, c.raw])) !== JSON.stringify(expected.map((c) => [c.id, c.preset, c.raw]))) {
+      add(`the seeded cases are not the ${generator.count} the generator gives from seed ${generator.seed}`);
+    }
+  }
+  // What the hand-picked cases must cover.
+  const has = (preset, raw, test = () => true) => cases.some((c) => c.preset === preset && c.raw === raw && test(c));
+  for (const preset of presets) {
+    const rows = guardRows(theme, preset);
+    if (!rows.light || !rows.print || (preset === 'purpose' && !rows.dark)) {
+      add(`the theme table lacks a row the guard reads for ${preset}`);
+      continue;
+    }
+    if (!has(preset, rows.light.accent, (c) => c.k.light === 0)) add(`no case gives ${preset} its own accent ${rows.light.accent} at k = 0`);
+    if (rows.dark && !has(preset, rows.dark.accent, (c) => c.k.dark === 0)) add(`no case gives ${preset} its own dark accent ${rows.dark.accent} at k = 0`);
+    if (!has(preset, rows.print.accent, (c) => c.k.print === 0)) add(`no case gives ${preset} its own print accent ${rows.print.accent} at k = 0`);
+    for (const [what, raw] of [['white', '#ffffff'], ['black', '#000000'], ['its own ground', rows.light.ground]]) if (!has(preset, raw)) add(`no case gives ${preset} ${what} (${raw})`);
+    if (!cases.some((c) => c.preset === preset && isGrey(c.raw))) add(`no case gives ${preset} a mid grey`);
+    for (const raw of PRIMARIES) if (!has(preset, raw)) add(`no case gives ${preset} the primary ${raw}`);
+  }
+  for (const ground of ['light', 'dark', 'print']) if (!cases.some((c) => c.k[ground] > 0)) add(`no case adjusts the ${ground} ground (k > 0)`);
+  const flips = new Set();
+  for (const a of cases) {
+    for (const b of cases) {
+      if (a.preset !== b.preset || a.id >= b.id) continue;
+      const da = channels(a.raw);
+      const db = channels(b.raw);
+      if (da.reduce((n, c, i) => n + Math.abs(c - db[i]), 0) !== 1) continue;
+      for (const ground of Object.keys(a.k)) if (a.k[ground] !== b.k[ground]) flips.add(`${a.preset}/${ground}/${Math.min(a.k[ground], b.k[ground]) === 0 ? 'edge' : 'middle'}`);
+    }
+  }
+  if (flips.size < 6) add(`only ${flips.size} kinds of neighbour pairs whose k differs ([${[...flips]}]); the guard's threshold needs at least 6, at k = 0 and further along, on all three grounds`);
+  for (const ground of ['light', 'dark', 'print']) if (![...flips].some((f) => f.split('/')[1] === ground)) add(`no neighbour pair flips k on the ${ground} ground`);
+  return found;
+}
+
+/** The golden file, recomputed from its own hand-picked cases and its generator (`--print-accent-golden`). */
+function accentGoldenText(golden, theme, themeSha256, presets) {
+  const hand = (golden.cases ?? []).filter((c) => !SEEDED.test(c.id)).map((c) => ({ id: c.id, preset: c.preset, raw: c.raw, ...(c.note ? { note: c.note } : {}) }));
+  const seeded = seededRaws(golden.generator, presets);
+  const cases = [...hand, ...seeded].map((c) => {
+    const got = accentCase(theme, c.preset, c.raw);
+    return { ...c, accent: got.accent, k: got.k, onAccent: got.onAccent };
+  });
+  const head = { ...golden, themeSha256 };
+  delete head.cases;
+  const text = JSON.stringify(head, null, 2);
+  return `${text.slice(0, -2)},\n  "cases": [\n${cases.map((c) => `    ${JSON.stringify(c)}`).join(',\n')}\n  ]\n}\n`;
 }
 
 /* -------------------------------------------------------------------------- preview */
@@ -530,6 +792,7 @@ function goldenFilesProblems(names) {
 function allProblems(state) {
   return [
     ...contrastProblems(state.contrast, state.schemas.settings, state.schemas.page),
+    ...accentProblems(state.accent, state.contrast, state.themeSha256, state.schemas.settings.$defs.preset.enum),
     ...previewProblems(state.preview),
     ...aliasProblems(state.aliasGolden, state.alias, state.page),
     ...buildProblems(state.build),
@@ -550,6 +813,27 @@ const SELF_TEST = [
   ['contrast', (s) => { s.contrast.rows[3].ratios.accent = 6.0; }],
   ['contrast', (s) => { s.contrast.rows[2].muted = '#b0a090'; }],
   ['contrast', (s) => { s.contrast.rows = s.contrast.rows.filter((r) => r.preset !== 'signal'); }],
+  ['surface', (s) => { s.contrast.rows[6].surface = '#3a4a66'; }],
+  ['surface', (s) => { s.contrast.rows[4].surfaceRatios.muted = 9.99; }],
+  ['print', (s) => { s.contrast.rows = s.contrast.rows.filter((r) => !(r.preset === 'gold' && r.mode === 'print')); }],
+  ['print', (s) => { const row = s.contrast.rows.find((r) => r.preset === 'mint' && r.mode === 'print'); row.ground = '#eef7f2'; }],
+  ['guard-ends', (s) => { const row = s.contrast.rows.find((r) => r.preset === 'midnight' && r.mode === 'print'); row.ink = '#767676'; }],
+  ['guard-ends', (s) => { s.contrast.minimums.guard = 4.5; }],
+  ['status', (s) => { delete s.contrast.status.show.certificate.superseded; }],
+  ['status', (s) => { s.contrast.status.tones.dark.bad.background = '#7a4a4a'; }],
+  ['status', (s) => { s.contrast.status.ratios.light.ok = 9.5; }],
+  ['status', (s) => { s.contrast.status.tones.print.neutral.background = '#eef1f4'; }],
+  ['covers', (s) => { delete s.contrast.covers.presets.dusk; }],
+  ['covers', (s) => { s.contrast.covers.angle = 45; }],
+  ['accent', (s) => { s.accent.cases[0].k.light = 1; }],
+  ['accent', (s) => { const c = s.accent.cases.find((x) => x.k.print > 0); c.accent.print = c.raw; }],
+  ['accent', (s) => { const c = s.accent.cases.find((x) => x.onAccent.light === '#000000'); c.onAccent.light = '#ffffff'; }],
+  ['accent', (s) => { s.accent.themeSha256 = '0'.repeat(64); }],
+  ['accent', (s) => { const c = s.accent.cases.find((x) => SEEDED.test(x.id)); c.raw = c.raw === '#000001' ? '#000002' : '#000001'; }],
+  ['accent', (s) => { s.accent.cases = s.accent.cases.filter((x) => !SEEDED.test(x.id)); }],
+  ['accent', (s) => { s.accent.cases = s.accent.cases.filter((x) => !(x.note ?? '').startsWith('neighbour')); }],
+  ['accent', (s) => { s.accent.cases = s.accent.cases.filter((x) => !(x.preset === 'gold' && x.raw === '#7a5a17')); }],
+  ['accent', (s) => { s.contrast.rows.find((r) => r.preset === 'purpose' && r.mode === 'dark').ink = '#ffffff'; }],
   ['preview', (s) => { s.preview.vectors[0].previewSha256 = '0'.repeat(64); }],
   ['preview', (s) => { s.preview.vectors[1].preimage.picture = { kind: 'github', letters: 'S' }; }],
   ['preview', (s) => { s.preview.vectors = s.preview.vectors.filter((v) => v.id !== 'PV-3'); }],
@@ -586,6 +870,11 @@ function baseState() {
   return { ...structuredClone(real), goldenFiles };
 }
 
+if (process.argv.includes('--print-accent-golden')) {
+  process.stdout.write(accentGoldenText(real.accent, real.contrast, real.themeSha256, real.schemas.settings.$defs.preset.enum));
+  process.exit(0);
+}
+
 const selfTestProblems = selfTest();
 if (selfTestProblems.length > 0) fail(selfTestProblems, '');
 
@@ -593,7 +882,8 @@ const state = baseState();
 const problems = allProblems(state).map(([, message]) => message);
 fail(
   problems,
-  `the contributor page contracts hold: ${state.contrast.rows.length} preset rows meet WCAG 2.2 AA as recorded, ` +
+  `the contributor page contracts hold: ${state.contrast.rows.length} theme rows meet WCAG 2.2 AA on their grounds and surfaces as recorded, ` +
+    `the status chips and covers match the schemas, ${state.accent.cases.length} accent guard cases recompute, ` +
     `${state.preview.vectors.length} preview vectors recompute, ${state.aliasGolden.vectors.length} alias MAC vectors recompute, ` +
     `${state.build.vectors.length} builder vectors keep a hidden login off the repository list, no page member or example carries points, money or a GitHub id, ` +
     `the defaults are the schema's, ${REFUSALS.length} refusals hold, and every rule was proved able to fail`,

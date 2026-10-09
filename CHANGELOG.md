@@ -2912,6 +2912,28 @@ reasoning: no month export has ever been published with a row in it.
   nothing for amounts now, and adding the member when the operator decides at the first
   disbursement is additive. `check:contributor-page` refuses a document that carries one.
 
+### 1.0.1 — unreleased (2026-10-09; ops decision D116, slice P25)
+
+- Wording only, a patch under policy 3: no member, value or constraint moves. `theme.accent`'s
+  description settles a gap in design §4.3. The design's guard mixes the raw colour "toward the
+  preset's ink" on every ground; a dark preset's ink is light, and mixed toward it on the white
+  print ground a colour only loses contrast, so the design's own promise "at k = 64 the mix is the
+  ink itself, which passes everywhere" failed for midnight, gold and signal in print. Each ground
+  now mixes toward its own row's ink in the theme table, the print row's dark ink for print, and the
+  integer arithmetic is stated exactly: floor((raw × (64 − k) + ink × k + 32) / 64) per channel.
+- THE THEME TABLE. `examples/contributor-page-contrast.v1.golden.json` (specVersion 1.1.0) grows
+  from the contrast matrix of the eight presets into the table both implementations read byte for
+  byte (slice P25): each row gains `surface` and `rule`, every preset gains a `print` row (white
+  ground, a dark ink, the print accent), the fixed status tokens are added per mode with the tone of
+  every certificate status and repository listing `contributor-page.v1` can carry, and so are the
+  eight cover gradients. `minimums.guard` (4.6) is the guard's threshold, and every row's ink
+  reaches it on its ground and its surface, so the guard always ends. The nine rows of 1.0.0 keep
+  their values. `examples/contributor-page-accent.v1.golden.json` is new: the guard's vectors,
+  each preset's own accent, white, black, the grounds, greys, primaries, pairs one channel step
+  apart whose k differs, and 128 cases from a seeded generator, every one recomputed by
+  `check:contributor-page`, which also refuses a case decided within 1e-9 of the threshold so that
+  float differences between .NET and V8 cannot split an answer.
+
 ## contributor-page.v1.json
 
 ### 1.0.0 — unreleased (2026-10-06; ops decision D116 and its dated notes of ~09:40Z and ~11:50Z)

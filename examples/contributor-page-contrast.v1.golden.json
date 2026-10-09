@@ -1,14 +1,20 @@
 {
   "$comment": [
-    "The contrast matrix of the eight colour presets of the contributor page (design PROFILE-PAGE-2026-10-06 §4.3), as WCAG 2.2 figures every preset must meet. `purpose`, the default, follows the visitor and has a row per mode; the other presets have their own mode.",
-    "Each row names the preset's ground, ink, muted text, accent, the text on an accent button (white or black, whichever contrasts more with the accent) and the focus ring of its mode. `ratios` are the contrast ratios of ink, muted and accent against the ground, of the button text against the accent, and of the focus ring against the ground, rounded half up to two decimals.",
-    "WCAG 2.2: each sRGB channel c/255 is linearised (c/12.92 at or below 0.04045, else ((c+0.055)/1.055)^2.4); L = 0.2126 R + 0.7152 G + 0.0722 B; the ratio is (L1 + 0.05)/(L2 + 0.05), the lighter over the darker. check:contributor-page recomputes every figure and holds it to `minimums`: 4.5 for text (SC 1.4.3, AA) and 3 for the focus ring (SC 1.4.11).",
-    "The preset tables of the theme slice (P25) add the surface, rule and status tokens and the print ground; their rows are added here then, and every implementation's CI computes the same matrix (design §4.3)."
+    "The theme table of the contributor page (design PROFILE-PAGE-2026-10-06 §4.3, §4.4, §4.8; slice P25): the eight colour presets as token sets, the print rows, the fixed status tokens and the cover presets, with the WCAG 2.2 figures every pair must meet. It is DATA both implementations read byte for byte, each pinning its SHA-256: the api's accent guard (C#, in the platform) and the edge renderer (JavaScript, website `src/lib/contributor-page/theme.mjs`). The file keeps the name it had as the contrast matrix of slice P02.",
+    "ROWS. One row per preset and mode. `purpose`, the default, follows the visitor and has a `light` and a `dark` row; every other preset has its own mode (light: mocha, mint, mustard, earth; dark: midnight, gold, signal). Every preset also has a `print` row (design §4.8: one column on white): white ground and surface, a dark ink, and the print accent, which is the preset's own accent where that holds on white and a darker colour of the same hue for the three dark presets, whose own ink and accent are light.",
+    "TOKENS. `ground` is the page. `surface` is the paper sheet of layout `paper` and the section cards of layout `profile`, so every text token sits on both. `ink`, `muted` and `accent` are text (the accent is also links, headings and buttons). `onAccent` is the text on an accent button, white or black, whichever contrasts more with the accent. `focus` is the focus ring: `focusRings` of the row's mode, the light ring in print. `rule` is a hairline and decoration only: no text sits on it, so no figure applies to it.",
+    "SURFACE AND RULE, WHY THESE. On a light preset the surface is the ground lifted toward white in the preset's own hue, as the site sets #ffffff on #faf8f2: the sheet and the cards read as paper on a tinted desk, and every text token gains contrast on it. On a dark preset the surface is the ground lifted a few steps, as the site sets #151b17 on #0f1411: a raised card that keeps the preset's hue and costs each text token about a tenth of its ratio, which all of them can spare. The rule is a hairline of the preset's hue about 1.2 to 1.5:1 from its ground, as the site's #ded8c9 is; in print it is the light preset's own, or a pale grey of the dark preset's hue.",
+    "FIGURES. `ratios` are the contrast of ink, muted and accent against the ground, of the button text against the accent, and of the ring against the ground; `surfaceRatios` are ink, muted, accent and the ring against the surface; all rounded half up to two decimals. WCAG 2.2: each sRGB channel c/255 is linearised (c/12.92 at or below 0.04045, else ((c+0.055)/1.055)^2.4); L = 0.2126 R + 0.7152 G + 0.0722 B; the ratio is (L1 + 0.05)/(L2 + 0.05), the lighter over the darker. check:contributor-page recomputes every figure and holds it to `minimums`: 4.5 for text (SC 1.4.3, AA) and 3 for the focus ring (SC 1.4.11). Every row's ink also reaches `minimums.guard` (4.6) on its ground and its surface, which is what ends the accent guard below.",
+    "STATUS (design §4.3, §4.5). `status.tones` are the chips' fixed tokens per mode (text, background, border), the site's own verdict tones, so a person's accent can never fake \"Verified\" or \"Revoked\"; a chip always carries an icon and words as well. Light rows use `light`, dark rows `dark`, print rows `print`. `status.show` names the tone of every certificate `status` and repository `listing` contributor-page.v1 can carry; null is no chip. A participation certificate `expired` only by the clock still reads \"Verified: attests participation in {year}\" (contributor-page.v1), so it takes `ok`. Print draws a chip on white with its border, because a printer may drop backgrounds, and draws none on a certificate row (design §4.8: paper never states a verdict). `status.ratios` are each tone's text against its background.",
+    "THE ACCENT GUARD (design §4.3; contributor-page-settings.v1 `theme.accent`). The api adjusts a person's accent once at save, in C#, for each ground the page can show: the preset's own row (`light` in contributor-page.v1 `theme.accent`, whatever that row's mode), `purpose`'s dark row (`dark`, only there), and the preset's print row (`print`). For k = 0 to 64 it mixes the raw colour toward THAT ROW'S ink, each channel floor((raw × (64 − k) + ink × k + 32) / 64), which is (raw × (64 − k) + ink × k) / 64 rounded half up, and keeps the first mix whose contrast against both the row's ground and the row's surface is at least `minimums.guard`. The design says \"toward the preset's ink\"; a dark preset's ink is light, and mixed toward it on the white print ground a colour only loses contrast, so k = 64 would fail there. Each ground therefore mixes toward its own row's ink: the print row's dark ink for print. Since every row's ink reaches 4.6 on its ground and its surface, k = 64 is that ink and passes, so the guard always ends. examples/contributor-page-accent.v1.golden.json holds its vectors; the button text on an adjusted colour is white or black, whichever contrasts more, which is always at least 4.58:1.",
+    "THE RENDERER only checks, never adjusts (design §4.3): each stored adjusted accent must reach `minimums.text` (4.5) against its row's ground and surface, else that mode falls back to the row's own accent. The 0.1 between 4.6 and 4.5 absorbs float differences between .NET and V8. The raw colour is decoration only (the cover tint, the frame, the picture ring) and is held to no figure.",
+    "COVERS (design §4.4). `covers.presets` are the eight gradient presets, drawn from `from` to `to` at `covers.angle` degrees. No text ever sits on a cover, so no figure applies; the names are contributor-page.v1's `cover.preset`."
   ],
-  "specVersion": "1.0.0",
+  "specVersion": "1.1.0",
   "minimums": {
     "text": 4.5,
-    "focus": 3
+    "focus": 3,
+    "guard": 4.6
   },
   "focusRings": {
     "light": "#0f4f8a",
@@ -19,154 +25,547 @@
       "preset": "purpose",
       "mode": "light",
       "ground": "#faf8f2",
+      "surface": "#ffffff",
       "ink": "#14170f",
       "muted": "#4d5347",
       "accent": "#1d5c3c",
       "onAccent": "#ffffff",
       "focus": "#0f4f8a",
+      "rule": "#ded8c9",
       "ratios": {
         "ink": 17.06,
         "muted": 7.48,
         "accent": 7.47,
         "onAccent": 7.93,
         "focus": 7.89
+      },
+      "surfaceRatios": {
+        "ink": 18.12,
+        "muted": 7.94,
+        "accent": 7.93,
+        "focus": 8.38
       }
     },
     {
       "preset": "purpose",
       "mode": "dark",
       "ground": "#0f1411",
+      "surface": "#151b17",
       "ink": "#ece8dc",
       "muted": "#b4b3a5",
       "accent": "#8fcaa6",
       "onAccent": "#000000",
       "focus": "#8ec2f0",
+      "rule": "#263029",
       "ratios": {
         "ink": 15.19,
         "muted": 8.8,
         "accent": 9.9,
         "onAccent": 11.17,
         "focus": 9.86
+      },
+      "surfaceRatios": {
+        "ink": 14.27,
+        "muted": 8.27,
+        "accent": 9.3,
+        "focus": 9.26
       }
     },
     {
       "preset": "mocha",
       "mode": "light",
       "ground": "#f6efe7",
+      "surface": "#fcf8f3",
       "ink": "#2a1d14",
       "muted": "#5e4a3c",
       "accent": "#7a4a2a",
       "onAccent": "#ffffff",
       "focus": "#0f4f8a",
+      "rule": "#e2d5c6",
       "ratios": {
         "ink": 14.34,
         "muted": 7.31,
         "accent": 6.48,
         "onAccent": 7.39,
         "focus": 7.35
+      },
+      "surfaceRatios": {
+        "ink": 15.46,
+        "muted": 7.88,
+        "accent": 6.99,
+        "focus": 7.93
       }
     },
     {
       "preset": "mint",
       "mode": "light",
       "ground": "#eef7f2",
+      "surface": "#f8fcfa",
       "ink": "#10261c",
       "muted": "#3f5a4d",
       "accent": "#0f6b52",
       "onAccent": "#ffffff",
       "focus": "#0f4f8a",
+      "rule": "#cfe3d8",
       "ratios": {
         "ink": 14.61,
         "muted": 6.91,
         "accent": 5.92,
         "onAccent": 6.47,
         "focus": 7.67
+      },
+      "surfaceRatios": {
+        "ink": 15.42,
+        "muted": 7.3,
+        "accent": 6.25,
+        "focus": 8.1
       }
     },
     {
       "preset": "mustard",
       "mode": "light",
       "ground": "#fbf5e3",
+      "surface": "#fffcf2",
       "ink": "#241d08",
       "muted": "#5b5131",
       "accent": "#7a5c00",
       "onAccent": "#ffffff",
       "focus": "#0f4f8a",
+      "rule": "#e9dcb4",
       "ratios": {
         "ink": 15.37,
         "muted": 7.23,
         "accent": 5.74,
         "onAccent": 6.25,
         "focus": 7.69
+      },
+      "surfaceRatios": {
+        "ink": 16.31,
+        "muted": 7.67,
+        "accent": 6.09,
+        "focus": 8.16
       }
     },
     {
       "preset": "earth",
       "mode": "light",
       "ground": "#f7f1ec",
+      "surface": "#fdfaf7",
       "ink": "#2b1a12",
       "muted": "#5f4a3f",
       "accent": "#9a3f1f",
       "onAccent": "#ffffff",
       "focus": "#0f4f8a",
+      "rule": "#e4d6cc",
       "ratios": {
         "ink": 14.89,
         "muted": 7.39,
         "accent": 6.04,
         "onAccent": 6.76,
         "focus": 7.48
+      },
+      "surfaceRatios": {
+        "ink": 16.04,
+        "muted": 7.96,
+        "accent": 6.5,
+        "focus": 8.06
       }
     },
     {
       "preset": "midnight",
       "mode": "dark",
       "ground": "#0e1726",
+      "surface": "#152034",
       "ink": "#e8edf5",
       "muted": "#a9b6c9",
       "accent": "#8cb8ff",
       "onAccent": "#000000",
       "focus": "#8ec2f0",
+      "rule": "#26344b",
       "ratios": {
         "ink": 15.28,
         "muted": 8.74,
         "accent": 8.91,
         "onAccent": 10.42,
         "focus": 9.52
+      },
+      "surfaceRatios": {
+        "ink": 13.87,
+        "muted": 7.94,
+        "accent": 8.09,
+        "focus": 8.64
       }
     },
     {
       "preset": "gold",
       "mode": "dark",
       "ground": "#14110a",
+      "surface": "#1d1910",
       "ink": "#f3ecd9",
       "muted": "#c2b48f",
       "accent": "#e0b04a",
       "onAccent": "#000000",
       "focus": "#8ec2f0",
+      "rule": "#3a3222",
       "ratios": {
         "ink": 15.98,
         "muted": 9.17,
         "accent": 9.4,
         "onAccent": 10.48,
         "focus": 9.98
+      },
+      "surfaceRatios": {
+        "ink": 14.86,
+        "muted": 8.52,
+        "accent": 8.74,
+        "focus": 9.28
       }
     },
     {
       "preset": "signal",
       "mode": "dark",
       "ground": "#0b0f14",
+      "surface": "#121820",
       "ink": "#e6f1ff",
       "muted": "#9fb3c8",
       "accent": "#3ee6c1",
       "onAccent": "#000000",
       "focus": "#8ec2f0",
+      "rule": "#243040",
       "ratios": {
         "ink": 16.83,
         "muted": 8.93,
         "accent": 12.17,
         "onAccent": 13.29,
         "focus": 10.18
+      },
+      "surfaceRatios": {
+        "ink": 15.62,
+        "muted": 8.29,
+        "accent": 11.29,
+        "focus": 9.45
+      }
+    },
+    {
+      "preset": "purpose",
+      "mode": "print",
+      "ground": "#ffffff",
+      "surface": "#ffffff",
+      "ink": "#14170f",
+      "muted": "#4d5347",
+      "accent": "#1d5c3c",
+      "onAccent": "#ffffff",
+      "focus": "#0f4f8a",
+      "rule": "#ded8c9",
+      "ratios": {
+        "ink": 18.12,
+        "muted": 7.94,
+        "accent": 7.93,
+        "onAccent": 7.93,
+        "focus": 8.38
+      },
+      "surfaceRatios": {
+        "ink": 18.12,
+        "muted": 7.94,
+        "accent": 7.93,
+        "focus": 8.38
+      }
+    },
+    {
+      "preset": "mocha",
+      "mode": "print",
+      "ground": "#ffffff",
+      "surface": "#ffffff",
+      "ink": "#2a1d14",
+      "muted": "#5e4a3c",
+      "accent": "#7a4a2a",
+      "onAccent": "#ffffff",
+      "focus": "#0f4f8a",
+      "rule": "#e2d5c6",
+      "ratios": {
+        "ink": 16.35,
+        "muted": 8.33,
+        "accent": 7.39,
+        "onAccent": 7.39,
+        "focus": 8.38
+      },
+      "surfaceRatios": {
+        "ink": 16.35,
+        "muted": 8.33,
+        "accent": 7.39,
+        "focus": 8.38
+      }
+    },
+    {
+      "preset": "mint",
+      "mode": "print",
+      "ground": "#ffffff",
+      "surface": "#ffffff",
+      "ink": "#10261c",
+      "muted": "#3f5a4d",
+      "accent": "#0f6b52",
+      "onAccent": "#ffffff",
+      "focus": "#0f4f8a",
+      "rule": "#cfe3d8",
+      "ratios": {
+        "ink": 15.96,
+        "muted": 7.55,
+        "accent": 6.47,
+        "onAccent": 6.47,
+        "focus": 8.38
+      },
+      "surfaceRatios": {
+        "ink": 15.96,
+        "muted": 7.55,
+        "accent": 6.47,
+        "focus": 8.38
+      }
+    },
+    {
+      "preset": "mustard",
+      "mode": "print",
+      "ground": "#ffffff",
+      "surface": "#ffffff",
+      "ink": "#241d08",
+      "muted": "#5b5131",
+      "accent": "#7a5c00",
+      "onAccent": "#ffffff",
+      "focus": "#0f4f8a",
+      "rule": "#e9dcb4",
+      "ratios": {
+        "ink": 16.74,
+        "muted": 7.88,
+        "accent": 6.25,
+        "onAccent": 6.25,
+        "focus": 8.38
+      },
+      "surfaceRatios": {
+        "ink": 16.74,
+        "muted": 7.88,
+        "accent": 6.25,
+        "focus": 8.38
+      }
+    },
+    {
+      "preset": "earth",
+      "mode": "print",
+      "ground": "#ffffff",
+      "surface": "#ffffff",
+      "ink": "#2b1a12",
+      "muted": "#5f4a3f",
+      "accent": "#9a3f1f",
+      "onAccent": "#ffffff",
+      "focus": "#0f4f8a",
+      "rule": "#e4d6cc",
+      "ratios": {
+        "ink": 16.68,
+        "muted": 8.27,
+        "accent": 6.76,
+        "onAccent": 6.76,
+        "focus": 8.38
+      },
+      "surfaceRatios": {
+        "ink": 16.68,
+        "muted": 8.27,
+        "accent": 6.76,
+        "focus": 8.38
+      }
+    },
+    {
+      "preset": "midnight",
+      "mode": "print",
+      "ground": "#ffffff",
+      "surface": "#ffffff",
+      "ink": "#0e1726",
+      "muted": "#4a5568",
+      "accent": "#1f4f99",
+      "onAccent": "#ffffff",
+      "focus": "#0f4f8a",
+      "rule": "#cdd5e0",
+      "ratios": {
+        "ink": 17.96,
+        "muted": 7.53,
+        "accent": 7.96,
+        "onAccent": 7.96,
+        "focus": 8.38
+      },
+      "surfaceRatios": {
+        "ink": 17.96,
+        "muted": 7.53,
+        "accent": 7.96,
+        "focus": 8.38
+      }
+    },
+    {
+      "preset": "gold",
+      "mode": "print",
+      "ground": "#ffffff",
+      "surface": "#ffffff",
+      "ink": "#14110a",
+      "muted": "#5c5137",
+      "accent": "#7a5a17",
+      "onAccent": "#ffffff",
+      "focus": "#0f4f8a",
+      "rule": "#ddd3bb",
+      "ratios": {
+        "ink": 18.85,
+        "muted": 7.81,
+        "accent": 6.36,
+        "onAccent": 6.36,
+        "focus": 8.38
+      },
+      "surfaceRatios": {
+        "ink": 18.85,
+        "muted": 7.81,
+        "accent": 6.36,
+        "focus": 8.38
+      }
+    },
+    {
+      "preset": "signal",
+      "mode": "print",
+      "ground": "#ffffff",
+      "surface": "#ffffff",
+      "ink": "#0b0f14",
+      "muted": "#4b5866",
+      "accent": "#0b6b58",
+      "onAccent": "#ffffff",
+      "focus": "#0f4f8a",
+      "rule": "#ccd6e0",
+      "ratios": {
+        "ink": 19.22,
+        "muted": 7.27,
+        "accent": 6.45,
+        "onAccent": 6.45,
+        "focus": 8.38
+      },
+      "surfaceRatios": {
+        "ink": 19.22,
+        "muted": 7.27,
+        "accent": 6.45,
+        "focus": 8.38
       }
     }
-  ]
+  ],
+  "status": {
+    "tones": {
+      "light": {
+        "ok": {
+          "text": "#1d5c3c",
+          "background": "#e6efe8",
+          "border": "#a9c9b6"
+        },
+        "bad": {
+          "text": "#8a1f1f",
+          "background": "#fbeaea",
+          "border": "#e0b4b4"
+        },
+        "neutral": {
+          "text": "#45505c",
+          "background": "#eef1f4",
+          "border": "#c4ccd4"
+        }
+      },
+      "dark": {
+        "ok": {
+          "text": "#8fcaa6",
+          "background": "#182821",
+          "border": "#2e4a3b"
+        },
+        "bad": {
+          "text": "#e79a9a",
+          "background": "#2d1a1a",
+          "border": "#4f2c2c"
+        },
+        "neutral": {
+          "text": "#b3c0cc",
+          "background": "#1a1f24",
+          "border": "#333d47"
+        }
+      },
+      "print": {
+        "ok": {
+          "text": "#1d5c3c",
+          "background": "#ffffff",
+          "border": "#a9c9b6"
+        },
+        "bad": {
+          "text": "#8a1f1f",
+          "background": "#ffffff",
+          "border": "#e0b4b4"
+        },
+        "neutral": {
+          "text": "#45505c",
+          "background": "#ffffff",
+          "border": "#c4ccd4"
+        }
+      }
+    },
+    "show": {
+      "certificate": {
+        "valid": "ok",
+        "expired": "ok",
+        "revoked": "bad",
+        "superseded": "neutral"
+      },
+      "listing": {
+        "registered": null,
+        "no-longer-registered": "neutral"
+      }
+    },
+    "ratios": {
+      "light": {
+        "ok": 6.75,
+        "bad": 7.86,
+        "neutral": 7.25
+      },
+      "dark": {
+        "ok": 8.18,
+        "bad": 7.44,
+        "neutral": 8.95
+      },
+      "print": {
+        "ok": 7.93,
+        "bad": 9.14,
+        "neutral": 8.22
+      }
+    }
+  },
+  "covers": {
+    "angle": 135,
+    "presets": {
+      "meadow": {
+        "from": "#1d5c3c",
+        "to": "#8fcaa6"
+      },
+      "forest": {
+        "from": "#12291c",
+        "to": "#1d5c3c"
+      },
+      "dawn": {
+        "from": "#f5eddb",
+        "to": "#ddc99a"
+      },
+      "sand": {
+        "from": "#fbf5e3",
+        "to": "#eadfb8"
+      },
+      "clay": {
+        "from": "#9a3f1f",
+        "to": "#e2a37f"
+      },
+      "dusk": {
+        "from": "#142036",
+        "to": "#8cb8ff"
+      },
+      "night": {
+        "from": "#0b0f14",
+        "to": "#1f2a36"
+      },
+      "gold-leaf": {
+        "from": "#14110a",
+        "to": "#e0b04a"
+      }
+    }
+  }
 }

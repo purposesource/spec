@@ -20,7 +20,7 @@ a procurement reviewer can consume all of it the way they consume a static file.
 | `schemas/` | 35 JSON Schemas (draft 2020-12): one per published artifact class, and `contributor-page-settings.v1` for a person's private page settings, which are never published. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v2.ts`, the published coverage function in force, with `cov-v2.vectors.json` and its test suite; `cov-v1.ts`, the first version, frozen beside it with `vectors.json`. Zero dependencies. |
-| `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in four cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json`, `claim-kit.v2.example.json` and `link-platforms.v1.example.json`, the example IS the published document, byte for byte. Beside them, five golden files the implementations run: `link-rules.v1.golden.json` (the contributor page's link cases, hostile ones included), `contributor-page-contrast.v1.golden.json` (the WCAG matrix of the page's colour presets), `contributor-page-preview.v1.golden.json` (worked preview-hash vectors), `contributor-page-alias.v1.golden.json` (worked login-address MACs under a published test key) and `contributor-page-build.v1.golden.json` (the builder's vectors for keeping a hidden login off the repository list). |
+| `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in four cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json`, `claim-kit.v2.example.json` and `link-platforms.v1.example.json`, the example IS the published document, byte for byte. Beside them, six golden files the implementations run: `link-rules.v1.golden.json` (the contributor page's link cases, hostile ones included), `contributor-page-contrast.v1.golden.json` (the page's theme table: the colour presets, print rows, status chips and covers with their WCAG figures, read as data by both implementations), `contributor-page-accent.v1.golden.json` (the accent guard's vectors), `contributor-page-preview.v1.golden.json` (worked preview-hash vectors), `contributor-page-alias.v1.golden.json` (worked login-address MACs under a published test key) and `contributor-page-build.v1.golden.json` (the builder's vectors for keeping a hidden login off the repository list). |
 | `kits/` | The claim-language kits — `kit-{version}.json`, the wording a certificate holder may publish and the framing that is excluded (FS08-070). Versioned documents, not pages: a certificate pins the kit that was in force when it was issued. Each is published at `/kits/v{n}` and validated by `check:kits`. |
 | `scripts/` | The CI gates. Each one refuses to pass on an empty input set. |
 | `spec.config.json` | The organisation and domain names, in one place. Every `$id`, server URL and printed host derives from it, and the gates name any file that disagrees. |
@@ -43,7 +43,7 @@ designation makes 100 and derives its slug list, every contributors' summary kee
 5 and the published rounding, every monthly summary's totals make 100 per designation, and the
 two designation contracts refuse what would name a person or breach the floor; the contributor
 page's link table keeps its rules and gives every golden link answer; the page contracts meet the
-contrast matrix, recompute their preview hashes, carry no points, money or GitHub id, and refuse
+theme table's contrast figures, recompute the accent guard's cases and their preview hashes, carry no points, money or GitHub id, and refuse
 what the design rules out; the coverage
 vectors use valid artifacts and still cover all eight answers; the coverage module is
 dependency-free and clock-free (and its SHA-256 is printed); the copy law holds; the published
@@ -65,7 +65,7 @@ npm run check:designations      # designations make 100 and derive their slug li
                                 #   summary keeps the floor of 5 and the rounding; monthly totals; refusals
 npm run check:links             # the contributor page's link table keeps its rules; every golden
                                 #   link case gets its recorded answer from the table's steps
-npm run check:contributor-page  # contrast matrix, preview-hash and alias-MAC vectors, the builder's
+npm run check:contributor-page  # theme table and accent guard, preview-hash and alias-MAC vectors, the builder's
                                 #   hidden-login vectors, no points/money/GitHub id, the settings
                                 #   defaults, and the refusals the design rules
 npm run check:vectors           # vector inputs are valid artifacts; all eight answers covered
