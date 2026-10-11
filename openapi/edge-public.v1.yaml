@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.4.0
+  version: 1.5.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -44,7 +44,9 @@ info:
       with no schema change. The two allocation-key routes are P-M3 as well: their
       producer is the platform's index build, and until its first run writes the index
       both answer `404`. The designations summary route is P-M3 as well, for the same
-      producer: a month no index-build run rendered answers `404`. The three
+      producer: a month no index-build run rendered answers `404`. The two Recipient List
+      routes are P-M3 for the same producer: both answer `404` until its first run writes
+      the index, and a version no run has written answers `404` after that. The three
       contributor-page routes are P-M3 too: nothing is published under them until a
       person publishes a page, and production publishes none
       until its publishing switch is on, so until then each answers as for a page that does
@@ -95,6 +97,8 @@ tags:
     description: The append-only allocation ledger and its hash chain.
   - name: allocation-keys
     description: The board's allocation key for each month, published before the month, and the index of what became of each.
+  - name: recipient-list
+    description: "The Recipient List: each version two stewards released, written once, and the index of what became of each and of every immediate removal."
   - name: designations
     description: "Designations in summary: the projects' and, behind a floor, the contributors' designations for each month (advisory; routes money only after the fairness review, D27)."
   - name: badges
@@ -1732,6 +1736,654 @@ paths:
                     releasedAt: '2026-12-14T16:20:31Z'
                     approvedBody: '{"actKind":"policy-adopt","algoVersion":"ALLOC-v1","capBps":1500,"categoryFunds":[{"fundId":"cat-animal-welfare","name":"Animal welfare"},{"fundId":"cat-education","name":"Education"},{"fundId":"cat-environment","name":"Environment"},{"fundId":"cat-health","name":"Health"},{"fundId":"cat-humanitarian-aid","name":"Humanitarian aid"},{"fundId":"cat-poverty-relief","name":"Poverty relief"},{"fundId":"cat-research","name":"Research"}],"decisionRef":"SAMPLE-MINUTE-2026-12-10-ALLOCATION-KEY-2027-01","effectiveMonth":"2027-01","listVersion":"v1","reserveRetentionBpsMax":500,"reserveTargetMinor":2700000,"routingMode":"shadow","stewardDefaultVector":{"cat-animal-welfare":1111,"cat-education":2223,"cat-environment":1111,"cat-health":2222,"cat-humanitarian-aid":1111,"cat-poverty-relief":1111,"cat-research":1111},"weights":{"rcp_0svacmgratb4f4q0syghrz8ym4":2,"rcp_28h7pz5ynzcftzy0pjrhjqsqmk":1,"rcp_66ss8w31jg95dd6vc2kn7t5f8y":1,"rcp_814sdk80b8hzejd1wx7h12ea1s":1,"rcp_8jf9xfejcgadg7cgyag0hmkcxb":2,"rcp_92tq7q30k6a0gjvjrps04weeek":1,"rcp_bdzk8dv1s58eyavk3g0m8g2ncj":1,"rcp_bnpt0deptzcjgsm50wpvmrw7kn":1,"rcp_f5cc8xgz81c00nrve04pdahejb":2,"rcp_r8m8v0kcyttv527jz2m5rha2ps":1,"rcp_tg8g3ps3smxzdpy1zt0zesjnx9":2,"rcp_vztv7dk7w3wjbehnz4zr7vd9yz":1,"rcp_wrfhyk9jj3awrx8dknj7r6yjcn":1,"rcp_zyjz8xjhrede9fhzq9hf84wc0w":1}}'
                     bodySha256: e5337e2cfbd58e914df1945ae871692c09d44e0f4e78fd2f9504107187e85e37
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/recipient-list/index.json:
+    get:
+      operationId: getRecipientListIndex
+      summary: Every released Recipient List version, what became of it, and every immediate removal
+      description: |
+        The Recipient List's released versions, newest first, one entry per version token.
+        Each entry states the version's `status`, the month it takes effect from and its
+        release instant and, once a steward has recorded the version's publication, the
+        instant of its first proven publication and the publish batch that proves it, with
+        the notice the record holds on a `recorded` version. There is deliberately no
+        `adopted` status: every released version publishes an adopted board decision, and
+        what the platform can prove afterwards is a publication and its instant.
+
+        Beside the versions, every organisation removed at once under statutes Art. 7(6),
+        newest first, with the instant and the ground published with the removal. A removal
+        records no version, so it is published here and never by rewriting a version.
+
+        Regenerated whenever a release, a record act or a removal changes it. An entry never
+        leaves the index: a version published too late, or a release that was voided, keeps
+        its line with that status. Before the first release it is published with `versions`
+        and `removals` empty, so an empty list says no version has been released, where a
+        `404` says the index has not been built.
+
+        Check each entry against the version document at its `url`, and its
+        `publishBatchId` against `/meta/publish-log.json`; the schema says which members to
+        compare. The board's published List governs: where this index and the List ever
+        disagree, the divergence is a defect to report.
+      tags: [recipient-list]
+      x-psn-phase: P-M3
+      responses:
+        '200':
+          description: The index. Cached 300 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/recipient-lists.v1.json'
+              examples:
+                beforeFirstRelease:
+                  summary: Published, before any version has been released
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2026-11-02T05:00:00Z'
+                    source: fixture
+                    versions: []
+                    removals: []
+                fiveVersions:
+                  summary: Two versions recorded, one late, one voided, the newest released and not yet recorded, and one removal (development plane)
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-04-20T09:10:00Z'
+                    source: fixture
+                    versions:
+                      - version: v2
+                        url: https://dev-api.purposesource.org/v1/recipient-list/v2.json
+                        status: released
+                        effectiveFrom: 2027-07
+                        releasedAt: '2027-04-20T09:10:00Z'
+                      - version: v1.2
+                        url: https://dev-api.purposesource.org/v1/recipient-list/v1.2.json
+                        status: void
+                        effectiveFrom: 2027-05
+                        releasedAt: '2027-03-09T08:30:00Z'
+                      - version: v1.1
+                        url: https://dev-api.purposesource.org/v1/recipient-list/v1.1.json
+                        status: late
+                        effectiveFrom: 2027-04
+                        releasedAt: '2027-02-26T16:05:12Z'
+                        publishedAt: '2027-03-03T06:00:41Z'
+                        publishBatchId: evt_01mg4zkxs8nmeeg3ay4fz7jj48
+                      - version: v1
+                        url: https://dev-api.purposesource.org/v1/recipient-list/v1.json
+                        status: recorded
+                        effectiveFrom: 2027-01
+                        releasedAt: '2026-12-04T10:15:00Z'
+                        publishedAt: '2026-12-04T10:19:26Z'
+                        publishBatchId: evt_01m9091qxgwvp2aeh5gn8rm8wf
+                        noticeGivenAt: '2026-11-20T09:04:17Z'
+                      - version: v0
+                        url: https://dev-api.purposesource.org/v1/recipient-list/v0.json
+                        status: recorded
+                        effectiveFrom: 2027-01
+                        releasedAt: '2026-11-20T09:00:00Z'
+                        publishedAt: '2026-11-20T09:04:17Z'
+                        publishBatchId: evt_01m7w362k8aj3yrrydfbvp59f8
+                        noticeGivenAt: '2026-11-20T09:04:17Z'
+                    removals:
+                      - recipientId: rcp_bdzk8dv1s58eyavk3g0m8g2ncj
+                        name: SAMPLE — Animal-welfare recipient 2
+                        removedAt: '2027-02-03T11:42:09Z'
+                        ground: registration-lost
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/recipient-list/{version}.json:
+    get:
+      operationId: getRecipientListVersion
+      summary: One released version of the Recipient List
+      description: |
+        One released version of the Recipient List: the organisations that receive what the
+        fees account passes on, each in one of the seven published categories and each
+        `pending` or `active` (statutes Art. 7(1) and (4)), with the version's
+        `effectiveFrom`, the board's decision (`adoptedAt`, `decisionRef`) and the share
+        rule. An `active` entry also carries the month it is active from, the standard it
+        meets (as references into its recipient file) and the three dates of its activation
+        decision. The document maps the released body member by member and never carries it
+        verbatim, and it publishes no screening record, no person and no bank detail. The
+        board's published List is the legal instrument, not this document: where the two ever
+        disagree the List governs and the divergence is a defect to report.
+
+        Written once per released version and never rewritten, so its `generatedAt`, and
+        with it `Last-Modified`, is the release instant. It carries no publication date and
+        no notice, because no document can carry the date it was first published: the index
+        states both once a steward has recorded the version, and a released version governs
+        no month until then.
+
+        Cached 300 s although the document never changes, so that a `404` answered for a
+        version before its document was written is not held for longer than that once the
+        document is published.
+      tags: [recipient-list]
+      x-psn-phase: P-M3
+      parameters:
+        - name: version
+          in: path
+          required: true
+          description: The version's token, `v<major>` or `v<major>.<minor>`, as the index names it; the founding List is `v1.0`.
+          schema:
+            type: string
+            pattern: '^v[0-9]+(\.[0-9]+)?$'
+          example: v1
+      responses:
+        '200':
+          description: The version document. Cached 300 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/recipient-list.v1.json'
+              examples:
+                firstVersion:
+                  summary: A first version, every entry pending (development plane)
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2026-11-20T09:00:00Z'
+                    source: fixture
+                    version: v0
+                    status: adopted
+                    effectiveFrom: 2027-01
+                    adoptedAt: '2026-11-19'
+                    decisionRef: SAMPLE-MINUTE-2026-11-19-RECIPIENT-LIST-V0
+                    categories:
+                      - slug: health
+                        name: Health
+                        fundId: cat-health
+                      - slug: education
+                        name: Education
+                        fundId: cat-education
+                      - slug: poverty-relief
+                        name: Poverty relief
+                        fundId: cat-poverty-relief
+                      - slug: humanitarian-aid
+                        name: Humanitarian aid
+                        fundId: cat-humanitarian-aid
+                      - slug: environment
+                        name: Environment
+                        fundId: cat-environment
+                      - slug: animal-welfare
+                        name: Animal welfare
+                        fundId: cat-animal-welfare
+                      - slug: research
+                        name: Research
+                        fundId: cat-research
+                    recipients:
+                      - recipientId: rcp_0svacmgratb4f4q0syghrz8ym4
+                        name: SAMPLE — Education recipient 1
+                        country: IN
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates IN
+                        registrationRef: SAMPLE-REGISTER-IN-0003
+                        category: education
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                      - recipientId: rcp_28h7pz5ynzcftzy0pjrhjqsqmk
+                        name: SAMPLE — Humanitarian-aid recipient 2
+                        country: GB
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates GB
+                        registrationRef: SAMPLE-REGISTER-GB-0008
+                        category: humanitarian-aid
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                      - recipientId: rcp_66ss8w31jg95dd6vc2kn7t5f8y
+                        name: SAMPLE — Animal-welfare recipient 1
+                        country: ZA
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates ZA
+                        registrationRef: SAMPLE-REGISTER-ZA-0011
+                        category: animal-welfare
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                      - recipientId: rcp_814sdk80b8hzejd1wx7h12ea1s
+                        name: SAMPLE — Research recipient 2
+                        country: NL
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates NL
+                        registrationRef: SAMPLE-REGISTER-NL-0014
+                        category: research
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                      - recipientId: rcp_8jf9xfejcgadg7cgyag0hmkcxb
+                        name: SAMPLE — Education recipient 2
+                        country: BR
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates BR
+                        registrationRef: SAMPLE-REGISTER-BR-0004
+                        category: education
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                      - recipientId: rcp_92tq7q30k6a0gjvjrps04weeek
+                        name: SAMPLE — Humanitarian-aid recipient 1
+                        country: JO
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates JO
+                        registrationRef: SAMPLE-REGISTER-JO-0007
+                        category: humanitarian-aid
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                      - recipientId: rcp_bdzk8dv1s58eyavk3g0m8g2ncj
+                        name: SAMPLE — Animal-welfare recipient 2
+                        country: DE
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates DE
+                        registrationRef: SAMPLE-REGISTER-DE-0012
+                        category: animal-welfare
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                      - recipientId: rcp_bnpt0deptzcjgsm50wpvmrw7kn
+                        name: SAMPLE — Environment recipient 1
+                        country: ID
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates ID
+                        registrationRef: SAMPLE-REGISTER-ID-0009
+                        category: environment
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                      - recipientId: rcp_f5cc8xgz81c00nrve04pdahejb
+                        name: SAMPLE — Health recipient 1
+                        country: KE
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates KE
+                        registrationRef: SAMPLE-REGISTER-KE-0001
+                        category: health
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                      - recipientId: rcp_r8m8v0kcyttv527jz2m5rha2ps
+                        name: SAMPLE — Poverty-relief recipient 1
+                        country: BD
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates BD
+                        registrationRef: SAMPLE-REGISTER-BD-0005
+                        category: poverty-relief
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                      - recipientId: rcp_tg8g3ps3smxzdpy1zt0zesjnx9
+                        name: SAMPLE — Health recipient 2
+                        country: CH
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates CH
+                        registrationRef: SAMPLE-REGISTER-CH-0002
+                        category: health
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                      - recipientId: rcp_vztv7dk7w3wjbehnz4zr7vd9yz
+                        name: SAMPLE — Research recipient 1
+                        country: GH
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates GH
+                        registrationRef: SAMPLE-REGISTER-GH-0013
+                        category: research
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                      - recipientId: rcp_wrfhyk9jj3awrx8dknj7r6yjcn
+                        name: SAMPLE — Environment recipient 2
+                        country: CA
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates CA
+                        registrationRef: SAMPLE-REGISTER-CA-0010
+                        category: environment
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                      - recipientId: rcp_zyjz8xjhrede9fhzq9hf84wc0w
+                        name: SAMPLE — Poverty-relief recipient 2
+                        country: PE
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates PE
+                        registrationRef: SAMPLE-REGISTER-PE-0006
+                        category: poverty-relief
+                        shareBps: 0
+                        status: pending
+                        sample: true
+                    shareRule:
+                      mode: equal-per-recipient-in-category
+                      rounding: largest-remainder
+                      tiebreak: list-order
+                      status: decided
+                      note: 'Decided (ops decision D40 item 7): what a category receives for the month, so far as it does not go to a named active recipient, goes in equal shares to every active listed recipient of the category, apportioned by largest remainder with ties broken by the order of this list (ascending recipientId), so the shares sum exactly to the category''s amount. An organisation removed at once under statutes Art. 7(6) has no share from then on, and its share for that month goes to the other active recipients of its category, except after a sanctions hit.'
+                activations:
+                  summary: A later version that activates every entry of the first (development plane)
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2026-12-04T10:15:00Z'
+                    source: fixture
+                    version: v1
+                    status: adopted
+                    effectiveFrom: 2027-01
+                    adoptedAt: '2026-12-03'
+                    decisionRef: SAMPLE-MINUTE-2026-12-03-RECIPIENT-LIST-V1
+                    categories:
+                      - slug: health
+                        name: Health
+                        fundId: cat-health
+                      - slug: education
+                        name: Education
+                        fundId: cat-education
+                      - slug: poverty-relief
+                        name: Poverty relief
+                        fundId: cat-poverty-relief
+                      - slug: humanitarian-aid
+                        name: Humanitarian aid
+                        fundId: cat-humanitarian-aid
+                      - slug: environment
+                        name: Environment
+                        fundId: cat-environment
+                      - slug: animal-welfare
+                        name: Animal welfare
+                        fundId: cat-animal-welfare
+                      - slug: research
+                        name: Research
+                        fundId: cat-research
+                    recipients:
+                      - recipientId: rcp_0svacmgratb4f4q0syghrz8ym4
+                        name: SAMPLE — Education recipient 1
+                        country: IN
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates IN
+                        registrationRef: SAMPLE-REGISTER-IN-0003
+                        category: education
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-11-24'
+                        grantLetterAcceptedOn: '2026-11-26'
+                        standard:
+                          accountsYears: 6
+                          accountsRef: SAMPLE-ACCOUNTS-0SVACMGR-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of IN
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-0SVACMGR
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-0SVACMGR-2025
+                        activeFrom: 2027-01
+                        sample: true
+                      - recipientId: rcp_28h7pz5ynzcftzy0pjrhjqsqmk
+                        name: SAMPLE — Humanitarian-aid recipient 2
+                        country: GB
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates GB
+                        registrationRef: SAMPLE-REGISTER-GB-0008
+                        category: humanitarian-aid
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-11-26'
+                        grantLetterAcceptedOn: '2026-11-27'
+                        standard:
+                          accountsYears: 3
+                          accountsRef: SAMPLE-ACCOUNTS-28H7PZ5Y-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of GB
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-28H7PZ5Y
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-28H7PZ5Y-2025
+                        activeFrom: 2027-01
+                        sample: true
+                      - recipientId: rcp_66ss8w31jg95dd6vc2kn7t5f8y
+                        name: SAMPLE — Animal-welfare recipient 1
+                        country: ZA
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates ZA
+                        registrationRef: SAMPLE-REGISTER-ZA-0011
+                        category: animal-welfare
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-11-30'
+                        grantLetterAcceptedOn: '2026-12-02'
+                        standard:
+                          accountsYears: 6
+                          accountsRef: SAMPLE-ACCOUNTS-66SS8W31-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of ZA
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-66SS8W31
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-66SS8W31-2025
+                        activeFrom: 2027-01
+                        sample: true
+                      - recipientId: rcp_814sdk80b8hzejd1wx7h12ea1s
+                        name: SAMPLE — Research recipient 2
+                        country: NL
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates NL
+                        registrationRef: SAMPLE-REGISTER-NL-0014
+                        category: research
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-12-01'
+                        grantLetterAcceptedOn: '2026-12-02'
+                        standard:
+                          accountsYears: 5
+                          accountsRef: SAMPLE-ACCOUNTS-814SDK80-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of NL
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-814SDK80
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-814SDK80-2025
+                        activeFrom: 2027-01
+                        sample: true
+                      - recipientId: rcp_8jf9xfejcgadg7cgyag0hmkcxb
+                        name: SAMPLE — Education recipient 2
+                        country: BR
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates BR
+                        registrationRef: SAMPLE-REGISTER-BR-0004
+                        category: education
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-11-24'
+                        grantLetterAcceptedOn: '2026-11-27'
+                        standard:
+                          accountsYears: 3
+                          accountsRef: SAMPLE-ACCOUNTS-8JF9XFEJ-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of BR
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-8JF9XFEJ
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-8JF9XFEJ-2025
+                        activeFrom: 2027-01
+                        sample: true
+                      - recipientId: rcp_92tq7q30k6a0gjvjrps04weeek
+                        name: SAMPLE — Humanitarian-aid recipient 1
+                        country: JO
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates JO
+                        registrationRef: SAMPLE-REGISTER-JO-0007
+                        category: humanitarian-aid
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-11-26'
+                        grantLetterAcceptedOn: '2026-11-30'
+                        standard:
+                          accountsYears: 6
+                          accountsRef: SAMPLE-ACCOUNTS-92TQ7Q30-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of JO
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-92TQ7Q30
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-92TQ7Q30-2025
+                        activeFrom: 2027-01
+                        sample: true
+                      - recipientId: rcp_bdzk8dv1s58eyavk3g0m8g2ncj
+                        name: SAMPLE — Animal-welfare recipient 2
+                        country: DE
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates DE
+                        registrationRef: SAMPLE-REGISTER-DE-0012
+                        category: animal-welfare
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-11-30'
+                        grantLetterAcceptedOn: '2026-12-01'
+                        standard:
+                          accountsYears: 3
+                          accountsRef: SAMPLE-ACCOUNTS-BDZK8DV1-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of DE
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-BDZK8DV1
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-BDZK8DV1-2025
+                        activeFrom: 2027-01
+                        sample: true
+                      - recipientId: rcp_bnpt0deptzcjgsm50wpvmrw7kn
+                        name: SAMPLE — Environment recipient 1
+                        country: ID
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates ID
+                        registrationRef: SAMPLE-REGISTER-ID-0009
+                        category: environment
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-11-27'
+                        grantLetterAcceptedOn: '2026-12-01'
+                        standard:
+                          accountsYears: 4
+                          accountsRef: SAMPLE-ACCOUNTS-BNPT0DEP-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of ID
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-BNPT0DEP
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-BNPT0DEP-2025
+                        activeFrom: 2027-01
+                        sample: true
+                      - recipientId: rcp_f5cc8xgz81c00nrve04pdahejb
+                        name: SAMPLE — Health recipient 1
+                        country: KE
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates KE
+                        registrationRef: SAMPLE-REGISTER-KE-0001
+                        category: health
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-11-23'
+                        grantLetterAcceptedOn: '2026-11-25'
+                        standard:
+                          accountsYears: 4
+                          accountsRef: SAMPLE-ACCOUNTS-F5CC8XGZ-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of KE
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-F5CC8XGZ
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-F5CC8XGZ-2025
+                        activeFrom: 2027-01
+                        sample: true
+                      - recipientId: rcp_r8m8v0kcyttv527jz2m5rha2ps
+                        name: SAMPLE — Poverty-relief recipient 1
+                        country: BD
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates BD
+                        registrationRef: SAMPLE-REGISTER-BD-0005
+                        category: poverty-relief
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-11-25'
+                        grantLetterAcceptedOn: '2026-11-27'
+                        standard:
+                          accountsYears: 4
+                          accountsRef: SAMPLE-ACCOUNTS-R8M8V0KC-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of BD
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-R8M8V0KC
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-R8M8V0KC-2025
+                        activeFrom: 2027-01
+                        sample: true
+                      - recipientId: rcp_tg8g3ps3smxzdpy1zt0zesjnx9
+                        name: SAMPLE — Health recipient 2
+                        country: CH
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates CH
+                        registrationRef: SAMPLE-REGISTER-CH-0002
+                        category: health
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-11-23'
+                        grantLetterAcceptedOn: '2026-11-24'
+                        standard:
+                          accountsYears: 5
+                          accountsRef: SAMPLE-ACCOUNTS-TG8G3PS3-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of CH
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-TG8G3PS3
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-TG8G3PS3-2025
+                        activeFrom: 2027-01
+                        sample: true
+                      - recipientId: rcp_vztv7dk7w3wjbehnz4zr7vd9yz
+                        name: SAMPLE — Research recipient 1
+                        country: GH
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates GH
+                        registrationRef: SAMPLE-REGISTER-GH-0013
+                        category: research
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-12-01'
+                        grantLetterAcceptedOn: '2026-12-02'
+                        standard:
+                          accountsYears: 4
+                          accountsRef: SAMPLE-ACCOUNTS-VZTV7DK7-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of GH
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-VZTV7DK7
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-VZTV7DK7-2025
+                        activeFrom: 2027-01
+                        sample: true
+                      - recipientId: rcp_wrfhyk9jj3awrx8dknj7r6yjcn
+                        name: SAMPLE — Environment recipient 2
+                        country: CA
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates CA
+                        registrationRef: SAMPLE-REGISTER-CA-0010
+                        category: environment
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-11-27'
+                        grantLetterAcceptedOn: '2026-11-30'
+                        standard:
+                          accountsYears: 5
+                          accountsRef: SAMPLE-ACCOUNTS-WRFHYK9J-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of CA
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-WRFHYK9J
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-WRFHYK9J-2025
+                        activeFrom: 2027-01
+                        sample: true
+                      - recipientId: rcp_zyjz8xjhrede9fhzq9hf84wc0w
+                        name: SAMPLE — Poverty-relief recipient 2
+                        country: PE
+                        legalForm: SAMPLE — gemeinnützige Organisation ohne Erwerbszweck nach dem Recht des Sitzstaates PE
+                        registrationRef: SAMPLE-REGISTER-PE-0006
+                        category: poverty-relief
+                        shareBps: 0
+                        status: active
+                        sanctionsScreenedOn: '2026-12-01'
+                        accountConfirmedOn: '2026-11-25'
+                        grantLetterAcceptedOn: '2026-11-30'
+                        standard:
+                          accountsYears: 5
+                          accountsRef: SAMPLE-ACCOUNTS-ZYJZ8XJH-2023-2025
+                          foreignReceiptEvidence: SAMPLE — evidence that a Swiss association may lawfully transfer to this organisation under the law of PE
+                          independenceDeclared: true
+                          bankTransferOnly: true
+                          grantLetterRef: SAMPLE-GRANT-LETTER-ZYJZ8XJH
+                          annualStatementRef: SAMPLE-ANNUAL-REPORT-ZYJZ8XJH-2025
+                        activeFrom: 2027-01
+                        sample: true
+                    shareRule:
+                      mode: equal-per-recipient-in-category
+                      rounding: largest-remainder
+                      tiebreak: list-order
+                      status: decided
+                      note: 'Decided (ops decision D40 item 7): what a category receives for the month, so far as it does not go to a named active recipient, goes in equal shares to every active listed recipient of the category, apportioned by largest remainder with ties broken by the order of this list (ascending recipientId), so the shares sum exactly to the category''s amount. An organisation removed at once under statutes Art. 7(6) has no share from then on, and its share for that month goes to the other active recipients of its category, except after a sanctions hit.'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':

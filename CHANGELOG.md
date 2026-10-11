@@ -3432,6 +3432,44 @@ which kind of change each entry was.
   compares this description's paths with what the edge serves. The edge serves the route from
   website branch `edge-designations`.
 
+### 1.5.0 — unreleased (2026-10-11; FS-00 §6.2's dated note of 2026-10-01; PS-870 item 5)
+
+- Additive, a minor bump like 1.1.0: two GET operations serve the two artifacts FS-00 §6.2's dated
+  note of 2026-10-01 adds to the catalog, and nothing that existed moved. `getRecipientListIndex` at
+  `/v1/recipient-list/index.json` answers `recipient-lists.v1`, and `getRecipientListVersion` at
+  `/v1/recipient-list/{version}.json` answers `recipient-list.v1`; `{version}` takes the contracts'
+  token grammar, `^v[0-9]+(\.[0-9]+)?$` (`v2`, `v1.3`; the founding List is `v1.0`). The plane paths
+  are `/recipient-list/index.json` and `/recipient-list/{version}.json`, outside `ledger/`, as the
+  allocation key's are; platform `02d4f698`'s index build writes both and its purge names the edge
+  paths, and website `ce8500a` serves them. 1.2.2's note that the two routes were not described here
+  yet no longer holds.
+- Both are `x-psn-phase: P-M3`, and the phase list in `info.description` says so: the producer is
+  the platform's index build, both answer `404` until its first run writes the index, and a version
+  no run has written answers `404` after that. A new tag, `recipient-list`, because the List is
+  neither the ledger nor the allocation key.
+- Both are cached 300 s, the version document included although it is written once, for the
+  allocation key's reason (1.1.0): a `404` read before a version's first write is not held for
+  longer than that. The edge holds both at 300 s, in its route table and in its mirror lifetimes.
+- The descriptions say what the schemas say and nothing more: the index has no `adopted` status,
+  keeps every entry whatever became of it, is published with both arrays empty before the first
+  release, and lists every removal under statutes Art. 7(6) with its ground; the version document
+  maps the released body and never carries it verbatim, publishes no screening record, and carries
+  no publication date and no notice, which the index states once a steward has recorded the version.
+  Both say the board's published List governs.
+- Errors: `404` for the index before it has been built and for a version with no document, `429`,
+  and `503`, as the allocation keys'.
+- The examples are the development plane's (`source: fixture`, `dev-api.purposesource.org`,
+  `SAMPLE-` references), copied member for member, as `getAllocationKey` inlines its example: the
+  index's `fiveVersions` is `examples/recipient-lists.v1.example.json`, and the version's
+  `firstVersion` (`v0`, every entry `pending`) and `activations` (`v1`, every entry `active`) are
+  `examples/recipient-list.v1.founding.example.json` and `examples/recipient-list.v1.example.json`,
+  the two documents the index example's `recorded` entries name. The index adds one more,
+  `beforeFirstRelease`, with both arrays empty, as the key index does. `check:openapi-examples`
+  validates 56 examples (52 before).
+- `redocly.yaml`'s list of literal and template paths that overlap by design gains
+  `/v1/recipient-list/index.json` and `/v1/recipient-list/{version}.json`; `no-ambiguous-paths`
+  stays off for the reason recorded there.
+
 ## coverage/cov-v2.ts
 
 The second version of the published coverage function, beside the first. The module, its
