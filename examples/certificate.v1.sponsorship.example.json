@@ -14,5 +14,5 @@
   },
   "iat": 1800000000,
   "iss": "https://api.purposesource.org",
-  "claimKitVersion": "kit-2"
+  "claimKitVersion": "kit-1"
 }

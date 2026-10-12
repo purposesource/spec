@@ -9,33 +9,32 @@
  *
  *   1. `kits/` is not empty. A gate over an empty directory passes forever and proves nothing.
  *   2. EVERY KIT VALIDATES AGAINST THE SHAPE ITS OWN `schemaVersion` NAMES: 1 is
- *      `schemas/claim-kit.v1.json`, 2 is `schemas/claim-kit.v2.json` (ops decision D44). A kit
- *      naming any other shape is refused, never validated against a guess. kit-1 is a v1 document
- *      and stays one; a breaking change of the kit's shape is a new schema file (versioning
- *      policy 2), so this dispatch is the one place the two shapes meet.
+ *      `schemas/claim-kit.v1.json`, the one kit shape. A kit naming any other shape is refused,
+ *      never validated against a guess. Until the public launch the shape changes in place (on
+ *      2026-10-12 it took ops decision D44's lines, templates and badge; ops decision D136); from
+ *      the launch a breaking change of the kit's shape is a new schema file (versioning policy 2),
+ *      and this dispatch is where the shapes would meet.
  *   3. THE NAME AND THE URL AGREE. `kits/kit-{n}.json` carries `kitVersion: "kit-{n}"` and is
  *      published at `{siteBaseUrl}/kits/v{n}` — the file name carries the document's identifier
  *      (the `{family}-{n}` grammar of `att-1` and `ent-terms-1`) and the URL carries the site's
  *      permalink token. Both halves are derived from spec.config.json here, so a domain or org
  *      rename is one edit and a test run rather than a hunt.
  *   4. EVERY CLAIM ENDS WITH THE EXCLUSIVE-VERIFICATION SENTENCE, spelled from spec.config.json
- *      (CERT-027): in a v1 kit every `permittedPattern`; in a v2 kit every line whose `use` is not
- *      `clause` (a clause is words added inside a line) and every template, and the document's own
- *      `verify` member is that sentence. The schemas pin the sentence too; this asserts it against
+ *      (CERT-027): every line whose `use` is not `clause` (a clause is words added inside a line)
+ *      and every template, and the document's own `verify` member is that sentence. The schemas pin the sentence too; this asserts it against
  *      the configured host rather than against a literal, which is the half a rename would break.
  *   5. NO CURRENCY FIGURE, ANYWHERE IN THE DOCUMENT. A kit publishes a pattern with braced
  *      placeholders, never one organisation's filled-in claim, and a figure inside a document the
  *      renderer embeds into every certificate would be a number about somebody else's purchase.
  *      The regular expression is the website's currency lint verbatim, deliberately: the two
  *      repositories publish the same document and must not disagree about what a figure is.
- *   6. A V2 KIT STATES THE PLEDGE ONCE. `pledge.text` is the only place a v2 kit says where a
+ *   6. A KIT STATES THE PLEDGE ONCE. `pledge.text` is the only place a kit says where a
  *      Purpose Fee goes, and a line reaches it only through the `{pledge}` placeholder. The same
  *      text anywhere else in the file would be a restated pledge, which is exactly what the kit
  *      forbids its holders to write. (Byte-equality with the canonical pledge of statutes Art. 5(5)
  *      is held by the publishing repository's tests: this repository does not carry the pledge.)
  *   7. EACH EXAMPLE IS ITS PUBLISHED KIT, byte for byte, not a hand-written imitation of one:
- *      `examples/claim-kit.v1.example.json` is `kits/kit-1.json` and
- *      `examples/claim-kit.v2.example.json` is `kits/kit-2.json`. Kit wording is claim language
+ *      `examples/claim-kit.v1.example.json` is `kits/kit-1.json`. Kit wording is claim language
  *      under the claim rules; an example that drifted from the real document is exactly the file
  *      somebody copies into a press release. (Same precedent as `category-menu.v1.example.json`,
  *      where the example IS the published artifact.)
@@ -53,10 +52,7 @@ import { ROOT, EXAMPLE_DIR, config, createValidatorWithAllSchemas, fail } from '
 const KIT_DIR = join(ROOT, 'kits');
 
 /** Each example, and the published kit it must equal byte for byte. */
-const EXAMPLE_PAIRS = [
-  ['claim-kit.v1.example.json', 'kit-1.json'],
-  ['claim-kit.v2.example.json', 'kit-2.json'],
-];
+const EXAMPLE_PAIRS = [['claim-kit.v1.example.json', 'kit-1.json']];
 
 /** The website's currency lint, verbatim (website/scripts/check-copy.mjs CURRENCY_RE). */
 const CURRENCY_RE = /(?:CHF|EUR|USD|[$€£])\s?\d[\d.,']*/g;
@@ -64,10 +60,7 @@ const CURRENCY_RE = /(?:CHF|EUR|USD|[$€£])\s?\d[\d.,']*/g;
 const cfg = config();
 
 /** `schemaVersion` -> the `$id` of the shape a kit declaring it is validated against. */
-const KIT_SCHEMA_IDS = new Map([
-  [1, `${cfg.schemaBaseUrl}/claim-kit.v1.json`],
-  [2, `${cfg.schemaBaseUrl}/claim-kit.v2.json`],
-]);
+const KIT_SCHEMA_IDS = new Map([[1, `${cfg.schemaBaseUrl}/claim-kit.v1.json`]]);
 
 const { ajv } = createValidatorWithAllSchemas();
 const validators = new Map();
@@ -86,27 +79,23 @@ for (const [version, id] of KIT_SCHEMA_IDS) {
 }
 
 /**
- * Every claim a kit publishes that must end with the verification sentence, as [where, text].
- * v1: each variant's one `permittedPattern`. v2: each line whose `use` is not `clause`, and each
- * template. A member that is not a string is the schema's to report, not this rule's.
+ * Every claim a kit publishes that must end with the verification sentence, as [where, text]:
+ * each line whose `use` is not `clause`, and each template. A member that is not a string is the
+ * schema's to report, not this rule's.
  */
 function claimsOf(kit) {
   const claims = [];
   for (const [name, variant] of Object.entries(kit?.variants ?? {})) {
-    if (kit.schemaVersion === 2) {
-      (Array.isArray(variant?.lines) ? variant.lines : []).forEach((line, index) => {
-        if (line?.use !== 'clause' && typeof line?.text === 'string') {
-          claims.push([`variants.${name}.lines[${index}] (${line.id})`, line.text]);
-        }
-      });
-      (Array.isArray(variant?.templates) ? variant.templates : []).forEach((template, index) => {
-        if (typeof template?.text === 'string') {
-          claims.push([`variants.${name}.templates[${index}] (${template.id})`, template.text]);
-        }
-      });
-    } else if (typeof variant?.permittedPattern === 'string') {
-      claims.push([`variants.${name}.permittedPattern`, variant.permittedPattern]);
-    }
+    (Array.isArray(variant?.lines) ? variant.lines : []).forEach((line, index) => {
+      if (line?.use !== 'clause' && typeof line?.text === 'string') {
+        claims.push([`variants.${name}.lines[${index}] (${line.id})`, line.text]);
+      }
+    });
+    (Array.isArray(variant?.templates) ? variant.templates : []).forEach((template, index) => {
+      if (typeof template?.text === 'string') {
+        claims.push([`variants.${name}.templates[${index}] (${template.id})`, template.text]);
+      }
+    });
   }
   return claims;
 }
@@ -161,24 +150,22 @@ function kitProblems(file, text, kit) {
     }
   }
 
-  if (kit?.schemaVersion === 2) {
-    if (kit.verify !== cfg.verifyStatement) {
+  if (kit?.verify !== cfg.verifyStatement) {
+    found.push(
+      `${where}: verify must be ${JSON.stringify(cfg.verifyStatement)} (found ${JSON.stringify(kit?.verify)}) — ` +
+        'the document states the one verification sentence it requires at the end of every claim',
+    );
+  }
+  const pledge = kit?.pledge?.text;
+  if (typeof pledge === 'string' && pledge.length > 0) {
+    const spelled = JSON.stringify(pledge).slice(1, -1);
+    const count = text.split(spelled).length - 1;
+    if (count !== 1) {
       found.push(
-        `${where}: verify must be ${JSON.stringify(cfg.verifyStatement)} (found ${JSON.stringify(kit.verify)}) — ` +
-          'the document states the one verification sentence it requires at the end of every claim',
+        `${where}: the pledge text appears ${count} times in the file. A kit states the pledge once, ` +
+          'in pledge.text, and a line reaches it only through the {pledge} placeholder: a second copy is a ' +
+          'restated pledge, which the kit forbids its holders to write.',
       );
-    }
-    const pledge = kit.pledge?.text;
-    if (typeof pledge === 'string' && pledge.length > 0) {
-      const spelled = JSON.stringify(pledge).slice(1, -1);
-      const count = text.split(spelled).length - 1;
-      if (count !== 1) {
-        found.push(
-          `${where}: the pledge text appears ${count} times in the file. A v2 kit states the pledge once, ` +
-            'in pledge.text, and a line reaches it only through the {pledge} placeholder: a second copy is a ' +
-            'restated pledge, which the kit forbids its holders to write.',
-        );
-      }
     }
   }
 
@@ -270,12 +257,6 @@ function selfTest() {
     schemaVersion: 1,
     kitVersion: 'kit-9',
     permalink: `${cfg.siteBaseUrl}/kits/v9`,
-    variants: { supporter: { permittedPattern: `{organisation} holds something. ${cfg.verifyStatement}` } },
-  };
-  const wellFormedV2 = {
-    schemaVersion: 2,
-    kitVersion: 'kit-9',
-    permalink: `${cfg.siteBaseUrl}/kits/v9`,
     verify: cfg.verifyStatement,
     pledge: { text: 'the one pledge sentence this test document states', source: 'self-test' },
     variants: {
@@ -289,9 +270,9 @@ function selfTest() {
       },
     },
   };
-  /** A copy of the v2 document with one thing changed. */
-  const v2 = (change) => {
-    const kit = structuredClone(wellFormedV2);
+  /** A copy of the well-formed document with one thing changed. */
+  const changed = (change) => {
+    const kit = structuredClone(wellFormed);
     change(kit);
     return kit;
   };
@@ -301,17 +282,11 @@ function selfTest() {
     ['kit-9.json', { ...wellFormed, kitVersion: 'kit-1' }, 'kitVersion must be "kit-9"'],
     ['kit-9.json', { ...wellFormed, permalink: 'https://example.invalid/kits/v9' }, 'permalink must be'],
     ['kits.json', wellFormed, 'named kit-{n}.json'],
-    [
-      'kit-9.json',
-      { ...wellFormed, variants: { supporter: { permittedPattern: 'holds something. Verify at purposesource.org/verify.' } } },
-      'must end with',
-    ],
-    ['kit-9.json', { ...wellFormed, schemaVersion: 3 }, 'names no published kit shape'],
+    ['kit-9.json', { ...wellFormed, schemaVersion: 2 }, 'names no published kit shape'],
     ['kit-9.json', { ...wellFormed, schemaVersion: undefined }, 'names no published kit shape'],
-    ['kit-9.json', wellFormedV2, null],
-    ['kit-9.json', v2((kit) => { kit.variants.supporter.lines[0].text = '{organisation} holds something.'; }), 'lines[0] (holder) must end with'],
-    ['kit-9.json', v2((kit) => { kit.variants.supporter.templates[0].text = 'Verify at purposesource.org/verify.'; }), 'templates[0] (post) must end with'],
-    ['kit-9.json', v2((kit) => { kit.verify = 'verify at purposesource.org'; }), 'verify must be'],
+    ['kit-9.json', changed((kit) => { kit.variants.supporter.lines[0].text = '{organisation} holds something.'; }), 'lines[0] (holder) must end with'],
+    ['kit-9.json', changed((kit) => { kit.variants.supporter.templates[0].text = 'Verify at purposesource.org/verify.'; }), 'templates[0] (post) must end with'],
+    ['kit-9.json', changed((kit) => { kit.verify = 'verify at purposesource.org'; }), 'verify must be'],
   ];
 
   const found = [];
@@ -326,15 +301,15 @@ function selfTest() {
   }
 
   // A clause is words added inside a line, so it carries no verification sentence: the
-  // well-formed v2 document above has one, and the ending rule must leave it alone.
-  if (claimsOf(wellFormedV2).some(([where]) => where.includes('(amount)'))) {
-    found.push('self-test: a clause was treated as a claim — the ending rule would refuse every v2 kit');
+  // well-formed document above has one, and the ending rule must leave it alone.
+  if (claimsOf(wellFormed).some(([where]) => where.includes('(amount)'))) {
+    found.push('self-test: a clause was treated as a claim — the ending rule would refuse every kit');
   }
 
   // The pledge rule is tested over the document TEXT, where a restated pledge would sit.
-  const restated = JSON.stringify({ ...wellFormedV2, note: wellFormedV2.pledge.text });
-  if (!kitProblems('kit-9.json', restated, wellFormedV2).some((problem) => problem.includes('pledge text appears 2 times'))) {
-    found.push('self-test: a pledge stated twice in a v2 kit was not reported — the pledge rule is inert');
+  const restated = JSON.stringify({ ...wellFormed, note: wellFormed.pledge.text });
+  if (!kitProblems('kit-9.json', restated, wellFormed).some((problem) => problem.includes('pledge text appears 2 times'))) {
+    found.push('self-test: a pledge stated twice in a kit was not reported — the pledge rule is inert');
   }
 
   // The currency rule is tested over the document TEXT, which is where it applies: a figure
@@ -352,6 +327,6 @@ problems.push(...selfTest());
 fail(
   problems,
   `${files.length} claim-language kit(s) validate against the shape their schemaVersion names, are addressed at ` +
-    `${cfg.siteBaseUrl}/kits/, end every claim with ${JSON.stringify(cfg.verifyStatement)}, state a v2 pledge once, ` +
+    `${cfg.siteBaseUrl}/kits/, end every claim with ${JSON.stringify(cfg.verifyStatement)}, state the pledge once, ` +
     'carry no figure, and each example is its published kit',
 );

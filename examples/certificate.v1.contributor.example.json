@@ -15,7 +15,7 @@
   },
   "iat": 1831507200,
   "iss": "https://api.purposesource.org",
-  "claimKitVersion": "kit-2",
+  "claimKitVersion": "kit-1",
   "verify": "https://purposesource.org/verify/cert_01jk2m4p6r8t0v2x4z6b8d0f2h",
   "factRefs": {},
   "supersedes": null,

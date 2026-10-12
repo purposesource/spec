@@ -25,19 +25,19 @@ cannot ship without a written history.
    schema version it was published against. That is the entire reason the version is in
    the filename.
 5. **Until the public launch, every contract changes in place.** Rules 1 and 2 protect
-   consumers, and before the launch nobody outside the build depends on what is published
-   (ops decisions D132 item 1 and D136 item 1). So until the launch every contract, document
-   and function keeps its v1 and may lose a property, tighten a type, or close an open
-   pattern to an enum — with a **minor** bump and a section entry that labels the change
-   `pre-release`, dates it, and says what moved and why. No v2 of anything public is
-   created before the launch, and one created earlier folds back into its v1 (D136). From
-   the launch the new-file rule binds absolutely, and rule 4 makes that boundary permanent:
-   whatever is published from then on stays valid under the version it was published
-   against, so the freedom above can never reach back and invalidate it. This clause is
-   written down because the history below relies on it — `ledger-row.v1`'s 2026-09-05
-   rename of a row type, `registry-v0-record.v1` 1.1.0, and the coverage function's fold of
-   2026-10-12 — and a rule a repository quietly departs from is worse than a narrower rule
-   it keeps. *(Changed 2026-10-12, D136: the boundary was "a file's first published
+   consumers, and before the launch nobody outside the build depends on what is published (ops
+   decisions D132 item 1 and D136 item 1). So until the launch every contract, document and
+   function keeps its v1 and may lose a property, tighten a type, or close an open pattern to
+   an enum — with a **minor** bump and a section entry that labels the change `pre-release`,
+   dates it, and says what moved and why. No second version of anything public is created
+   before the launch, and one created earlier folds back into its v1 (D136). From the launch
+   the new-file rule binds absolutely, and rule 4 makes that boundary permanent: whatever is
+   published from then on stays valid under the version it was published against, so the
+   freedom above can never reach back and invalidate it. This clause is written down because
+   the history below relies on it — `ledger-row.v1`'s 2026-09-05 rename of a row type,
+   `registry-v0-record.v1` 1.1.0, and the folds of 2026-10-12 (the coverage function, and the
+   claim kit's shape) — and a rule a repository quietly departs from is worse than a narrower
+   rule it keeps. *(Changed 2026-10-12, D136: the boundary was "a file's first published
    artifact"; it is the public launch, and rule 2 binds from then.)*
 
 ## 0.1.0 — unreleased
@@ -54,32 +54,33 @@ artifact plane has carried since the first build and the plane's own validation 
 list as unschematised for want of a contract.
 
 Ops decision D44 (2026-09-15) adds to the set, each addition with its own section below:
-`claim-kit.v2.json`, the second shape of the claim-language kit, beside `claim-kit.v1.json`
-rather than in place of it; `covered-organisations.v1.json`, the one public list of
-organisations holding an Entitlement term, named only where they asked to be; and
-`sponsorship-schedule.v1.json` and `sponsorship.v1.json`, the published sponsorship schedule and
-the sponsor register — twenty-seven schemas in all.
+`covered-organisations.v1.json`, the one public list of organisations holding an Entitlement
+term, named only where they asked to be; and `sponsorship-schedule.v1.json` and
+`sponsorship.v1.json`, the published sponsorship schedule and the sponsor register — twenty-six
+schemas in all. D44's new shape of the claim-language kit is `claim-kit.v1.json` 1.1.0: it was
+first added as a second schema file and folded back on 2026-10-12 (ops decision D136), so each
+count here and below is one lower than it was first written.
 
 The allocation key's publication (2026-09-28) adds two more, each with its own section below:
 `allocation-key.v1.json`, the key the board released for one month, written once, carrying the
 exact text two stewards approved and that text's SHA-256; and `allocation-keys.v1.json`, the index
-of every released key with what became of its publication — twenty-nine schemas in all.
+of every released key with what became of its publication — twenty-eight schemas in all.
 
 The Recipient List's versions and their index (2026-10-01; FS-00 §6.2's dated note of
 2026-10-01) add one more, with its own section below: `recipient-lists.v1.json`, the index of
 every released List version with what became of its publication, and of every immediate removal
-with its published ground — thirty schemas in all.
+with its published ground — twenty-nine schemas in all.
 
 The contributor page (2026-10-06; ops decision D116 and its dated notes) adds four, each with its
 own section below: `contributor-page-settings.v1.json`, the person's private choices, published as
 a schema and never as a document; `contributor-page.v1.json`, the public document of a published
 page; `contributor-page-alias.v1.json`, the pointer from a login address to a page; and
 `link-platforms.v1.json`, the pinned link table, whose example is the table itself —
-thirty-four schemas in all.
+thirty-three schemas in all.
 
 The designations' publication in summary (2026-10-08; ops decisions D117 §6 and D121 item 1) adds one
 more, with its own section below: `designations-summary.v1.json`, the registry-wide monthly totals of
-the projects' designations and, from 5 designators, of the contributors' — thirty-five schemas in all.
+the projects' designations and, from 5 designators, of the contributors' — thirty-four schemas in all.
 
 ### Contracts published beyond the initially-scoped ten
 
@@ -1022,7 +1023,7 @@ value inside `v1` is not additive (versioning policy 1).*
   a top-up was a multiplier on a Purpose Fee that enters the fees account (COM-064), and
   sponsorship never enters that account (statutes Art. 6a(1), 6b).
 - Not issuable yet: the sponsor certificate waits for the tax adviser's answer (LEG-094), and
-  its claim wording comes in a later kit version, because kit-2 carries no sponsor variant.
+  its claim wording comes in a later kit version, because the kit carries no sponsor variant.
 - Wording (ops decision D44 item 7). `typ`, `variant` and the `topup` rule now say that `topup`
   is reserved: the voluntary multipliers were withdrawn before any sale, so no top-up
   certificate is ever issued. No enum value is removed.
@@ -1200,7 +1201,7 @@ value inside `v1` is not additive (versioning policy 1).*
   variant other than its class's governs its claims — absent means the class's. A policy lists
   `supporter.sponsor` as not issuable until the tax adviser has answered (LEG-094), and the kit
   variant it names is carried by the later kit that publishes the sponsor certificate's words,
-  not by kit-2.
+  not by the kit in force.
 - Wording (ops decision D44 item 7). `$defs.typ` says that `topup` is reserved and never issued:
   the voluntary multipliers were withdrawn before any sale. No enum value is removed.
 - The existing example validates unchanged.
@@ -1270,26 +1271,31 @@ value inside `v1` is not additive (versioning policy 1).*
   from every document in `kits/`. Kit wording is claim language; a drifted example is the file
   somebody copies into a press release. Same precedent as `category-menu.v1.example.json`.
 
-## claim-kit.v2.json
+### 1.1.0 — unreleased (2026-10-12; ops decisions D44, D103 item 3 and D136) — **pre-release** change under versioning policy 5
 
-### 1.0.0 — unreleased (2026-09-15; ops decision D44)
-
-- Initial publication. The second shape of the claim-language kit, as a NEW FILE beside
-  `claim-kit.v1.json` under versioning policy 2: v1 requires every variant's `prohibited` list
-  to contain "we give back", allows exactly one `permittedPattern` per variant, closes the
-  variant set and has no member for templates, a badge or rules with their reasons, while D44
-  permits a give-something-back line tied to the pledge, several lines, share templates, named
-  rules and a coverage badge. `claim-kit.v1.json` and `kits/kit-1.json` are unchanged, and kit-1
-  stays a v1 document: this schema refuses `kitVersion: "kit-1"`.
-- THE MONEY LINE IS THE PLEDGE OR NOTHING. `pledge.text` is the only place a v2 kit says where a
+- The shape of ops decision D44 (2026-09-15) replaces 1.0.0's, in place. D44's shape was first
+  published as a second schema file beside this one, with a second kit as its document. Under
+  D136 nothing public gets a second version before the public launch, so this file takes that
+  shape; the second schema file, its example and its kit are deleted; and `kits/kit-1.json`
+  takes the second kit's text, as D103 item 3 decided (the claim kit v1 is the second kit's
+  text). No kit under either shape has been published (`publishedAt` is null on every one),
+  which is what policy 5 asks.
+- What 1.0.0's shape had and this one drops: one `permittedPattern` and its `optionalClauses` per
+  variant, a closed set of two variants, translations carrying the permitted wording themselves,
+  and "we give back" as a required prohibition on every variant — while D44 permits a
+  give-something-back line tied to the pledge, several lines, share templates, named rules and a
+  coverage badge.
+- THE MONEY LINE IS THE PLEDGE OR NOTHING. `pledge.text` is the only place a kit says where a
   Purpose Fee goes, and a line reaches it only through the `{pledge}` placeholder. `check:kits`
   asserts that the text appears exactly once in the file; its byte-equality with the canonical
   pledge of statutes Art. 5(5) is held by the publishing repository's tests, because JSON Schema
-  cannot hold it and this repository does not carry the pledge.
+  cannot hold it and this repository does not carry the pledge. `pledge.text` must start
+  `100% of net Purpose Fees ` (ops decision D114, 2026-10-05; it had been `100% of net Purpose
+  Fee proceeds `), and the length bounds (200 to 600) hold the pledge, 424 characters.
 - EVERY CLAIM ENDS WITH THE ONE VERIFICATION SENTENCE (CERT-027): every line whose `use` is
   `base`, `line` or `gated`, and every template (`$defs.claimText`). A `clause` is words added
-  inside a line and carries none. `check:kits` asserts the same sentence against
-  `spec.config.json`, as it does for v1.
+  inside a line and carries none. The document states the sentence once in `verify`, and
+  `check:kits` asserts it against `spec.config.json`.
 - THE SUPPORTER RULES ARE NAMED BY ID, and the ten ids D44 fixes are required as `contains`
   clauses, so a later edit cannot quietly drop one. The FS-08 §8 reviewer phrases "we support
   charity" and "any unquantified social-impact framing" stay required members of the supporter's
@@ -1302,62 +1308,45 @@ value inside `v1` is not additive (versioning policy 1).*
 - A GATED LINE IS CLOSED IN THE DOCUMENT. Its gate names the fact the holder checks on the public
   record (`figure-issued-after-disbursed-row`) and its `state` is the `const` `closed`: a
   published kit never opens a gate by editing itself.
-- `supporter` and `statusOnly` are required; `sponsor` is OPTIONAL. kit-2 carries no sponsor
+- `supporter` and `statusOnly` are required; `sponsor` is OPTIONAL. kit-1 carries no sponsor
   variant, because the sponsor certificate's wording waits for the tax adviser's answer
   (LEG-094). The schema already fixes what a sponsor variant may never carry — `{pledge}`,
   `{lane}`, `{band}`, `{categories}`, `{figure}`, "give something back", "Purpose Fee:", a
-  template or a badge — so the later kit that publishes those words needs no schema change.
-  *(Corrected before publication, the same day: the design draft of this file's description
-  still said that exactly three variants exist; it now says two are required and the third is
-  optional.)*
-- `appliesTo` keeps v1's type grammar, `topup` and `x2|x5|x10` included, and adds the `sponsor`
+  template or a badge — so the kit that publishes those words needs no schema change.
+- `appliesTo` keeps 1.0.0's type grammar, `topup` and `x2|x5|x10` included, and adds the `sponsor`
   variant token. The grammar names tokens and grants nothing: the `topup` type is reserved and
   never issued since D44 item 7 withdrew the multipliers before any sale
   (`certificate.v1.json` 1.3.0).
 - No figure of any kind appears in a kit, no `generatedAt`, and `publishedAt` is null until first
-  publication at the permalink on the apex, immutable from then on (D32) — the v1 rules, kept.
-- The first document is `kits/kit-2.json`, published at `/kits/v2`: SHA-256
-  `63b6efcca1fe8278c0e71257fff4a36b6c03da72cec62e2ea1676aacd3a465c5` over its raw bytes (11,615
-  bytes, LF). `examples/claim-kit.v2.example.json` IS that document, byte for byte. *(Changed
-  before publication, 2026-09-16: the badge's EU consumer notice dates the Directive
-  "2026-09-27", the ISO form every rendered date takes, where it had said "27 September 2026";
-  the earlier SHA-256 was `c60a723677d5c5508192a79ec2cd4a5bd815ef61b7a201f43e0d5f65eb4925cb`,
-  11,622 bytes.)*
-- `check:kits` now validates each kit against the shape its `schemaVersion` names (1 is
-  `claim-kit.v1`, 2 is `claim-kit.v2`, anything else is refused), runs the ending rule over v1
-  patterns and over v2 lines and templates, adds the pledge-once rule and the `verify` member for
-  v2, and pairs each example with its own kit byte for byte. Each new rule has a self-test case
-  that must fail.
-
-### 1.1.0 — unreleased (2026-10-05; ops decision D114) — **pre-release** change under versioning policy 5
-
-- `pledge.text` must match `^100% of net Purpose Fees ` (it was `^100% of net Purpose Fee
-  proceeds `). With D114 the canonical pledge (Finanzreglement § 12(7) in German; the English
-  wording the website pins; its floor is statutes Art. 5(5)) reads: "100% of net Purpose Fees go to
-  the listed charities within 30 days of each payout, after published, capped costs: running costs
-  at most 15% of a year's net fees, and the reserve at most 5% of each payout until it holds six
-  months of costs, so at least 80% every year. Listed supporters lower the costs, never what is
-  passed on. No cap is ever raised for a purchase already made. Every cost and transfer is published
-  monthly." It drops "every cap able only to fall", which stopped being true once statutes Art. 22
-  let all members raise a cap with notice, for later purchases only. Nothing has been published
-  under this schema (kit-2's `publishedAt` is null), so the pattern changes in place with a minor
-  bump. The length bounds (200 to 600) still hold the new text, 424 characters.
-- `kits/kit-2.json`, still unpublished, changes before publication (D32). `pledge.text` is the new
-  pledge. The two texts that quote it, the `give-back` line and the `linkedin` template, now close
-  the quotation without a full stop of their own (`“{pledge}” verify only at purposesource.org/verify`), because the
-  pledge ends with one. Its SHA-256 over the raw bytes is now
-  `3a60f57f140156e48a2799408fe80df670ff3d2334868931e8e78ee0e49e777a` (11,694 bytes, LF); it was
-  `63b6efcca1fe8278c0e71257fff4a36b6c03da72cec62e2ea1676aacd3a465c5` (11,615 bytes).
-  `examples/claim-kit.v2.example.json` is still that document, byte for byte, and the website
-  vendors the same bytes.
-- *(Kit and example only, 2026-10-09, ops decision D125: the statutes' outer limit for passing on
-  Purpose Fees becomes 60 days (Art. 6a(2) and (4), changed before the register filing), so the
-  pledge reads "within 60 days of each payout" where it read "within 30 days of each payout".
-  Nothing else in the pledge or the kit changes, and the pledge is still 424 characters.
-  `kits/kit-2.json` is still unpublished (D32). Its SHA-256 over the raw bytes is now
-  `e5ca21ad419bc1ce790e1e19c1871347555a726f14c3bd38b0236558a8df0fe2` (11,694 bytes, LF); it was
-  `3a60f57f140156e48a2799408fe80df670ff3d2334868931e8e78ee0e49e777a`. The example is still the
-  same document, byte for byte, and the website vendors the same bytes. No schema change.)*
+  publication at the permalink on the apex, immutable from then on (D32) — 1.0.0's rules, kept.
+  `schemaVersion` stays the `const` 1 and `kitVersion` is any `kit-{n}`: the second file's clause
+  that refused `kit-1` goes with it. The consumer list no longer cites a checkout attestation's
+  step, `fsRefs` keep 1.0.0's FS-05 §3.1 step 5 and add D136, and 1.0.0's descriptions of
+  `kitVersion`, `permalink`, `publishedAt`, `language`, `variants`, `translations` and
+  `translationsNote` are kept where they still hold.
+- The document: `kits/kit-1.json` is the second kit's text with three header members changed —
+  `schemaVersion` 1, `kitVersion` `kit-1`, `permalink` `https://purposesource.org/kits/v1` — and
+  its body names no version. SHA-256
+  `01e9b1995a48dd16f48e7db8f823467a13233206c604db64b2f037e57e35385e` over its raw bytes (11,694
+  bytes, LF). The text's earlier states, all unpublished (D32), under the second kit's
+  name: `c60a723677d5c5508192a79ec2cd4a5bd815ef61b7a201f43e0d5f65eb4925cb` (the first, 11,622
+  bytes); `63b6efcca1fe8278c0e71257fff4a36b6c03da72cec62e2ea1676aacd3a465c5` (2026-09-16: the badge's
+  EU consumer notice dates the Directive "2026-09-27"); `3a60f57f140156e48a2799408fe80df670ff3d2334868931e8e78ee0e49e777a`
+  (2026-10-05, D114's pledge; the two texts that quote it close the quotation without a full stop
+  of their own); and `e5ca21ad419bc1ce790e1e19c1871347555a726f14c3bd38b0236558a8df0fe2` (2026-10-09,
+  ops decision D125: "within 60 days of each payout"). 1.0.0's kit-1 text, one pattern per
+  variant, is replaced and stays in this repository's history. `examples/claim-kit.v1.example.json`
+  IS the document, byte for byte, and the website's kit byte-identity check reads these bytes.
+- A certificate names its kit by `claimKitVersion`. `examples/certificate.v1.contributor.example.json`
+  and `examples/certificate.v1.sponsorship.example.json` pin `kit-1`. Development certificates signed
+  while the second kit was the working kit keep their signed payloads; production has issued no
+  certificate.
+- `check:kits` validates every kit against this file only (any other `schemaVersion` is refused),
+  runs the ending rule over lines and templates and the `verify` and pledge-once rules over every
+  kit, and pairs the one example with `kits/kit-1.json`. Its self-test documents are this shape,
+  and each rule still has a case that must fail.
+- Every other mention in this changelog of the second kit or its schema file now names kit-1, the
+  kit in force, or this file; the counts of schemas under 0.1.0 are one lower.
 
 ## ct-segment.v1.json
 

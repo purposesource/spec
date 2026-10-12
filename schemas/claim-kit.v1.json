@@ -2,152 +2,235 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://purposesource.org/spec/schemas/claim-kit.v1.json",
   "title": "Claim-language kit — /kits/{version}.json",
-  "description": "The exact wording an organisation may use to describe a certificate publicly, the framing that is contractually excluded, and the binding statement printed on the certificate face (CERT-050…053, FS08-070). A kit is a versioned DOCUMENT rather than a page: `kitVersion` is what a certificate payload's `claimKitVersion` pins at issuance (D17), so the wording that was in force when a certificate was issued stays readable after the wording changes.\n\nTwo properties make this a contract rather than advice. First, permitted wording is a PATTERN with braced placeholders and never a filled-in claim: a kit carrying one organisation's values would publish a single purchase's claim as if it governed every purchase, and a kit carrying a figure would put a number into a document the renderer embeds in every certificate — so no figure of any kind appears here, and every placeholder is substituted from the certificate the claim is about. Second, `prohibited` is written as prohibitions a reviewer can match a published claim against, and the three entries FS-08 §8 names are required members of every variant's list: a later edit cannot quietly drop one.\n\nExactly two variants exist, and the set is closed deliberately: `supporter` governs the payment class, and `statusOnly` governs the licence-status class, which permits coverage-status wording exclusively and no supporter or impact phrasing anywhere (CERT-052, MKT-034). There is no donation-lane variant — the donate-direct lane is not operable at this phase, so a kit for it would govern claims nobody can make; adding one is an additive change to this file, made when the lane exists.\n\nThe document carries no `generatedAt`. It is authored and published as-is: it holds no counters, no subject data and no batch timestamp, so there is nothing for one to date (the same deliberate absence as the badge contract, for a different reason). `publishedAt` is null until the document is first published at its permalink on the apex, and immutable from then on (D32, FS01-121).",
+  "description": "The exact wording an organisation may use to describe a certificate publicly, the framing that is contractually excluded, and the binding statement printed on the certificate face (CERT-050…053, FS08-070). A kit is a versioned DOCUMENT rather than a page: `kitVersion` is what a certificate payload's `claimKitVersion` pins at issuance (D17), so the wording that was in force when a certificate was issued stays readable after the wording changes. It carries only PATTERNS with braced placeholders, never a filled-in claim: a kit carrying one organisation's values would publish a single purchase's claim as if it governed every purchase. The shape is ops decision D44's (2026-09-15): several lines, share templates, named rules, a coverage badge and a give-something-back line tied to the pledge, where the first shape allowed one pattern per variant and required every variant to prohibit \"we give back\". It replaced the first shape in place on 2026-10-12 (ops decision D136, versioning policy 5): no kit under either shape has been published (`publishedAt` null).\n\nWHAT THIS SHAPE MAKES STRUCTURAL. (1) THE MONEY LINE IS THE PLEDGE OR NOTHING: the only place the document states where a Purpose Fee goes is `pledge.text`, which must equal the canonical pledge of statutes Art. 5(5) byte for byte (a test in the publishing repositories holds that equality; JSON Schema cannot), and a line reaches it only through the `{pledge}` placeholder. (2) EVERY CLAIM ENDS WITH THE ONE VERIFICATION SENTENCE (CERT-027): every line whose `use` is `base`, `line` or `gated`, and every template, ends with it; a `clause` is added inside a line and does not. (3) THE SUPPORTER RULES ARE NAMED BY ID, and the ten ids D44 fixes are required, so a later edit cannot quietly drop one; the reviewer phrases \"we support charity\" and \"any unquantified social-impact framing\" stay required members of the supporter's `prohibited` list (FS-08 §8). (4) A BADGE IS A COVERAGE BADGE: its text is fixed to the Purpose Source name, the lane or the waiver designation, and the live status, and the supporter badge carries the EU consumer notice. (5) A GATED LINE IS CLOSED IN THE DOCUMENT: its gate names a fact the holder checks on the public record, and a published kit never opens a gate by editing itself.\n\nTwo variants are required: `supporter` for the payment class and `statusOnly` for the licence-status class, which permits coverage-status wording exclusively and no supporter or impact phrasing anywhere (CERT-052, MKT-034). A third, `sponsor`, for the sponsor certificate (`supporter.sponsor`), is optional: kit-1 carries none, because that certificate's wording waits for the tax adviser's answer, and the kit that adds it needs no change to this schema. No figure of any kind appears in the document. The document carries no `generatedAt`; `publishedAt` is null until the document is first published at its permalink on the apex, and immutable from then on (D32).",
   "x-psn": {
-    "specVersion": "1.0.0",
+    "specVersion": "1.1.0",
     "phase": "P-M2",
     "artifactPath": "/kits/{version}.json",
     "authoritative": true,
-    "producer": "authored in this repository as kits/kit-{version}.json and published as-is (P-M2: vendored byte-identical by the website and served at its permalink; P-M3: emitted into the artifact plane by jobs.index-build)",
+    "producer": "authored in this repository as kits/kit-{version}.json and published as-is (P-M2: vendored byte-identically by the website and served at its permalink; P-M3: emitted into the artifact plane by jobs.index-build)",
     "consumers": [
       "the certificate renderer, which embeds the kit as an integral PDF page carrying the binding statement",
       "the kit page and its raw endpoint on the website",
-      "the checkout acknowledgment that delivers the kit at purchase",
-      "OSPO reviewers and journalists checking a published claim against the document that governs it"
+      "the checkout statement that delivers the kit at purchase",
+      "OSPO reviewers, journalists and counsel checking a published claim against the document that governs it"
     ],
-    "fsRefs": [
-      "FS-08 §8 (FS08-070…072)",
-      "FS-05 §3.1 step 5",
-      "D17",
-      "CERT-050…053",
-      "MKT-032…035"
-    ],
+    "fsRefs": ["FS-08 §8 (FS08-070…072)", "FS-05 §3.1 step 5", "D17", "D44", "D136", "CERT-027", "CERT-050…053", "CERT-062", "MKT-011…013", "MKT-032…035", "NEV-016", "NEV-017"],
     "vsRefs": ["VS-31", "VS-30"],
     "changelog": "CHANGELOG.md#claim-kitv1json"
   },
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "schemaVersion",
-    "kitVersion",
-    "permalink",
-    "publishedAt",
-    "language",
-    "variants",
-    "translations",
-    "translationsNote"
-  ],
+  "required": ["schemaVersion", "kitVersion", "permalink", "publishedAt", "language", "verify", "pledge", "variants", "translations", "translationsNote"],
   "properties": {
     "schemaVersion": { "const": 1 },
-    "kitVersion": {
-      "type": "string",
-      "pattern": "^kit-[0-9]+$",
-      "description": "The kit's identifier, in the `{family}-{n}` grammar the checkout documents share with `att-1` and `ent-terms-1`. This is the string a certificate payload pins as `claimKitVersion` (D17), so it is never reused and never renamed."
-    },
-    "permalink": {
-      "type": "string",
-      "pattern": "^https://purposesource\\.org/kits/v[0-9]+$",
-      "description": "Where this document is published for a reader, in full, permanently. `kit-{n}` is published at `/kits/v{n}`: the file name carries the document's identifier and the URL carries the site's permalink token (WEB-012, FS01-121). A gate in this repository derives both from spec.config.json, so a domain or org rename is one edit and a test run."
-    },
-    "publishedAt": {
-      "type": ["string", "null"],
-      "format": "date-time",
-      "description": "When this document was first published at its permalink on the apex, or null while it has not been. Required and nullable rather than optional: in an audit a missing key and an explicit null must not be distinguishable, and the null is what says the text may still change in place (D32). After publication the text is immutable and a change is a new kit at a new URL."
-    },
-    "language": {
-      "const": "en",
-      "description": "The language of this document's own text. English is controlling for every kit (CERT-056); an approved rendering in another language is an entry in `translations`, never a separate document with a different `language`."
+    "kitVersion": { "type": "string", "pattern": "^kit-[0-9]+$", "description": "The kit's identifier, in the `{family}-{n}` grammar the checkout documents share with `att-1` and `ent-terms-1`. This is the string a certificate payload pins as `claimKitVersion` (D17)." },
+    "permalink": { "type": "string", "pattern": "^https://purposesource\\.org/kits/v[0-9]+$", "description": "Where this document is published for a reader, in full, permanently. `kit-{n}` is published at `/kits/v{n}`: the file name carries the document's identifier and the URL carries the site's permalink token (WEB-012, FS01-121). A gate in this repository derives both from spec.config.json, so a domain or org rename is one edit and a test run." },
+    "publishedAt": { "type": ["string", "null"], "format": "date-time", "description": "When this document was first published at its permalink on the apex, or null while it has not been. Required and nullable rather than optional: in an audit a missing key and an explicit null must not be distinguishable, and the null is what says the text may still change in place (D32). After publication the text is immutable and a change is a new kit at a new URL." },
+    "language": { "const": "en", "description": "The language of this document's own text. English is controlling for every kit (CERT-056); an approved rendering in another language is an entry in `translations`, never a separate document with a different `language`." },
+    "verify": { "const": "verify only at purposesource.org/verify", "description": "The one exclusive-verification sentence (CERT-027), stated once for the document and required at the end of every claim." },
+    "pledge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "source"],
+      "properties": {
+        "text": { "type": "string", "minLength": 200, "maxLength": 600, "pattern": "^100% of net Purpose Fees ", "description": "The canonical pledge, byte for byte; `{pledge}` in a line is replaced by exactly this text." },
+        "source": { "type": "string", "minLength": 5 }
+      }
     },
     "variants": {
       "type": "object",
       "additionalProperties": false,
       "required": ["supporter", "statusOnly"],
-      "description": "The kit variants, one per certificate class that embeds a kit: `supporter` for the payment class, `statusOnly` for the licence-status class. These keys are this document's own, in the camelCase every key here uses. The published certificate policy distinguishes the SAME two classes with the `classes[].kitVariant` tokens `supporter` and `status-only`, so a consumer joining the two files maps the policy's `status-only` onto `statusOnly` — indexing this object with the policy token directly resolves to nothing for every licence-status class. Both variants are required: a kit that published one and left the other out would leave a class of holder with no permitted wording at all, which is the state CERT-053 exists to prevent.",
+      "description": "The kit variants, one per certificate class that embeds a kit: `supporter` for the payment class, `statusOnly` for the licence-status class, and optionally `sponsor` for the sponsor certificate. These keys are this document's own, in the camelCase every key here uses. The published certificate policy distinguishes the same variants with the `kitVariant` tokens `supporter`, `status-only` and `sponsor`, so a consumer joining the two files maps the policy's `status-only` onto `statusOnly` — indexing this object with the policy token directly resolves to nothing for every licence-status class. `supporter` and `statusOnly` are required: a kit that published one and left the other out would leave a class of holder with no permitted wording at all, which is the state CERT-053 exists to prevent.",
+      "$comment": "D44 (FIXES-2): `sponsor` is optional. kit-1 carries no sponsor variant, because the sponsor certificate's wording waits for the tax adviser's answer (LEG-094); the kit that adds it does so under this same schema, and a `supporter.sponsor` certificate pins that kit.",
       "properties": {
-        "supporter": { "$ref": "#/$defs/variant" },
-        "statusOnly": { "$ref": "#/$defs/variant" }
+        "supporter": {
+          "allOf": [
+            { "$ref": "#/$defs/variant" },
+            {
+              "required": ["rules"],
+              "properties": {
+                "lines": { "contains": { "properties": { "text": { "pattern": "\\{pledge\\}" } }, "required": ["text"] } },
+                "badge": {
+                  "type": "object",
+                  "required": ["euConsumerNotice"],
+                  "properties": { "text": { "const": "Purpose Source · {lane} Entitlement · {status}" } }
+                },
+                "rules": {
+                  "allOf": [
+                    { "contains": { "properties": { "id": { "const": "donation-framing" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "numbers-not-printed" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "recipients-and-emblems" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "own-purchase-only" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "no-environmental-claims" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "credential-not-licence" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "pledge-words-only" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "give-back-with-money-line" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "badge-coverage-only" } }, "required": ["id"] } },
+                    { "contains": { "properties": { "id": { "const": "one-verification-address" } }, "required": ["id"] } }
+                  ]
+                },
+                "prohibited": {
+                  "allOf": [
+                    { "contains": { "const": "we support charity" } },
+                    { "contains": { "const": "any unquantified social-impact framing" } }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "statusOnly": {
+          "allOf": [
+            { "$ref": "#/$defs/variant" },
+            {
+              "properties": {
+                "lines": { "items": { "properties": { "text": { "not": { "pattern": "\\{(?:amount|band|pledge|tier|figure)\\}|give something back|Purpose Fee" } } } } },
+                "templates": { "maxItems": 0 },
+                "badge": { "type": "object", "properties": { "text": { "const": "Purpose Source · waiver · {status}" } } },
+                "prohibited": {
+                  "allOf": [
+                    { "contains": { "const": "we support charity" } },
+                    { "contains": { "const": "we give back" } },
+                    { "contains": { "const": "any unquantified social-impact framing" } },
+                    { "contains": { "const": "any supporter or impact phrasing" } }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "sponsor": {
+          "allOf": [
+            { "$ref": "#/$defs/variant" },
+            {
+              "properties": {
+                "lines": { "items": { "properties": { "text": { "not": { "pattern": "\\{(?:pledge|lane|band|categories|figure)\\}|give something back|Purpose Fee:" } } } } },
+                "templates": { "maxItems": 0 },
+                "badge": { "const": null }
+              }
+            }
+          ]
+        }
       }
     },
     "translations": {
       "type": "object",
+      "description": "Counsel-approved renderings, keyed by ISO 639-1 language code. Empty is the honest state at this phase and not a gap: a rendering nobody has approved would be a builder's own translation of a legal constraint. German and French ship at P-M3 (CERT-056), each marked as an approved rendering, and the English text of this document is controlling in every case.",
       "propertyNames": { "pattern": "^[a-z]{2}$" },
-      "additionalProperties": { "$ref": "#/$defs/translation" },
-      "description": "Counsel-approved renderings, keyed by ISO 639-1 language code. Empty is the honest state at this phase and not a gap: a rendering nobody has approved would be a builder's own translation of a legal constraint. German and French ship at P-M3 (CERT-056), each marked as an approved rendering, and the English text of this document is controlling in every case."
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["approvedRendering", "document"],
+        "properties": {
+          "approvedRendering": { "const": true },
+          "document": { "type": "string", "pattern": "^https://purposesource\\.org/kits/v[0-9]+/[a-z]{2}$" }
+        }
+      }
     },
-    "translationsNote": {
-      "type": "string",
-      "minLength": 40,
-      "description": "What the state of `translations` means, said in the document itself rather than only in this schema — the kit is read as a published page by people who will never open the contract."
-    }
+    "translationsNote": { "type": "string", "minLength": 40, "description": "What the state of `translations` means, said in the document itself rather than only in this schema — the kit is read as a published page by people who will never open the contract." }
   },
   "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,48}$" },
+    "placeholderText": {
+      "type": "string",
+      "minLength": 10,
+      "pattern": "^(?:[^{}]|\\{(?:organisation|lane|period|amount|band|categories|status|tier|pledge|figure)\\})*$",
+      "description": "Text whose only braces are the closed placeholder set: {organisation} {lane} {period} {amount} {band} {categories} {status} {tier} {pledge} {figure}."
+    },
+    "claimText": {
+      "allOf": [
+        { "$ref": "#/$defs/placeholderText" },
+        { "pattern": "(?:verify only at purposesource.org/verify)$" }
+      ]
+    },
+    "line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "use", "text"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "use": { "enum": ["base", "line", "clause", "gated"], "description": "`base` — the one line a claim starts from; `line` — a line that may be used with the base; `clause` — words added inside a line; `gated` — unusable until its gate's fact is on the public record." },
+        "text": { "type": "string" },
+        "gate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "state"],
+          "properties": {
+            "kind": { "enum": ["figure-issued-after-disbursed-row"] },
+            "state": { "const": "closed" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "use": { "const": "clause" } }, "required": ["use"] },
+          "then": { "properties": { "text": { "$ref": "#/$defs/placeholderText" } } },
+          "else": { "properties": { "text": { "$ref": "#/$defs/claimText" } } }
+        },
+        {
+          "if": { "properties": { "use": { "const": "gated" } }, "required": ["use"] },
+          "then": { "required": ["gate"] },
+          "else": { "not": { "required": ["gate"] } }
+        }
+      ]
+    },
+    "template": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "channel", "text"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "channel": { "enum": ["long-post", "short-post"] },
+        "text": { "$ref": "#/$defs/claimText" }
+      }
+    },
+    "badge": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["text", "notes"],
+      "properties": {
+        "text": { "type": "string", "pattern": "^Purpose Source · (?:\\{lane\\} Entitlement|waiver) · \\{status\\}$" },
+        "notes": { "type": "array", "items": { "type": "string", "minLength": 40 } },
+        "euConsumerNotice": { "type": "string", "minLength": 100 }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "rule", "reason"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "rule": { "type": "string", "minLength": 20 },
+        "reason": { "type": "string", "minLength": 20 }
+      }
+    },
     "variant": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["appliesTo", "permittedPattern", "optionalClauses", "permittedNotes", "prohibited", "binding"],
-      "description": "One variant: which certificates it governs, the one permitted pattern, the clauses that may be added to it, the notes that bound how it is filled in, the prohibitions, and the binding statement.",
+      "required": ["appliesTo", "lines", "permittedNotes", "templates", "badge", "prohibited", "binding"],
       "properties": {
         "appliesTo": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": {
-            "type": "string",
-            "pattern": "^(?:contributor|steward|supporter|license-status|topup)\\.(?:participation|registration|impact|entitlement|gift-funder|waived-funder|donation|waiver|under-threshold|gifted-pass|x2|x5|x10)$"
-          },
-          "description": "The certificate classes this variant governs, as `{typ}.{variant}` in the frozen tokens of the type system (FS08-010). Both enums are copied here rather than referenced: no schema in this repository may `$ref` another, because one downloaded file has to validate on its own. A class absent from every variant of a published kit is a class whose holders have no permitted wording, and that absence is never left silent: the variant's `permittedNotes` say which classes it does not cover and what is true of them. Which classes can be issued at all is the published certificate policy's answer, not this schema's — and a class that policy records as issuable which no kit variant covers is a gap for the next kit version to close, never a licence to invent wording."
+          "items": { "type": "string", "pattern": "^(?:contributor|steward|supporter|license-status|topup)\\.(?:participation|registration|impact|entitlement|gift-funder|waived-funder|donation|sponsor|waiver|under-threshold|gifted-pass|x2|x5|x10)$" }
         },
-        "permittedPattern": {
-          "type": "string",
-          "minLength": 40,
-          "pattern": "(?:verify only at purposesource.org/verify)$",
-          "description": "The one permitted claim shape, with braced placeholders. It ends with the exclusive-verification sentence and the pin above requires that (CERT-027, FS-00 §6.4 as amended 2026-09-01): a claim offering any other address to verify at is outside the kit. The two dots in the pin are deliberately unescaped and the sentence deliberately wrapped in a group — this repository's copy gate reads the token that follows those words and requires it to equal the published host exactly, so an escaped dot or a bare anchor pressed against the sentence would read here as a different host being published."
-        },
-        "optionalClauses": {
-          "type": "array",
-          "uniqueItems": true,
-          "items": { "type": "string", "minLength": 5 },
-          "description": "Clauses that may be added to the pattern, each with its own placeholders. Required and possibly empty: an empty array states that this variant permits nothing beyond its pattern, where an absent key would leave a reader to decide whether silence meant permission."
-        },
-        "permittedNotes": {
+        "lines": {
           "type": "array",
           "minItems": 1,
-          "items": { "type": "string", "minLength": 20 },
-          "description": "How the pattern is filled in, and what may not be added while filling it in — the part a marketing team gets wrong. These are constraints in prose, addressed to the holder; they are not commentary about the schema."
+          "items": { "$ref": "#/$defs/line" },
+          "contains": { "properties": { "use": { "const": "base" } }, "required": ["use"] },
+          "minContains": 1,
+          "maxContains": 1
         },
-        "prohibited": {
-          "type": "array",
-          "minItems": 5,
-          "uniqueItems": true,
-          "items": { "type": "string", "minLength": 5 },
-          "allOf": [
-            { "contains": { "const": "we support charity" } },
-            { "contains": { "const": "we give back" } },
-            { "contains": { "const": "any unquantified social-impact framing" } }
-          ],
-          "description": "The wording the holder may not publish, stated as prohibitions so a reviewer can match a published claim against them (FS08-070). The three entries FS-08 §8 lists are required members of every variant's list: they are the examined-and-rejected framings, and a kit that dropped one would silently permit it."
-        },
-        "binding": {
-          "const": "public claims about this certificate are governed by the enclosed claim-language kit",
-          "description": "The CERT-053 statement the certificate carries on its face, pinned to FS-08 §8's sentence. A const rather than a length rule, because the sentence is what makes the kit contractual: a paraphrase on one certificate and the original on another would leave two different bindings in the field."
-        }
-      }
-    },
-    "translation": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["permitted", "approvedRendering"],
-      "properties": {
-        "permitted": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "type": "string", "minLength": 20 },
-          "description": "The permitted wording in this language, as counsel approved it (FS-08 §8)."
-        },
-        "approvedRendering": {
-          "const": true,
-          "description": "A rendering is published only once counsel has approved it. The flag is required and constant so an unapproved draft cannot be added with the field simply left out; English stays controlling either way (CERT-056)."
-        }
+        "permittedNotes": { "type": "array", "items": { "type": "string", "minLength": 20 } },
+        "templates": { "type": "array", "items": { "$ref": "#/$defs/template" } },
+        "badge": { "$ref": "#/$defs/badge" },
+        "rules": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/rule" } },
+        "prohibited": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 5 } },
+        "binding": { "const": "public claims about this certificate are governed by the enclosed claim-language kit" }
       }
     }
   }
