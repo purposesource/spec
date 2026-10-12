@@ -813,12 +813,6 @@ creating one.
   permitted before the revocation stays lawful. No constraint moved, and the coverage answer is
   unchanged.
 
-### 1.2.3 — unreleased (2026-10-12; ops decision D136)
-
-- Wording. The description names the coverage function once, `cov-v1`, where it named a second
-  version "and `cov-v1` before it": the coverage function folded back into `cov-v1`
-  (`coverage/cov-v1.ts` 1.2.0). No constraint moved.
-
 ## entitlement-record.v1.json
 
 ### 1.0.0 — unreleased
