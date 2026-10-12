@@ -19,7 +19,7 @@ a procurement reviewer can consume all of it the way they consume a static file.
 |---|---|
 | `schemas/` | 35 JSON Schemas (draft 2020-12): one per published artifact class, and `contributor-page-settings.v1` for a person's private page settings, which are never published. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
-| `coverage/` | `cov-v2.ts`, the published coverage function in force, with `cov-v2.vectors.json` and its test suite; `cov-v1.ts`, the first version, frozen beside it with `vectors.json`. Zero dependencies. |
+| `coverage/` | `cov-v1.ts`, the published coverage function, with its vectors (`vectors.json`) and its test suite. Zero dependencies. |
 | `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in four cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json`, `claim-kit.v2.example.json` and `link-platforms.v1.example.json`, the example IS the published document, byte for byte. Beside them, six golden files the implementations run: `link-rules.v1.golden.json` (the contributor page's link cases, hostile ones included), `contributor-page-contrast.v1.golden.json` (the page's theme table: the colour presets, print rows, status chips and covers with their WCAG figures, read as data by both implementations), `contributor-page-accent.v1.golden.json` (the accent guard's vectors), `contributor-page-preview.v1.golden.json` (worked preview-hash vectors), `contributor-page-alias.v1.golden.json` (worked login-address MACs under a published test key) and `contributor-page-build.v1.golden.json` (the builder's vectors for keeping a hidden login off the repository list). |
 | `kits/` | The claim-language kits — `kit-{version}.json`, the wording a certificate holder may publish and the framing that is excluded (FS08-070). Versioned documents, not pages: a certificate pins the kit that was in force when it was issued. Each is published at `/kits/v{n}` and validated by `check:kits`. |
 | `scripts/` | The CI gates. Each one refuses to pass on an empty input set. |
@@ -47,7 +47,7 @@ theme table's contrast figures, recompute the accent guard's cases and their pre
 what the design rules out; the coverage
 vectors use valid artifacts and still cover all eight answers; the coverage module is
 dependency-free and clock-free (and its SHA-256 is printed); the copy law holds; the published
-module typechecks under `erasableSyntaxOnly`; the frozen vector suite passes; the OpenAPI lints;
+module typechecks under `erasableSyntaxOnly`; the coverage vector suite passes; the OpenAPI lints;
 and every example inside the API description validates too.
 
 Individual gates:
@@ -72,7 +72,7 @@ npm run check:vectors           # vector inputs are valid artifacts; all eight a
 npm run check:module            # coverage module: no imports, no clock, no I/O; prints its digest
 npm run check:copy              # claim rules and leak guards over published copy
 npm run check:types             # tsc --noEmit with erasableSyntaxOnly
-npm run test:coverage           # the frozen vector suite
+npm run test:coverage           # the coverage vector suite
 npm run lint:openapi            # Redocly, recommended ruleset
 npm run check:openapi-examples  # every example in the API description, conformantly validated
 ```
@@ -179,7 +179,7 @@ handle them agree on it.
 
 ## The coverage function
 
-`coverage/cov-v2.ts` answers with exactly one of eight values, plus a `basis` block naming
+`coverage/cov-v1.ts` answers with exactly one of eight values, plus a `basis` block naming
 what produced the answer:
 
 `yes-via-pass` · `yes-via-project` · `yes-via-portfolio` · `yes-via-waiver` ·
@@ -189,20 +189,21 @@ what produced the answer:
 the credential of the direct donation route, and that route was dropped before it opened (ops
 decisions D91 item 3 and D93 item 1, 2026-10-01). No Donation Entitlement is issued, so no
 published entitlement record carries the `donation` term the function's donation step looks for.
-The value stays in the frozen set of eight (FS-00 §6.3), which `/v1/meta` lists in full, and both
-modules keep the step, because their bytes are pinned.
+The value stays in the frozen set of eight (FS-00 §6.3), which `/v1/meta` lists in full, and the
+module keeps the step.
 
-`cov-v2` is a pure function over three published inputs and an explicit `now`. No I/O, no clock
+`cov-v1` is a pure function over three published inputs and an explicit `now`. No I/O, no clock
 read, no dependencies. Two calls with the same arguments return the same result forever,
 which is what makes the vector file a real test rather than a snapshot.
 
-`cov-v2` (2026-09-30) is `cov-v1` with three changes, each an ops decision: a Pass covers
+On 2026-09-30 the function changed in place in three ways, each an ops decision: a Pass covers
 any work under the licence, registered or not, so a Pass holder asking about a repository
 with no registry record is answered `yes-via-pass` rather than `repo_not_registered` (D48
 item 5, D82 item 10); a registered repository answers the same whether or not its admins
 claimed it (D82 item 1); and an answer reports one public state, `registered`, for a record
-that says `registered` or the older `verified` (D82's dated note (d)). `cov-v1.ts` stays
-beside it unchanged, its digest pinned, so every answer it gave stays reproducible.
+that says `registered` or the older `verified` (D82's dated note (d)). The `coverage/cov-v1.ts`
+section of [`CHANGELOG.md`](CHANGELOG.md) records each change with its date and the digest
+the edge served before and after it.
 
 The deployed worker publishes its own module digest at `GET /v1/meta`. Compare it with the
 digest `npm run check:module` prints, and you have verified that the code that answered
@@ -261,9 +262,8 @@ the board's list         ─────┼──────► recipient-list.
                               └──────► stats.v1              ─┘
                                               │
                                               ▼
-                                   coverage/cov-v2.ts  ── the pure function over
+                                   coverage/cov-v1.ts  ── the pure function over
                                                           entitlement + repo + waivers
-                                                          (cov-v1.ts frozen beside it)
 ```
 
 `category-menu.v1` sits underneath all of it: the seven public-benefit categories, written
@@ -273,12 +273,16 @@ repository. `check:menu` is what makes "once" mechanical rather than aspirationa
 
 ## Versioning
 
-Additive-only inside a version; a breaking change is a **new file** beside the old one,
-which keeps being served unchanged for as long as anything published under it exists. The
-same rule governs the coverage function: `cov-v2` is created alongside `cov-v1`, never in
-place of it. Full policy and per-schema history in [`CHANGELOG.md`](CHANGELOG.md).
+Until the public launch, every contract, document and function here changes **in place**
+inside its v1, with a pre-release minor bump and a dated entry in [`CHANGELOG.md`](CHANGELOG.md)
+saying what moved and why (ops decision D136); the coverage function keeps the name `cov-v1`
+the same way. From the launch, a published version is never edited: it stays additive-only, and
+a breaking change is a **new file** beside the old one (`{name}.v{n+1}.json` beside
+`{name}.v{n}.json`), which keeps being served unchanged for as long as anything published under
+it exists; a change in the coverage function's behaviour is the next version alongside
+`cov-v1.ts`. Full policy and per-schema history in [`CHANGELOG.md`](CHANGELOG.md).
 
-The scripts check that a schema compiles, that every example validates and that the frozen
+The scripts check that a schema compiles, that every example validates and that the coverage
 vectors still hold; whether a change is additive in *meaning* is a human's read. Since
 2026-09-11 [`.github/CODEOWNERS`](.github/CODEOWNERS) names the organisation team
 `@purposesource/stewards` on `schemas/`, `openapi/`, `coverage/` and `CHANGELOG.md`, so a

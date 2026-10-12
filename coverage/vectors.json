@@ -1,13 +1,17 @@
 {
-  "$comment": "FROZEN test vectors for cov-v1 (FS10-020). Every vector states its inputs as COMPLETE published artifacts — each `repos` fixture validates against repo-record.v1.json, each `company` against entitlement-record.v1.json, each `waivers` document against waiver.v1.json (scripts/check-vectors.mjs enforces exactly that). `expect` is asserted by DEEP EQUALITY against the whole result, not field by field, so the wire shape is pinned here too. Vectors are appended, never edited: a behaviour change creates cov-v2 with its own vector file. FS10-120(b) requires each of the eight answer values to be producible from fixtures — coverage/cov-v1.test.ts asserts that this file does so.",
+  "$comment": "Test vectors for cov-v1 (FS10-020), the published coverage function. Every input is a COMPLETE published artifact (scripts/check-vectors.mjs validates each `repos` fixture against repo-record.v1.json, each `company` against entitlement-record.v1.json and each `waivers` document against waiver.v1.json), and `expect` is asserted by DEEP EQUALITY against the whole outcome, so the wire shape is pinned here too. FS10-120(b) requires each of the eight answer values to be producible from fixtures; coverage/cov-v1.test.ts asserts that this file does so. VEC-01 to VEC-25 are the vectors of the function's first text (2026-09-17), with their ids, inputs and answers unchanged; since 2026-09-30 an answer reports a `verified` record as `registered` (D82's dated note (d)). The other 21 were added on 2026-09-30 for that date's three changes (ops decisions D48 item 5 and D82): (a) a Pass inside its term covers a work with no published record (`repo: null`, `repoNodeId` names the repository asked about, and nothing is published at registry/repo/{repoNodeId}.json; the answer reports `repoState: no-record`), and every other organisation gets `repo_not_registered`, expected as `{error, algoVersion, repo}`; (b) a registered repository its admins never claimed answers like any registered one; (c) the one public state. Until the public launch the vectors change in place with the function, each change dated in CHANGELOG.md (ops decision D136); from the launch they are appended, never edited.",
   "algoVersion": "cov-v1",
-  "specVersion": "1.0.0",
+  "specVersion": "1.2.0",
   "repos": {
     "verified": {
       "schemaVersion": 1,
       "generatedAt": "2027-06-01T00:00:00Z",
       "nodeId": "R_kgDOAbc123",
-      "owner": { "login": "acme", "orgId": "O_kgDOAcme001", "type": "Organization" },
+      "owner": {
+        "login": "acme",
+        "orgId": "O_kgDOAcme001",
+        "type": "Organization"
+      },
       "name": "widget-engine",
       "defaultBranch": "main",
       "state": "verified",
@@ -21,16 +25,31 @@
         "adoptedAt": "2027-03-14",
         "textSha256": "9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f"
       },
-      "manifest": { "present": false, "rejections": [] },
-      "waivers": { "count": 0, "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json" },
-      "badge": { "url": "https://api.purposesource.org/badge/R_kgDOAbc123.json", "state": "registered" },
-      "links": { "repository": "https://github.com/acme/widget-engine" }
+      "manifest": {
+        "present": false,
+        "rejections": []
+      },
+      "waivers": {
+        "count": 0,
+        "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json"
+      },
+      "badge": {
+        "url": "https://api.purposesource.org/badge/R_kgDOAbc123.json",
+        "state": "registered"
+      },
+      "links": {
+        "repository": "https://github.com/acme/widget-engine"
+      }
     },
     "delisted": {
       "schemaVersion": 1,
       "generatedAt": "2027-06-01T00:00:00Z",
       "nodeId": "R_kgDODel456",
-      "owner": { "login": "acme", "orgId": "O_kgDOAcme001", "type": "Organization" },
+      "owner": {
+        "login": "acme",
+        "orgId": "O_kgDOAcme001",
+        "type": "Organization"
+      },
       "name": "retired-tool",
       "defaultBranch": "main",
       "state": "delisted",
@@ -44,15 +63,28 @@
         "adoptedAt": "2027-03-14",
         "textSha256": "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f809"
       },
-      "manifest": { "present": false, "rejections": [] },
-      "waivers": { "count": 0, "url": "https://api.purposesource.org/v1/waivers/R_kgDODel456.json" },
-      "badge": { "url": "https://api.purposesource.org/badge/R_kgDODel456.json", "state": "neutral" }
+      "manifest": {
+        "present": false,
+        "rejections": []
+      },
+      "waivers": {
+        "count": 0,
+        "url": "https://api.purposesource.org/v1/waivers/R_kgDODel456.json"
+      },
+      "badge": {
+        "url": "https://api.purposesource.org/badge/R_kgDODel456.json",
+        "state": "neutral"
+      }
     },
     "otherOwner": {
       "schemaVersion": 1,
       "generatedAt": "2027-06-01T00:00:00Z",
       "nodeId": "R_kgDOOth789",
-      "owner": { "login": "otherco", "orgId": "O_kgDOOther99", "type": "Organization" },
+      "owner": {
+        "login": "otherco",
+        "orgId": "O_kgDOOther99",
+        "type": "Organization"
+      },
       "name": "zeta-lib",
       "defaultBranch": "main",
       "state": "verified",
@@ -66,9 +98,132 @@
         "adoptedAt": "2027-04-01",
         "textSha256": "708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f"
       },
-      "manifest": { "present": false, "rejections": [] },
-      "waivers": { "count": 0, "url": "https://api.purposesource.org/v1/waivers/R_kgDOOth789.json" },
-      "badge": { "url": "https://api.purposesource.org/badge/R_kgDOOth789.json", "state": "registered" }
+      "manifest": {
+        "present": false,
+        "rejections": []
+      },
+      "waivers": {
+        "count": 0,
+        "url": "https://api.purposesource.org/v1/waivers/R_kgDOOth789.json"
+      },
+      "badge": {
+        "url": "https://api.purposesource.org/badge/R_kgDOOth789.json",
+        "state": "registered"
+      }
+    },
+    "registered": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "nodeId": "R_kgDOReg456",
+      "owner": {
+        "login": "acme",
+        "orgId": "O_kgDOAcme001",
+        "type": "Organization"
+      },
+      "name": "gear-kit",
+      "defaultBranch": "main",
+      "state": "registered",
+      "stateChangedAt": "2027-05-02T00:00:00Z",
+      "weightClass": "standard",
+      "license": {
+        "id": "PurposeSource-1.0",
+        "version": "1.0",
+        "publishedAt": "2027-01-15",
+        "apacheConversionDate": "2031-01-15",
+        "adoptedAt": "2027-05-02",
+        "textSha256": "9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f"
+      },
+      "manifest": {
+        "present": false,
+        "rejections": []
+      },
+      "waivers": {
+        "count": 0,
+        "url": "https://api.purposesource.org/v1/waivers/R_kgDOReg456.json"
+      },
+      "badge": {
+        "url": "https://api.purposesource.org/badge/R_kgDOReg456.json",
+        "state": "registered"
+      },
+      "links": {
+        "repository": "https://github.com/acme/gear-kit"
+      }
+    },
+    "suspended": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "nodeId": "R_kgDOSus789",
+      "owner": {
+        "login": "acme",
+        "orgId": "O_kgDOAcme001",
+        "type": "Organization"
+      },
+      "name": "paused-lib",
+      "defaultBranch": "main",
+      "state": "suspended",
+      "stateChangedAt": "2027-05-25T00:00:00Z",
+      "weightClass": "standard",
+      "license": {
+        "id": "PurposeSource-1.0",
+        "version": "1.0",
+        "publishedAt": "2027-01-15",
+        "apacheConversionDate": "2031-01-15",
+        "adoptedAt": "2027-03-14",
+        "textSha256": "9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f"
+      },
+      "manifest": {
+        "present": false,
+        "rejections": []
+      },
+      "waivers": {
+        "count": 0,
+        "url": "https://api.purposesource.org/v1/waivers/R_kgDOSus789.json"
+      },
+      "badge": {
+        "url": "https://api.purposesource.org/badge/R_kgDOSus789.json",
+        "state": "neutral"
+      },
+      "links": {
+        "repository": "https://github.com/acme/paused-lib"
+      }
+    },
+    "quit": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "nodeId": "R_kgDOQui321",
+      "owner": {
+        "login": "acme",
+        "orgId": "O_kgDOAcme001",
+        "type": "Organization"
+      },
+      "name": "left-project",
+      "defaultBranch": "main",
+      "state": "quit",
+      "stateChangedAt": "2027-05-10T00:00:00Z",
+      "weightClass": "standard",
+      "license": {
+        "id": "PurposeSource-1.0",
+        "version": "1.0",
+        "publishedAt": "2027-01-15",
+        "apacheConversionDate": "2031-01-15",
+        "adoptedAt": "2027-03-14",
+        "textSha256": "9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f"
+      },
+      "manifest": {
+        "present": false,
+        "rejections": []
+      },
+      "waivers": {
+        "count": 0,
+        "url": "https://api.purposesource.org/v1/waivers/R_kgDOQui321.json"
+      },
+      "badge": {
+        "url": "https://api.purposesource.org/badge/R_kgDOQui321.json",
+        "state": "neutral"
+      },
+      "links": {
+        "repository": "https://github.com/acme/left-project"
+      }
     }
   },
   "emptyWaiversComment": "The honest empty state, reused by every vector whose repository has no waiver. It deliberately carries no `nodeId`, so one document can stand for whichever repository is under test; a real published artifact always names its repository.",
@@ -80,7 +235,7 @@
   "vectors": [
     {
       "id": "VEC-01-yes-via-pass",
-      "description": "An active Pass covers every registered repository — no scope check, which is why it wins the precedence order.",
+      "description": "An active Pass covers every work under the licence, registered or not (D48 item 5) — no scope check, which is why it wins the precedence order.",
       "fsRef": "FS-10 §4.3 step 5a; COM-009",
       "now": "2027-06-01T12:00:00Z",
       "repo": "verified",
@@ -90,19 +245,28 @@
         "generatedAt": "2027-01-01T09:00:00Z",
         "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
         "name": "Example Industries AG",
-        "domains": ["example.com"],
+        "domains": [
+          "example.com"
+        ],
         "verification": "domain-verified",
         "entitlements": [
           {
             "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
             "lane": "pass",
-            "scope": { "kind": "network" },
+            "scope": {
+              "kind": "network"
+            },
             "status": "active",
             "periodStart": "2027-01-01T00:00:00Z",
             "periodEnd": "2028-01-01T00:00:00Z",
             "graceEnd": "2028-01-31T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2027-01-01", "to": "2028-01-01" }]
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2028-01-01"
+              }
+            ]
           }
         ]
       },
@@ -110,8 +274,14 @@
         "answer": "yes-via-pass",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b", "verification": "domain-verified" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
+          "company": {
+            "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+            "verification": "domain-verified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
           "entitlement": {
             "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
             "lane": "pass",
@@ -119,7 +289,10 @@
             "periodEnd": "2028-01-01T00:00:00Z"
           }
         },
-        "proofRef": { "type": "entitlement-jws", "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b" }
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b"
+        }
       }
     },
     {
@@ -139,13 +312,24 @@
           {
             "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
             "lane": "project",
-            "scope": { "kind": "project", "repos": ["R_kgDOAbc123", "R_kgDOOth789"] },
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDOAbc123",
+                "R_kgDOOth789"
+              ]
+            },
             "status": "active",
             "periodStart": "2027-03-20T00:00:00Z",
             "periodEnd": "2028-03-19T00:00:00Z",
             "graceEnd": "2028-04-18T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2027-03-20", "to": "2028-03-19" }]
+            "vestedWindows": [
+              {
+                "from": "2027-03-20",
+                "to": "2028-03-19"
+              }
+            ]
           }
         ]
       },
@@ -153,8 +337,14 @@
         "answer": "yes-via-project",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
+          "company": {
+            "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
           "entitlement": {
             "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
             "lane": "project",
@@ -162,7 +352,10 @@
             "periodEnd": "2028-03-19T00:00:00Z"
           }
         },
-        "proofRef": { "type": "entitlement-jws", "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d" }
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d"
+        }
       }
     },
     {
@@ -176,19 +369,29 @@
         "schemaVersion": 1,
         "generatedAt": "2027-02-01T09:00:00Z",
         "coId": "co_01jj1z5f2pq6t0ac8v3y7w9b1e",
-        "domains": ["portfolio.example"],
+        "domains": [
+          "portfolio.example"
+        ],
         "verification": "domain-verified",
         "entitlements": [
           {
             "entId": "ent_01jj1z5f2pq6t0ac8v3y7w9b2e",
             "lane": "portfolio",
-            "scope": { "kind": "portfolio", "org": "O_kgDOAcme001" },
+            "scope": {
+              "kind": "portfolio",
+              "org": "O_kgDOAcme001"
+            },
             "status": "active",
             "periodStart": "2027-02-01T00:00:00Z",
             "periodEnd": "2028-01-31T00:00:00Z",
             "graceEnd": "2028-03-01T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2027-02-01", "to": "2028-01-31" }]
+            "vestedWindows": [
+              {
+                "from": "2027-02-01",
+                "to": "2028-01-31"
+              }
+            ]
           }
         ]
       },
@@ -196,8 +399,14 @@
         "answer": "yes-via-portfolio",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jj1z5f2pq6t0ac8v3y7w9b1e", "verification": "domain-verified" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
+          "company": {
+            "coId": "co_01jj1z5f2pq6t0ac8v3y7w9b1e",
+            "verification": "domain-verified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
           "entitlement": {
             "entId": "ent_01jj1z5f2pq6t0ac8v3y7w9b2e",
             "lane": "portfolio",
@@ -205,7 +414,10 @@
             "periodEnd": "2028-01-31T00:00:00Z"
           }
         },
-        "proofRef": { "type": "entitlement-jws", "coId": "co_01jj1z5f2pq6t0ac8v3y7w9b1e" }
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jj1z5f2pq6t0ac8v3y7w9b1e"
+        }
       }
     },
     {
@@ -219,19 +431,29 @@
         "schemaVersion": 1,
         "generatedAt": "2027-02-01T09:00:00Z",
         "coId": "co_01jj1z5f2pq6t0ac8v3y7w9b1e",
-        "domains": ["portfolio.example"],
+        "domains": [
+          "portfolio.example"
+        ],
         "verification": "domain-verified",
         "entitlements": [
           {
             "entId": "ent_01jj1z5f2pq6t0ac8v3y7w9b2e",
             "lane": "portfolio",
-            "scope": { "kind": "portfolio", "org": "O_kgDOAcme001" },
+            "scope": {
+              "kind": "portfolio",
+              "org": "O_kgDOAcme001"
+            },
             "status": "active",
             "periodStart": "2027-02-01T00:00:00Z",
             "periodEnd": "2028-01-31T00:00:00Z",
             "graceEnd": "2028-03-01T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2027-02-01", "to": "2028-01-31" }]
+            "vestedWindows": [
+              {
+                "from": "2027-02-01",
+                "to": "2028-01-31"
+              }
+            ]
           }
         ]
       },
@@ -239,8 +461,14 @@
         "answer": "no",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jj1z5f2pq6t0ac8v3y7w9b1e", "verification": "domain-verified" },
-          "repo": { "nodeId": "R_kgDOOth789", "repoState": "verified" }
+          "company": {
+            "coId": "co_01jj1z5f2pq6t0ac8v3y7w9b1e",
+            "verification": "domain-verified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOOth789",
+            "repoState": "registered"
+          }
         }
       }
     },
@@ -266,7 +494,10 @@
         "waivers": [
           {
             "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
-            "beneficiary": { "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f", "name": "Kleinbetrieb GmbH" },
+            "beneficiary": {
+              "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+              "name": "Kleinbetrieb GmbH"
+            },
             "grantedAt": "2027-04-01T00:00:00Z",
             "coolingEndsAt": "2027-04-04T00:00:00Z",
             "revokedAt": null,
@@ -278,9 +509,18 @@
         "answer": "yes-via-waiver",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f", "verification": "unverified" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
-          "waiver": { "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f", "grantedAt": "2027-04-01T00:00:00Z" }
+          "company": {
+            "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+            "verification": "unverified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
+          "waiver": {
+            "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+            "grantedAt": "2027-04-01T00:00:00Z"
+          }
         },
         "proofRef": {
           "type": "waiver-record",
@@ -311,7 +551,10 @@
         "waivers": [
           {
             "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
-            "beneficiary": { "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f", "name": "Kleinbetrieb GmbH" },
+            "beneficiary": {
+              "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+              "name": "Kleinbetrieb GmbH"
+            },
             "grantedAt": "2027-04-01T00:00:00Z",
             "coolingEndsAt": "2027-04-04T00:00:00Z",
             "grantedBy": "repo-admin"
@@ -322,9 +565,18 @@
         "answer": "yes-via-waiver",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f", "verification": "unverified" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
-          "waiver": { "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f", "grantedAt": "2027-04-01T00:00:00Z" }
+          "company": {
+            "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+            "verification": "unverified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
+          "waiver": {
+            "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+            "grantedAt": "2027-04-01T00:00:00Z"
+          }
         },
         "proofRef": {
           "type": "waiver-record",
@@ -355,7 +607,10 @@
         "waivers": [
           {
             "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
-            "beneficiary": { "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f", "name": "Kleinbetrieb GmbH" },
+            "beneficiary": {
+              "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+              "name": "Kleinbetrieb GmbH"
+            },
             "grantedAt": "2027-04-01T00:00:00Z",
             "coolingEndsAt": "2027-04-04T00:00:00Z",
             "revokedAt": "2027-05-01T00:00:00Z",
@@ -367,8 +622,14 @@
         "answer": "no",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f", "verification": "unverified" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" }
+          "company": {
+            "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+            "verification": "unverified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          }
         }
       }
     },
@@ -383,7 +644,10 @@
         "generatedAt": "2027-04-02T09:00:00Z",
         "coId": "co_01jp5d9k6tv0y4eg2z7c1a3f5j",
         "name": "Domain Verified AG",
-        "domains": ["Example.COM", "example.net"],
+        "domains": [
+          "Example.COM",
+          "example.net"
+        ],
         "verification": "domain-verified",
         "entitlements": []
       },
@@ -395,7 +659,10 @@
         "waivers": [
           {
             "wvrId": "wvr_01jp5d9k6tv0y4eg2z7c1a3f6j",
-            "beneficiary": { "name": "Domain Verified AG", "domain": "example.com" },
+            "beneficiary": {
+              "name": "Domain Verified AG",
+              "domain": "example.com"
+            },
             "grantedAt": "2027-04-01T00:00:00Z",
             "coolingEndsAt": "2027-04-04T00:00:00Z",
             "grantedBy": "repo-admin"
@@ -406,9 +673,18 @@
         "answer": "yes-via-waiver",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jp5d9k6tv0y4eg2z7c1a3f5j", "verification": "domain-verified" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
-          "waiver": { "wvrId": "wvr_01jp5d9k6tv0y4eg2z7c1a3f6j", "grantedAt": "2027-04-01T00:00:00Z" }
+          "company": {
+            "coId": "co_01jp5d9k6tv0y4eg2z7c1a3f5j",
+            "verification": "domain-verified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
+          "waiver": {
+            "wvrId": "wvr_01jp5d9k6tv0y4eg2z7c1a3f6j",
+            "grantedAt": "2027-04-01T00:00:00Z"
+          }
         },
         "proofRef": {
           "type": "waiver-record",
@@ -427,7 +703,9 @@
         "schemaVersion": 1,
         "generatedAt": "2027-04-02T09:00:00Z",
         "coId": "co_01jq6e0m7vw1z5fh3a8d2b4g6k",
-        "domains": ["example.com"],
+        "domains": [
+          "example.com"
+        ],
         "verification": "officer-attested",
         "entitlements": []
       },
@@ -439,7 +717,10 @@
         "waivers": [
           {
             "wvrId": "wvr_01jp5d9k6tv0y4eg2z7c1a3f6j",
-            "beneficiary": { "name": "Someone Else AG", "domain": "example.com" },
+            "beneficiary": {
+              "name": "Someone Else AG",
+              "domain": "example.com"
+            },
             "grantedAt": "2027-04-01T00:00:00Z",
             "coolingEndsAt": "2027-04-04T00:00:00Z",
             "grantedBy": "repo-admin"
@@ -450,8 +731,14 @@
         "answer": "no",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jq6e0m7vw1z5fh3a8d2b4g6k", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" }
+          "company": {
+            "coId": "co_01jq6e0m7vw1z5fh3a8d2b4g6k",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          }
         }
       }
     },
@@ -462,7 +749,9 @@
       "now": "2027-06-01T12:00:00Z",
       "repo": "verified",
       "company": null,
-      "companyRef": { "domain": "waived.example" },
+      "companyRef": {
+        "domain": "waived.example"
+      },
       "waivers": {
         "schemaVersion": 1,
         "generatedAt": "2027-04-02T09:00:00Z",
@@ -471,7 +760,10 @@
         "waivers": [
           {
             "wvrId": "wvr_01jh0y4e1np5s9zb7t2x6v8a2d",
-            "beneficiary": { "name": "Waived Charity Association", "domain": "waived.example" },
+            "beneficiary": {
+              "name": "Waived Charity Association",
+              "domain": "waived.example"
+            },
             "grantedAt": "2027-04-01T00:00:00Z",
             "coolingEndsAt": "2027-04-04T00:00:00Z",
             "grantedBy": "repo-admin"
@@ -483,8 +775,14 @@
         "basis": {
           "algoVersion": "cov-v1",
           "company": null,
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
-          "waiver": { "wvrId": "wvr_01jh0y4e1np5s9zb7t2x6v8a2d", "grantedAt": "2027-04-01T00:00:00Z" }
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
+          "waiver": {
+            "wvrId": "wvr_01jh0y4e1np5s9zb7t2x6v8a2d",
+            "grantedAt": "2027-04-01T00:00:00Z"
+          }
         },
         "proofRef": {
           "type": "waiver-record",
@@ -511,13 +809,20 @@
           {
             "entId": "ent_01jm3b7h4rs8w2ce0x5a9y1d4g",
             "lane": "donation",
-            "scope": { "kind": "network" },
+            "scope": {
+              "kind": "network"
+            },
             "status": "active",
             "periodStart": "2027-05-01T00:00:00Z",
             "periodEnd": "2028-04-30T00:00:00Z",
             "graceEnd": "2028-05-30T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2027-05-01", "to": "2028-04-30" }]
+            "vestedWindows": [
+              {
+                "from": "2027-05-01",
+                "to": "2028-04-30"
+              }
+            ]
           }
         ]
       },
@@ -525,8 +830,14 @@
         "answer": "yes-via-donation",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jm3b7h4rs8w2ce0x5a9y1d3g", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
+          "company": {
+            "coId": "co_01jm3b7h4rs8w2ce0x5a9y1d3g",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
           "entitlement": {
             "entId": "ent_01jm3b7h4rs8w2ce0x5a9y1d4g",
             "lane": "donation",
@@ -534,7 +845,10 @@
             "periodEnd": "2028-04-30T00:00:00Z"
           }
         },
-        "proofRef": { "type": "entitlement-jws", "coId": "co_01jm3b7h4rs8w2ce0x5a9y1d3g" }
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jm3b7h4rs8w2ce0x5a9y1d3g"
+        }
       }
     },
     {
@@ -551,7 +865,10 @@
           "algoVersion": "cov-v1",
           "company": null,
           "note": "no registry record for this organization",
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" }
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          }
         }
       }
     },
@@ -572,13 +889,23 @@
           {
             "entId": "ent_01jn4c8j5st9x3df1y6b0z2e5h",
             "lane": "project",
-            "scope": { "kind": "project", "repos": ["R_kgDOAbc123"] },
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDOAbc123"
+              ]
+            },
             "status": "active",
             "periodStart": "2026-05-15T00:00:00Z",
             "periodEnd": "2027-05-15T00:00:00Z",
             "graceEnd": "2027-06-14T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2026-05-15", "to": "2027-05-15" }]
+            "vestedWindows": [
+              {
+                "from": "2026-05-15",
+                "to": "2027-05-15"
+              }
+            ]
           }
         ]
       },
@@ -586,12 +913,27 @@
         "answer": "lapsed-in-grace",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
-          "entitlement": { "entId": "ent_01jn4c8j5st9x3df1y6b0z2e5h", "lane": "project" }
+          "company": {
+            "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
+          "entitlement": {
+            "entId": "ent_01jn4c8j5st9x3df1y6b0z2e5h",
+            "lane": "project"
+          }
         },
-        "dates": { "periodEnd": "2027-05-15T00:00:00Z", "graceEnd": "2027-06-14T00:00:00Z" },
-        "proofRef": { "type": "entitlement-jws", "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m" }
+        "dates": {
+          "periodEnd": "2027-05-15T00:00:00Z",
+          "graceEnd": "2027-06-14T00:00:00Z"
+        },
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m"
+        }
       }
     },
     {
@@ -611,13 +953,23 @@
           {
             "entId": "ent_01jn4c8j5st9x3df1y6b0z2e5h",
             "lane": "project",
-            "scope": { "kind": "project", "repos": ["R_kgDOAbc123"] },
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDOAbc123"
+              ]
+            },
             "status": "active",
             "periodStart": "2026-05-15T00:00:00Z",
             "periodEnd": "2027-05-15T00:00:00Z",
             "graceEnd": "2027-06-14T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2026-05-15", "to": "2027-05-15" }]
+            "vestedWindows": [
+              {
+                "from": "2026-05-15",
+                "to": "2027-05-15"
+              }
+            ]
           }
         ]
       },
@@ -625,8 +977,14 @@
         "answer": "yes-via-project",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
+          "company": {
+            "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
           "entitlement": {
             "entId": "ent_01jn4c8j5st9x3df1y6b0z2e5h",
             "lane": "project",
@@ -634,7 +992,10 @@
             "periodEnd": "2027-05-15T00:00:00Z"
           }
         },
-        "proofRef": { "type": "entitlement-jws", "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m" }
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m"
+        }
       }
     },
     {
@@ -654,13 +1015,23 @@
           {
             "entId": "ent_01jn4c8j5st9x3df1y6b0z2e5h",
             "lane": "project",
-            "scope": { "kind": "project", "repos": ["R_kgDOAbc123"] },
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDOAbc123"
+              ]
+            },
             "status": "active",
             "periodStart": "2026-05-15T00:00:00Z",
             "periodEnd": "2027-05-15T00:00:00Z",
             "graceEnd": "2027-06-14T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2026-05-15", "to": "2027-05-15" }]
+            "vestedWindows": [
+              {
+                "from": "2026-05-15",
+                "to": "2027-05-15"
+              }
+            ]
           }
         ]
       },
@@ -668,12 +1039,27 @@
         "answer": "lapsed-in-grace",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
-          "entitlement": { "entId": "ent_01jn4c8j5st9x3df1y6b0z2e5h", "lane": "project" }
+          "company": {
+            "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
+          "entitlement": {
+            "entId": "ent_01jn4c8j5st9x3df1y6b0z2e5h",
+            "lane": "project"
+          }
         },
-        "dates": { "periodEnd": "2027-05-15T00:00:00Z", "graceEnd": "2027-06-14T00:00:00Z" },
-        "proofRef": { "type": "entitlement-jws", "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m" }
+        "dates": {
+          "periodEnd": "2027-05-15T00:00:00Z",
+          "graceEnd": "2027-06-14T00:00:00Z"
+        },
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m"
+        }
       }
     },
     {
@@ -693,13 +1079,23 @@
           {
             "entId": "ent_01jn4c8j5st9x3df1y6b0z2e5h",
             "lane": "project",
-            "scope": { "kind": "project", "repos": ["R_kgDOAbc123"] },
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDOAbc123"
+              ]
+            },
             "status": "active",
             "periodStart": "2026-05-15T00:00:00Z",
             "periodEnd": "2027-05-15T00:00:00Z",
             "graceEnd": "2027-06-14T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2026-05-15", "to": "2027-05-15" }]
+            "vestedWindows": [
+              {
+                "from": "2026-05-15",
+                "to": "2027-05-15"
+              }
+            ]
           }
         ]
       },
@@ -707,8 +1103,14 @@
         "answer": "no",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" }
+          "company": {
+            "coId": "co_01jr7f1n8wx2a6gj4b9e3c5h7m",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          }
         }
       }
     },
@@ -729,13 +1131,23 @@
           {
             "entId": "ent_01jq6e0m7vw1z5fh3a8d2b4g7k",
             "lane": "project",
-            "scope": { "kind": "project", "repos": ["R_kgDOAbc123"] },
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDOAbc123"
+              ]
+            },
             "status": "suspended",
             "periodStart": "2027-01-01T00:00:00Z",
             "periodEnd": "2028-01-01T00:00:00Z",
             "graceEnd": "2028-01-31T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2027-01-01", "to": "2028-01-01" }]
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2028-01-01"
+              }
+            ]
           }
         ]
       },
@@ -743,8 +1155,14 @@
         "answer": "no",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jq6e0m7vw1z5fh3a8d2b4g6k", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" }
+          "company": {
+            "coId": "co_01jq6e0m7vw1z5fh3a8d2b4g6k",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          }
         }
       }
     },
@@ -765,7 +1183,12 @@
           {
             "entId": "ent_01jr7f1n8wx2a6gj4b9e3c5h8m",
             "lane": "project",
-            "scope": { "kind": "project", "repos": ["R_kgDOAbc123"] },
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDOAbc123"
+              ]
+            },
             "status": "void",
             "periodStart": "2027-01-01T00:00:00Z",
             "periodEnd": "2028-01-01T00:00:00Z",
@@ -778,8 +1201,14 @@
         "answer": "no",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jq6e0m7vw1z5fh3a8d2b4g6k", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" }
+          "company": {
+            "coId": "co_01jq6e0m7vw1z5fh3a8d2b4g6k",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          }
         }
       }
     },
@@ -800,24 +1229,41 @@
           {
             "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
             "lane": "pass",
-            "scope": { "kind": "network" },
+            "scope": {
+              "kind": "network"
+            },
             "status": "suspended",
             "periodStart": "2027-01-01T00:00:00Z",
             "periodEnd": "2028-01-01T00:00:00Z",
             "graceEnd": "2028-01-31T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2027-01-01", "to": "2028-01-01" }]
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2028-01-01"
+              }
+            ]
           },
           {
             "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
             "lane": "project",
-            "scope": { "kind": "project", "repos": ["R_kgDOAbc123"] },
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDOAbc123"
+              ]
+            },
             "status": "active",
             "periodStart": "2027-03-20T00:00:00Z",
             "periodEnd": "2028-03-19T00:00:00Z",
             "graceEnd": "2028-04-18T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2027-03-20", "to": "2028-03-19" }]
+            "vestedWindows": [
+              {
+                "from": "2027-03-20",
+                "to": "2028-03-19"
+              }
+            ]
           }
         ]
       },
@@ -825,8 +1271,14 @@
         "answer": "yes-via-project",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
+          "company": {
+            "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
           "entitlement": {
             "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
             "lane": "project",
@@ -834,7 +1286,10 @@
             "periodEnd": "2028-03-19T00:00:00Z"
           }
         },
-        "proofRef": { "type": "entitlement-jws", "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d" }
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d"
+        }
       }
     },
     {
@@ -848,19 +1303,28 @@
         "generatedAt": "2027-04-02T09:00:00Z",
         "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
         "name": "Example Industries AG",
-        "domains": ["example.com"],
+        "domains": [
+          "example.com"
+        ],
         "verification": "domain-verified",
         "entitlements": [
           {
             "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
             "lane": "pass",
-            "scope": { "kind": "network" },
+            "scope": {
+              "kind": "network"
+            },
             "status": "active",
             "periodStart": "2027-01-01T00:00:00Z",
             "periodEnd": "2028-01-01T00:00:00Z",
             "graceEnd": "2028-01-31T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2027-01-01", "to": "2028-01-01" }]
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2028-01-01"
+              }
+            ]
           }
         ]
       },
@@ -872,7 +1336,10 @@
         "waivers": [
           {
             "wvrId": "wvr_01jf8w2c9km3q7xz5r0v4t6y7b",
-            "beneficiary": { "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b", "name": "Example Industries AG" },
+            "beneficiary": {
+              "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+              "name": "Example Industries AG"
+            },
             "grantedAt": "2027-04-01T00:00:00Z",
             "coolingEndsAt": "2027-04-04T00:00:00Z",
             "grantedBy": "repo-admin"
@@ -883,8 +1350,14 @@
         "answer": "yes-via-pass",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b", "verification": "domain-verified" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
+          "company": {
+            "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+            "verification": "domain-verified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
           "entitlement": {
             "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
             "lane": "pass",
@@ -892,7 +1365,10 @@
             "periodEnd": "2028-01-01T00:00:00Z"
           }
         },
-        "proofRef": { "type": "entitlement-jws", "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b" }
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b"
+        }
       }
     },
     {
@@ -918,11 +1394,22 @@
         "answer": "no-entitlement-required-under-threshold",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jn4c8j5st9x3df1y6b0z2e4h", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" }
+          "company": {
+            "coId": "co_01jn4c8j5st9x3df1y6b0z2e4h",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          }
         },
-        "dates": { "selfCertifiedAt": "2027-03-10T09:00:00Z" },
-        "proofRef": { "type": "entitlement-jws", "coId": "co_01jn4c8j5st9x3df1y6b0z2e4h" }
+        "dates": {
+          "selfCertifiedAt": "2027-03-10T09:00:00Z"
+        },
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jn4c8j5st9x3df1y6b0z2e4h"
+        }
       }
     },
     {
@@ -948,8 +1435,14 @@
         "answer": "no",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jn4c8j5st9x3df1y6b0z2e4h", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" }
+          "company": {
+            "coId": "co_01jn4c8j5st9x3df1y6b0z2e4h",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          }
         }
       }
     },
@@ -970,13 +1463,23 @@
           {
             "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
             "lane": "project",
-            "scope": { "kind": "project", "repos": ["R_kgDOAbc123"] },
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDOAbc123"
+              ]
+            },
             "status": "active",
             "periodStart": "2027-03-20T00:00:00Z",
             "periodEnd": "2028-03-19T00:00:00Z",
             "graceEnd": "2028-04-18T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2027-03-20", "to": "2028-03-19" }]
+            "vestedWindows": [
+              {
+                "from": "2027-03-20",
+                "to": "2028-03-19"
+              }
+            ]
           }
         ],
         "thresholdRegistration": {
@@ -988,8 +1491,14 @@
         "answer": "yes-via-project",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOAbc123", "repoState": "verified" },
+          "company": {
+            "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
           "entitlement": {
             "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
             "lane": "project",
@@ -997,7 +1506,10 @@
             "periodEnd": "2028-03-19T00:00:00Z"
           }
         },
-        "proofRef": { "type": "entitlement-jws", "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d" }
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d"
+        }
       }
     },
     {
@@ -1017,13 +1529,23 @@
           {
             "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
             "lane": "project",
-            "scope": { "kind": "project", "repos": ["R_kgDODel456"] },
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDODel456"
+              ]
+            },
             "status": "active",
             "periodStart": "2027-03-20T00:00:00Z",
             "periodEnd": "2028-03-19T00:00:00Z",
             "graceEnd": "2028-04-18T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2027-03-20", "to": "2028-03-19" }]
+            "vestedWindows": [
+              {
+                "from": "2027-03-20",
+                "to": "2028-03-19"
+              }
+            ]
           }
         ]
       },
@@ -1031,8 +1553,14 @@
         "answer": "yes-via-project",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDODel456", "repoState": "delisted" },
+          "company": {
+            "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDODel456",
+            "repoState": "delisted"
+          },
           "entitlement": {
             "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
             "lane": "project",
@@ -1040,7 +1568,10 @@
             "periodEnd": "2028-03-19T00:00:00Z"
           }
         },
-        "proofRef": { "type": "entitlement-jws", "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d" }
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d"
+        }
       }
     },
     {
@@ -1060,13 +1591,23 @@
           {
             "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
             "lane": "project",
-            "scope": { "kind": "project", "repos": ["R_kgDOAbc123"] },
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDOAbc123"
+              ]
+            },
             "status": "active",
             "periodStart": "2027-03-20T00:00:00Z",
             "periodEnd": "2028-03-19T00:00:00Z",
             "graceEnd": "2028-04-18T00:00:00Z",
             "scheduleVersion": "v1",
-            "vestedWindows": [{ "from": "2027-03-20", "to": "2028-03-19" }]
+            "vestedWindows": [
+              {
+                "from": "2027-03-20",
+                "to": "2028-03-19"
+              }
+            ]
           }
         ]
       },
@@ -1074,8 +1615,1061 @@
         "answer": "no",
         "basis": {
           "algoVersion": "cov-v1",
-          "company": { "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d", "verification": "officer-attested" },
-          "repo": { "nodeId": "R_kgDOOth789", "repoState": "verified" }
+          "company": {
+            "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOOth789",
+            "repoState": "registered"
+          }
+        }
+      }
+    },
+    {
+      "id": "V2-01-no-record-pass-covers",
+      "description": "A repository with no published record is covered by an active Pass: a Pass covers any work under the licence, registered or not. The basis says no record is published under the node id (`no-record`, which checks neither registration nor the licence) and why the answer holds.",
+      "fsRef": "D48 item 5; D82 item 10; FS-10 §4.3 step 5a",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-01-01T09:00:00Z",
+        "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+        "name": "Example Industries AG",
+        "domains": [
+          "example.com"
+        ],
+        "verification": "domain-verified",
+        "entitlements": [
+          {
+            "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "active",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z",
+            "graceEnd": "2028-01-31T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2028-01-01"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "answer": "yes-via-pass",
+        "basis": {
+          "algoVersion": "cov-v1",
+          "company": {
+            "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+            "verification": "domain-verified"
+          },
+          "repo": {
+            "nodeId": "R_kgDONoRec01",
+            "repoState": "no-record"
+          },
+          "entitlement": {
+            "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
+            "lane": "pass",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z"
+          },
+          "reason": "pass-any-work"
+        },
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b"
+        }
+      }
+    },
+    {
+      "id": "V2-02-no-record-pass-at-period-end",
+      "description": "The term boundary is the registered repository's: now == periodEnd is still inside the Pass, so a work with no record is still covered.",
+      "fsRef": "D48 item 5; FS10-121",
+      "now": "2028-01-01T00:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-01-01T09:00:00Z",
+        "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+        "name": "Example Industries AG",
+        "domains": [
+          "example.com"
+        ],
+        "verification": "domain-verified",
+        "entitlements": [
+          {
+            "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "active",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z",
+            "graceEnd": "2028-01-31T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2028-01-01"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "answer": "yes-via-pass",
+        "basis": {
+          "algoVersion": "cov-v1",
+          "company": {
+            "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+            "verification": "domain-verified"
+          },
+          "repo": {
+            "nodeId": "R_kgDONoRec01",
+            "repoState": "no-record"
+          },
+          "entitlement": {
+            "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
+            "lane": "pass",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z"
+          },
+          "reason": "pass-any-work"
+        },
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b"
+        }
+      }
+    },
+    {
+      "id": "V2-03-no-record-two-passes-latest-term-named",
+      "description": "Two live Pass terms: the basis names the one with the later periodEnd, by step 5a's own tie-break, so two deployments name the same term.",
+      "fsRef": "D48 item 5; FS-10 §4.3 step 5a; FS-00 §7.3",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-02-01T09:00:00Z",
+        "coId": "co_01jz4p7m2kq8w3xv5r9t6y0b2c",
+        "name": "Twin Terms SA",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01jz4p7m2kq8w3xv5r9t6y0b3c",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "active",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2027-12-31T00:00:00Z",
+            "graceEnd": "2028-01-30T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2027-12-31"
+              }
+            ]
+          },
+          {
+            "entId": "ent_01jz4p7m2kq8w3xv5r9t6y0b4c",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "active",
+            "periodStart": "2027-02-01T00:00:00Z",
+            "periodEnd": "2028-01-31T00:00:00Z",
+            "graceEnd": "2028-03-01T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-02-01",
+                "to": "2028-01-31"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "answer": "yes-via-pass",
+        "basis": {
+          "algoVersion": "cov-v1",
+          "company": {
+            "coId": "co_01jz4p7m2kq8w3xv5r9t6y0b2c",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDONoRec01",
+            "repoState": "no-record"
+          },
+          "entitlement": {
+            "entId": "ent_01jz4p7m2kq8w3xv5r9t6y0b4c",
+            "lane": "pass",
+            "periodStart": "2027-02-01T00:00:00Z",
+            "periodEnd": "2028-01-31T00:00:00Z"
+          },
+          "reason": "pass-any-work"
+        },
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jz4p7m2kq8w3xv5r9t6y0b2c"
+        }
+      }
+    },
+    {
+      "id": "V2-04-no-record-project-only-is-not-registered",
+      "description": "A Project naming other repositories never reaches a work with no record: without a Pass inside its term the question stays repo_not_registered, as in the first text.",
+      "fsRef": "D82 item 10; FS-10 §4.3 step 1; D42",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-03-20T09:00:00Z",
+        "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
+            "lane": "project",
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDOAbc123",
+                "R_kgDOOth789"
+              ]
+            },
+            "status": "active",
+            "periodStart": "2027-03-20T00:00:00Z",
+            "periodEnd": "2028-03-19T00:00:00Z",
+            "graceEnd": "2028-04-18T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-03-20",
+                "to": "2028-03-19"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v1",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-05-no-record-unknown-company-is-not-registered",
+      "description": "No company record and no record for the repository: repo_not_registered, never `no` — the organisation's absence is an answer only about a registered repository.",
+      "fsRef": "FS-10 §4.3 steps 1 and 3; COM-057",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": null,
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v1",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-06-no-record-suspended-pass-is-not-registered",
+      "description": "A suspended Pass is excluded exactly as at step 4, so it reaches nothing: repo_not_registered.",
+      "fsRef": "D48 item 5; FS-10 §4.3 step 4; COM-024",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-05-30T09:00:00Z",
+        "coId": "co_01jz5q8n3mr9x4yw6s0v7z1c2d",
+        "name": "Chargeback Holdings Ltd",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01jz5q8n3mr9x4yw6s0v7z1c3d",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "suspended",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z",
+            "graceEnd": "2028-01-31T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2028-01-01"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v1",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-07-no-record-pass-in-grace-is-not-registered",
+      "description": "Only a Pass inside its term is answered about a work with no record. A Pass in its grace window answers lapsed-in-grace about a registered repository (VEC-13's rule) and repo_not_registered here.",
+      "fsRef": "D82 item 10; FS-10 §4.3 steps 1 and 9",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-05-16T09:00:00Z",
+        "coId": "co_01jz6r9p4ns0y5zx7t1w8a2d3e",
+        "name": "Late Renewal GmbH",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01jz6r9p4ns0y5zx7t1w8a2d4e",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "active",
+            "periodStart": "2026-05-15T00:00:00Z",
+            "periodEnd": "2027-05-15T00:00:00Z",
+            "graceEnd": "2027-06-14T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2026-05-15",
+                "to": "2027-05-15"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v1",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-08-no-record-under-threshold-is-not-registered",
+      "description": "A threshold self-certification is not an Entitlement, and only a Pass inside its term is answered about a work with no record (D82 item 10): repo_not_registered, as in the first text.",
+      "fsRef": "D48 item 5; D82 item 10; FS-10 §4.3 steps 1 and 8",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-03-10T09:00:00Z",
+        "coId": "co_01jn4c8j5st9x3df1y6b0z2e4h",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [],
+        "thresholdRegistration": {
+          "selfCertifiedAt": "2027-03-10T09:00:00Z",
+          "expiresAt": "2028-03-10T09:00:00Z"
+        }
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v1",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-09-no-record-waivers-are-not-read",
+      "description": "A waiver is granted by a registered repository's admins and published under its record's node id; for a work with no record the waiver list is not read, even when one is passed.",
+      "fsRef": "D14; D82 item 4; FS-10 §4.3 steps 1 and 2",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-04-02T09:00:00Z",
+        "scope": "repo",
+        "nodeId": "R_kgDONoRec01",
+        "waivers": [
+          {
+            "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+            "beneficiary": {
+              "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+              "name": "Kleinbetrieb GmbH"
+            },
+            "grantedAt": "2027-04-01T00:00:00Z",
+            "coolingEndsAt": "2027-04-04T00:00:00Z",
+            "revokedAt": null,
+            "grantedBy": "repo-admin",
+            "repoNodeId": "R_kgDONoRec01"
+          }
+        ]
+      },
+      "company": null,
+      "companyRef": {
+        "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f"
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v1",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-10-registered-unclaimed-pass",
+      "description": "A record published for a registered repository its admins never claimed carries `registered` and no claim status, and a Pass answers about it exactly as about any registered repository — no `reason`, because the record shows it.",
+      "fsRef": "D82 items 1, 3 and 10; dated note (d); FS-10 §4.3 step 5a",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": "registered",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-01-01T09:00:00Z",
+        "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+        "name": "Example Industries AG",
+        "domains": [
+          "example.com"
+        ],
+        "verification": "domain-verified",
+        "entitlements": [
+          {
+            "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "active",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z",
+            "graceEnd": "2028-01-31T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2028-01-01"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "answer": "yes-via-pass",
+        "basis": {
+          "algoVersion": "cov-v1",
+          "company": {
+            "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+            "verification": "domain-verified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOReg456",
+            "repoState": "registered"
+          },
+          "entitlement": {
+            "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
+            "lane": "pass",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z"
+          }
+        },
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b"
+        }
+      }
+    },
+    {
+      "id": "V2-11-registered-unclaimed-project",
+      "description": "A Project term naming a registered repository nobody claimed covers it: the claim adds admin powers, never coverage.",
+      "fsRef": "D82 items 1, 4 and 7(a); FS-10 §4.3 step 5b; D42",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": "registered",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-03-20T09:00:00Z",
+        "coId": "co_01jz7s0q5pt1z6ay8v2x9b3e4f",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01jz7s0q5pt1z6ay8v2x9b3e5f",
+            "lane": "project",
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDOReg456"
+              ]
+            },
+            "status": "active",
+            "periodStart": "2027-03-20T00:00:00Z",
+            "periodEnd": "2028-03-19T00:00:00Z",
+            "graceEnd": "2028-04-18T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-03-20",
+                "to": "2028-03-19"
+              }
+            ]
+          }
+        ],
+        "name": "Gear Users Inc."
+      },
+      "expect": {
+        "answer": "yes-via-project",
+        "basis": {
+          "algoVersion": "cov-v1",
+          "company": {
+            "coId": "co_01jz7s0q5pt1z6ay8v2x9b3e4f",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOReg456",
+            "repoState": "registered"
+          },
+          "entitlement": {
+            "entId": "ent_01jz7s0q5pt1z6ay8v2x9b3e5f",
+            "lane": "project",
+            "periodStart": "2027-03-20T00:00:00Z",
+            "periodEnd": "2028-03-19T00:00:00Z"
+          }
+        },
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jz7s0q5pt1z6ay8v2x9b3e4f"
+        }
+      }
+    },
+    {
+      "id": "V2-12-registered-unclaimed-portfolio",
+      "description": "A Portfolio term matches a registered repository's owner organisation id whether or not the repository was claimed.",
+      "fsRef": "D82 items 1 and 7(a); FS-10 §4.3 step 5c",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": "registered",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-02-01T09:00:00Z",
+        "coId": "co_01jj1z5f2pq6t0ac8v3y7w9b1e",
+        "domains": [
+          "portfolio.example"
+        ],
+        "verification": "domain-verified",
+        "entitlements": [
+          {
+            "entId": "ent_01jj1z5f2pq6t0ac8v3y7w9b2e",
+            "lane": "portfolio",
+            "scope": {
+              "kind": "portfolio",
+              "org": "O_kgDOAcme001"
+            },
+            "status": "active",
+            "periodStart": "2027-02-01T00:00:00Z",
+            "periodEnd": "2028-01-31T00:00:00Z",
+            "graceEnd": "2028-03-01T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-02-01",
+                "to": "2028-01-31"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "answer": "yes-via-portfolio",
+        "basis": {
+          "algoVersion": "cov-v1",
+          "company": {
+            "coId": "co_01jj1z5f2pq6t0ac8v3y7w9b1e",
+            "verification": "domain-verified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOReg456",
+            "repoState": "registered"
+          },
+          "entitlement": {
+            "entId": "ent_01jj1z5f2pq6t0ac8v3y7w9b2e",
+            "lane": "portfolio",
+            "periodStart": "2027-02-01T00:00:00Z",
+            "periodEnd": "2028-01-31T00:00:00Z"
+          }
+        },
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jj1z5f2pq6t0ac8v3y7w9b1e"
+        }
+      }
+    },
+    {
+      "id": "V2-13-registered-unclaimed-unknown-company-is-no",
+      "description": "An organisation with no record asking about a registered repository nobody claimed is answered `no`, never 404 repo_not_registered: the repository is registered.",
+      "fsRef": "D82 item 10; FS-10 §4.3 step 3; COM-057",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": "registered",
+      "waivers": "emptyWaivers",
+      "company": null,
+      "expect": {
+        "answer": "no",
+        "basis": {
+          "algoVersion": "cov-v1",
+          "company": null,
+          "note": "no registry record for this organization",
+          "repo": {
+            "nodeId": "R_kgDOReg456",
+            "repoState": "registered"
+          }
+        }
+      }
+    },
+    {
+      "id": "V2-14-verified-record-reports-registered",
+      "description": "A record published before D82 still says `verified`. It is read as registered and the answer reports `registered`, the one public state; the answer is VEC-02's.",
+      "fsRef": "D82 dated note (d); repo-record.v1 1.4.0; versioning policy 4",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": "verified",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-03-20T09:00:00Z",
+        "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
+            "lane": "project",
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDOAbc123",
+                "R_kgDOOth789"
+              ]
+            },
+            "status": "active",
+            "periodStart": "2027-03-20T00:00:00Z",
+            "periodEnd": "2028-03-19T00:00:00Z",
+            "graceEnd": "2028-04-18T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-03-20",
+                "to": "2028-03-19"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "answer": "yes-via-project",
+        "basis": {
+          "algoVersion": "cov-v1",
+          "company": {
+            "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d",
+            "verification": "officer-attested"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
+          "entitlement": {
+            "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d",
+            "lane": "project",
+            "periodStart": "2027-03-20T00:00:00Z",
+            "periodEnd": "2028-03-19T00:00:00Z"
+          }
+        },
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d"
+        }
+      }
+    },
+    {
+      "id": "V2-15-suspended-record-reports-suspended",
+      "description": "A suspended repository is registered in D82 item 1's sense and its record shows `suspended`, as before; coverage that was bought still computes and the answer reports `suspended`.",
+      "fsRef": "D82 item 1 and dated note (d); FS-10 §4.3 step 1; D12",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": "suspended",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-01-01T09:00:00Z",
+        "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+        "name": "Example Industries AG",
+        "domains": [
+          "example.com"
+        ],
+        "verification": "domain-verified",
+        "entitlements": [
+          {
+            "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "active",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z",
+            "graceEnd": "2028-01-31T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2028-01-01"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "answer": "yes-via-pass",
+        "basis": {
+          "algoVersion": "cov-v1",
+          "company": {
+            "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+            "verification": "domain-verified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOSus789",
+            "repoState": "suspended"
+          },
+          "entitlement": {
+            "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
+            "lane": "pass",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z"
+          }
+        },
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b"
+        }
+      }
+    },
+    {
+      "id": "V2-16-no-record-portfolio-is-not-registered",
+      "description": "VEC-03's Portfolio, asked about a work with no record. A Portfolio is matched through the record's owner organisation id, and with no record there is no owner to match: repo_not_registered.",
+      "fsRef": "D82 item 10; FS-10 §4.3 steps 1 and 5c",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-02-01T09:00:00Z",
+        "coId": "co_01jj1z5f2pq6t0ac8v3y7w9b1e",
+        "domains": [
+          "portfolio.example"
+        ],
+        "verification": "domain-verified",
+        "entitlements": [
+          {
+            "entId": "ent_01jj1z5f2pq6t0ac8v3y7w9b2e",
+            "lane": "portfolio",
+            "scope": {
+              "kind": "portfolio",
+              "org": "O_kgDOAcme001"
+            },
+            "status": "active",
+            "periodStart": "2027-02-01T00:00:00Z",
+            "periodEnd": "2028-01-31T00:00:00Z",
+            "graceEnd": "2028-03-01T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-02-01",
+                "to": "2028-01-31"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v1",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-17-no-record-network-donation-is-not-registered",
+      "description": "VEC-11's donation term, scoped to the whole network, asked about a work with no record. Only a Pass inside its term is answered about such a work (D82 item 10), so the donation term stays repo_not_registered, as in the first text.",
+      "fsRef": "D82 item 10; FS-10 §4.3 steps 1 and 7",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-05-01T09:00:00Z",
+        "coId": "co_01jm3b7h4rs8w2ce0x5a9y1d3g",
+        "name": "Donor Cooperative",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01jm3b7h4rs8w2ce0x5a9y1d4g",
+            "lane": "donation",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "active",
+            "periodStart": "2027-05-01T00:00:00Z",
+            "periodEnd": "2028-04-30T00:00:00Z",
+            "graceEnd": "2028-05-30T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-05-01",
+                "to": "2028-04-30"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v1",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-18-no-record-void-pass-is-not-registered",
+      "description": "A void Pass is excluded exactly as at step 4, so it reaches nothing, a work with no record included: repo_not_registered.",
+      "fsRef": "D82 item 10; FS-10 §4.3 step 4; FS05-052",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-05-20T09:00:00Z",
+        "coId": "co_01k0a1b2c3d4e5f6g7h8j9k0m1",
+        "name": "Voided Order Ltd",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01k0a1b2c3d4e5f6g7h8j9k0m2",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "void",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z",
+            "graceEnd": "2028-01-31T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2028-01-01"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v1",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-19-no-record-pass-not-yet-started-is-not-registered",
+      "description": "A Pass whose term starts after `now` is not inside its term (step 5a skips it for a registered repository too), so it reaches no work with no record yet: repo_not_registered.",
+      "fsRef": "D82 item 10; FS-10 §4.3 step 5a; FS10-121",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-05-28T09:00:00Z",
+        "coId": "co_01k1a2b3c4d5e6f7g8h9j0k1m2",
+        "name": "Early Order GmbH",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01k1a2b3c4d5e6f7g8h9j0k1m3",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "active",
+            "periodStart": "2027-07-01T00:00:00Z",
+            "periodEnd": "2028-07-01T00:00:00Z",
+            "graceEnd": "2028-07-31T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-07-01",
+                "to": "2028-07-01"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v1",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-20-no-record-project-naming-it-is-not-registered",
+      "description": "A Project whose scope names this very node id, asked about it while no record is published under it. Only a Pass inside its term is answered about a work with no record (D82 item 10), so the Project is answered once the repository's record is published, and until then the question is repo_not_registered, as in the first text.",
+      "fsRef": "D82 items 1 and 10; FS-10 §4.3 steps 1 and 5b; D42",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": null,
+      "repoNodeId": "R_kgDONoRec01",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-05-02T09:00:00Z",
+        "coId": "co_01k2a3b4c5d6e7f8g9h0j1k2m3",
+        "name": "Named Repository AG",
+        "domains": [],
+        "verification": "officer-attested",
+        "entitlements": [
+          {
+            "entId": "ent_01k2a3b4c5d6e7f8g9h0j1k2m4",
+            "lane": "project",
+            "scope": {
+              "kind": "project",
+              "repos": [
+                "R_kgDONoRec01"
+              ]
+            },
+            "status": "active",
+            "periodStart": "2027-05-01T00:00:00Z",
+            "periodEnd": "2028-04-30T00:00:00Z",
+            "graceEnd": "2028-05-30T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-05-01",
+                "to": "2028-04-30"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "error": "repo_not_registered",
+        "algoVersion": "cov-v1",
+        "repo": {
+          "nodeId": "R_kgDONoRec01"
+        }
+      }
+    },
+    {
+      "id": "V2-21-quit-record-reports-quit",
+      "description": "A repository that quit still has its record and still computes: coverage that was bought stays bought (D12). The answer reports `quit`, as published, never `registered`.",
+      "fsRef": "D82 item 1 and dated note (d); FS-10 §4.3 step 1; D12",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": "quit",
+      "waivers": "emptyWaivers",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-01-01T09:00:00Z",
+        "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+        "name": "Example Industries AG",
+        "domains": [
+          "example.com"
+        ],
+        "verification": "domain-verified",
+        "entitlements": [
+          {
+            "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
+            "lane": "pass",
+            "scope": {
+              "kind": "network"
+            },
+            "status": "active",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z",
+            "graceEnd": "2028-01-31T00:00:00Z",
+            "scheduleVersion": "v1",
+            "vestedWindows": [
+              {
+                "from": "2027-01-01",
+                "to": "2028-01-01"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "answer": "yes-via-pass",
+        "basis": {
+          "algoVersion": "cov-v1",
+          "company": {
+            "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b",
+            "verification": "domain-verified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOQui321",
+            "repoState": "quit"
+          },
+          "entitlement": {
+            "entId": "ent_01jf8w2c9km3q7xz5r0v4t6y9b",
+            "lane": "pass",
+            "periodStart": "2027-01-01T00:00:00Z",
+            "periodEnd": "2028-01-01T00:00:00Z"
+          }
+        },
+        "proofRef": {
+          "type": "entitlement-jws",
+          "coId": "co_01jf8w2c9km3q7xz5r0v4t6y8b"
         }
       }
     }

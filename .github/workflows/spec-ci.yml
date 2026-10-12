@@ -127,7 +127,7 @@ jobs:
         # enum would typecheck and then fail at runtime for every consumer.
         run: npm run check:types
 
-      - name: Coverage function — frozen vector suite
+      - name: Coverage function — vector suite
         run: npm run test:coverage
 
       - name: OpenAPI lints

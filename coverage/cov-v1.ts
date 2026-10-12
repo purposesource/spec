@@ -12,6 +12,38 @@
  * steps). URS COM-009 owns the semantics. This file adds no answer, removes none, and
  * reorders nothing.
  *
+ * WHAT CHANGED ON 2026-09-30, IN PLACE, AND NOTHING ELSE DID
+ * ----------------------------------------------------------
+ * The first text of this function was served from 2026-09-17. On 2026-09-30 it changed in
+ * exactly three places, each an ops decision; every other rule stayed as it was, in the
+ * same order:
+ *
+ *  1. A PASS COVERS ANY WORK UNDER THE LICENCE, REGISTERED OR NOT (ops decision D48 item 5,
+ *     carried out by D82 item 10). A repository with no published record is no longer
+ *     only the caller's `404 repo_not_registered`: the caller passes `{ nodeId, state:
+ *     'no-record' }`, and an organisation holding a Pass inside its term is answered
+ *     `yes-via-pass` with `basis.repo.repoState: 'no-record'` and `basis.reason:
+ *     'pass-any-work'` — the reason says why a repository with no record is covered.
+ *     `no-record` says what the caller found and nothing more: no record is published under
+ *     this node id. The repository may be registered and not yet published, or not under
+ *     the licence at all; the answer checks neither, and the Pass covers it either way.
+ *     Every other organisation still gets `repo_not_registered`, now RETURNED rather than
+ *     thrown, because it is a fact about the repository and not a caller defect.
+ *  2. A REGISTERED REPOSITORY IS ONE THING, CLAIMED OR NOT (D82 item 1). A record published
+ *     for a repository its admins never claimed answers exactly like any other record; the
+ *     record carries no claim status and this function reads none.
+ *  3. ONE PUBLIC STATE, `registered` (D82's dated note (d) of 2026-09-29). A record that
+ *     still says `verified` — the token published before D82 — is read as registered and
+ *     reported as `registered`; `suspended`, `quit` and `delisted` are reported as before.
+ *
+ * Change 1 moves the interface in two places, neither of them an answer: `coverage()` returns
+ * a `CoverageOutcome` (an answer, or `repo_not_registered`) where the first text returned only
+ * an answer, and a missing repository argument throws with code `repo_input_missing` where
+ * the first text threw with code `repo_not_registered`.
+ *
+ * The first text's 25 vectors are still in ./vectors.json, with the same ids, inputs and
+ * answers; in their expected results only the reported `verified` token moved (change 3).
+ *
  * PURITY IS THE POINT
  * -------------------
  * No I/O. No clock read — `nowUtc` is a parameter. No network, no crypto, no
@@ -29,27 +61,32 @@
  *  · It does NOT resolve a domain to a company. That is a lookup in the published
  *    domain index, and it is the caller's job (FS-10 §4.2 input 4). A domain mapping to
  *    more than one company is `409 company_ambiguous` and never reaches this function.
- *  · It does NOT decide `404 repo_not_registered`. An absent repository is an ERROR,
- *    not an answer (FS-10 §4.3 step 1), so the caller resolves the repo record first.
- *    Passing nothing throws — see CoverageInputError.
+ *  · It does NOT read the registry. The caller fetches `/registry/repo/{node_id}.json` and
+ *    passes the record, or `{ nodeId, state: 'no-record' }` when there is none. Whether
+ *    that absence is an answer or `404 repo_not_registered` is decided HERE, so every
+ *    deployment decides it the same way. Passing nothing at all is a caller defect and
+ *    throws — see CoverageInputError.
  *  · It does NOT build URLs or hashes. `proofRef` names the proof; `toCoverageResponse`
  *    turns it into the wire shape once the caller supplies the base URL and the JWS
  *    digest it already had to compute for verification.
  *
  * VERSIONING
  * ----------
- * A change in behaviour creates `cov-v2` ALONGSIDE this file. cov-v1 is never mutated:
- * every answer ever given by a deployment reporting `algoVersion: "cov-v1"` must stay
- * reproducible from this exact source. FS10-020 makes that mechanical — CI mirrors the
- * deployed module into this repository and fails on a hash difference, and the running
- * deployment publishes its own module digest at `/v1/meta`.
+ * Until the public launch this function changes IN PLACE, as every contract in this
+ * repository does (ops decision D136): it keeps the name `cov-v1`, and each change is
+ * recorded with its date in the `coverage/cov-v1.ts` section of CHANGELOG.md, which also
+ * lists every module digest a deployment has published. From the launch, a published
+ * version is never edited: a change in behaviour creates the next version ALONGSIDE this
+ * file, and every answer given by a deployment reporting `algoVersion: "cov-v1"` stays
+ * reproducible from this exact source. FS10-020 makes that mechanical — the edge mirrors
+ * this module byte for byte, CI fails on a hash difference, and the running deployment
+ * publishes its own module digest at `/v1/meta`.
  *
  * PHASE
  * -----
- * There is no coverage route at v0 (FS-00 §6.10 as amended 2026-09-01): the v0 coverage
- * proof is the published entitlement JWS plus the verify page. This module ships anyway,
- * because the semantics a v0 buyer is promised must be readable before the endpoint that
- * automates them exists. The computed endpoint activates at P-M3 with no schema change.
+ * There is no coverage route on production at v0 (FS-00 §6.10 as amended 2026-09-01): the
+ * v0 coverage proof is the published entitlement JWS plus the verify page. The computed
+ * route runs on preview and dev, and activates on production at P-M3.
  */
 
 /** The eight answer values. Exactly FS-00 §6.3 — restated from COM-009, never extended. */
@@ -79,14 +116,34 @@ export type EntitlementLane = 'pass' | 'project' | 'portfolio' | 'donation';
  */
 export type PublishedEntitlementStatus = 'active' | 'suspended' | 'void';
 
-/** Published repo states. `detected` repositories get no record at all (GH-014). */
-export type PublishedRepoState = 'verified' | 'suspended' | 'quit' | 'delisted';
+/**
+ * The states a published repository record carries (`repo-record.v1` 1.4.0). `registered`
+ * is the one state a record published from ops decision D82 on shows for a registered
+ * repository that is not suspended, claimed or not; `verified` is what records published
+ * before D82 carried, and is read as `registered`. The platform's internal `detected`
+ * never appears in a record.
+ */
+export type RecordRepoState = 'registered' | 'verified' | 'suspended' | 'quit' | 'delisted';
+
+/**
+ * The states an ANSWER reports in `basis.repo.repoState`. One public state for a
+ * registered repository (D82's dated note (d)), so `verified` is never reported; and
+ * `no-record` when no record is published under the node id asked about, which only a Pass
+ * answers about (D48 item 5). `no-record` is what the caller found, not a registry state:
+ * the repository may be registered and not yet published, or not under the licence at all,
+ * and the answer checks neither.
+ */
+export type PublishedRepoState = 'registered' | 'suspended' | 'quit' | 'delisted' | 'no-record';
 
 export type ScopeKind = 'project' | 'portfolio' | 'network';
 
 export interface Scope {
   kind: ScopeKind;
-  /** Declared repository node_ids for a project-scoped term (min 1, cap 50 — COM-018). */
+  /**
+   * The repository node_ids the term's paid coverage names — exactly one for a Project
+   * bought under ops decision D42; the array bound of 50 is the shape's, not a purchasable
+   * quantity. Never the usage declaration (D16, COM-020, ENG-029, D42).
+   */
   repos?: readonly string[];
   /** Owner-organisation node_id for a portfolio-scoped term. */
   org?: string;
@@ -131,12 +188,22 @@ export interface CompanyRecord {
 /** The fields of `/registry/repo/{node_id}.json` this function reads (input 2). */
 export interface RepoRecord {
   nodeId: string;
-  state: PublishedRepoState;
+  state: RecordRepoState;
   owner?: {
     login?: string;
     /** Compared against a portfolio term's `scope.org`. */
     orgId?: string;
   };
+}
+
+/**
+ * What the caller passes when `/registry/repo/{node_id}.json` does not exist: the node id it
+ * was asked about, and nothing else. No record means no owner and no waiver list, and only
+ * a Pass inside its term is answered about such a repository (D48 item 5, D82 item 10).
+ */
+export interface NoRecordRepo {
+  nodeId: string;
+  state: 'no-record';
 }
 
 export interface WaiverBeneficiary {
@@ -180,6 +247,14 @@ export interface CompanyRef {
   domain?: string;
 }
 
+/**
+ * Why an answer holds when the other basis members cannot show it. One value today:
+ * `pass-any-work` — the repository has no published record, and the organisation's Pass
+ * covers it because a Pass covers any work under the licence, registered or not (D48
+ * item 5). Absent from every other answer.
+ */
+export type CoverageReason = 'pass-any-work';
+
 export interface CoverageBasis {
   algoVersion: typeof ALGO_VERSION;
   company: { coId: string; verification?: CompanyRecord['verification'] } | null;
@@ -192,6 +267,7 @@ export interface CoverageBasis {
     periodEnd?: string;
   };
   waiver?: { wvrId: string; grantedAt: string };
+  reason?: CoverageReason;
 }
 
 export interface CoverageDates {
@@ -214,6 +290,20 @@ export interface CoverageResult {
    */
   proofRef?: ProofRef;
 }
+
+/**
+ * The question cannot be answered about this repository: it has no published record, and
+ * the organisation holds no Pass inside its term. The caller answers
+ * `404 repo_not_registered` (FS-10 §4.5). Returned, never thrown — it is a fact about the
+ * repository, not a step the caller skipped.
+ */
+export interface RepoNotRegistered {
+  error: 'repo_not_registered';
+  algoVersion: typeof ALGO_VERSION;
+  repo: { nodeId: string };
+}
+
+export type CoverageOutcome = CoverageResult | RepoNotRegistered;
 
 /** Thrown when the caller skipped a step it owns (FS-10 §4.3 step 1). */
 export class CoverageInputError extends Error {
@@ -256,6 +346,16 @@ function normaliseDomain(domain: string): string {
   return domain.trim().toLowerCase().replace(/\.$/, '');
 }
 
+/**
+ * The state an answer reports for a record's state. `verified` — the token records
+ * published before D82 carried — is reported as `registered`, the one public state a
+ * registered repository has (D82's dated note (d)). Every other token is reported as the
+ * record carries it, as the first text did.
+ */
+function publicRepoState(state: RecordRepoState): PublishedRepoState {
+  return state === 'verified' ? 'registered' : state;
+}
+
 // ---------------------------------------------------------------------------------
 // Predicates
 // ---------------------------------------------------------------------------------
@@ -263,11 +363,11 @@ function normaliseDomain(domain: string): string {
 /**
  * Does this term's scope reach this repository?
  *
- * A Pass reaches every registered repository — that is what a Pass IS, and why it wins
- * the precedence order (FS-10 §4.3 step 5a). Project terms match a declared node_id.
- * Portfolio terms match the repo record's owner organisation id, which is why a repo
- * transfer changes portfolio matching from the next publish while the repository key
- * itself never moves (FS10-121).
+ * A Pass reaches every work under the licence, registered or not (D48 item 5) — that is
+ * what a Pass IS, and why it wins the precedence order (FS-10 §4.3 step 5a). Project terms
+ * match a named node_id. Portfolio terms match the repo record's owner organisation id,
+ * which is why a repo transfer changes portfolio matching from the next publish while the
+ * repository key itself never moves (FS10-121).
  */
 function appliesToRepo(ent: Entitlement, repo: RepoRecord): boolean {
   if (ent.lane === 'pass') return true;
@@ -415,6 +515,49 @@ function activeThreshold(company: CompanyRecord, nowMs: number): ThresholdRegist
   return sorted[0] ?? null;
 }
 
+/**
+ * Step 1 for a repository with NO published record (D48 item 5, D82 item 10).
+ *
+ * Only a Pass inside its term is answered about it: a Pass covers any work under the
+ * licence, registered or not, which is what D82 item 10 asks of the coverage function ("a
+ * Pass covers any work under the licence"). Nothing else is answered here. A Portfolio is
+ * matched through the record's owner and a waiver is published under the record's node id,
+ * so neither can be read without a record; a Project, a donation term, a threshold
+ * self-certification and a Pass in its grace window keep the first text's outcome for a
+ * work with no record, `repo_not_registered`, each pinned by a vector. Answering any of them
+ * here would be a change in behaviour, made as VERSIONING above says. The Pass is picked by
+ * the same rule as step 5a (suspended and void terms excluded, latest `periodEnd`, then
+ * `entId`), so the basis names the same term a registered repository's answer would name.
+ */
+function noRecordWork(company: CompanyRecord | null, nodeId: string, nowMs: number): CoverageOutcome {
+  const pass = company
+    ? pickTerm(
+        (company.entitlements ?? []).filter(
+          (ent) => ent && ent.status === 'active' && ent.lane === 'pass' && isWithinTerm(ent, nowMs),
+        ),
+      )
+    : null;
+  if (!company || !pass) {
+    return { error: 'repo_not_registered', algoVersion: ALGO_VERSION, repo: { nodeId } };
+  }
+  return {
+    answer: 'yes-via-pass',
+    basis: {
+      algoVersion: ALGO_VERSION,
+      company: { coId: company.coId, verification: company.verification },
+      repo: { nodeId, repoState: 'no-record' },
+      entitlement: {
+        entId: pass.entId,
+        lane: pass.lane,
+        periodStart: pass.periodStart,
+        periodEnd: pass.periodEnd,
+      },
+      reason: 'pass-any-work',
+    },
+    proofRef: { type: 'entitlement-jws', coId: company.coId },
+  };
+}
+
 // ---------------------------------------------------------------------------------
 // The function
 // ---------------------------------------------------------------------------------
@@ -425,32 +568,39 @@ function activeThreshold(company: CompanyRecord, nowMs: number): ThresholdRegist
  * @param companyRecord The verified, decoded entitlement record, or null when the
  *   organisation resolved to nothing. Absence of a record is `no`, never an error
  *   (COM-057) — legibility for scanners.
- * @param repoRecord The published repo record. Required: an unregistered repository is
- *   the caller's `404 repo_not_registered`, not an answer.
- * @param waiverList The repository's waiver artifact entries (possibly empty).
+ * @param repoRecord The published repo record, or `{ nodeId, state: 'no-record' }`
+ *   when `/registry/repo/{node_id}.json` does not exist. Required either way.
+ * @param waiverList The repository's waiver artifact entries (possibly empty). Not read
+ *   for a repository with no record, which has no waiver artifact.
  * @param nowUtc The instant to answer as of. A parameter, never a clock read.
  * @param companyRef Optional: the reference as received. See CompanyRef.
+ * @returns The answer, or `repo_not_registered` when the repository has no published
+ *   record and the organisation holds no Pass inside its term — the caller's `404`.
  */
 export function coverage(
   companyRecord: CompanyRecord | null,
-  repoRecord: RepoRecord,
+  repoRecord: RepoRecord | NoRecordRepo,
   waiverList: readonly WaiverRecord[],
   nowUtc: string | number | Date,
   companyRef?: CompanyRef,
-): CoverageResult {
-  // Step 1 — repo gate. The caller owns the 404; we refuse to guess.
+): CoverageOutcome {
+  // Step 1 — repo gate. The caller says what it found; this function decides what an
+  // absence means, so every deployment decides it the same way.
   if (!repoRecord || typeof repoRecord.nodeId !== 'string' || repoRecord.nodeId.length === 0) {
     throw new CoverageInputError(
-      'repoRecord with a nodeId is required — an unregistered repository is 404 repo_not_registered, not an answer',
-      'repo_not_registered',
+      'repoRecord with a nodeId is required — pass the published record, or { nodeId, state: ' +
+        "'no-record' } when /registry/repo/{node_id}.json does not exist",
+      'repo_input_missing',
     );
   }
   const nowMs = toMillis(nowUtc);
+  if (repoRecord.state === 'no-record') return noRecordWork(companyRecord, repoRecord.nodeId, nowMs);
+  const record: RepoRecord = repoRecord;
   const waivers = Array.isArray(waiverList) ? waiverList : [];
 
   // A delisted or quit repository still computes: entitlements and vesting stand (D12).
   // The state travels in the basis so the caller can say so out loud.
-  const repoBasis = { nodeId: repoRecord.nodeId, repoState: repoRecord.state };
+  const repoBasis = { nodeId: record.nodeId, repoState: publicRepoState(record.state) };
 
   // Step 2 — waiver eligibility, computed before any company short-circuit.
   const waiver = findEligibleWaiver(waivers, companyRecord, companyRef, nowMs);
@@ -466,7 +616,7 @@ export function coverage(
           repo: repoBasis,
           waiver: { wvrId: waiver.wvrId, grantedAt: waiver.grantedAt },
         },
-        proofRef: { type: 'waiver-record', repoNodeId: repoRecord.nodeId, wvrId: waiver.wvrId },
+        proofRef: { type: 'waiver-record', repoNodeId: record.nodeId, wvrId: waiver.wvrId },
       };
     }
     return {
@@ -495,7 +645,7 @@ export function coverage(
   ];
   for (const { lane, answer } of lanes) {
     const term = pickTerm(
-      usable.filter((ent) => ent.lane === lane && isWithinTerm(ent, nowMs) && appliesToRepo(ent, repoRecord)),
+      usable.filter((ent) => ent.lane === lane && isWithinTerm(ent, nowMs) && appliesToRepo(ent, record)),
     );
     if (term) {
       return {
@@ -527,13 +677,13 @@ export function coverage(
         repo: repoBasis,
         waiver: { wvrId: waiver.wvrId, grantedAt: waiver.grantedAt },
       },
-      proofRef: { type: 'waiver-record', repoNodeId: repoRecord.nodeId, wvrId: waiver.wvrId },
+      proofRef: { type: 'waiver-record', repoNodeId: record.nodeId, wvrId: waiver.wvrId },
     };
   }
 
   // Step 7 — donation lane, scope rules as recorded.
   const donation = pickTerm(
-    usable.filter((ent) => ent.lane === 'donation' && isWithinTerm(ent, nowMs) && appliesToRepo(ent, repoRecord)),
+    usable.filter((ent) => ent.lane === 'donation' && isWithinTerm(ent, nowMs) && appliesToRepo(ent, record)),
   );
   if (donation) {
     return {
@@ -571,7 +721,7 @@ export function coverage(
     usable.filter(
       (ent) =>
         (ent.lane === 'pass' || ent.lane === 'project' || ent.lane === 'portfolio' || ent.lane === 'donation') &&
-        appliesToRepo(ent, repoRecord) &&
+        appliesToRepo(ent, record) &&
         isWithinGrace(ent, nowMs),
     ),
   );
@@ -632,7 +782,8 @@ export interface ResponseOptions {
 /**
  * Turn a result into the published response shape. Separated from `coverage` because
  * URLs and digests need configuration and I/O, and the frozen function must have
- * neither. `no` carries no proof (FS-10 §4.4).
+ * neither. `no` carries no proof (FS-10 §4.4). A `repo_not_registered` outcome is not a
+ * result and is not accepted here: the caller answers it with the error envelope.
  */
 export function toCoverageResponse(result: CoverageResult, options: ResponseOptions): CoverageResponse {
   const base = options.apiBaseUrl.replace(/\/+$/, '');
@@ -657,6 +808,11 @@ export function toCoverageResponse(result: CoverageResult, options: ResponseOpti
     }
   }
   return response;
+}
+
+/** Narrowing helper: is this outcome the caller's `404 repo_not_registered`? */
+export function isRepoNotRegistered(outcome: CoverageOutcome): outcome is RepoNotRegistered {
+  return 'error' in outcome && outcome.error === 'repo_not_registered';
 }
 
 /** Narrowing helper for consumers validating an answer string off the wire. */

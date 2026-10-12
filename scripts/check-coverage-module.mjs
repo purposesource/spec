@@ -1,33 +1,32 @@
 #!/usr/bin/env node
 /**
- * Gate: the published coverage modules keep the promises made about them, and print their
- * digests.
+ * Gate: the published coverage module keeps the promises made about it, and prints its
+ * digest.
  *
- * Three of those promises are structural, so a gate can hold them, for EVERY published
- * version (`cov-v1.ts`, and `cov-v2.ts` beside it since ops decisions D48 item 5 and D82):
+ * Three of those promises are structural, so a gate can hold them, for every module listed
+ * below (today one, `cov-v1.ts`):
  *
  *   1. ZERO IMPORTS. A module must not import anything — not a package, not a sibling
  *      file, not a type. Anyone auditing the coverage model should need one file and a
  *      copy of Node, and nothing else. The moment it imports a helper, "read the
  *      published function" becomes "read the published function and its dependency tree".
- *      (That includes the other version: cov-v2 repeats cov-v1's helpers rather than
- *      importing them, so each file stands alone.)
+ *      (That will include a later version: it repeats its predecessor's helpers rather
+ *      than importing them, so each file stands alone.)
  *
  *   2. NO CLOCK, NO I/O, NO RANDOMNESS. The function is pure and time is a parameter. A
  *      grep is a blunt instrument, but it catches the exact regression that matters: the
  *      well-meaning `Date.now()` added to make a signature "more convenient".
  *
  *   3. ONE VERSION PER FILE. `cov-vN.ts` declares `cov-vN`, and its vector file targets
- *      `cov-vN`. A behaviour change creates the next version alongside; it never edits a
- *      published one.
+ *      `cov-vN`.
  *
- * And one promise is a measurement: a FROZEN module's digest is pinned here. cov-v1 is the
- * module every answer reporting `algoVersion: "cov-v1"` came from; its digest is what the
- * edge published at `/v1/meta` and what readers pinned. Now that a second module lives
- * beside it, an edit to the wrong file would be one keystroke away, so the gate compares
- * the bytes with the pinned digest instead of trusting the version string alone. cov-v2 is
- * pinned the same way from its first merge, because the edge mirrors it and answers with it
- * from the next deploy.
+ * And one promise is a measurement: the module's digest is pinned here. It is what the edge
+ * publishes at `/v1/meta` and what readers compare, so the gate checks the bytes against the
+ * pinned digest instead of trusting the version string alone. Until the public launch the
+ * module changes in place (ops decision D136): a change moves this pin in the same commit,
+ * and the `coverage/cov-v1.ts` section of CHANGELOG.md records the date and every digest the
+ * edge has served. From the launch a published module is never edited: a change in behaviour
+ * creates the next version beside it, pinned the same way, and a published pin never moves.
  *
  * Then it prints each module's SHA-256. That digest is what a deployment publishes at its
  * own diagnostics route, and what continuous integration compares against the deployed
@@ -42,23 +41,16 @@ import { join } from 'node:path';
 
 import { ROOT, readJson, fail } from './lib/spec.mjs';
 
-/** Every published module, the vector file that targets it, and its pinned digest if frozen. */
+/** Every published module, the vector file that targets it, and its pinned digest. */
 const MODULES = [
   {
     version: 'cov-v1',
     file: 'cov-v1.ts',
     vectors: 'vectors.json',
-    // Frozen since the edge first published it (measured 2026-09-17, FS-10 §4.6 dated note).
-    pinned: '96b19df421e4c3d8b719de736640133c3c2376dbc92045f13b83384c0184267a',
-  },
-  {
-    version: 'cov-v2',
-    file: 'cov-v2.ts',
-    vectors: 'cov-v2.vectors.json',
-    // Pinned from its first merge (2026-09-30, ops decisions D48 item 5 and D82 item 10): the
-    // edge mirrors these bytes and answers with them from its next deploy, so a later change
-    // is a cov-v3 beside it, never an edit here.
-    pinned: 'a2c5f1174b1bf346b28d8e6d6e1e225d30569a19f8779cad2accb8aa4e313ebb',
+    // Pinned 2026-10-12 (ops decision D136): the function as changed on 2026-09-30, under its
+    // own name. The edge served 96b19df4… from 2026-09-17 and a2c5f117… from 2026-09-30; the
+    // CHANGELOG's coverage/cov-v1.ts section records all three digests and what moved.
+    pinned: 'd1a3a4cba8e448d358dc9dfde8f150d76174584fdb4aa8391087331c5d78fe33',
   },
 ];
 
@@ -108,8 +100,9 @@ for (const { version, file, vectors: vectorName, pinned } of MODULES) {
   } else if (declared[1] !== version) {
     problems.push(
       `coverage/${file}: declares ${JSON.stringify(declared[1])}, not ${version}. A behaviour change ` +
-        `creates the next version alongside this file; it never renames this one, because every answer ` +
-        `already given under ${version} must stay reproducible from this exact source.`,
+        `creates the next version alongside this file once the network is public; it never renames ` +
+        `this one, because every answer given under ${version} must be reproducible from the source ` +
+        `the CHANGELOG names for it.`,
     );
   }
   if (vectors.algoVersion !== version) {
@@ -119,17 +112,18 @@ for (const { version, file, vectors: vectorName, pinned } of MODULES) {
   const digest = createHash('sha256').update(bytes).digest('hex');
   if (pinned !== null && digest !== pinned) {
     problems.push(
-      `coverage/${file} has changed: sha256 ${digest}, pinned ${pinned}. ${version} is FROZEN — every ` +
-        `answer a deployment gave under it must stay reproducible from these exact bytes, and readers ` +
-        `pinned this digest. Restore the file; a behaviour change is a new version beside it.`,
+      `coverage/${file} has changed: sha256 ${digest}, pinned ${pinned}. The edge mirrors these bytes ` +
+        `and publishes their digest, and readers compare it. Before the public launch a change in place ` +
+        `moves this pin in the same commit, with a dated entry in the CHANGELOG's coverage section ` +
+        `(ops decision D136); from the launch, restore the file — a behaviour change is a new version beside it.`,
     );
   }
-  digests.push(`  ${version}: moduleSha256 = ${digest}${pinned !== null ? ' (frozen, pinned)' : ''}`);
+  digests.push(`  ${version}: moduleSha256 = ${digest}${pinned !== null ? ' (pinned)' : ''}`);
 }
 
 fail(
   problems,
-  `the coverage modules are dependency-free, clock-free and declare their own versions\n` +
+  `the coverage module is dependency-free, clock-free and declares its own version\n` +
     `${digests.join('\n')}\n` +
-    `  (a deployment publishes the digest of the module it runs at /v1/meta; it must equal one of these)`,
+    `  (a deployment publishes the digest of the module it runs at /v1/meta; it must equal this one)`,
 );

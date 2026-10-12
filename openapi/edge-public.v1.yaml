@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.6.0
+  version: 1.7.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -144,12 +144,10 @@ paths:
         claimed it (ops decision D82).
 
         The answer is computed by a published, versioned pure function over three signed or
-        published inputs: `cov-v2` from API 1.2.0, `cov-v1` before it. `basis.algoVersion`
-        names the one that answered. Both modules and their test vectors are in the same
-        repository as this document — `cov-v1` unchanged, so every answer it gave stays
-        reproducible — and the running deployment publishes the digest of the module it runs
-        at `/v1/meta`, so the code that answered your query is checkable against the code we
-        published.
+        published inputs, `cov-v1`, which `basis.algoVersion` names. The module and its test
+        vectors are in the same repository as this document, and the running deployment
+        publishes the digest of the module it runs at `/v1/meta`, so the code that answered
+        your query is checkable against the code we published.
       tags: [coverage]
       x-psn-phase: P-M3
       parameters:
@@ -192,7 +190,7 @@ paths:
                   value:
                     answer: yes-via-pass
                     basis:
-                      algoVersion: cov-v2
+                      algoVersion: cov-v1
                       company:
                         coId: co_01jf8w2c9km3q7xz5r0v4t6y8b
                         verification: domain-verified
@@ -214,7 +212,7 @@ paths:
                   value:
                     answer: lapsed-in-grace
                     basis:
-                      algoVersion: cov-v2
+                      algoVersion: cov-v1
                       company:
                         coId: co_01jr7f1n8wx2a6gj4b9e3c5h7m
                         verification: officer-attested
@@ -237,7 +235,7 @@ paths:
                   value:
                     answer: no-entitlement-required-under-threshold
                     basis:
-                      algoVersion: cov-v2
+                      algoVersion: cov-v1
                       company:
                         coId: co_01jn4c8j5st9x3df1y6b0z2e4h
                         verification: officer-attested
@@ -255,7 +253,7 @@ paths:
                   value:
                     answer: yes-via-waiver
                     basis:
-                      algoVersion: cov-v2
+                      algoVersion: cov-v1
                       company:
                         coId: co_01jk2a6g3qr7v1bd9w4z8x0c2f
                         verification: unverified
@@ -274,7 +272,7 @@ paths:
                   value:
                     answer: yes-via-pass
                     basis:
-                      algoVersion: cov-v2
+                      algoVersion: cov-v1
                       company:
                         coId: co_01jf8w2c9km3q7xz5r0v4t6y8b
                         verification: domain-verified
@@ -297,7 +295,7 @@ paths:
                   value:
                     answer: no
                     basis:
-                      algoVersion: cov-v2
+                      algoVersion: cov-v1
                       company: null
                       note: no registry record for this organization
                       repo:
@@ -374,7 +372,7 @@ paths:
                   value:
                     answer: yes-via-project
                     basis:
-                      algoVersion: cov-v2
+                      algoVersion: cov-v1
                       company:
                         coId: co_01jh0y4e1np5s9zb7t2x6v8a0d
                         verification: domain-verified
@@ -1009,7 +1007,7 @@ paths:
                   value:
                     edgeVersion: 2027.06.01-3
                     coverage:
-                      algoVersion: cov-v2
+                      algoVersion: cov-v1
                       moduleSha256: 3b1c9e0a5d7f2846bb14c0e9a7d3f5028c6b4a19e7d2f80315a9c4b6e8d0f2a4
                     contracts:
                       answerEnum:
@@ -2859,9 +2857,10 @@ components:
         algoVersion:
           type: string
           description: >-
-            The coverage function version — `cov-v2` from API 1.2.0, `cov-v1` before it. Its source and
-            vectors are published, and a published version is never edited.
-          example: cov-v2
+            The coverage function version, `cov-v1`. Its source and vectors are published. Until the
+            public launch it changes in place under this name, each change dated in the
+            specification's changelog; from the launch a published version is never edited.
+          example: cov-v1
         company:
           type: [object, 'null']
           additionalProperties: false
@@ -2892,10 +2891,10 @@ components:
                 The state the repository's published record carries, as the coverage function read it.
                 `registered` is the one state a record published from ops decision D82 on carries for a
                 registered repository that is not suspended, whether or not its admins have claimed it (D82 and its dated note (d) of
-                2026-09-29); `verified` is what records published before D82 carried. cov-v2 reports a
-                `verified` record as `registered`, so an answer from cov-v2 never says `verified`; cov-v1
-                reports the record's state without branching on it, and its own `PublishedRepoState` type,
-                which predates D82, stays byte-identical for pinned readers. `no-record` (cov-v2 only) is
+                2026-09-29); `verified` is what records published before D82 carried. The coverage
+                function reports a `verified` record as `registered`, so an answer never says `verified`;
+                the value stays listed because answers given before 2026-09-30, when the function
+                reported the record's state without branching on it, could carry it. `no-record` is
                 not a registry state: no record is published under this node id, and the answer is a
                 Pass's, with `reason` `pass-any-work` (D48 item 5). The repository may be registered and not
                 yet published, or not under the licence at all; the answer checks neither. A quit or
@@ -2935,7 +2934,7 @@ components:
           type: string
           enum: [pass-any-work]
           description: >-
-            Why the answer holds when the other members cannot show it (cov-v2). `pass-any-work`: the
+            Why the answer holds when the other members cannot show it (since 2026-09-30). `pass-any-work`: the
             repository has no published record (`repo.repoState: no-record`), and the organisation's
             Pass covers it because a Pass covers any work under the licence, registered or not (ops
             decision D48 item 5). Absent from every other answer.
@@ -3166,7 +3165,7 @@ components:
             algoVersion:
               type: string
               description: The coverage function this deployment runs — the one every answer's `basis.algoVersion` names.
-              example: cov-v2
+              example: cov-v1
             moduleSha256:
               type: string
               pattern: '^[0-9a-f]{64}$'
@@ -3351,7 +3350,7 @@ components:
         The addressed artifact does not exist. Note the asymmetry on the coverage route: a
         repository with no registry record is this error (`repo_not_registered`) unless the
         organisation holds a Pass inside its term, which covers any work under the licence
-        (cov-v2, ops decision D48 item 5), while an organisation with no record is the answer
+        (ops decision D48 item 5), while an organisation with no record is the answer
         `no`.
       content:
         application/json:

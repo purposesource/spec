@@ -2,24 +2,24 @@
 /**
  * Gate: every coverage test vector's INPUTS are valid published artifacts.
  *
- * The vector suites in coverage/cov-v1.test.ts and coverage/cov-v2.test.ts prove the
- * functions compute the right answer. They cannot prove the inputs are shaped like real
- * artifacts — and a vector built on an impossible record would prove a function correct on
- * data it will never see. So this gate validates, for every vector of both files:
+ * The vector suite in coverage/cov-v1.test.ts proves the function computes the right
+ * answer. It cannot prove the inputs are shaped like real artifacts — and a vector built on
+ * an impossible record would prove a function correct on data it will never see. So this
+ * gate validates, for every vector:
  *
  *   · the repo fixture against repo-record.v1.json
  *   · the company record against entitlement-record.v1.json
  *   · the waiver document against waiver.v1.json
  *
- * It also asserts each suite still names all eight answers, so nobody can quietly delete
+ * It also asserts the suite still names all eight answers, so nobody can quietly delete
  * the awkward ones (the anti-spoof case, the grace boundaries, the waived organisation
  * with no account).
  *
- * cov-v2 (ops decisions D48 item 5 and D82) adds one input shape and one outcome: a vector
- * whose `repo` is null asks about a repository with NO published record, named by
- * `repoNodeId`, and such a vector may expect `repo_not_registered` instead of an answer.
- * Only such a vector may, and the node id it names must not be any fixture's — otherwise
- * "no record" would be a record after all.
+ * Since 2026-09-30 (ops decisions D48 item 5 and D82) there is one more input shape and one
+ * more outcome: a vector whose `repo` is null asks about a repository with NO published
+ * record, named by `repoNodeId`, and such a vector may expect `repo_not_registered` instead
+ * of an answer. Only such a vector may, and the node id it names must not be any fixture's —
+ * otherwise "no record" would be a record after all.
  *
  * Run: node scripts/check-vectors.mjs
  */
@@ -64,10 +64,7 @@ const EIGHT = [
 /** The repository node id grammar of repo-record.v1's `nodeId`, as the edge reads it. */
 const NODE_ID = /^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$/;
 
-const FILES = [
-  { name: 'vectors.json', algoVersion: 'cov-v1', acceptsNoRecord: false },
-  { name: 'cov-v2.vectors.json', algoVersion: 'cov-v2', acceptsNoRecord: true },
-];
+const FILES = [{ name: 'vectors.json', algoVersion: 'cov-v1', acceptsNoRecord: true }];
 const loaded = Object.fromEntries(FILES.map(({ name }) => [name, readJson(join(ROOT, 'coverage', name))]));
 const summary = [];
 
@@ -132,10 +129,7 @@ for (const { name, algoVersion, acceptsNoRecord } of FILES) {
     }
 
     if (vector.carriedFrom !== undefined) {
-      const source = loaded['vectors.json'].vectors.find((old) => old.id === vector.carriedFrom);
-      if (name === 'vectors.json' || !source) {
-        problems.push(`${label}: carriedFrom ${JSON.stringify(vector.carriedFrom)} names no cov-v1 vector`);
-      }
+      problems.push(`${label}: carriedFrom is gone — one vector file, nothing to carry from (ops decision D136)`);
     }
   }
 
