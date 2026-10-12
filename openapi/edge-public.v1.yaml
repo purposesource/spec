@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.5.0
+  version: 1.6.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -759,10 +759,16 @@ paths:
         HTML), `{pid}-dark.png` and `{pid}-dark@2x.png` (for `<picture>` in dark mode), and
         `{pid}-og.png` (1200×630, the page's `og:image`, addressed with `?v=`).
 
-        **An unknown, hidden, deleted or erased page, a wrong `v`, or a card not drawn yet answers
-        `200` with one neutral image**, the same bytes in every case ("This contributor page is not
-        public"), so no embed ever shows a broken image and no probe tells a withdrawn page from one
-        that never existed. Only a file name of none of the five shapes is a `404`.
+        **An unknown, hidden, deleted or erased page, or a wrong `v`, answers `200` with one neutral
+        image**, the same bytes in every case ("This contributor page is not public"), so no embed
+        ever shows a broken image and no probe tells a withdrawn page from one that never existed.
+        Only a file name of none of the five shapes is a `404`.
+
+        **A public page whose card is not drawn yet, or whose card cannot be read (an outage),
+        answers a `302` to the site's generic card**, `no-store`. That card asserts nothing about
+        the page; the neutral image would call a public page not public, and an outage knows
+        nothing either way. The drawn card replaces the redirect as soon as the page document names
+        it (`contributor-page.v1` `card.h16`).
       tags: [contributor-pages]
       x-psn-phase: P-M3
       parameters:
@@ -809,6 +815,27 @@ paths:
               schema:
                 type: string
                 contentMediaType: image/png
+        '302':
+          description: |
+            The page is public and its card is not drawn yet, or the card could not be read (an
+            outage): a redirect to the site's generic 1200×630 card, on the site host of the
+            deployment. It asserts nothing about the page. `no-store`, so the drawn card replaces it
+            as soon as the page document names it; the location is fixed and never built from the
+            request.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              example: https://purposesource.org/brand/og-generic-1200x630.png
+            Cache-Control:
+              schema:
+                type: string
+              example: no-store
+            X-Robots-Tag:
+              schema:
+                type: string
+              example: noindex
         '404':
           description: The file name is none of the five card shapes. Nothing was read.
           content:
@@ -841,6 +868,10 @@ paths:
         page"** — unknown, hidden, deleted and erased alike — because a README must not show a
         broken image, and a withdrawn page must not be told apart from one that never existed. It is
         cached like the card, without `stale-if-error`, and purged with it.
+
+        **A storage outage answers `503 artifacts_unavailable`, `no-store`**, never the neutral
+        badge: "no public page" asserts that a page is not public, and a cache holding it for an
+        hour would say so of pages that are. The README shows the image again when the store heals.
       tags: [contributor-pages]
       x-psn-phase: P-M3
       parameters:
@@ -881,6 +912,8 @@ paths:
                       traceId: 01jp4cam7wx1z5fh3a8d2b4g6k
         '429':
           $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
 
   /stats.json:
     get:

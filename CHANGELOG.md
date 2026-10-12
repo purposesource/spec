@@ -3470,6 +3470,29 @@ which kind of change each entry was.
   `/v1/recipient-list/index.json` and `/v1/recipient-list/{version}.json`; `no-ambiguous-paths`
   stays off for the reason recorded there.
 
+### 1.6.0 — unreleased (2026-10-12; ops decision D116; design PROFILE-PAGE-2026-10-06 §4.9; the review of slice P13a)
+
+- Minor, and **pre-release** (policy 5: nothing is published under these routes yet): two status
+  codes are added to the contributor page's routes and one sentence of 1.3.0 is corrected, so the
+  description says what the edge built in slice P13a answers. No route, cache class or error code
+  moved.
+- `getContributorPageCard` gains `302`: a page that IS public and whose card is not drawn yet (no
+  `card.h16`), or whose card file cannot be read (an outage), redirects to the site's generic
+  1200×630 card, `no-store`, with `noindex`. **1.3.0's sentence that "a card not drawn yet" answers
+  `200` with the neutral image is withdrawn**: that image says "This contributor page is not
+  public", which is false of a public page, and `contributor-page.v1` already said the card URLs
+  answer the generic card until `card.h16` is present. The neutral image's cases are now an
+  unknown, hidden, deleted or erased page and a wrong `v`, unchanged in bytes and headers.
+- `getContributorPageBadge` gains `503 artifacts_unavailable` (the shared response), `no-store`:
+  on a storage outage the badge route answers the error rather than the neutral badge, because "no
+  public page" asserts something an outage cannot know and a shared cache would keep saying it for
+  an hour. `getContributorPageVersion` already listed its `503`.
+- The website's edge test of these routes now reads the three operations' response codes from this
+  description and holds them to what the edge answers, so 1.3.0's finding that no test compares
+  this description with the edge no longer holds for these three routes. The edge serves them from
+  website branch `p13-person-edge`; push this file first. `check:openapi-examples` validates the
+  same 56 examples (no example was added: a `302` and a `503` carry no body).
+
 ## coverage/cov-v2.ts
 
 The second version of the published coverage function, beside the first. The module, its
