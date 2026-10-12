@@ -4,8 +4,8 @@
   "source": "fixture",
   "versions": [
     {
-      "version": "v1.3",
-      "url": "https://dev-api.purposesource.org/v1/recipient-list/v1.3.json",
+      "version": "v2",
+      "url": "https://dev-api.purposesource.org/v1/recipient-list/v2.json",
       "status": "released",
       "effectiveFrom": "2027-07",
       "releasedAt": "2027-04-20T09:10:00Z"
