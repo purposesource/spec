@@ -813,6 +813,12 @@ creating one.
   permitted before the revocation stays lawful. No constraint moved, and the coverage answer is
   unchanged.
 
+### 1.2.3 — unreleased (2026-10-12; ops decision D136)
+
+- Wording. The description names the coverage function once, `cov-v1`, where it named a second
+  version "and `cov-v1` before it": the coverage function folded back into `cov-v1`
+  (`coverage/cov-v1.ts` 1.2.0). No constraint moved.
+
 ## entitlement-record.v1.json
 
 ### 1.0.0 — unreleased
@@ -2425,13 +2431,19 @@ reasoning: no month export has ever been published with a row in it.
   removal or later lists the removed organisation (migration 0050's whole-list rule).
 - The example is a development plane after five releases: the sample's founding version `v0` and
   its activation version `v1` recorded; `v1.1` late, first published on 3 March 2027 for April,
-  29 days before its first day; `v1.2` void; and `v2` released for July 2027. One organisation is
+  29 days before its first day; `v1.2` void; and `v1.3` released for July 2027. One organisation is
   removed, SAMPLE — Animal-welfare recipient 2, for `registration-lost` on 3 February 2027, after
   the 2027-01 key was released and so not left out of that key. The new gate
   `check:recipient-lists` holds the example to its order, dates and notices (each recorded notice
   is the proof of a recorded version at or before it, and the late version was published fewer
   than thirty days before its month) and to agreement with the two List examples, and proves the
   refusals of both List contracts on copies of the examples.
+
+*Dated note, 2026-10-12 (ops decision D136): the example's newest release was the token of a second
+major; it is `v1.3`, because no Recipient List token leaves v1 before the public launch, and the
+List documents are written once. `v1.3` sorts after `v1.2`, so the example's order, dates and
+gate are unchanged. The API description's copy of the example moved with it (`edge-public.v1`
+1.7.0).*
 
 ## allocation-key.v1.json
 
@@ -3509,7 +3521,10 @@ which kind of change each entry was.
   2026-09-30 could carry it). 1.2.0's sentence that named a second function "from API 1.2.0, and
   `cov-v1` before it" is withdrawn.
 - Examples: the eight coverage and meta examples that named the second function say
-  `algoVersion: cov-v1`. `check:openapi-examples` validates the same 56.
+  `algoVersion: cov-v1`. `getRecipientListIndex`'s `fiveVersions` example releases `v1.3`, not a
+  second major, for July 2027, as `recipient-lists.v1`'s example now does: no Recipient List token
+  leaves v1 before the launch. It sorts after `v1.2`, so the example's order is unchanged.
+  `check:openapi-examples` validates the same 56.
 
 ## coverage/cov-v1.ts
 
