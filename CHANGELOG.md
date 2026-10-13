@@ -3031,6 +3031,18 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 
 ## contributor-page.v1.json
 
+### 1.0.2 — unreleased (2026-10-13; ops decision D116 and its dated note of ~11:50Z; slice P26)
+
+- Wording only, a patch under policy 3: no member, value or constraint moves. `x-psn.producer` gains
+  one sentence: until the person can publish, the private preview's document may hold no vouched
+  section, or no section at all (`sections: []`, which the one builder writes for the default
+  settings of an account with nothing credited and no certificate). Anyone signed in may build and
+  preview a page (item 1 of the dated note); the vouched rule is publishing's (design §2.2), so the
+  api answers such a preview with `preview.vouched` false and refuses to publish it, and `sections`
+  (`minItems` 1 and a vouched section) still binds every published document. The website's
+  renderer draws such a preview under its band and refuses it on every public answer (the review of
+  slice P26: the preview answered `500` for every new account).
+
 ### 1.0.1 — unreleased (2026-10-09; ops decision D116, slice P25)
 
 - Wording only, a patch under policy 3: no member, value or constraint moves. `theme`'s description
@@ -3628,9 +3640,8 @@ which kind of change each entry was.
 - `/v1/meta`'s `rateLimits.classes` gains a `pages` class (120 a minute per address, the design's
   `RL_PAGES`) on the deployments that serve the pages. `Meta.rateLimits.classes` is an open map
   ("a class arrives by being deployed"), so the component does not change.
-- The website's edge serves this from branch `p26`; the description does not gate it, so the order
-  of pushes does not matter for the website's tests. `check:openapi-examples` validates the same 67
-  examples.
+- The description does not gate the website's tests, so the order of pushes does not matter for
+  them. `check:openapi-examples` validates the same 67 examples.
 
 ## coverage/cov-v1.ts
 
