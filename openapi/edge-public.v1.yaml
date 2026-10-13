@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.10.0
+  version: 1.11.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -75,12 +75,30 @@ info:
     document on the SITE host, at `https://purposesource.org/p/{pid}` (the permanent link),
     `/u/{login}` or `/u/{login}/{pid}` (whichever address the person chose), with the page's
     stylesheet and fonts under `/u/_a/` and its pictures under `/p/{pid}/`. It is not part of
-    this API and has no operation here. On this host every `/p/*` and `/u/*` path answers `301`
-    to the same path on the site host (a mis-cased or slash-ended address to its lower-case
-    form), and nothing is read to decide that. The owner's private preview,
-    `/v1/me/page/preview`, needs the owner's session: it belongs to the authenticated family and
-    is not described here either. This API's contributor-page routes are the three tagged
-    `contributor-pages` below.
+    this API and has no operation here.
+
+    On the site host the permanent link answers the page itself while the person chose the
+    anonymous address. While they chose the login address `/u/{login}` or the mixed address
+    `/u/{login}/{pid}`, a page view of `/p/{pid}` answers `302` with `Location` set to exactly
+    that address, the page's canonical address (ops decision D138): the permanent link is the
+    one to share, and it opens the page under the person's current login. Where the edge
+    cannot serve that address with this page, for example while its login alias is not yet
+    published or names another page, the permanent link keeps serving the page itself. The
+    redirect is
+    temporary, never `301` or `308`, so it ends the moment the address does (a rename, a switch
+    to anonymous); it has no body, the page's `Cache-Control: public, max-age=60` and
+    `X-Robots-Tag: noindex, nofollow`, and its location is built from the deployment's own page
+    origin and the published document, never from the request. The card view (`?view=card`),
+    the page's pictures, the private preview and every `/u/` address are never redirected (a
+    retired or old login address answers like a page that never existed), and a page that is
+    not public answers the same `404` at `/p/{pid}` as before. QR codes, snippets, badges and
+    cards keep naming `/p/{pid}`.
+
+    On this API's host every `/p/*` and `/u/*` path answers `301` to the same path on the site
+    host (a mis-cased or slash-ended address to its lower-case form), and nothing is read to
+    decide that. The owner's private preview, `/v1/me/page/preview`, needs the owner's session:
+    it belongs to the authenticated family and is not described here either. This API's
+    contributor-page routes are the three tagged `contributor-pages` below.
   contact:
     name: Purpose Source Network
     url: https://purposesource.org/trust/api

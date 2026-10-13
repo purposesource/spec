@@ -3029,7 +3029,26 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   `check:contributor-page`, which also refuses a case decided within 1e-9 of the threshold so that
   float differences between .NET and V8 cannot split an answer.
 
+### 1.0.2 — unreleased (2026-10-13; ops decision D138)
+
+- Wording only, a patch under policy 3: no member, value or constraint moves. `address`'s description said
+  "Whatever the shape, `/p/{pid}` always serves the page". Since D138 the permanent link serves the page
+  itself for `anonymous`, and a page view of it is a temporary redirect (`302`) to the chosen address for
+  `login` and `mixed`, while the edge can serve that address with the page, and the page itself until
+  then; snippets, the QR and badges keep using it. `contributor-page.v1` 1.0.4 and
+  `openapi/edge-public.v1.yaml` 1.11.0 say the same.
+
 ## contributor-page.v1.json
+
+### 1.0.4 — unreleased (2026-10-13; ops decision D138)
+
+- Wording only, a patch under policy 3: no member, value or constraint moves. `address`'s description said
+  "`/p/{pid}` always serves the page". Since D138 the edge serves the page there while `address` is
+  `anonymous`, and while it is `login` or `mixed` a page view of `/p/{pid}` answers a temporary redirect
+  (`302`, never `301` or `308`) to that address, the page's canonical one, and its card view is never
+  redirected. Where the edge cannot serve that address with this page (its login alias not yet published,
+  or naming another page), `/p/{pid}` keeps serving the page itself. The `/u/` addresses keep their rule:
+  served only while this names them, otherwise `404`, never a redirect.
 
 ### 1.0.3 — unreleased (2026-10-13; ops decision D137 item 4) — wording only
 
@@ -3166,6 +3185,18 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   page example, the same login in mixed case, the shortest and the longest login — each with the
   message, the digest before base32 and the MAC, because if the two implementations disagree by
   one character every login address answers 404. `check:contributor-page` recomputes them.
+
+### 1.0.1 — unreleased (2026-10-13; ops decision D138)
+
+- Wording only, a patch under policy 3: no member, value or constraint moves. The description says the
+  edge also reads the alias for a page view of the permanent link `/p/{pid}` of a `login`-shape page, and
+  answers `302` to `/u/{login}` only while the alias names that pid (otherwise the page itself, at
+  `/p/{pid}`). RENAMES AND RETIREMENT gains the order of writes for index-build (P14g): a login's alias is
+  written before the document that names the login at the `login` address, and deleted only after no
+  document names it there (a rename: new alias, document, old alias deleted; a hide, a switch away from
+  `login` or an erasure: document first, then alias), so the edge never meets a published `login`-shape
+  document without its alias and the redirect never pauses during a rename. `openapi/edge-public.v1.yaml`
+  1.11.0 and `contributor-page.v1` 1.0.4 say the same of the redirect.
 
 ## link-platforms.v1.json
 
@@ -3688,6 +3719,31 @@ which kind of change each entry was.
   projects and the rosette: the verify page it links to names the holder. The description now
   spells out both cards' lines; until this entry it named only the flat badge's words.
 - `check:openapi-examples` validates the same 67 examples.
+
+### 1.11.0 — unreleased (2026-10-13; ops decision D138; design PROFILE-PAGE-2026-10-06 §7.1 and its dated note of 2026-10-13) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: the site host's answer at the permanent link changes for two of the three
+  address shapes, in place. No operation, status code of an operation, cache class, error code, schema
+  member or enum value of this API moved: the page is not a route of this API (1.9.0), and this host's
+  `301` for every `/p/*` and `/u/*` path is unchanged.
+- `info.description`'s "Contributor pages are not routes of this API" says what the site host now answers
+  at `/p/{pid}`. While the person chose the anonymous address, the page itself, as before. While they chose
+  the login address `/u/{login}` or the mixed address `/u/{login}/{pid}`, a page view answers `302` with
+  `Location` set to exactly that address, the page's canonical one (so a login address that fell back,
+  design §7.3 and §7.4, is followed to the address the page has), built from the deployment's own page
+  origin and the published document, never from the request; no body, the page's `Cache-Control: public,
+  max-age=60`, and `X-Robots-Tag: noindex, nofollow`. Temporary, never `301` or `308`: browsers keep a
+  permanent redirect for ever, and after a rename or a switch to anonymous the permanent link would send
+  people to a dead address. The card view (`?view=card`), the page's pictures, the private preview and
+  every `/u/` address are never redirected (a retired or old login address stays the not-found page), and
+  every page that is not public answers the same `404` at `/p/{pid}` as before. QR codes, snippets, badges
+  and cards keep naming `/p/{pid}`.
+- `contributor-page.v1` 1.0.4 and `contributor-page-settings.v1` 1.0.2 say the same of `address`, wording
+  only, and `contributor-page-alias.v1` 1.0.1 says the edge reads the alias for it. Where the edge cannot
+  serve the chosen address with this page, for example while its login alias is not yet published or names
+  another page, the permanent link keeps serving the page itself: the redirect never leads to the not-found
+  page or to another person's page. The description does not gate the website's tests, so the order of
+  pushes does not matter for them. `check:openapi-examples` validates the same 67 examples.
 
 ## coverage/cov-v1.ts
 
