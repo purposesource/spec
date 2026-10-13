@@ -37,6 +37,15 @@ jobs:
         # repository. This one is public. `npm test` runs the same gate first.
         run: npm run check:no-records
 
+      - name: Nothing public gets a later version before the launch (D136)
+        # As cheap as the step above: a text scan of the tracked files and their names. Until
+        # the operator says the network is public, a change lands in place inside its v1
+        # (versioning policy rule 5), so a /vN address, a {name}.vN contract or a kit-N, att-N
+        # or cov-vN id is a successor nobody may publish yet. The allowlist, and the one switch
+        # that turns the rule off, are in scripts/no-successor-allowlist.json. `npm test` runs
+        # the same gate second.
+        run: npm run check:no-successor
+
       - name: Schemas compile, are addressed correctly, and carry provenance
         # Draft 2020-12 compile, $id derived from spec.config.json, no external $ref
         # (each schema must validate on its own after a single download), and a

@@ -1,0 +1,36 @@
+{
+  "about": "The hits scripts/check-no-successor.mjs accepts, and its switch (ops decision D136 item 1, 2026-10-12: nothing public gets a later version until the operator says the network is public). Set \"public\" to true on that word and the gate passes without scanning. Each entry: the tracked path (or * for another party's name anywhere), the text the hit sits inside (no text = the whole file, name included), and one line saying why it is not a public successor. An entry that covers nothing fails the gate: delete it.",
+  "public": false,
+  "allow": [
+    {
+      "path": "CHANGELOG.md",
+      "text": "att-3 step 7",
+      "reason": "history: the dated notes of 2026-10-03 (D102, D103) quote the old citation they replaced with att-1 step 7"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "text": "att-4 carried",
+      "reason": "history: the same notes say att-1 carries the card the withdrawn pre-launch att-4 carried (D103 item 3)"
+    },
+    {
+      "path": "scripts/check-kits.mjs",
+      "text": "kit-9",
+      "reason": "negative test: the kit gate's self-test builds a hypothetical kit-9 to prove each rule can fail; it is never published"
+    },
+    {
+      "path": "scripts/check-kits.mjs",
+      "text": "/kits/v9",
+      "reason": "negative test: the hypothetical kit-9's permalink in the same self-test"
+    },
+    {
+      "path": "scripts/check-kits.mjs",
+      "text": "schemaVersion: 2",
+      "reason": "negative test: proves a kit naming an unpublished shape is refused"
+    },
+    {
+      "path": "scripts/check-recipient-lists.mjs",
+      "text": "'/v99.json'",
+      "reason": "negative test: proves an index entry whose URL names another List version is refused"
+    }
+  ]
+}

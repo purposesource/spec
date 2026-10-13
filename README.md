@@ -71,6 +71,9 @@ npm run check:contributor-page  # theme table and accent guard, preview-hash and
 npm run check:vectors           # vector inputs are valid artifacts; all eight answers covered
 npm run check:module            # coverage module: no imports, no clock, no I/O; prints its digest
 npm run check:copy              # claim rules and leak guards over published copy
+npm run check:no-successor      # no new later version of anything public before the launch (D136):
+                                #   no /vN address, {name}.vN contract, kit-N, att-N, cov-vN; allowlist
+                                #   and switch in scripts/no-successor-allowlist.json
 npm run check:types             # tsc --noEmit with erasableSyntaxOnly
 npm run test:coverage           # the coverage vector suite
 npm run lint:openapi            # Redocly, recommended ruleset
