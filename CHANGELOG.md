@@ -2742,6 +2742,27 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   registration and nothing else; D82 moved which repositories are registered and ruled this
   change by name.
 
+### 1.1.0 — unreleased (2026-10-13; ops decision D115, slice P13b) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: the shape serves a second route, and the description says so. No
+  member, constraint or enum moved, and every body that validated still validates; the change is
+  what the canonical values cover. The title names both routes.
+- The edge answers `/badge/cert/{cert_id}.json` in this shape (`edge-public.v1` 1.8.0,
+  `getCertificateBadge`), computed from the certificate's published record on each cache miss and
+  stored nowhere. Its canonical messages are the publicity plan's badge words (ops
+  `design/contributor-publicity/PLAN-2026-10-05.md` §2.2): `credited {years}` for a contributor's
+  certificate shown in full whose status is `valid` or `expired` by the clock, `verified {years}`
+  for the same recorded status-only, `revoked`, `updated, see new`, `not found` (with `isError`,
+  for an unknown, malformed or erased certificate, as for an unknown repository) and `test` for a
+  non-production key off production. `{years}` is the period's year or `2025–2026`. The colours
+  are the hex values the SVG badges draw (`color` already admitted them). No message names a
+  person, a project or a figure.
+- An organisation's certificate has no badge words in this slice: the claim kit's badge text
+  (`kit-1` `variants.supporter.badge`, `variants.statusOnly.badge`) needs words the edge does not
+  draw, so those badge routes answer `404`. The repository messages are unchanged.
+- One further example, `examples/badge.v1.certificate.example.json` (`credited 2026`), validated
+  like the main one.
+
 ## stats.v1.json
 
 ### 1.0.0 — unreleased
@@ -3525,6 +3546,41 @@ which kind of change each entry was.
   second major, for July 2027, as `recipient-lists.v1`'s example now does: no Recipient List token
   leaves v1 before the launch. It sorts after `v1.2`, so the example's order is unchanged.
   `check:openapi-examples` validates the same 56.
+
+### 1.8.0 — unreleased (2026-10-13; ops decision D115 and its dated note of 2026-10-12T14:06Z, slice P13b) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: four GET operations and one tag are added, and nothing that existed
+  moved. They are the rest of the plan's P13 (ops `design/contributor-publicity/PLAN-2026-10-05.md`
+  §2.2, §2.4, §2.7, §5 "edge"), which the dated note split off as P13b. The website's edge serves
+  them from branch `p13b`; push this file first.
+- `getCertificateBadge` at `/badge/cert/{badgeFile}`: the flat badge `{cid}.svg`, the card badge
+  `{cid}-card.svg` and `{cid}-card-dark.svg`, and `{cid}.json` in `badge.v1` (1.1.0 documents its
+  messages). Drawn from the certificate record on each cache miss; nothing a status-only record
+  withholds is drawn (its card counts no projects). Every certificate that is not published (an
+  unknown or malformed id, an erased record) answers `200` with one `not found` badge, the same
+  bytes each time. An organisation's or a steward's certificate answers `404`: no badge words are
+  drawn for it yet. `400` on production for a non-production plane or key, `503` on an outage
+  (never `not found`), `noindex`, and the plan's cache line with `stale-if-error`. P-M3.
+- `getRepositoryBadge` at `/badge/repo/{badgeFile}`: the repository badge's own look inside v1,
+  as the D136 fold-back plan (§8) says, flat and card, light and dark, from the same artifact and
+  delist set as `getBadge`, which stays. Its words are binding correction 12's: `registered`,
+  `status: see registry` for suspended, quit or delisted, `not registered` for an unknown id. The
+  card adds the repository's name and licence version from its registry record while registered.
+  P-M2, like the endpoint body.
+- `getCertificateCard` at `/cards/{cardFile}`: the 1200×630 card at `cards/{cid}.png` that
+  platform slice P12 copies for a person's certificate shown in full, served only while the
+  record is shown in full. `v` takes exactly the eight values `{status}-{display}-v1` that P12
+  purges; any of them serves the current card, and any other query is not served one. Every request
+  with no servable card answers `302` to the generic site card, `no-store`, as
+  `getContributorPageCard` does for an undrawn card. P-M3.
+- `getRepositoryCard` at `/cards/repo/{cardFile}`: `{nodeId}.png` and `{nodeId}-github.png`
+  (P07 build plan, row P16a) from `cards/repo/…` on the plane, with the same generic fallback and a
+  delisted repository's card never served. The platform's index build does not copy repository
+  cards yet (its `CardCopies` copies a person's card only), so every repository answers the
+  fallback until it does. P-M3.
+- A new tag, `cards`; the `badges` tag's description covers the SVG badges. The phase list in
+  `info.description` names the new P-M3 routes. `check:openapi-examples` validates 67 examples
+  (56 before: the four certificate badge bodies and seven error envelopes).
 
 ## coverage/cov-v1.ts
 

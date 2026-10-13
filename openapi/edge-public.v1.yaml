@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.7.0
+  version: 1.8.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -50,7 +50,10 @@ info:
       contributor-page routes are P-M3 too: nothing is published under them until a
       person publishes a page, and production publishes none
       until its publishing switch is on, so until then each answers as for a page that does
-      not exist.
+      not exist. The certificate badges and the two card routes are P-M3 for the same
+      reason: their producers are the platform's index build and render job, a certificate
+      badge answers `not found` and a card the generic card until a certificate or a card is
+      published, and the index build does not copy repository cards yet.
     - `P-M4` — the change feed and the sandbox tenant, both demand-gated.
 
     ## Machine-readable schemas
@@ -102,7 +105,9 @@ tags:
   - name: designations
     description: "Designations in summary: the projects' and, behind a floor, the contributors' designations for each month (advisory; routes money only after the fairness review, D27)."
   - name: badges
-    description: README badge endpoints in the shields.io endpoint format.
+    description: README badges — the shields.io endpoint body, and the SVG badges the edge draws for a repository and for a certificate.
+  - name: cards
+    description: Share and link-preview images — a certificate's card and a repository's project cards (PNG), with the generic card as their fallback.
   - name: contributor-pages
     description: A contributor's own public page — which version is public, its card and its badge. The page itself is HTML on the site host, never JSON.
   - name: counters
@@ -912,6 +917,419 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '503':
           $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /badge/cert/{badgeFile}:
+    get:
+      operationId: getCertificateBadge
+      summary: The README badges of one certificate (SVG, and the shields.io endpoint body)
+      description: |
+        The badges a certificate's holder embeds beside the certificate's link
+        (`https://purposesource.org/verify/{cid}`): a flat 20-pixel badge, `{cid}.svg`; a 420×88 card
+        badge in a light and a dark version, `{cid}-card.svg` and `{cid}-card-dark.svg` (for
+        `<picture>` with `prefers-color-scheme`); and the same words as a shields.io endpoint body,
+        `{cid}.json` (`badge.v1`). The edge draws each from the certificate's published record
+        (`certificate-record.v1`) on every cache miss, with every word pre-outlined, so a badge looks
+        the same behind an image proxy, in dark mode and with no fonts. Nothing is stored.
+
+        **What a badge says is fixed words and a period, and nothing a record withholds.** A
+        contributor's certificate shown in full says `credited {years}`, and its card adds the number
+        of projects it credits; recorded status-only, it says `verified {years}` and its card counts
+        no projects, because the record publishes none. `{years}` is the period's year or its first
+        and last year (`2025–2026`). A revoked certificate says `revoked`, a superseded one
+        `updated, see new`, and a certificate signed with a non-production key says `test` (served
+        off production only). No badge carries a name, a login, a project name, a figure or a point.
+        The card badge draws the certificate's rosette, a pattern from the token's public hash: it is
+        decoration, and it proves nothing.
+
+        **A certificate that is not published answers like one that never existed:** an unknown
+        identifier, a malformed one, and a person's certificate whose record was erased (a
+        revocation at the subject's request) all answer `200` with the same `not found` badge, the
+        same bytes for every one of them (the `.json` body carries `isError: true`), so a README
+        never shows a broken image and no probe tells them apart.
+
+        **Only a contributor's certificate has badge words yet.** An organisation's certificate is
+        governed by the claim kit, whose badge words the edge does not draw, and a steward's has no
+        words at all; their badge files answer `404 artifact_not_found`. A file name of none of the
+        four shapes answers the same `404` and reads nothing.
+
+        **A non-production plane, or a non-production key, on production answers
+        `400 sandbox_artifact_on_prod`**, as the certificate record's route does: a production
+        hostname never draws a fictional badge. **A storage outage answers `503`, `no-store`**,
+        never `not found`, which would assert something an outage cannot know.
+      tags: [badges]
+      x-psn-phase: P-M3
+      parameters:
+        - name: badgeFile
+          in: path
+          required: true
+          description: >-
+            The certificate's id followed by one of the four badge shapes: `.svg`, `-card.svg`,
+            `-card-dark.svg` or `.json`. An id that is not a certificate id answers as an unknown one
+            does, without a read.
+          schema:
+            type: string
+            pattern: '^cert_[0-9a-hjkmnp-tv-z]{26}(?:\.svg|-card\.svg|-card-dark\.svg|\.json)$'
+          example: cert_01jf8w2c9km3q7xz5r0v4t6y8a-card.svg
+      responses:
+        '200':
+          description: |
+            The badge, as SVG for the three image shapes and as a `badge.v1` body for `.json`;
+            `not found` for every certificate that is not published. Cached `max-age=300,
+            s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800`; production purges
+            them with the certificate's card, and any other change shows within the hour. Sent with
+            `X-Robots-Tag: noindex` (a certificate may be a person's), `Access-Control-Allow-Origin: *`,
+            `Cross-Origin-Resource-Policy: cross-origin` and, on the images,
+            `Content-Security-Policy: default-src 'none'; sandbox`.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+              example: max-age=300, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800
+            X-Robots-Tag:
+              schema:
+                type: string
+              example: noindex
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                contentMediaType: image/svg+xml
+            application/json:
+              schema:
+                $ref: '../schemas/badge.v1.json'
+              examples:
+                credited:
+                  summary: A contributor's certificate shown in full
+                  value:
+                    schemaVersion: 1
+                    label: purpose source
+                    message: credited 2026
+                    color: '#1d5c3c'
+                    cacheSeconds: 3600
+                verified:
+                  summary: A contributor's certificate recorded status-only, over two calendar years
+                  value:
+                    schemaVersion: 1
+                    label: purpose source
+                    message: verified 2025–2026
+                    color: '#1d5c3c'
+                    cacheSeconds: 3600
+                revoked:
+                  summary: A revoked certificate
+                  value:
+                    schemaVersion: 1
+                    label: purpose source
+                    message: revoked
+                    color: '#8a1f1f'
+                    cacheSeconds: 3600
+                notFound:
+                  summary: No published certificate with this id, whatever the reason — 200 with an error-shaped body
+                  value:
+                    schemaVersion: 1
+                    isError: true
+                    label: purpose source
+                    message: not found
+                    color: '#45505c'
+                    cacheSeconds: 3600
+        '400':
+          description: The certificate is on a non-production plane, or signed with a non-production key, and this is production.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                sandboxOnProd:
+                  summary: Fixture material behind a production hostname
+                  value:
+                    error:
+                      code: sandbox_artifact_on_prod
+                      message: This deployment serves production material only.
+                      traceId: 01jp4cbn8xy2a6gj4b9e3c5h7m
+        '404':
+          description: |
+            The file name is none of the four badge shapes (nothing was read), or the certificate is
+            an organisation's or a steward's, for which no badge words are drawn.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                noBadge:
+                  summary: Not a badge file, or no badge words for this certificate's class
+                  value:
+                    error:
+                      code: artifact_not_found
+                      message: no such badge
+                      traceId: 01jp4ccp9yz3b7hk5c0f4d6j8n
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /badge/repo/{badgeFile}:
+    get:
+      operationId: getRepositoryBadge
+      summary: The README badges of one repository (SVG)
+      description: |
+        The repository badge's own look, drawn by the edge with every word pre-outlined: a flat
+        20-pixel badge, `{nodeId}.svg`, and a 420×88 card badge in a light and a dark version,
+        `{nodeId}-card.svg` and `{nodeId}-card-dark.svg`. They link to the repository's registry page
+        and say what the shields.io endpoint `/badge/{nodeId}.json` says, from the same published
+        badge artifact and the same delist set: `registered`, the neutral `status: see registry`
+        for a suspended, quit or delisted repository (a stale artifact never keeps asserting
+        registration), and `not registered` for an unknown id, at `200` so a README never shows a
+        broken image. The card adds the repository's name and licence version from its published
+        registry record while it is registered. Text only, with no mark: repositories are what
+        organisations display. The shields.io endpoint stays as it is, beside these.
+
+        A storage outage answers the neutral badge, which asserts nothing, as the endpoint does.
+      tags: [badges]
+      x-psn-phase: P-M2
+      parameters:
+        - name: badgeFile
+          in: path
+          required: true
+          description: >-
+            The repository's GitHub node id, in either form GitHub has issued (`%3D` is read as `=`),
+            followed by `.svg`, `-card.svg` or `-card-dark.svg`. A value that is not a repository node
+            id answers `400 invalid_repo_id` before any read. A node id that itself ends in `-card` is
+            read as the card of the shorter id.
+          schema:
+            type: string
+            pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})(?:\.svg|-card\.svg|-card-dark\.svg)$'
+          example: R_kgDOAbc123-card.svg
+      responses:
+        '200':
+          description: |
+            The badge (SVG), including the neutral and the unknown forms. Cached `max-age=300,
+            s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800`, like the shields.io
+            endpoint.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+              example: max-age=300, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                contentMediaType: image/svg+xml
+        '400':
+          description: The value is not a repository node id, or the plane behind a production hostname is not a production plane.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                invalidRepoId:
+                  summary: Not a repository node id
+                  value:
+                    error:
+                      code: invalid_repo_id
+                      message: A repository is identified by its GitHub node id.
+                      traceId: 01jp4cdq0z04c8jm6d1g5e7k9p
+        '404':
+          description: The file name is none of the three badge shapes. Nothing was read.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                notABadge:
+                  summary: Not a badge file name
+                  value:
+                    error:
+                      code: artifact_not_found
+                      message: no such badge
+                      traceId: 01jp4cer1a15d9kn7e2h6f8m0q
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /cards/{cardFile}:
+    get:
+      operationId: getCertificateCard
+      summary: The share card of one certificate (PNG)
+      description: |
+        The 1200×630 card the render job drew for a certificate shown in full, which the verify
+        page names as its link-preview image and the holder shares. It prints the certificate's id
+        and "Issued {month}", never a live status. The edge serves the copy the platform's index
+        build placed on the published plane (`cards/{cid}.png`), and only while the certificate's
+        published record is shown in full: a card left in storage after the holder withdrew to
+        status-only is never served.
+
+        **`v` versions the link preview.** The verify page names the card as
+        `/cards/{cid}.png?v={status}-{display}-v1`, so a link-preview cache fetches again when the
+        status or the display changes; production purges the bare address and every one of the
+        eight values on each change. Any of the eight serves the current card. A `v` outside them,
+        more than one, or any other query parameter is never served a card, so no cached copy
+        outlives a purge.
+
+        **Every certificate without a servable card answers a `302` to the site's generic card**,
+        `no-store`: a status-only or unknown certificate, a malformed id, an erased record, a card not
+        drawn or not copied yet, a non-production plane on production, and an outage. The generic
+        card asserts nothing about any certificate, so no preview ever breaks and no probe learns
+        anything. Only a file name that is not `{something}.png` is a `404`.
+      tags: [cards]
+      x-psn-phase: P-M3
+      parameters:
+        - name: cardFile
+          in: path
+          required: true
+          description: The certificate's id followed by `.png`.
+          schema:
+            type: string
+            pattern: '^cert_[0-9a-hjkmnp-tv-z]{26}\.png$'
+          example: cert_01jf8w2c9km3q7xz5r0v4t6y8a.png
+        - name: v
+          in: query
+          required: false
+          description: The certificate's status and display when the link was made, and the template version.
+          schema:
+            type: string
+            pattern: '^(?:valid|expired|revoked|superseded)-(?:full|status-only)-v1$'
+          example: valid-full-v1
+      responses:
+        '200':
+          description: |
+            The card. Cached `max-age=300, s-maxage=3600, stale-while-revalidate=600` and never
+            `stale-if-error`, so an outage does not keep a withdrawn card alive, and purged on
+            production at every status or display change. Sent with `X-Robots-Tag: noindex`,
+            `Access-Control-Allow-Origin: *` and `Cross-Origin-Resource-Policy: cross-origin` (the
+            dashboard hands it to the phone's share sheet) and
+            `Content-Security-Policy: default-src 'none'; sandbox`.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+              example: max-age=300, s-maxage=3600, stale-while-revalidate=600
+            X-Robots-Tag:
+              schema:
+                type: string
+              example: noindex
+          content:
+            image/png:
+              schema:
+                type: string
+                contentMediaType: image/png
+        '302':
+          description: |
+            No card is served for this request: a redirect to the site's generic 1200×630 card on the
+            site host of the deployment, `no-store`. The location is fixed and never built from the
+            request.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              example: https://purposesource.org/brand/og-generic-1200x630.png
+            Cache-Control:
+              schema:
+                type: string
+              example: no-store
+        '404':
+          description: The file name is not a card file. Nothing was read.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                notACard:
+                  summary: Not a card file name
+                  value:
+                    error:
+                      code: artifact_not_found
+                      message: no such card file
+                      traceId: 01jp4cfs2b26e0mp8f3j7g9n1r
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /cards/repo/{cardFile}:
+    get:
+      operationId: getRepositoryCard
+      summary: The project card of one repository (PNG)
+      description: |
+        The repository's project card, typographic and with no mark: `{nodeId}.png` (1200×630, the
+        registry page's link-preview image) and `{nodeId}-github.png` (1280×640, for GitHub's
+        social preview). The edge serves the copies the platform's index build places on the
+        published plane, `cards/repo/{nodeId}.png` and `cards/repo/{nodeId}-github.png`.
+
+        **Every repository without a servable card answers a `302` to the site's generic card**,
+        `no-store`, so a preview never breaks: a card not drawn or not copied yet, a suspended, quit
+        or delisted repository (a stale card never keeps asserting registration), a non-production
+        plane on production, and an outage. Until the index build copies repository cards, every
+        repository answers it.
+      tags: [cards]
+      x-psn-phase: P-M3
+      parameters:
+        - name: cardFile
+          in: path
+          required: true
+          description: >-
+            The repository's GitHub node id followed by `.png` or `-github.png`. A value that is not a
+            repository node id answers `400 invalid_repo_id` before any read.
+          schema:
+            type: string
+            pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})(?:-github)?\.png$'
+          example: R_kgDOAbc123.png
+      responses:
+        '200':
+          description: |
+            The card. Cached `max-age=300, s-maxage=3600, stale-while-revalidate=600`, with
+            `Access-Control-Allow-Origin: *`, `Cross-Origin-Resource-Policy: cross-origin` and
+            `Content-Security-Policy: default-src 'none'; sandbox`. A repository's card is a registry
+            fact and carries no robots header on production.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+              example: max-age=300, s-maxage=3600, stale-while-revalidate=600
+          content:
+            image/png:
+              schema:
+                type: string
+                contentMediaType: image/png
+        '302':
+          description: No card is served for this repository, so this redirects to the site's generic card, `no-store`.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              example: https://purposesource.org/brand/og-generic-1200x630.png
+            Cache-Control:
+              schema:
+                type: string
+              example: no-store
+        '400':
+          description: The value is not a repository node id. Nothing was read.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                invalidRepoId:
+                  summary: Not a repository node id
+                  value:
+                    error:
+                      code: invalid_repo_id
+                      message: A repository is identified by its GitHub node id.
+                      traceId: 01jp4cgt3c37f1nq9g4k8h0p2s
+        '404':
+          description: The file name is not a repository card file. Nothing was read.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                notACard:
+                  summary: Not a card file name
+                  value:
+                    error:
+                      code: artifact_not_found
+                      message: no such card file
+                      traceId: 01jp4chv4d48g2pr0h5m9j1q3t
+        '429':
+          $ref: '#/components/responses/RateLimited'
 
   /stats.json:
     get:
