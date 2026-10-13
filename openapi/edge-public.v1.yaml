@@ -948,8 +948,8 @@ paths:
         contributor's certificate shown in full says `credited {years}`, and its card reads
         `Credited contributor` over `Purpose Source · {years} · {n} projects` (`1 project` for
         one), the number of projects it credits. Recorded status-only, it says `verified {years}`,
-        and its card reads `Purpose Source` over `verified · {years}`: no headline, no count and no
-        rosette. A badge names nobody, so anyone can embed anyone's; `Credited contributor` is drawn
+        and its card reads `Purpose Source` over `verified · {years}` (`verified` alone when the
+        period does not read): no headline, no count and no rosette. A badge names nobody, so anyone can embed anyone's; `Credited contributor` is drawn
         only on a card whose verify page names the holder, and a status-only record's cannot, so its
         card says nothing more than its flat badge does (ops decision D137 item 4). `{years}` is the
         period's year or its first and last year (`2025–2026`). Every card's last line is

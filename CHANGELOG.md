@@ -3031,6 +3031,34 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 
 ## contributor-page.v1.json
 
+### 1.0.3 — unreleased (2026-10-13; ops decision D137 item 4) — wording only
+
+- Wording only, a patch under policy 3: no member, value or constraint moves, and the builder's
+  vectors (`examples/contributor-page-preview.v1.golden.json`,
+  `examples/contributor-page-build.v1.golden.json`) do not change. The operator's rule (D137 item
+  4) is that "Credited" is said only where a credited contribution stands behind it. The
+  descriptions now say how the one builder applies it:
+- `summarySection`: a repository's years are credited years only. The monthly records' years win
+  wherever they answer for a repository; a valid or clock-expired participation certificate of one
+  calendar year adds that year to each of its projects; one that spans years (all-time, which runs
+  to the newest locked month, credited or not) adds its span only to a project nothing else
+  answers for, so it never widens a repository's credited years (an all-time certificate over
+  2026–2028 had made a repository credited in 2026 alone read "Credited 2026–2028"). Certificates
+  stay the durable record design §8.1 makes them: "a year stays only while the monthly records
+  hold it, or for good when a certificate covers it" still holds. `since` is the earliest year of
+  the repositories the page shows, never a listed certificate's own first year (a revoked one's
+  may never have been credited), and is absent when the page shows none. `certificates` leaves
+  out a revoked certificate whose credit never stood.
+- `certificatesSection`: on a page that shows the login every item is `full` and lists its
+  projects, except a certificate revoked as `issuance-error` or `fraud-misrepresentation`, or
+  revoked with no class or one the builder does not know, which is listed with its years and its
+  "Revoked" chip and no `repos`, and is counted in no total. The verify page draws the same
+  record without its projects (website `creditWithdrawn`), so the page never names a project the
+  face it links to withholds. A revocation the holder asked for, a project's delisting, a waiver's
+  end or a key's replacement leave the credit standing, and those items list their projects as
+  before. `repos`' description says so, and `repositoriesSection` says its years are credited
+  years only.
+
 ### 1.0.2 — unreleased (2026-10-13; ops decision D116 and its dated note of ~11:50Z; slice P26)
 
 - Wording only, a patch under policy 3: no member, value or constraint moves. `x-psn.producer` gains
@@ -3651,7 +3679,8 @@ which kind of change each entry was.
   say `credited {years}`, `verified {years}`, `revoked`, `updated, see new`, `not found` or `test`.
 - `getCertificateBadge`: a status-only certificate's card (`{cid}-card.svg`, `{cid}-card-dark.svg`)
   no longer reads `Credited contributor` and no longer draws the rosette. It reads `Purpose Source`
-  over `verified · {years}` and `Live status from purposesource.org`, its flat badge's own words.
+  over `verified · {years}` (`verified` alone when the period does not read) and `Live status from
+  purposesource.org`, its flat badge's own words.
   The operator's rule (D137 item 4) is that "Credited contributor" is said only where a credited
   contribution stands behind it and the surface ties it to the person who earned it: a badge names
   nobody, so anyone can embed another holder's, and a status-only record's verify page cannot name
