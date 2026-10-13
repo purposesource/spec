@@ -1082,6 +1082,23 @@ value inside `v1` is not additive (versioning policy 1).*
   person, often a long-standing contributor, could not be named by any certificate.
 - Every payload valid under 1.4.0 still validates and means the same.
 
+### 1.6.0 — unreleased (2026-10-13; ops decision D115 item 3) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: a new `allOf` rule refuses `purposePoints` and `percentileBand` on a
+  payload with `typ: contributor`. D115 item 3 keeps points and ranks private to the holder
+  (FS04-051; D64 questions 42 and 43), and the privacy notice's §7 (slice P19, website PR #45)
+  tells a contributor that their certificate never carries their points or a percentile band.
+  Until this entry both members said "contributor payloads only", so a producer could have put
+  them on a contributor certificate and no schema check would have failed.
+- Tightening, permitted in place by policy 5 before the public launch. The platform's issuer has
+  never written either member (its participation test lists both among the members a contributor
+  certificate never carries), so no certificate it signed is refused. No member or enum value is
+  removed; the two members' descriptions now say they are never on a contributor certificate, and
+  since they were described for contributor payloads only, no other type uses them.
+- Every example still validates and means the same: none carries either member. The schema refuses
+  `examples/certificate.v1.contributor.example.json` with `purposePoints`, or with `percentileBand`,
+  added.
+
 ## certificate-record.v1.json
 
 ### 1.0.0 — unreleased
