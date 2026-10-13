@@ -942,15 +942,15 @@ paths:
         decoration, and it proves nothing.
 
         **A certificate that is not published answers like one that never existed:** an unknown
-        identifier, a malformed one, and a person's certificate whose record was erased (a
-        revocation at the subject's request) all answer `200` with the same `not found` badge, the
-        same bytes for every one of them (the `.json` body carries `isError: true`), so a README
-        never shows a broken image and no probe tells them apart.
+        identifier, a malformed one, and any certificate whose record was erased (a revocation at
+        the subject's request, whatever the certificate's class) all answer `200` with the same
+        `not found` badge, the same bytes for every one of them (the `.json` body carries
+        `isError: true`), so a README never shows a broken image and no probe tells them apart.
 
         **Only a contributor's certificate has badge words yet.** An organisation's certificate is
-        governed by the claim kit, whose badge words the edge does not draw, and a steward's has no
-        words at all; their badge files answer `404 artifact_not_found`. A file name of none of the
-        four shapes answers the same `404` and reads nothing.
+        governed by the claim kit, whose badge words the edge does not draw yet, and a steward's has
+        no words at all; their badge files answer `404 artifact_not_found` unless the record was
+        erased. A file name of none of the four shapes answers the same `404` and reads nothing.
 
         **A non-production plane, or a non-production key, on production answers
         `400 sandbox_artifact_on_prod`**, as the certificate record's route does: a production
@@ -975,8 +975,10 @@ paths:
           description: |
             The badge, as SVG for the three image shapes and as a `badge.v1` body for `.json`;
             `not found` for every certificate that is not published. Cached `max-age=300,
-            s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800`; production purges
-            them with the certificate's card, and any other change shows within the hour. Sent with
+            s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800`: production purges
+            them whenever the certificate's card changes, and any other change shows within about an
+            hour, or later while the edge answers errors (a shared cache may then keep the last good
+            badge for up to a week). Sent with
             `X-Robots-Tag: noindex` (a certificate may be a person's), `Access-Control-Allow-Origin: *`,
             `Cross-Origin-Resource-Policy: cross-origin` and, on the images,
             `Content-Security-Policy: default-src 'none'; sandbox`.
@@ -1048,7 +1050,8 @@ paths:
         '404':
           description: |
             The file name is none of the four badge shapes (nothing was read), or the certificate is
-            an organisation's or a steward's, for which no badge words are drawn.
+            an organisation's or a steward's, for which no badge words are drawn, and its record was
+            not erased.
           content:
             application/json:
               schema:
@@ -1154,21 +1157,32 @@ paths:
         page names as its link-preview image and the holder shares. It prints the certificate's id
         and "Issued {month}", never a live status. The edge serves the copy the platform's index
         build placed on the published plane (`cards/{cid}.png`), and only while the certificate's
-        published record is shown in full: a card left in storage after the holder withdrew to
-        status-only is never served.
+        published record is shown in full and is `valid`, or `expired` by the clock (one card serves
+        both): a card left in storage after the holder withdrew to status-only is never served, and
+        neither is the card of a revoked or superseded certificate, because the file in storage may
+        still be the one drawn before its status changed. Those answer the generic card for now.
 
         **`v` versions the link preview.** The verify page names the card as
         `/cards/{cid}.png?v={status}-{display}-v1`, so a link-preview cache fetches again when the
         status or the display changes; production purges the bare address and every one of the
-        eight values on each change. Any of the eight serves the current card. A `v` outside them,
-        more than one, or any other query parameter is never served a card, so no cached copy
-        outlives a purge.
+        eight values on each change of the card. The query is read as sent, never parsed: only the
+        bare address and `?v=` followed by exactly one of the eight values are served a card. Any
+        other query, a `v` outside them, more than one, or one of them spelled another way (`?v=…&`,
+        `?%76=…`, `?v=valid%2Dfull-v1`), is never served one, so every address that can hold a card
+        in a cache is one production purges. Without a purge, what shared caches answer catches up
+        within about 75 minutes: up to five for the edge's own read of the record and the card, an
+        hour in a shared cache, and ten more of revalidation (a link-preview service's own copy is
+        beyond the edge's reach either way).
 
         **Every certificate without a servable card answers a `302` to the site's generic card**,
-        `no-store`: a status-only or unknown certificate, a malformed id, an erased record, a card not
-        drawn or not copied yet, a non-production plane on production, and an outage. The generic
-        card asserts nothing about any certificate, so no preview ever breaks and no probe learns
-        anything. Only a file name that is not `{something}.png` is a `404`.
+        `no-store`: a status-only, revoked, superseded or unknown certificate, a malformed id, an
+        erased record, a card not drawn or not copied yet, any other query, a non-production plane on
+        production, and an outage. The generic card asserts nothing about any certificate, so no
+        preview ever breaks and no probe learns anything. Only a file name that is not
+        `{something}.png` is a `404`.
+
+        **Rate limit:** counted with `/v1/verify/{certId}` against the same per-address limit (the
+        `verify` class of `/v1/meta`), because a card shown in full carries what the record does.
       tags: [cards]
       x-psn-phase: P-M3
       parameters:
@@ -1253,11 +1267,13 @@ paths:
         social preview). The edge serves the copies the platform's index build places on the
         published plane, `cards/repo/{nodeId}.png` and `cards/repo/{nodeId}-github.png`.
 
-        **Every repository without a servable card answers a `302` to the site's generic card**,
-        `no-store`, so a preview never breaks: a card not drawn or not copied yet, a suspended, quit
-        or delisted repository (a stale card never keeps asserting registration), a non-production
-        plane on production, and an outage. Until the index build copies repository cards, every
-        repository answers it.
+        A card is served only while the repository's badge says `registered`, decided as
+        `/badge/{nodeId}.json` decides it. **Every repository without a servable card answers a
+        `302` to the site's generic card**, `no-store`, so a preview never breaks: a card not drawn
+        or not copied yet, a suspended, quit or delisted repository, an id with no published badge
+        (never registered, or removed), whatever card is in storage (a stale card never keeps
+        asserting registration), a non-production plane on production, and an outage. Until the
+        index build copies repository cards, every repository answers it.
       tags: [cards]
       x-psn-phase: P-M3
       parameters:

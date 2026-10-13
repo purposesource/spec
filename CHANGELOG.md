@@ -2759,7 +2759,12 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   person, a project or a figure.
 - An organisation's certificate has no badge words in this slice: the claim kit's badge text
   (`kit-1` `variants.supporter.badge`, `variants.statusOnly.badge`) needs words the edge does not
-  draw, so those badge routes answer `404`. The repository messages are unchanged.
+  draw, so those badge routes answer `404`. The publicity plan's company rows (§2.2: a listed
+  company, an expired one) are moved to a follow-up slice, which also settles the kit's word
+  `valid` and the rows the plan does not have (an unlisted company, a waiver, a sponsor). The
+  repository messages are unchanged.
+- *(Same day, from the slice's review.)* `not found` covers every erased certificate, whatever its
+  class: an erased organisation's or steward's record answers it too, never the class's `404`.
 - One further example, `examples/badge.v1.certificate.example.json` (`credited 2026`), validated
   like the main one.
 
@@ -3578,6 +3583,30 @@ which kind of change each entry was.
   delisted repository's card never served. The platform's index build does not copy repository
   cards yet (its `CardCopies` copies a person's card only), so every repository answers the
   fallback until it does. P-M3.
+- *(Same day, from the slice's review; still 1.8.0, unreleased.)* Five corrections, no operation
+  added or removed:
+  - `getCertificateCard` serves a card only for a record that is `valid` or `expired` by the clock
+    (one card serves both). A revoked or superseded certificate answers the generic card: the
+    platform's index build leaves the card drawn before a status change on the plane until it
+    copies the new variant (`CardCopies` leaves a card whose inputs are not current where it is),
+    and indefinitely if that render is refused, so the old card, with the holder's login on it,
+    could otherwise be served under a revoked record. The revoked and superseded variants are
+    served once the platform deletes or overwrites the card whenever the status moves.
+  - The card's query is read as sent: only the bare address and `?v=` with exactly one of the eight
+    values are served a card, so `?v=…&`, `?&v=…`, `?%76=…` and `?v=valid%2Dfull-v1`, which parse
+    to the same `v` and which no purge names, are not. The description states the real bound
+    without a purge (about 75 minutes of shared caches) instead of "no cached copy outlives a
+    purge".
+  - The certificate card is counted with `/v1/verify/{certId}` against the verify limit, as the
+    publicity plan's §5 sets the cards bucket at the verify numbers; it was in the badge class
+    (600 a minute), twenty times the record route's anti-scraping figure for an image that carries
+    a full record's login. The badges and the repository's cards stay in the badge class.
+  - `getCertificateBadge`: every erased certificate, of any class, answers `not found`; the `200`
+    text says a change shows within about an hour, or later while the edge answers errors (it said
+    "within the hour", which `stale-while-revalidate` and `stale-if-error` do not promise).
+  - `getRepositoryCard` serves a card only while the repository's badge says `registered`: an id
+    with no published badge (never registered, or removed) or a neutral one answers the generic
+    card whatever is in storage.
 - A new tag, `cards`; the `badges` tag's description covers the SVG badges. The phase list in
   `info.description` names the new P-M3 routes. `check:openapi-examples` validates 67 examples
   (56 before: the four certificate badge bodies and seven error envelopes).
