@@ -3611,6 +3611,27 @@ which kind of change each entry was.
   `info.description` names the new P-M3 routes. `check:openapi-examples` validates 67 examples
   (56 before: the four certificate badge bodies and seven error envelopes).
 
+### 1.9.0 — unreleased (2026-10-13; ops decision D116; design PROFILE-PAGE-2026-10-06 §4.1, §7.1, §3.3; slice P26) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: the description says what this host now does with the contributor
+  page's own paths. No operation, status code of an operation, cache class, error code, schema
+  member or enum value moved.
+- `info.description` gains "Contributor pages are not routes of this API": the page is HTML the
+  same worker draws on the site host at `/p/{pid}`, `/u/{login}` and `/u/{login}/{pid}` (with its
+  stylesheet and fonts under `/u/_a/` and its pictures under `/p/{pid}/`); on this host every `/p/*`
+  and `/u/*` path answers `301` to the site host, decided without a read (design §7.1: "On the api
+  host, /u/* and /p/* answer 301 to the site host, except the preview route"). Until slice P26 those
+  paths fell through to the passthrough's `404 artifact_not_found`. The owner's private preview,
+  `/v1/me/page/preview` (§3.3), needs a session and is the authenticated family's, so it is named and
+  not described.
+- The `contributor-pages` tag says the same in one clause.
+- `/v1/meta`'s `rateLimits.classes` gains a `pages` class (120 a minute per address, the design's
+  `RL_PAGES`) on the deployments that serve the pages. `Meta.rateLimits.classes` is an open map
+  ("a class arrives by being deployed"), so the component does not change.
+- The website's edge serves this from branch `p26`; the description does not gate it, so the order
+  of pushes does not matter for the website's tests. `check:openapi-examples` validates the same 67
+  examples.
+
 ## coverage/cov-v1.ts
 
 The published coverage function, versioned together with its vectors (`coverage/vectors.json`)
