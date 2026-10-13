@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.9.0
+  version: 1.10.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -945,14 +945,19 @@ paths:
         the same behind an image proxy, in dark mode and with no fonts. Nothing is stored.
 
         **What a badge says is fixed words and a period, and nothing a record withholds.** A
-        contributor's certificate shown in full says `credited {years}`, and its card adds the number
-        of projects it credits; recorded status-only, it says `verified {years}` and its card counts
-        no projects, because the record publishes none. `{years}` is the period's year or its first
-        and last year (`2025–2026`). A revoked certificate says `revoked`, a superseded one
+        contributor's certificate shown in full says `credited {years}`, and its card reads
+        `Credited contributor` over `Purpose Source · {years} · {n} projects` (`1 project` for
+        one), the number of projects it credits. Recorded status-only, it says `verified {years}`,
+        and its card reads `Purpose Source` over `verified · {years}`: no headline, no count and no
+        rosette. A badge names nobody, so anyone can embed anyone's; `Credited contributor` is drawn
+        only on a card whose verify page names the holder, and a status-only record's cannot, so its
+        card says nothing more than its flat badge does (ops decision D137 item 4). `{years}` is the
+        period's year or its first and last year (`2025–2026`). Every card's last line is
+        `Live status from purposesource.org`. A revoked certificate says `revoked`, a superseded one
         `updated, see new`, and a certificate signed with a non-production key says `test` (served
         off production only). No badge carries a name, a login, a project name, a figure or a point.
-        The card badge draws the certificate's rosette, a pattern from the token's public hash: it is
-        decoration, and it proves nothing.
+        The card of a certificate shown in full draws the certificate's rosette, a pattern from the
+        token's public hash: it is decoration, and it proves nothing.
 
         **A certificate that is not published answers like one that never existed:** an unknown
         identifier, a malformed one, and any certificate whose record was erased (a revocation at

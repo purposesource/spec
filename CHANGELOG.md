@@ -3643,6 +3643,23 @@ which kind of change each entry was.
 - The description does not gate the website's tests, so the order of pushes does not matter for
   them. `check:openapi-examples` validates the same 67 examples.
 
+### 1.10.0 — unreleased (2026-10-13; ops decision D137 item 4) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: what a status-only certificate's card badge draws changes, so a
+  documented response body changes. No operation, status code, cache class, error code, schema
+  member or enum value moved, and `badge.v1` does not change: the flat badge and the `.json` still
+  say `credited {years}`, `verified {years}`, `revoked`, `updated, see new`, `not found` or `test`.
+- `getCertificateBadge`: a status-only certificate's card (`{cid}-card.svg`, `{cid}-card-dark.svg`)
+  no longer reads `Credited contributor` and no longer draws the rosette. It reads `Purpose Source`
+  over `verified · {years}` and `Live status from purposesource.org`, its flat badge's own words.
+  The operator's rule (D137 item 4) is that "Credited contributor" is said only where a credited
+  contribution stands behind it and the surface ties it to the person who earned it: a badge names
+  nobody, so anyone can embed another holder's, and a status-only record's verify page cannot name
+  the holder either. A certificate shown in full keeps `Credited contributor`, its count of
+  projects and the rosette: the verify page it links to names the holder. The description now
+  spells out both cards' lines; until this entry it named only the flat badge's words.
+- `check:openapi-examples` validates the same 67 examples.
+
 ## coverage/cov-v1.ts
 
 The published coverage function, versioned together with its vectors (`coverage/vectors.json`)
