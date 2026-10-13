@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.11.0
+  version: 1.12.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -3178,6 +3178,24 @@ paths:
         That is the entire data-protection story for a form submission: there is no
         record to breach, no record to subpoena, and no record to delete. The reply you
         get comes from a human reading email.
+
+        **The body, by `kind`.** `contact` and `dsar` take a `FormMessage`, which needs a
+        reply address. `abuse` takes an `AbuseReport`: the notice and action mechanism of
+        the EU Digital Services Act, Art. 16, delivered to legal@purposesource.org. It
+        carries the elements Art. 16(2) names: what is reported (`category`), its exact
+        address (`url`, required for `contributor-page` and `csam`), the explanation
+        (`message`), the reporter's `name` and `email`, and the good-faith statement
+        (`goodFaith`). The name and the e-mail are asked for but optional in every category,
+        and an e-mail that is given must be an address. Outside `csam` (Art. 16(2)(c)), a
+        report without them is not a complete notice; it is still processed like any report,
+        because it can still make the Association aware of illegal content (Art. 16(3),
+        16(6)). Without an e-mail no confirmation of receipt and no decision can be sent.
+
+        Every field is a string; a field of another type is read as absent. The site's own
+        page posts the same fields as a form (`multipart/form-data`), with the challenge
+        token under `cf-turnstile-response`; the route reads either. A body the route
+        refuses is answered `403 turnstile_failed`, the code of a failed challenge, so a
+        sender learns nothing about which half of the check refused it.
       tags: [forms]
       x-psn-phase: P-M2
       parameters:
@@ -3194,26 +3212,9 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              additionalProperties: false
-              required: [email, message, token]
-              properties:
-                email:
-                  type: string
-                  format: email
-                  maxLength: 254
-                  description: Where to reply. Forwarded in the email and stored nowhere.
-                subject:
-                  type: string
-                  maxLength: 200
-                message:
-                  type: string
-                  minLength: 1
-                  maxLength: 5000
-                token:
-                  type: string
-                  maxLength: 2048
-                  description: Anti-abuse challenge token, verified server-side before anything is sent.
+              oneOf:
+                - $ref: '#/components/schemas/FormMessage'
+                - $ref: '#/components/schemas/AbuseReport'
             examples:
               contact:
                 summary: A contact message
@@ -3221,6 +3222,15 @@ paths:
                   email: ospo@example.com
                   subject: Licence question
                   message: Does the four-year conversion date apply per release?
+                  token: 0.AbCdEf...
+              abuseAnonymous:
+                summary: An abuse report of a contributor page, without a name or an e-mail
+                value:
+                  category: contributor-page
+                  url: https://purposesource.org/p/7k2m9xq4tpz3r8vd
+                  subject: Fake support desk
+                  message: The bio claims to be Purpose Source support and asks for sign-in codes.
+                  goodFaith: 'yes'
                   token: 0.AbCdEf...
       responses:
         '202':
@@ -3238,7 +3248,9 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '403':
-          description: The anti-abuse challenge did not verify. Nothing was sent.
+          description: |
+            The anti-abuse challenge did not verify, or the route refused the body (the same
+            code on purpose; the message names the rule). Nothing was sent.
           content:
             application/json:
               schema:
@@ -3762,6 +3774,108 @@ components:
             Whether `publishedAt` has fallen outside the publication period plus its grace.
             The deployment computes it so a reader does not have to know the period. Absent
             whenever `publishedAt` is, and typed here for the same reason.
+
+    FormMessage:
+      type: object
+      additionalProperties: false
+      required: [email, subject, message, token]
+      description: The body of a `contact` or a `dsar` form. A reply address is required.
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          pattern: '^[^\s@]+@[^\s@]+\.[^\s@]{2,}$'
+          description: Where to reply. Forwarded in the email and stored nowhere.
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
+        message:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        token:
+          type: string
+          minLength: 1
+          maxLength: 2048
+          description: Anti-abuse challenge token, verified server-side before anything is sent.
+
+    AbuseReport:
+      type: object
+      additionalProperties: false
+      required: [category, subject, message, goodFaith, token]
+      description: |
+        The body of an `abuse` report: a notice under EU DSA Art. 16 (ops decision D116; design
+        PROFILE-PAGE-2026-10-06 §6.4). The name and the e-mail are optional in every category
+        (Recitals 50 and 53: the mechanism allows, but does not require, the reporter's
+        identity). The mail the steward reads starts with the notice elements, one per line,
+        and its `reporter:` line says whether the report is a complete notice and whether an
+        acknowledgement can be sent.
+      properties:
+        category:
+          type: string
+          enum: [contributor-page, certificate, waiver, marks, csam, other]
+          description: |
+            What is reported. `contributor-page` is what a contributor page's "Report this page"
+            link fills in; `csam` is child sexual abuse material, the one category whose report
+            is a complete notice without a name or an e-mail (Art. 16(2)(c)).
+        url:
+          type: string
+          maxLength: 2048
+          pattern: '^(https?://[^\s/?#]+\S*)?$'
+          description: |
+            The exact address of what is reported (Art. 16(2)(b)): an absolute `http` or `https`
+            address, with no white space or control character in it. Required, and not empty,
+            for `contributor-page` and `csam`; another category may leave it out and name what
+            it reports in the message.
+        name:
+          type: string
+          maxLength: 200
+          description: |
+            The reporter's name (Art. 16(2)(c)). Optional in every category. The route folds any
+            line break or other white space in it into one space: it is printed on one line of
+            the mail.
+        email:
+          type: string
+          maxLength: 254
+          pattern: '^([^\s@]+@[^\s@]+\.[^\s@]{2,})?$'
+          description: |
+            Where to reply (Art. 16(2)(c), 16(4)). Optional in every category: left out or empty,
+            the report is still processed, but no confirmation of receipt and no decision can be
+            sent. One that is given must be an address. Forwarded in the email and stored nowhere.
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
+        message:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          description: Why the reporter believes the content is illegal or breaks the rules (Art. 16(2)(a)).
+        goodFaith:
+          type: string
+          enum: ['yes', 'on', 'true']
+          description: |
+            The reporter's statement of a good-faith belief that the report is accurate and
+            complete (Art. 16(2)(d)). Required. The route also accepts these words in any letter
+            case; the site's form sends `yes`.
+        token:
+          type: string
+          minLength: 1
+          maxLength: 2048
+          description: Anti-abuse challenge token, verified server-side before anything is sent.
+      allOf:
+        - if:
+            required: [category]
+            properties:
+              category:
+                enum: [contributor-page, csam]
+          then:
+            required: [url]
+            properties:
+              url:
+                minLength: 1
 
     FormAck:
       type: object

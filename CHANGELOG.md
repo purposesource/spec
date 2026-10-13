@@ -3745,6 +3745,31 @@ which kind of change each entry was.
   page or to another person's page. The description does not gate the website's tests, so the order of
   pushes does not matter for them. `check:openapi-examples` validates the same 67 examples.
 
+### 1.12.0 — unreleased (2026-10-13; ops decision D116 slice P14j; design PROFILE-PAGE-2026-10-06 §6.4) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: `postForm`'s request body now describes what the edge route accepts, and
+  for one member it tightens. No path, operation, status code, cache class or error code moved.
+- The body is a `oneOf` of two new components. `FormMessage` is the `contact` and `dsar` body as before,
+  and `AbuseReport` is the `abuse` body: the EU DSA Art. 16 notice the route has taken since website
+  slice P14j. `AbuseReport` carries `category` (`contributor-page`, `certificate`, `waiver`, `marks`,
+  `csam`, `other`), `url` (required and not empty for `contributor-page` and `csam`; an absolute
+  `http`/`https` address with no white space), `name` (up to 200 characters), `email`, `subject`,
+  `message`, `goodFaith` (required: `yes`, `on` or `true`) and `token`. The name and the e-mail are
+  optional in every category, and an e-mail that is given must match the route's reply-address rule.
+  Until this entry the body was closed (`additionalProperties: false`), required `email` and had none
+  of the notice members, so it refused every abuse report the site sends, and every anonymous one.
+- The operation's description says how the route treats a report without a name or an e-mail (outside
+  `csam` it is not a complete notice, and it is still processed like any report, DSA Art. 16(3) and
+  16(6)), that every field is a string, that the site's page posts the same fields as a form with the
+  challenge under `cf-turnstile-response`, and that a refused body answers `403 turnstile_failed`.
+  The `403` response's description says the same.
+- Tightened, pre-release: `subject` is now required, with `minLength: 1`, on both bodies, and the
+  `contact`/`dsar` `email` carries the route's reply-address pattern beside `format: email`. The route
+  has always refused a submission without a subject ("a subject is required"), so a body the old
+  contract admitted without one was refused anyway.
+- A new request example, `abuseAnonymous`, shows a contributor-page report with no name and no
+  e-mail. `check:openapi-examples` validates 68 examples (67 before).
+
 ## coverage/cov-v1.ts
 
 The published coverage function, versioned together with its vectors (`coverage/vectors.json`)
