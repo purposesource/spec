@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.11.0
+  version: 1.11.1
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -97,8 +97,12 @@ info:
     On this API's host every `/p/*` and `/u/*` path answers `301` to the same path on the site
     host (a mis-cased or slash-ended address to its lower-case form), and nothing is read to
     decide that. The owner's private preview, `/v1/me/page/preview`, needs the owner's session:
-    it belongs to the authenticated family and is not described here either. This API's
-    contributor-page routes are the three tagged `contributor-pages` below.
+    it belongs to the authenticated family and is not described here either. So does the
+    person's certificate preview, `/v1/me/certificate-preview/{card|picture|badge.svg|badge-card.svg|badge-card-dark.svg}`,
+    which the same worker draws, marked `PREVIEW` and never issued, from the application's
+    `GET /v1/me/certificates/participation/preview` for that session alone: `private, no-store`,
+    framed by the dashboard alone, and `400 invalid_query` for a query outside that read's grammar.
+    This API's contributor-page routes are the three tagged `contributor-pages` below.
   contact:
     name: Purpose Source Network
     url: https://purposesource.org/trust/api

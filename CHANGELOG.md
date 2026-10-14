@@ -3822,6 +3822,19 @@ which kind of change each entry was.
   page or to another person's page. The description does not gate the website's tests, so the order of
   pushes does not matter for them. `check:openapi-examples` validates the same 67 examples.
 
+### 1.11.1 — unreleased (2026-10-14; ops decision D140, the live-samples plan §6.1, slice L8) — wording only
+
+- Patch: one sentence in `info.description`'s "Contributor pages are not routes of this API", beside the
+  owner's page preview. The person's certificate preview, `/v1/me/certificate-preview/{file}` (`card`,
+  `picture`, `badge.svg`, `badge-card.svg`, `badge-card-dark.svg`), belongs to the authenticated family like
+  the page preview and is not described here: the same worker draws it, marked `PREVIEW` and never issued,
+  from the application's `GET /v1/me/certificates/participation/preview` for the caller's session alone,
+  answers `private, no-store`, is framed by the dashboard alone, and refuses a query outside that read's
+  grammar with `400 invalid_query`, an envelope code of the worker's that no route of this API returns. No
+  operation, status code of an operation, cache class, error code of this API, schema member or enum value
+  moved. The description does not gate the website's tests, so the order of pushes does not matter for them.
+  `check:openapi-examples` validates the same 67 examples.
+
 ## coverage/cov-v1.ts
 
 The published coverage function, versioned together with its vectors (`coverage/vectors.json`)
