@@ -1,0 +1,31 @@
+{
+  "$comment": [
+    "The badge kit of one repository (FS04-031, WEB-084; ops decision D115, slices P13b and P16a): what a repository's administrator pastes into a README, and the addresses of the repository's project cards. Two implementations compose it from the same three inputs, the dashboard's api in C# and the website's registry page in JavaScript, and each is held to this file member for member and character for character, so a snippet copied from the dashboard and one copied from the repository's public page are the same text.",
+    "`input` is the repository's GitHub node id, the origin the edge answers on and the public site's origin. `kit` is the answer. `endpoint`, `markdown` and `html` are the shields.io endpoint (`/badge/{nodeId}.json`) and its two snippets. `page` is the registry page every snippet links to. `flat` and `card` are the repository's own badges (openapi/edge-public.v1.yaml `getRepositoryBadge`): the flat badge, and the 420×88 card in a light and a dark version, whose HTML is one `<picture>` that shows the dark version under `prefers-color-scheme: dark`; Markdown cannot switch, so the card's Markdown shows the light one. `projectCard` (1200×630) and `socialPreview` (1280×640, for GitHub's repository social preview) are the project cards (`getRepositoryCard`).",
+    "Every snippet names the canonical hosts verbatim (CERT-027). A snippet changes here first, and then in both implementations in the same release."
+  ],
+  "input": {
+    "nodeId": "R_kgDOAbc123",
+    "apiOrigin": "https://api.purposesource.org",
+    "siteOrigin": "https://purposesource.org"
+  },
+  "kit": {
+    "endpoint": "https://api.purposesource.org/badge/R_kgDOAbc123.json",
+    "markdown": "[![Purpose Source](https://img.shields.io/endpoint?url=https%3A%2F%2Fapi.purposesource.org%2Fbadge%2FR_kgDOAbc123.json)](https://purposesource.org/registry/repo/R_kgDOAbc123)",
+    "html": "<a href=\"https://purposesource.org/registry/repo/R_kgDOAbc123\"><img src=\"https://img.shields.io/endpoint?url=https%3A%2F%2Fapi.purposesource.org%2Fbadge%2FR_kgDOAbc123.json\" alt=\"Purpose Source: registered\" /></a>",
+    "page": "https://purposesource.org/registry/repo/R_kgDOAbc123",
+    "flat": {
+      "url": "https://api.purposesource.org/badge/repo/R_kgDOAbc123.svg",
+      "markdown": "[![Purpose Source](https://api.purposesource.org/badge/repo/R_kgDOAbc123.svg)](https://purposesource.org/registry/repo/R_kgDOAbc123)",
+      "html": "<a href=\"https://purposesource.org/registry/repo/R_kgDOAbc123\"><img src=\"https://api.purposesource.org/badge/repo/R_kgDOAbc123.svg\" alt=\"Purpose Source: registered\" /></a>"
+    },
+    "card": {
+      "url": "https://api.purposesource.org/badge/repo/R_kgDOAbc123-card.svg",
+      "darkUrl": "https://api.purposesource.org/badge/repo/R_kgDOAbc123-card-dark.svg",
+      "markdown": "[![Purpose Source](https://api.purposesource.org/badge/repo/R_kgDOAbc123-card.svg)](https://purposesource.org/registry/repo/R_kgDOAbc123)",
+      "html": "<a href=\"https://purposesource.org/registry/repo/R_kgDOAbc123\"><picture>\n  <source media=\"(prefers-color-scheme: dark)\" srcset=\"https://api.purposesource.org/badge/repo/R_kgDOAbc123-card-dark.svg\" />\n  <img src=\"https://api.purposesource.org/badge/repo/R_kgDOAbc123-card.svg\" width=\"420\" height=\"88\" alt=\"Purpose Source: registered\" />\n</picture></a>"
+    },
+    "projectCard": "https://api.purposesource.org/cards/repo/R_kgDOAbc123.png",
+    "socialPreview": "https://api.purposesource.org/cards/repo/R_kgDOAbc123-github.png"
+  }
+}
