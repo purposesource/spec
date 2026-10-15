@@ -44,10 +44,13 @@
  *              example or vector carries a currency figure, a person's GitHub node id (the current
  *              `U_` form or the legacy base64 "04:User" form) or a GitHub picture address (design
  *              §8.7; the plan's correction 11; design correction 5).
- *   defaults   the `defaults` settings example is the schema's `default` for every member, so the
- *              document a new person starts from is the one the schema describes (status-only by
- *              default, the GitHub picture; design §2.4 and the D116 dated note of ~11:50Z).
- *   agree      the closed lists the settings and the public document share are the same lists.
+ *   defaults   the `defaults` settings example is the schema's `default` for every required member,
+ *              so the document a new person starts from is the one the schema describes (status-only by
+ *              default, the GitHub picture; design §2.4 and the D116 dated note of ~11:50Z), and it
+ *              leaves every optional member out (1.1.0: the api writes one only when it differs from
+ *              its default, so a document stored before it keeps its bytes and its hash).
+ *   agree      the closed lists the settings and the public document share are the same lists (1.1.0:
+ *              the links' two places, the display parts and the palette ids among them).
  *   facts      in the page examples, every link is its table template with its handle, and the
  *              summary's counts are the rows the page shows (design §8.1: a count never reveals a
  *              hidden row).
@@ -59,7 +62,17 @@
  *              shaped like a path, a person's node id where a repository's belongs, a
  *              `generatedAt` finer than its day, two links for one platform, a Mastodon link with
  *              no instance, an upper-case or short colour, a bio with four line breaks, a name with
- *              a bidi override, and an alias carrying a login.
+ *              a bidi override, and an alias carrying a login; and from 1.1.0 (ops decision D149) a
+ *              link or a GitHub line that shows nothing, a display with a part too few or too many, a
+ *              website display with a handle, the GitHub line's parts on a page without the login, a
+ *              third place for the links, a background that is neither a palette id nor a lower-case
+ *              colour, a ground without an accent, a night row off `purpose` or under an own colour, a
+ *              `purpose` swatch without its night row or its accent's night colour, and an own colour
+ *              whose accent keeps one.
+ *   admits     what 1.1.0 adds is admitted, proved on copies of the examples: icon-only links beside
+ *              the name, the GitHub line's parts, the website's display, a palette swatch and an own
+ *              colour in the settings, and a `purpose` pair, an own colour and a swatch of another
+ *              preset in the document.
  *   goldens    every `examples/*.golden.json` is one a gate checks.
  *
  * Every rule is proved able to fail before the examples are trusted to pass.
@@ -644,24 +657,41 @@ function neverProblems(schemaSet, documents) {
 
 /* ------------------------------------------------------------------ defaults, agree */
 
+/**
+ * The defaults example is the document a new person starts from, AS THE API STORES IT: every required member at the
+ * schema's default, and every optional member (1.1.0's `linksPlacement`, `theme.ground`, `identity.loginShow`) LEFT OUT,
+ * because the api writes an optional member only when it differs from its default, so a document stored before the
+ * member existed keeps its bytes and its hash.
+ */
 function defaultsProblems(defaults, settingsSchema) {
   const found = [];
+  const add = (message) => found.push(['defaults', `examples/contributor-page-settings.v1.defaults.example.json: ${message}`]);
+  const required = settingsSchema.required ?? [];
   for (const [member, schema] of Object.entries(settingsSchema.properties)) {
     if (member === 'schemaVersion') continue;
+    if (!required.includes(member)) {
+      if (member in defaults) add(`${member} is optional and left out at its default, but the example carries ${JSON.stringify(defaults[member])}`);
+      if (schema.default === undefined) add(`${member} is optional and names no default, so its absence means nothing`);
+      continue;
+    }
     const expected = JSON.parse(JSON.stringify(collectDefault(schema)));
     if (JSON.stringify(sortDeep(defaults[member])) !== JSON.stringify(sortDeep(expected))) {
-      found.push(['defaults', `examples/contributor-page-settings.v1.defaults.example.json: ${member} is ${JSON.stringify(defaults[member])}, the schema's default is ${JSON.stringify(expected)}`]);
+      add(`${member} is ${JSON.stringify(defaults[member])}, the schema's default is ${JSON.stringify(expected)}`);
     }
   }
   return found;
 }
-/** A member's default: its own, or for an object without one, the object of its members' defaults. */
+/**
+ * A member's default: its own, or for an object without one, the object of its REQUIRED members' defaults (an optional
+ * member is left out at its default, as the api stores it).
+ */
 function collectDefault(schema) {
   if (schema.default !== undefined) return schema.default;
   if (schema.properties) {
+    const required = schema.required ?? [];
     return Object.fromEntries(
       Object.entries(schema.properties)
-        .filter(([, member]) => member.default !== undefined || member.properties)
+        .filter(([key, member]) => required.includes(key) && (member.default !== undefined || member.properties))
         .map(([key, member]) => [key, collectDefault(member)]),
     );
   }
@@ -680,7 +710,11 @@ function agreeProblems(settingsSchema, pageSchema) {
     ['cover preset', s.$defs.coverPreset.enum, p.properties.cover.properties.preset.enum],
     ['address', s.properties.address.enum, p.properties.address.enum],
     ['section id', s.$defs.sectionId.enum, ['summarySection', 'certificatesSection', 'repositoriesSection', 'adopterSection', 'linksSection', 'sponsorsSection'].map((d) => p.$defs[d].properties.id.const)],
-    ['card element', Object.keys(s.properties.card.properties), Object.keys(p.properties.card.properties).filter((k) => k !== 'h16')]
+    ['card element', Object.keys(s.properties.card.properties), Object.keys(p.properties.card.properties).filter((k) => k !== 'h16')],
+    ['links placement', s.properties.linksPlacement?.enum, p.properties.linksPlacement?.enum],
+    ['link display part', s.$defs.show?.required, p.$defs.show?.required],
+    ['website display part', s.$defs.websiteShow?.required, p.$defs.websiteShow?.required],
+    ['palette id', s.$defs.groundId?.enum, p.$defs.groundId?.enum]
   ];
   for (const [what, a, b] of pairs) {
     if ((a ?? []).join(',') !== (b ?? []).join(',')) found.push(['agree', `the ${what} lists differ: settings [${a}], page [${b}]`]);
@@ -762,7 +796,69 @@ const REFUSALS = [
   ['settings', 'a name with a bidi override', (d) => { d.identity.displayName = 'Alex \u202eelpmaxE'; }],
   ['settings', 'a website with a query', (d) => { d.website = { url: 'https://alex.dev/?ref=x' }; }],
   ['settings', 'an amount switch', (d) => { d.summary.amounts = false; }],
-  ['alias', 'an alias carrying a login', (d) => { d.login = 'example-contributor'; }]
+  ['alias', 'an alias carrying a login', (d) => { d.login = 'example-contributor'; }],
+  // 1.1.0 (ops decision D149; design CPAGE-REFINEMENTS-2026-10-15 §1.2, §3, §5.6).
+  ['settings', 'a link that shows nothing', (d) => { d.links[0].show = { icon: false, label: false, handle: false }; }],
+  ['settings', 'a link display missing a part', (d) => { d.links[0].show = { icon: true, label: true }; }],
+  ['settings', 'a link display with a fourth part', (d) => { d.links[0].show = { icon: true, label: true, handle: true, url: true }; }],
+  ['settings', 'a GitHub line that shows nothing', (d) => { d.identity.loginShow = { icon: false, label: false, handle: false }; }],
+  ['settings', 'a website display with a handle', (d) => { d.website = { url: 'https://alex.dev/', show: { icon: true, label: true, handle: false } }; }],
+  ['settings', 'a sponsorship button with a display', (d) => { d.sponsors[0].show = { icon: true, label: true, handle: true }; }],
+  ['settings', 'links placed outside the two places', (d) => { d.linksPlacement = 'footer'; }],
+  ['settings', 'a background that is neither a palette id nor a colour', (d) => { d.theme.ground = 'Lilac'; }],
+  ['settings', 'an upper-case background colour', (d) => { d.theme.ground = '#3366CC'; }],
+  ['page', 'a link that shows nothing', (d) => { sectionOf(d, 'links').items[0].show = { icon: false, label: false, handle: false }; }],
+  ['page', 'a website display with a handle', (d) => { sectionOf(d, 'links').website.show = { icon: false, label: true, handle: true }; }],
+  ['anonymous', "the GitHub line's parts without the login", (d) => { d.loginShow = { icon: true, label: false, handle: false }; }],
+  ['page', 'links placed outside the two places', (d) => { d.linksPlacement = 'footer'; }],
+  ['page', 'a ground without an accent', (d) => { d.theme = { preset: 'mocha', ground: { raw: 'cream', light: ROW.cream } }; }],
+  ['page', 'a night row off purpose', (d) => { d.theme = { preset: 'mocha', accent: ACCENT.mocha, ground: { raw: 'cream', light: ROW.cream, dark: ROW.lilacNight } }; }],
+  ['page', 'a night row under an own colour', (d) => { d.theme = { preset: 'purpose', accent: ACCENT.purpose, ground: { raw: '#f0ecf6', light: ROW.lilac, dark: ROW.lilacNight } }; }],
+  ['page', 'a purpose swatch without its night row', (d) => { d.theme = { preset: 'purpose', accent: ACCENT.purposeDay, ground: { raw: 'lilac', light: ROW.lilac } }; }],
+  ['page', 'a purpose pair whose accent has no night colour', (d) => { d.theme = { preset: 'purpose', accent: ACCENT.purposeDay, ground: { raw: 'lilac', light: ROW.lilac, dark: ROW.lilacNight } }; }],
+  ['page', 'an own colour on purpose whose accent keeps a night colour', (d) => { d.theme = { preset: 'purpose', accent: ACCENT.purpose, ground: { raw: '#3366cc', light: ROW.ownDark } }; }],
+  ['page', 'a pair whose day row is dark', (d) => { d.theme = { preset: 'purpose', accent: ACCENT.purpose, ground: { raw: 'lilac', light: ROW.lilacNight, dark: ROW.lilacNight } }; }],
+  ['page', 'a ground row carrying an accent', (d) => { d.theme = { preset: 'mocha', accent: ACCENT.mocha, ground: { raw: 'cream', light: { ...ROW.cream, accent: '#7a4a2a' } } }; }],
+  ['page', 'a ground row of an upper-case colour', (d) => { d.theme = { preset: 'mocha', accent: ACCENT.mocha, ground: { raw: 'cream', light: { ...ROW.cream, ground: '#FBF6EC' } } }; }],
+  ['page', 'a ground named by a colour name', (d) => { d.theme = { preset: 'mocha', accent: ACCENT.mocha, ground: { raw: 'Cream', light: ROW.cream } }; }]
+];
+
+/** Rows and accents for the 1.1.0 cases: real rows (two palette swatches, and the ground guard's row for #3366cc). */
+const ROW = {
+  cream: { mode: 'light', ground: '#fbf6ec', surface: '#fdfbf6', ink: '#2a1d14', muted: '#5e4a3c', rule: '#dad4ca', focus: '#0f4f8a' },
+  lilac: { mode: 'light', ground: '#f0ecf6', surface: '#f8f6fb', ink: '#14170f', muted: '#4d5347', rule: '#cecbd2', focus: '#0f4f8a' },
+  lilacNight: { mode: 'dark', ground: '#17131d', surface: '#26222b', ink: '#ece8dc', muted: '#b4b3a5', rule: '#38343b', focus: '#8ec2f0' },
+  ownDark: { mode: 'dark', ground: '#24488f', surface: '#325396', ink: '#ece8dc', muted: '#cacdcf', rule: '#43619b', focus: '#8ec2f0' }
+};
+const ACCENT = {
+  mocha: { raw: '#7a4a2a', light: '#7a4a2a', print: '#7a4a2a' },
+  purpose: { raw: '#1d5c3c', light: '#1d5c3c', dark: '#8fcaa6', print: '#1d5c3c' },
+  purposeDay: { raw: '#1d5c3c', light: '#1d5c3c', print: '#1d5c3c' }
+};
+
+/**
+ * What 1.1.0 must ADMIT, proved on copies of the examples, so a schema that refused every new member would not pass this
+ * gate unnoticed until the examples that carry them arrive: each change below must still validate.
+ */
+const ADMITS = [
+  ['settings', 'every link icon-only, the GitHub line without its word, the website without its globe, the links beside the name', (d) => {
+    for (const link of d.links) link.show = { icon: true, label: false, handle: false };
+    d.identity.loginShow = { icon: true, label: false, handle: true };
+    d.website.show = { icon: false, label: false };
+    d.linksPlacement = 'header';
+  }],
+  ['settings', 'a palette swatch', (d) => { d.theme.ground = 'lilac'; }],
+  ['settings', 'an own background colour', (d) => { d.theme.ground = '#3366cc'; }],
+  ['settings', 'the background stated at its default', (d) => { d.theme.ground = null; d.linksPlacement = 'section'; }],
+  ['page', 'a purpose pair with its night accent', (d) => { d.theme = { preset: 'purpose', accent: ACCENT.purpose, ground: { raw: 'lilac', light: ROW.lilac, dark: ROW.lilacNight } }; }],
+  ['page', 'an own colour on purpose, one dark row, no night accent', (d) => { d.theme = { preset: 'purpose', accent: ACCENT.purposeDay, ground: { raw: '#3366cc', light: ROW.ownDark } }; }],
+  ['page', 'a mocha swatch', (d) => { d.theme = { preset: 'mocha', accent: ACCENT.mocha, ground: { raw: 'cream', light: ROW.cream } }; }],
+  ['page', 'icon-only links beside the name, and the GitHub line as a logo', (d) => {
+    for (const item of sectionOf(d, 'links').items) item.show = { icon: true, label: false, handle: false };
+    sectionOf(d, 'links').website.show = { icon: true, label: false };
+    d.linksPlacement = 'header';
+    d.loginShow = { icon: true, label: false, handle: false };
+  }]
 ];
 
 const CONTRACT = { page: 'contributor-page.v1', anonymous: 'contributor-page.v1', settings: 'contributor-page-settings.v1', alias: 'contributor-page-alias.v1' };
@@ -774,6 +870,17 @@ function refusalProblems(docs, refusals) {
     const copy = structuredClone(docs[base]);
     breakIt(copy);
     if (validators[base](copy)) found.push(['refusals', `${CONTRACT[base]} admits ${what}`]);
+  }
+  return found;
+}
+
+function admitsProblems(docs, admits) {
+  const found = [];
+  const validators = { page: validatePage, anonymous: validatePage, settings: validateSettings };
+  for (const [base, what, change] of admits) {
+    const copy = structuredClone(docs[base]);
+    change(copy);
+    if (!validators[base](copy)) found.push(['admits', `${CONTRACT[base]} refuses ${what} (${ajv.errorsText(validators[base].errors)})`]);
   }
   return found;
 }
@@ -805,6 +912,7 @@ function allProblems(state) {
     ...agreeProblems(state.schemas.settings, state.schemas.page),
     ...factsProblems([['examples/contributor-page.v1.example.json', state.page], ['examples/contributor-page.v1.anonymous.example.json', state.anonymous]]),
     ...refusalProblems(state, state.refusals ?? REFUSALS),
+    ...admitsProblems(state, state.admits ?? ADMITS),
     ...goldenFilesProblems(state.goldenFiles)
   ];
 }
@@ -848,7 +956,10 @@ const SELF_TEST = [
   ['never', (s) => { s.anonymous.identity.bio = 'Paid CHF 120 to get here'; }],
   ['never', (s) => { s.anonymous.identity.bio = 'MDQ6VXNlcjEyMzQ1Njc='; }],
   ['defaults', (s) => { s.defaults.address = 'login'; }],
+  ['defaults', (s) => { s.defaults.linksPlacement = 'section'; }],
   ['agree', (s) => { s.schemas.page.properties.layout.enum = ['paper', 'profile']; }],
+  ['agree', (s) => { s.schemas.page.$defs.groundId.enum = s.schemas.page.$defs.groundId.enum.slice(1); }],
+  ['admits', (s) => { s.admits = [['settings', 'a background named by a colour name', (d) => { d.theme.ground = 'Cream'; }]]; }],
   ['facts', (s) => { sectionOf(s.page, 'links').items[0].url = 'https://www.linkedin.com/in/someone-else'; }],
   ['facts', (s) => { sectionOf(s.page, 'summary').projects = 4; }],
   ['refusals', (s) => { s.refusals = [['page', 'an unchanged page', () => {}]]; }],
@@ -886,5 +997,5 @@ fail(
     `the status chips and covers match the schemas, ${state.accent.cases.length} accent guard cases recompute, ` +
     `${state.preview.vectors.length} preview vectors recompute, ${state.aliasGolden.vectors.length} alias MAC vectors recompute, ` +
     `${state.build.vectors.length} builder vectors keep a hidden login off the repository list, no page member or example carries points, money or a GitHub id, ` +
-    `the defaults are the schema's, ${REFUSALS.length} refusals hold, and every rule was proved able to fail`,
+    `the defaults are the schema's, ${REFUSALS.length} refusals and ${ADMITS.length} admissions hold, and every rule was proved able to fail`,
 );

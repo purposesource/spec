@@ -3038,7 +3038,65 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   then; snippets, the QR and badges keep using it. `contributor-page.v1` 1.0.4 and
   `openapi/edge-public.v1.yaml` 1.11.0 say the same.
 
+### 1.1.0 — unreleased (2026-10-15; ops decision D149 and its dated note) — pre-release
+
+- **Pre-release** additions under policy 5, a minor bump (design CPAGE-REFINEMENTS-2026-10-15 §1.2, §9). Five
+  OPTIONAL members, each absent at its default. The api writes each only when it differs from its default, so a draft
+  or version stored under 1.0.x reads and serialises to the same RFC 8785 text: its `settings_sha256` holds, and a
+  published page does not turn "changed" on the day the api learns the members. Every other member stays required.
+  `check:contributor-page` now holds the defaults example to the required members' defaults and refuses one that
+  carries an optional member, and proves the new members admitted as well as refused.
+- `links[].show` (`$defs.show`): which of the platform's real logo, its name and the username a link shows; absent
+  means all three, which is how a new link starts (D149 item 4). At least one, in the schema itself (`anyOf`), so the
+  api, the editor and the renderer read one rule; the api answers `page.link_display_invalid` with reason
+  `none_shown`. Links that show only their logo stand side by side as plain logos. Sponsorship buttons take no
+  display member: they always show their words.
+- `website.show` (`$defs.websiteShow`): the globe and the word "Website". It has no `handle` member, because the
+  domain always shows, as the one address on the page Purpose Source does not check (design PROFILE-PAGE §5.4).
+- `identity.loginShow`: the GitHub line's logo, the word "GitHub" and "@login", at least one, while `showLogin` is on.
+  The "✓ Verified" chip always shows beside them, and the line is always a line of its own (design §3);
+  `showLogin`'s description says the line reads "GitHub @login" with the chip.
+- `linksPlacement`: `section` (the default, headed "Elsewhere") or `header`, the links together with the name, in the
+  header after the bio and under the GitHub line, with no heading (design §2.3). The links section's own switch still
+  decides whether links show at all.
+- `theme.ground`: null, the preset's own background; a palette id of the current preset (`$defs.groundId` lists every
+  id of every palette once, and which preset an id belongs to is the api's check, `page.colour_invalid` with reason
+  `not_in_palette`); or `#rrggbb`, any colour, through the ground guard the description states exactly (design §5.4:
+  the first k at which the colour mixed toward white or black reaches 7:1 with the mode's ink, then the derived
+  surface, muted, rule and focus ring), with `page.warn.ground_adjusted` when it moved. `purpose`'s swatches are day and
+  night pairs, so a `purpose` page with a swatch keeps following the visitor; an own colour fixes the mode. Choosing
+  another preset resets the ground (D149 item 2): the editor sets it to null, and the api stores null for a save that
+  changes the preset while carrying the stored, non-null ground unchanged, answering `page.warn.ground_reset` (check (l)
+  of the description). The accent is not reset; it is adjusted again against the new rows.
+- Wording: `layout`'s `paper` is a plain sheet with one hairline and no cover, and `cover` is drawn only by the
+  `profile` layout (D149 item 6); `sectionId`'s `links` names its two places.
+- No `language` member (D149 item 1): the page and the editor stay English only, and a language arrives as one more
+  optional member when a contributor asks for one.
+
 ## contributor-page.v1.json
+
+### 1.1.0 — unreleased (2026-10-15; ops decision D149 and its dated note) — pre-release
+
+- **Pre-release** additions under policy 5, a minor bump (design CPAGE-REFINEMENTS-2026-10-15 §1-§3, §5.6, §9), all
+  optional: every document written under 1.0.x stays valid, and the renderer reads an absent member as its default.
+- `loginShow` (written only with `login`, and only when it is not all three; `dependentRequired` holds the first),
+  `linksPlacement` (written only when it is `header`: the links section, which keeps its shape and its place in
+  `sections`, is then drawn in the header under the GitHub line with no heading), and `show` on each link item and on
+  the website, as the settings' members of the same names.
+- `theme.ground` = `{raw, light, dark?}`, each row `{mode, ground, surface, ink, muted, rule, focus}`
+  (`$defs.groundRow`): `raw` is the settings' value as stored, `light` the page's own row whatever its mode, and `dark`
+  is present only for a `purpose` palette pair, whose day row is then light and whose `raw` is a palette id. With a
+  ground, `theme.accent` is required, so the renderer never has to choose one, and its `dark` follows the rows: the
+  rule "if `purpose` then `dark`" becomes "if `purpose` and (no ground, or a ground with `dark`) then `dark`". A night
+  row on another preset, a `purpose` swatch without its night row and a night row under an own colour are refused.
+  The accent's description says how the builder adjusts it against a ground: from the person's own accent, or from
+  the preset's own accent for each row where they chose none.
+- Descriptions follow D149: the login line reads "GitHub @login" with the "✓ Verified" chip, always on a line of its
+  own; each link is drawn with its platform's real logo in plain black or white, never the accent, with the parts its
+  `show` names; icon-only links stand side by side as plain logos; the sentence under the links ("added by the page
+  owner, only the GitHub account is verified") is gone, because the chip on GitHub alone and the fixed footer carry
+  its meaning; sponsorship buttons carry their platform's real logo, or their words alone where no logo is confirmed;
+  the cover is drawn only by the `profile` layout; and the accent's `raw` no longer tints a ring round the picture.
 
 ### 1.0.4 — unreleased (2026-10-13; ops decision D138)
 
