@@ -71,8 +71,8 @@
     },
     "cover": {
       "$ref": "#/$defs/cover",
-      "default": { "kind": "preset", "preset": "meadow" },
-      "description": "The cover band above the header (design §4.4): none, one of eight colour presets, a solid colour, a two-colour gradient, the rosette pattern, or the person's own upload (the D116 dated note of ~11:50Z, item 2). No text ever sits on a cover, so no contrast rule applies to it. Only the `profile` layout draws it, as the banner the person chose; `paper` and `minimal` draw none (ops decision D149 item 6: no gradient band over the paper sheet). A malformed choice is `page.cover_invalid`."
+      "default": { "kind": "none" },
+      "description": "The cover band above the header (design §4.4): none, one of eight colour presets, a solid colour, a two-colour gradient, the rosette pattern, or the person's own upload (the D116 dated note of ~11:50Z, item 2). No text ever sits on a cover, so no contrast rule applies to it. Only the `profile` layout draws it, as the banner the person chose; `paper` and `minimal` draw none (ops decision D149 item 6: no gradient band over the paper sheet). A malformed choice is `page.cover_invalid`. A page never saved starts with none (1.1.0; it was the `meadow` gradient): a stored draft keeps the cover it carries."
     },
     "identity": {
       "type": "object",

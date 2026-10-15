@@ -3077,6 +3077,18 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   `profile` layout (D149 item 6); `sectionId`'s `links` names its two places.
 - No `language` member (D149 item 1): the page and the editor stay English only, and a language arrives as one more
   optional member when a contributor asks for one.
+- THE EXAMPLES AND THE GOLDEN (piece A2, landed back to back with the platform's api). A page never saved starts
+  with no cover: `cover`'s default is `{kind: "none"}` (it was the `meadow` gradient) and the defaults example says
+  so; a stored draft keeps the cover it carries. `examples/contributor-page-ground.v1.golden.json` is new: the ground
+  guard's rule and its vectors (33 hand-picked cases and 128 from a seeded generator, each recomputed by
+  `check:contributor-page`, none decided within 1e-9 of a threshold, and the guard run over a 16-step grid of every
+  channel against the renderer's figures), every preset's palette (45 rows: five swatches per preset, `purpose`'s as
+  day and night pairs, each the preset's own row with only the ground changed and each reaching 4.6 for text and 3
+  for the ring and the logo, so a swatch never needs adjusting), and fifteen document themes: what the one builder
+  writes into `contributor-page.v1` `theme` for a preset, a ground and an accent. Two further settings examples and
+  the documents the builder makes of them: `header` (the links beside the name, two icon-only links, the GitHub line
+  without its word, the website without its globe, a `purpose` pair) and `own-ground` (an own colour on `purpose`, a
+  link without its username).
 
 ## contributor-page.v1.json
 

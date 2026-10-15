@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "start": "unnamed",
+  "layout": "minimal",
+  "theme": { "preset": "purpose", "accent": null, "ground": "#3366cc" },
+  "picture": { "kind": "rosette" },
+  "cover": { "kind": "none" },
+  "identity": { "displayName": "Sam", "pronouns": null, "bio": null, "showLogin": false },
+  "address": "anonymous",
+  "search": false,
+  "sections": [
+    { "id": "summary", "on": true },
+    { "id": "certificates", "on": true },
+    { "id": "links", "on": true },
+    { "id": "repositories", "on": false },
+    { "id": "adopter", "on": false },
+    { "id": "sponsors", "on": false }
+  ],
+  "summary": { "projects": true, "organisations": false, "since": true, "certificates": true },
+  "certificates": { "mode": "all-eligible" },
+  "repositories": { "mode": "all", "hidden": [], "years": true },
+  "adopter": { "hidden": [] },
+  "links": [
+    { "platform": "codeberg", "handle": "sam-codes", "show": { "icon": true, "label": true, "handle": false } },
+    { "platform": "x", "handle": "sam_codes", "show": { "icon": true, "label": false, "handle": false } }
+  ],
+  "website": null,
+  "sponsors": [],
+  "card": { "picture": true, "name": true, "login": true, "summary": true, "adopter": true, "links": true }
+}

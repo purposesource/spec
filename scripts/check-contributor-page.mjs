@@ -23,6 +23,18 @@
  *              1e-9 of 4.6, so .NET and V8 cannot split one; the file names the theme table's
  *              SHA-256. `--print-accent-golden` prints the file recomputed from its own
  *              hand-picked cases and generator, for when the theme table moves.
+ *   ground     `examples/contributor-page-ground.v1.golden.json` (1.1.0; ops decision D149 item 2):
+ *              the gate's own reference of the ground guard (the settings schema's `theme.ground`)
+ *              recomputes every case's k and row, and the file's rule is held to the theme table
+ *              (purpose's inks, the guard's 4.6, the ring's 3); the cases cover white, black, the
+ *              primaries, every preset's ground, greys, both modes kept and moved, and neighbour pairs
+ *              whose k or mode flips; the seeded cases are the generator's; no case is decided within
+ *              1e-9 of a threshold; the guard runs over a 16-step grid of every channel and each row
+ *              meets the renderer's figures. Every palette row is its preset's own row with only the
+ *              ground changed, its ratios recompute and reach 4.6 (text) and 3 (ring and logo), its ids
+ *              are the schemas' `$defs.groundId`; and every document theme (a preset, a ground and an
+ *              accent) is the builder's, a valid `contributor-page.v1` `theme`, a palette id of
+ *              another preset refused. `--print-ground-golden` prints the file recomputed.
  *   preview    `examples/contributor-page-preview.v1.golden.json`: each vector's document is a
  *              valid `contributor-page.v1`, its preimage is the document reduced exactly as that
  *              schema's description defines, its text is the RFC 8785 form of the preimage, and
@@ -51,7 +63,7 @@
  *              its default, so a document stored before it keeps its bytes and its hash).
  *   agree      the closed lists the settings and the public document share are the same lists (1.1.0:
  *              the links' two places, the display parts and the palette ids among them).
- *   facts      in the page examples, every link is its table template with its handle, and the
+ *   facts      in the page examples (1.1.0's further two among them), every link is its table template with its handle, and the
  *              summary's counts are the rows the page shows (design §8.1: a count never reveals a
  *              hidden row).
  *   refusals   the schemas refuse what the design rules out, proved on copies of the examples: a
@@ -102,7 +114,8 @@ const GOLDENS = [
   'contributor-page-accent.v1.golden.json',
   'contributor-page-preview.v1.golden.json',
   'contributor-page-alias.v1.golden.json',
-  'contributor-page-build.v1.golden.json'
+  'contributor-page-build.v1.golden.json',
+  'contributor-page-ground.v1.golden.json'
 ];
 
 const table = example('link-platforms.v1.example.json');
@@ -115,8 +128,12 @@ const real = {
   preview: example('contributor-page-preview.v1.golden.json'),
   aliasGolden: example('contributor-page-alias.v1.golden.json'),
   build: example('contributor-page-build.v1.golden.json'),
+  ground: example('contributor-page-ground.v1.golden.json'),
   page: example('contributor-page.v1.example.json'),
   anonymous: example('contributor-page.v1.anonymous.example.json'),
+  // 1.1.0's further examples (ops decision D149): the links beside the name with icon-only links and a purpose pair; an own colour.
+  header: example('contributor-page.v1.header.example.json'),
+  ownGround: example('contributor-page.v1.own-ground.example.json'),
   settings: example('contributor-page-settings.v1.example.json'),
   defaults: example('contributor-page-settings.v1.defaults.example.json'),
   alias: example('contributor-page-alias.v1.example.json'),
@@ -423,6 +440,355 @@ function accentGoldenText(golden, theme, themeSha256, presets) {
   delete head.cases;
   const text = JSON.stringify(head, null, 2);
   return `${text.slice(0, -2)},\n  "cases": [\n${cases.map((c) => `    ${JSON.stringify(c)}`).join(',\n')}\n  ]\n}\n`;
+}
+
+/* ----------------------------------------------------------------------- ground guard */
+
+const GROUND_FILE = 'contributor-page-ground.v1.golden.json';
+const SEEDED_GROUND = /^GS-\d{3}$/;
+const ROW_KEYS = ['mode', 'ground', 'surface', 'ink', 'muted', 'rule', 'focus'];
+const MARK = { light: '#000000', dark: '#ffffff' };
+
+/**
+ * The ground guard as contributor-page-settings.v1 `theme.ground` defines it (design CPAGE-REFINEMENTS-2026-10-15 §5.4):
+ * the gate's own reference, not the api's C#. Answers the row, the k, and the smallest distance from a threshold that
+ * decided it (the choice of k, the side on a tie, the muted step, the focus ring), so a case no two implementations
+ * could split is recognisable.
+ */
+function groundGuard(raw, spec, rings) {
+  const margins = [];
+  for (let k = 0; k <= spec.steps; k++) {
+    const light = mix(raw, '#ffffff', k);
+    const dark = mix(raw, '#000000', k);
+    const onLight = ratio(light, spec.inks.light);
+    const onDark = ratio(dark, spec.inks.dark);
+    margins.push(Math.abs(onLight - spec.target), Math.abs(onDark - spec.target));
+    if (onLight < spec.target && onDark < spec.target) continue;
+    let mode;
+    if (onLight >= spec.target && onDark >= spec.target) {
+      mode = onLight >= onDark ? 'light' : 'dark';
+      margins.push(Math.abs(onLight - onDark));
+    } else {
+      mode = onLight >= spec.target ? 'light' : 'dark';
+    }
+    const ground = mode === 'light' ? light : dark;
+    const surface = mix(ground, '#ffffff', spec.surfaceSteps[mode]);
+    const ink = spec.inks[mode];
+    const worst = (colour) => Math.min(ratio(colour, ground), ratio(colour, surface));
+    let muted = ink;
+    for (let m = 0; m <= spec.mutedSteps; m++) {
+      const candidate = mix(ink, ground, m);
+      const at = worst(candidate);
+      margins.push(Math.abs(at - spec.muted));
+      if (at >= spec.muted) muted = candidate;
+    }
+    const ring = rings[mode];
+    const ringAt = worst(ring);
+    margins.push(Math.abs(ringAt - spec.focus));
+    const focus = ringAt >= spec.focus ? ring : ink;
+    const rule = mix(ground, ink, spec.ruleSteps);
+    return { k, row: { mode, ground, surface, ink, muted, rule, focus }, margin: Math.min(...margins) };
+  }
+  return null;
+}
+
+const gridMemo = new Map();
+
+/** The guard over every colour of a 16-step grid of each channel (4,096 colours), memoised per rule: the self-tests rerun it. */
+function gridProblems(spec, rings, minimums) {
+  const key = JSON.stringify([spec, rings, minimums]);
+  if (gridMemo.has(key)) return gridMemo.get(key);
+  const found = [];
+  for (let r = 0; r < 256; r += 17) {
+    for (let g = 0; g < 256; g += 17) {
+      for (let b = 0; b < 256; b += 17) {
+        const raw = toHex([r, g, b]);
+        const got = groundGuard(raw, spec, rings);
+        if (!got) {
+          found.push(`the guard does not end for ${raw}`);
+          continue;
+        }
+        const worst = (colour) => Math.min(ratio(colour, got.row.ground), ratio(colour, got.row.surface));
+        if (worst(got.row.ink) < minimums.text || worst(got.row.muted) < minimums.text || worst(got.row.focus) < minimums.focus) found.push(`the guard's row for ${raw} fails the renderer's check`);
+      }
+    }
+  }
+  gridMemo.set(key, found);
+  return found;
+}
+
+/** A palette swatch's row: the preset's own row of that mode, with only the ground (and the surface and rule it gives) changed. */
+function paletteRow(own, ground, spec) {
+  return {
+    mode: own.mode,
+    ground,
+    surface: mix(ground, '#ffffff', spec.surfaceSteps[own.mode]),
+    ink: own.ink,
+    muted: own.muted,
+    rule: mix(ground, own.ink, spec.ruleSteps),
+    focus: own.focus
+  };
+}
+
+/** The ratios a palette row is held to: text, the preset's own accent and the focus ring against its ground and its surface, and the logo's colour. */
+function rowRatios(row, accent) {
+  const worst = (colour) => twoDecimals(Math.min(ratio(colour, row.ground), ratio(colour, row.surface)));
+  return { ink: worst(row.ink), muted: worst(row.muted), accent: worst(accent), focus: worst(row.focus), mark: worst(MARK[row.mode]) };
+}
+
+/** The theme table's rows of one preset: its own row of each mode, and its print row. */
+function presetRows(theme, preset) {
+  const rows = theme.rows.filter((r) => r.preset === preset);
+  return { light: rows.find((r) => r.mode === 'light'), dark: rows.find((r) => r.mode === 'dark'), print: rows.find((r) => r.mode === 'print'), own: rows.find((r) => r.mode !== 'print' && (preset !== 'purpose' || r.mode === 'light')) };
+}
+
+/**
+ * The public document's `theme` for a preset, a ground (null, a palette id or `#rrggbb`) and an accent (null or
+ * `#rrggbb`), as contributor-page.v1 `theme` and `theme.accent` define it: the gate's own reading of the builder. With
+ * no ground it is the accent guard's answer of 1.0.0. With a ground, the accent is always present, adjusted against the
+ * ground's rows and the print row, from the person's accent, or from the preset's own accent for each row (on `purpose`
+ * its row of the same mode, otherwise its one row, and the print row's for print), `raw` being the light row's.
+ */
+function themeFor(themeTable, golden, preset, ground, accent) {
+  const rows = presetRows(themeTable, preset);
+  const minimum = themeTable.minimums.guard;
+  if (!rows.own || !rows.print || (preset === 'purpose' && (!rows.light || !rows.dark))) return null;
+  if (ground === null) {
+    if (accent === null) return { theme: { preset }, k: {} };
+    const got = accentCase(themeTable, preset, accent);
+    return got ? { theme: { preset, accent: got.accent }, k: got.k } : null;
+  }
+  let groundRows;
+  if (HEX.test(ground)) {
+    const answer = groundGuard(ground, golden.guard, themeTable.focusRings);
+    if (!answer) return null;
+    groundRows = { light: answer.row };
+  } else {
+    const swatch = (golden.palettes?.[preset] ?? []).find((s) => s.id === ground);
+    if (!swatch) return { refused: 'not_in_palette' };
+    groundRows = { light: swatch.light, ...(swatch.dark ? { dark: swatch.dark } : {}) };
+  }
+  const startFrom = (key, row) => {
+    if (accent !== null) return accent;
+    if (key === 'print') return rows.print.accent;
+    if (preset === 'purpose') return rows[row.mode].accent;
+    return rows.own.accent;
+  };
+  const grounds = { light: groundRows.light, ...(groundRows.dark ? { dark: groundRows.dark } : {}), print: rows.print };
+  const stored = {};
+  const k = {};
+  for (const [key, row] of Object.entries(grounds)) {
+    const answer = guard(startFrom(key, row), row, minimum);
+    if (!answer) return null;
+    stored[key] = answer.colour;
+    k[key] = answer.k;
+  }
+  const raw = startFrom('light', groundRows.light);
+  return {
+    theme: { preset, accent: { raw, ...stored }, ground: { raw: ground, ...groundRows } },
+    k
+  };
+}
+
+/** xorshift32 draws as the accent golden's generator, one per case: raw = the draw mod 2^24. */
+function seededGrounds(generator) {
+  let x = generator.seed >>> 0;
+  const out = [];
+  for (let i = 0; i < generator.count; i++) {
+    x ^= x << 13;
+    x ^= x >>> 17;
+    x ^= x << 5;
+    x >>>= 0;
+    out.push({ id: `GS-${String(i + 1).padStart(3, '0')}`, raw: `#${(x & 0xffffff).toString(16).padStart(6, '0')}` });
+  }
+  return out;
+}
+
+const validateGroundRow = ajv.getSchema(`${cfg.schemaBaseUrl}/${PAGE}#/$defs/groundRow`);
+
+function groundProblems(golden, themeTable, themeSha256, settingsSchema, pageSchema) {
+  const found = [];
+  const add = (message) => found.push(['ground', `examples/${GROUND_FILE}: ${message}`]);
+  if (golden.themeSha256 !== themeSha256) add(`themeSha256 is ${golden.themeSha256}; the theme table hashes to ${themeSha256}`);
+  const spec = golden.guard ?? {};
+  const purpose = presetRows(themeTable, 'purpose');
+  const expectedSpec = {
+    steps: 64,
+    target: 7,
+    inks: { light: purpose.light?.ink, dark: purpose.dark?.ink },
+    surfaceSteps: { light: 32, dark: 4 },
+    mutedSteps: 40,
+    muted: themeTable.minimums.guard,
+    ruleSteps: 10,
+    focus: themeTable.minimums.focus
+  };
+  if (JSON.stringify(sortDeep(spec)) !== JSON.stringify(sortDeep(expectedSpec))) {
+    add(`guard is ${JSON.stringify(spec)}; the schema's rule over this theme table is ${JSON.stringify(expectedSpec)} (the inks are purpose's, the muted figure the guard minimum, the focus figure the table's)`);
+    return found;
+  }
+
+  // The guard's cases.
+  const cases = golden.cases ?? [];
+  if (cases.length === 0) add('no cases — this gate would pass vacuously');
+  const ids = new Set();
+  for (const c of cases) {
+    if (ids.has(c.id)) add(`${c.id} appears twice`);
+    ids.add(c.id);
+    if (!HEX.test(c.raw ?? '')) {
+      add(`${c.id}: raw is #rrggbb in lower case`);
+      continue;
+    }
+    const got = groundGuard(c.raw, spec, themeTable.focusRings);
+    if (!got) {
+      add(`${c.id}: the guard did not end for ${c.raw}`);
+      continue;
+    }
+    if (c.k !== got.k) add(`${c.id}: k is ${c.k}, the guard gives ${got.k}`);
+    if (JSON.stringify(c.row) !== JSON.stringify(got.row)) add(`${c.id}: row is ${JSON.stringify(c.row)}, the guard gives ${JSON.stringify(got.row)}`);
+    if (got.margin < KNIFE_EDGE) add(`${c.id}: decided within ${KNIFE_EDGE} of a threshold, where two float implementations could answer differently; choose another colour`);
+    if (!validateGroundRow(c.row)) add(`${c.id}: the row is not a valid contributor-page.v1 groundRow (${ajv.errorsText(validateGroundRow.errors)})`);
+    for (const [what, colour, minimum] of [['ink', c.row?.ink, themeTable.minimums.text], ['muted', c.row?.muted, themeTable.minimums.text], ['focus', c.row?.focus, themeTable.minimums.focus]]) {
+      if (HEX.test(colour ?? '') && Math.min(ratio(colour, c.row.ground), ratio(colour, c.row.surface)) < minimum) add(`${c.id}: the row's ${what} is below the renderer's ${minimum} on its ground or surface`);
+    }
+  }
+  const generator = golden.generator ?? {};
+  if (generator.algorithm !== 'xorshift32' || !Number.isInteger(generator.seed) || generator.seed <= 0 || generator.seed > 0xffffffff || !Number.isInteger(generator.count) || generator.count < 120) {
+    add('generator is {algorithm: "xorshift32", seed: a positive 32-bit integer, count: at least 120}');
+  } else {
+    const expected = seededGrounds(generator);
+    const seeded = cases.filter((c) => SEEDED_GROUND.test(c.id));
+    if (JSON.stringify(seeded.map((c) => [c.id, c.raw])) !== JSON.stringify(expected.map((c) => [c.id, c.raw]))) add(`the seeded cases are not the ${generator.count} the generator gives from seed ${generator.seed}`);
+  }
+  const has = (raw) => cases.some((c) => c.raw === raw);
+  for (const raw of ['#ffffff', '#000000', ...PRIMARIES]) if (!has(raw)) add(`no case gives ${raw}`);
+  for (const row of themeTable.rows.filter((r) => r.mode !== 'print')) if (!has(row.ground)) add(`no case gives the ground of ${row.preset}/${row.mode} (${row.ground})`);
+  if (!cases.some((c) => isGrey(c.raw) && c.k > 0)) add('no case moves a grey');
+  for (const mode of ['light', 'dark']) {
+    if (!cases.some((c) => c.row?.mode === mode && c.k === 0)) add(`no ${mode} case stays as picked (k = 0)`);
+    if (!cases.some((c) => c.row?.mode === mode && c.k > 0)) add(`no ${mode} case is moved (k > 0)`);
+  }
+  const flips = new Set();
+  for (const a of cases) {
+    for (const b of cases) {
+      if (a.id >= b.id || !HEX.test(a.raw ?? '') || !HEX.test(b.raw ?? '')) continue;
+      const da = channels(a.raw);
+      const db = channels(b.raw);
+      if (da.reduce((n, c, i) => n + Math.abs(c - db[i]), 0) !== 1) continue;
+      if (a.row?.mode !== b.row?.mode) flips.add('mode');
+      else if (a.k !== b.k) flips.add(Math.min(a.k, b.k) === 0 ? 'edge' : 'middle');
+    }
+  }
+  for (const kind of ['edge', 'middle', 'mode']) if (!flips.has(kind)) add(`no neighbour pair (one channel one step apart) flips ${kind === 'mode' ? 'the mode' : kind === 'edge' ? 'k at the threshold (0 against 1)' : 'k further along'}`);
+
+  // Every colour on a coarse grid: the guard ends, and its row meets the renderer's figures.
+  for (const message of gridProblems(spec, themeTable.focusRings, themeTable.minimums)) add(message);
+
+  // The palettes.
+  const presets = settingsSchema.$defs.preset.enum;
+  const palettes = golden.palettes ?? {};
+  if (Object.keys(palettes).join(',') !== presets.join(',')) add(`palettes names [${Object.keys(palettes)}]; every preset has one, in the schemas' order [${presets}]`);
+  const allIds = new Set();
+  for (const [preset, swatches] of Object.entries(palettes)) {
+    const rows = presetRows(themeTable, preset);
+    if (!rows.own || !rows.print || (preset === 'purpose' && (!rows.light || !rows.dark))) {
+      add(`${preset}: the theme table lacks a row its palette is derived from`);
+      continue;
+    }
+    if (!Array.isArray(swatches) || swatches.length !== 5) add(`${preset}: a palette has five swatches beside the preset's own background`);
+    const seen = new Set();
+    for (const s of swatches ?? []) {
+      const where = `${preset}/${s.id}`;
+      if (seen.has(s.id)) add(`${where} appears twice`);
+      seen.add(s.id);
+      allIds.add(s.id);
+      if (typeof s.label !== 'string' || s.label.length === 0) add(`${where}: no label`);
+      const own = preset === 'purpose' ? { light: rows.light, dark: rows.dark } : { light: rows.own };
+      if (preset === 'purpose' ? !s.dark : 'dark' in s) add(`${where}: ${preset === 'purpose' ? "purpose's swatches are day and night pairs" : 'only purpose has night rows'}`);
+      const expectedRatios = {};
+      for (const key of preset === 'purpose' ? ['light', 'dark'] : ['light']) {
+        const row = s[key];
+        if (!row || !HEX.test(row.ground ?? '')) {
+          add(`${where}: ${key} has no ground`);
+          continue;
+        }
+        const expected = paletteRow(own[key], row.ground, spec);
+        if (JSON.stringify(row) !== JSON.stringify(expected)) add(`${where}: ${key} is ${JSON.stringify(row)}, the palette's rule gives ${JSON.stringify(expected)}`);
+        if (!validateGroundRow(row)) add(`${where}: ${key} is not a valid contributor-page.v1 groundRow`);
+        const got = rowRatios(expected, own[key].accent);
+        expectedRatios[key] = got;
+        if (got.ink < spec.muted || got.muted < spec.muted || got.accent < spec.muted || got.focus < spec.focus || got.mark < spec.focus) add(`${where}: ${key} misses a figure (${JSON.stringify(got)}); a swatch never needs adjusting`);
+        if (row.ground === own[key].ground) add(`${where}: ${key} is the preset's own background, which is the "Own" choice (null), not a swatch`);
+      }
+      if (JSON.stringify(s.ratios) !== JSON.stringify(expectedRatios)) add(`${where}: ratios are ${JSON.stringify(s.ratios)}, WCAG 2.2 gives ${JSON.stringify(expectedRatios)}`);
+    }
+  }
+  const schemaIds = settingsSchema.$defs.groundId?.enum ?? [];
+  if ([...allIds].sort().join(',') !== [...schemaIds].join(',')) add(`the palettes' ids [${[...allIds].sort()}] are not the schemas' $defs.groundId [${schemaIds}] (each once, alphabetical)`);
+  if ((pageSchema.$defs.groundId?.enum ?? []).join(',') !== schemaIds.join(',')) add('the two schemas list different palette ids');
+
+  // The document's theme for a preset, a ground and an accent: what the one builder writes.
+  const themeCases = golden.themeCases ?? [];
+  if (themeCases.length === 0) add('no themeCases — the builder\'s accent against a ground would be unpinned');
+  for (const t of themeCases) {
+    const got = themeFor(themeTable, golden, t.preset, t.ground, t.accent);
+    if (!got || got.refused) {
+      add(`${t.id}: ${got?.refused ?? 'no answer'} for ${t.preset} ${t.ground} ${t.accent}`);
+      continue;
+    }
+    if (JSON.stringify(sortDeep(t.theme)) !== JSON.stringify(sortDeep(got.theme))) add(`${t.id}: theme is ${JSON.stringify(t.theme)}, the builder's rule gives ${JSON.stringify(got.theme)}`);
+    if (JSON.stringify(sortDeep(t.k)) !== JSON.stringify(sortDeep(got.k))) add(`${t.id}: k is ${JSON.stringify(t.k)}, the guards give ${JSON.stringify(got.k)}`);
+    if (!validateTheme(t.theme)) add(`${t.id}: the theme is not a valid contributor-page.v1 theme (${ajv.errorsText(validateTheme.errors)})`);
+  }
+  const covered = (test) => themeCases.some(test);
+  if (!covered((t) => t.preset === 'purpose' && t.theme?.ground?.dark)) add('no themeCase draws a purpose pair');
+  if (!covered((t) => t.preset === 'purpose' && HEX.test(t.ground ?? ''))) add('no themeCase gives purpose an own colour');
+  if (!covered((t) => t.preset !== 'purpose' && HEX.test(t.ground ?? '') && t.theme?.ground?.light?.mode !== presetRows(themeTable, t.preset).own?.mode)) add('no themeCase gives a preset an own colour of the other mode');
+  if (!covered((t) => t.accent !== null && t.ground !== null)) add('no themeCase carries a person\'s accent with a ground');
+  if (!covered((t) => Object.values(t.k ?? {}).some((k) => k > 0) && t.ground !== null)) add('no themeCase adjusts an accent against a ground');
+  if (themeFor(themeTable, golden, 'mocha', 'lilac', null)?.refused !== 'not_in_palette') add('a palette id of another preset is not refused as not_in_palette');
+  return found;
+}
+
+/** The ground golden recomputed from its own hand-picked cases, palette grounds and theme cases (`--print-ground-golden`). */
+function groundGoldenText(golden, themeTable, themeSha256) {
+  const spec = golden.guard;
+  const hand = (golden.cases ?? []).filter((c) => !SEEDED_GROUND.test(c.id)).map((c) => ({ id: c.id, raw: c.raw, ...(c.note ? { note: c.note } : {}) }));
+  const cases = [...hand, ...seededGrounds(golden.generator)].map((c) => {
+    const got = groundGuard(c.raw, spec, themeTable.focusRings);
+    return { ...c, k: got.k, row: got.row };
+  });
+  const palettes = {};
+  for (const [preset, swatches] of Object.entries(golden.palettes)) {
+    const rows = presetRows(themeTable, preset);
+    const own = preset === 'purpose' ? { light: rows.light, dark: rows.dark } : { light: rows.own };
+    palettes[preset] = swatches.map((s) => {
+      const out = { id: s.id, label: s.label };
+      const ratios = {};
+      for (const key of Object.keys(own)) {
+        out[key] = paletteRow(own[key], s[key].ground, spec);
+        ratios[key] = rowRatios(out[key], own[key].accent);
+      }
+      return { ...out, ratios };
+    });
+  }
+  const withPalettes = { ...golden, palettes };
+  const themeCases = (golden.themeCases ?? []).map((t) => {
+    const got = themeFor(themeTable, withPalettes, t.preset, t.ground, t.accent);
+    return { id: t.id, preset: t.preset, ground: t.ground, accent: t.accent, ...(t.note ? { note: t.note } : {}), theme: got.theme, k: got.k };
+  });
+  const head = { ...golden, themeSha256 };
+  delete head.cases;
+  delete head.palettes;
+  delete head.themeCases;
+  const lines = JSON.stringify(head, null, 2).slice(0, -2);
+  const paletteText = Object.entries(palettes)
+    .map(([preset, swatches]) => `    ${JSON.stringify(preset)}: [\n${swatches.map((s) => `      ${JSON.stringify(s)}`).join(',\n')}\n    ]`)
+    .join(',\n');
+  return (
+    `${lines},\n  "cases": [\n${cases.map((c) => `    ${JSON.stringify(c)}`).join(',\n')}\n  ],\n` +
+    `  "palettes": {\n${paletteText}\n  },\n` +
+    `  "themeCases": [\n${themeCases.map((t) => `    ${JSON.stringify(t)}`).join(',\n')}\n  ]\n}\n`
+  );
 }
 
 /* -------------------------------------------------------------------------- preview */
@@ -903,14 +1269,22 @@ function allProblems(state) {
     ...previewProblems(state.preview),
     ...aliasProblems(state.aliasGolden, state.alias, state.page),
     ...buildProblems(state.build),
+    ...groundProblems(state.ground, state.contrast, state.themeSha256, state.schemas.settings, state.schemas.page),
     ...neverProblems(state.schemas, [
       ...PAGE_EXAMPLES.map((name, i) => [`examples/${name}`, i === 0 ? state.page : state.anonymous]),
       ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document]),
-      ['examples/contributor-page-alias.v1.example.json', state.alias]
+      ['examples/contributor-page-alias.v1.example.json', state.alias],
+      ['examples/contributor-page.v1.header.example.json', state.header],
+      ['examples/contributor-page.v1.own-ground.example.json', state.ownGround]
     ]),
     ...defaultsProblems(state.defaults, state.schemas.settings),
     ...agreeProblems(state.schemas.settings, state.schemas.page),
-    ...factsProblems([['examples/contributor-page.v1.example.json', state.page], ['examples/contributor-page.v1.anonymous.example.json', state.anonymous]]),
+    ...factsProblems([
+      ['examples/contributor-page.v1.example.json', state.page],
+      ['examples/contributor-page.v1.anonymous.example.json', state.anonymous],
+      ['examples/contributor-page.v1.header.example.json', state.header],
+      ['examples/contributor-page.v1.own-ground.example.json', state.ownGround]
+    ]),
     ...refusalProblems(state, state.refusals ?? REFUSALS),
     ...admitsProblems(state, state.admits ?? ADMITS),
     ...goldenFilesProblems(state.goldenFiles)
@@ -952,6 +1326,20 @@ const SELF_TEST = [
   ['build', (s) => { const v = s.build.vectors[0]; v.expect.repositories.groups.push({ owner: 'sam-codes', repos: [{ nodeId: 'R_kgDOSMPL0021', name: 'dotfiles', years: { from: 2026, to: 2026 }, listing: 'registered' }] }); }],
   ['build', (s) => { s.build.vectors[0].expect.counts.projects = 3; }],
   ['build', (s) => { s.build.vectors = s.build.vectors.filter((v) => v.id !== 'BV-3'); }],
+  ['ground', (s) => { s.ground.themeSha256 = '0'.repeat(64); }],
+  ['ground', (s) => { s.ground.guard.target = 4.5; }],
+  ['ground', (s) => { s.contrast.rows.find((r) => r.preset === 'purpose' && r.mode === 'dark').ink = '#ffffff'; }],
+  ['ground', (s) => { s.ground.cases[0].k += 1; }],
+  ['ground', (s) => { const c = s.ground.cases.find((x) => x.k > 0); c.row.muted = c.row.ink === '#14170f' ? '#4d5347' : '#b4b3a5'; }],
+  ['ground', (s) => { const c = s.ground.cases.find((x) => SEEDED_GROUND.test(x.id)); c.raw = c.raw === '#000001' ? '#000002' : '#000001'; }],
+  ['ground', (s) => { s.ground.cases = s.ground.cases.filter((x) => !(x.note ?? '').startsWith('neighbour')); }],
+  ['ground', (s) => { s.ground.palettes.mocha[1].light.surface = '#ffffff'; }],
+  ['ground', (s) => { s.ground.palettes.purpose[4].ratios.dark.ink = 9.99; }],
+  ['ground', (s) => { delete s.ground.palettes.purpose[0].dark; }],
+  ['ground', (s) => { s.ground.palettes.signal.pop(); }],
+  ['ground', (s) => { s.ground.palettes.mint[0].light.ground = '#eef7f2'; }],
+  ['ground', (s) => { const t = s.ground.themeCases.find((x) => x.theme.ground?.dark); t.theme.accent.dark = t.theme.accent.light; }],
+  ['ground', (s) => { s.ground.themeCases = s.ground.themeCases.filter((x) => !(x.preset === 'purpose' && /^#/.test(x.ground ?? ''))); }],
   ['never', (s) => { s.schemas.page.$defs.summarySection.properties.rank = { type: 'integer' }; }],
   ['never', (s) => { s.anonymous.identity.bio = 'Paid CHF 120 to get here'; }],
   ['never', (s) => { s.anonymous.identity.bio = 'MDQ6VXNlcjEyMzQ1Njc='; }],
@@ -962,6 +1350,7 @@ const SELF_TEST = [
   ['admits', (s) => { s.admits = [['settings', 'a background named by a colour name', (d) => { d.theme.ground = 'Cream'; }]]; }],
   ['facts', (s) => { sectionOf(s.page, 'links').items[0].url = 'https://www.linkedin.com/in/someone-else'; }],
   ['facts', (s) => { sectionOf(s.page, 'summary').projects = 4; }],
+  ['facts', (s) => { sectionOf(s.header, 'links').items[1].url = 'https://mastodon.social/@alex'; }],
   ['refusals', (s) => { s.refusals = [['page', 'an unchanged page', () => {}]]; }],
   ['goldens', (s) => { s.goldenFiles = [...s.goldenFiles, 'unchecked.v1.golden.json']; }]
 ];
@@ -981,6 +1370,11 @@ function baseState() {
   return { ...structuredClone(real), goldenFiles };
 }
 
+if (process.argv.includes('--print-ground-golden')) {
+  process.stdout.write(groundGoldenText(real.ground, real.contrast, real.themeSha256));
+  process.exit(0);
+}
+
 if (process.argv.includes('--print-accent-golden')) {
   process.stdout.write(accentGoldenText(real.accent, real.contrast, real.themeSha256, real.schemas.settings.$defs.preset.enum));
   process.exit(0);
@@ -995,6 +1389,7 @@ fail(
   problems,
   `the contributor page contracts hold: ${state.contrast.rows.length} theme rows meet WCAG 2.2 AA on their grounds and surfaces as recorded, ` +
     `the status chips and covers match the schemas, ${state.accent.cases.length} accent guard cases recompute, ` +
+    `${state.ground.cases.length} ground guard cases, ${Object.values(state.ground.palettes).reduce((n, p) => n + p.reduce((m, s) => m + (s.dark ? 2 : 1), 0), 0)} palette rows and ${state.ground.themeCases.length} document themes recompute, ` +
     `${state.preview.vectors.length} preview vectors recompute, ${state.aliasGolden.vectors.length} alias MAC vectors recompute, ` +
     `${state.build.vectors.length} builder vectors keep a hidden login off the repository list, no page member or example carries points, money or a GitHub id, ` +
     `the defaults are the schema's, ${REFUSALS.length} refusals and ${ADMITS.length} admissions hold, and every rule was proved able to fail`,

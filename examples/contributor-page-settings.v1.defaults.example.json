@@ -4,7 +4,7 @@
   "layout": "paper",
   "theme": { "preset": "purpose", "accent": null },
   "picture": { "kind": "github" },
-  "cover": { "kind": "preset", "preset": "meadow" },
+  "cover": { "kind": "none" },
   "identity": { "displayName": null, "pronouns": null, "bio": null, "showLogin": false },
   "address": "anonymous",
   "search": false,

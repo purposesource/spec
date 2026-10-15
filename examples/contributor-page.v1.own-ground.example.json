@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-03-01T00:00:00Z",
+  "source": "fixture",
+  "pid": "w6n2c8r4t1v9k5mx",
+  "versionId": "pgv_w6n2c8r4t1v9k5mxw6n2c8r4t1",
+  "address": "anonymous",
+  "search": false,
+  "layout": "minimal",
+  "theme": {
+    "preset": "purpose",
+    "accent": { "raw": "#8fcaa6", "light": "#b0d5b9", "print": "#1d5c3c" },
+    "ground": {
+      "raw": "#3366cc",
+      "light": {
+        "mode": "dark",
+        "ground": "#24488f",
+        "surface": "#325396",
+        "ink": "#ece8dc",
+        "muted": "#cacdcf",
+        "rule": "#43619b",
+        "focus": "#8ec2f0"
+      }
+    }
+  },
+  "picture": { "kind": "rosette" },
+  "cover": { "kind": "none" },
+  "identity": { "displayName": "Sam" },
+  "sections": [
+    { "id": "summary", "projects": 2, "since": 2026, "certificates": 1 },
+    {
+      "id": "certificates",
+      "items": [
+        {
+          "cid": "cert_01jm8q3s5v7x9z1b3d5f7h9k1m",
+          "typ": "contributor",
+          "variant": "participation",
+          "years": { "from": 2026, "to": 2026 },
+          "status": "expired",
+          "disclosure": "status-only"
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "items": [
+        {
+          "platform": "codeberg",
+          "handle": "sam-codes",
+          "url": "https://codeberg.org/sam-codes",
+          "show": { "icon": true, "label": true, "handle": false }
+        },
+        {
+          "platform": "x",
+          "handle": "sam_codes",
+          "url": "https://x.com/sam_codes",
+          "show": { "icon": true, "label": false, "handle": false }
+        }
+      ]
+    }
+  ],
+  "card": { "picture": true, "name": true, "login": false, "summary": true, "adopter": false, "links": true },
+  "autoUpdated": ["summary", "certificate-status"],
+  "factsAsOf": "2027-02"
+}

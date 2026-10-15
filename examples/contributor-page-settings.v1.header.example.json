@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "start": "named",
+  "layout": "profile",
+  "theme": { "preset": "purpose", "accent": null, "ground": "lilac" },
+  "picture": { "kind": "monogram" },
+  "cover": { "kind": "none" },
+  "identity": {
+    "displayName": "Alex Example",
+    "pronouns": "they/them",
+    "bio": "Maintainer of small accounting libraries.",
+    "showLogin": true,
+    "loginShow": { "icon": true, "label": false, "handle": true }
+  },
+  "address": "login",
+  "search": false,
+  "sections": [
+    { "id": "summary", "on": true },
+    { "id": "certificates", "on": true },
+    { "id": "links", "on": true },
+    { "id": "repositories", "on": false },
+    { "id": "adopter", "on": false },
+    { "id": "sponsors", "on": false }
+  ],
+  "summary": { "projects": true, "organisations": true, "since": true, "certificates": true },
+  "certificates": { "mode": "all-eligible" },
+  "repositories": { "mode": "all", "hidden": [], "years": true },
+  "adopter": { "hidden": [] },
+  "links": [
+    { "platform": "linkedin", "handle": "alex-example", "show": { "icon": true, "label": false, "handle": false } },
+    { "platform": "mastodon", "handle": "alex", "instance": "fosstodon.org", "show": { "icon": true, "label": false, "handle": false } },
+    { "platform": "orcid", "handle": "0000-0002-1825-0097" }
+  ],
+  "website": { "url": "https://alex.dev/", "show": { "icon": false, "label": false } },
+  "linksPlacement": "header",
+  "sponsors": [],
+  "card": { "picture": true, "name": true, "login": true, "summary": true, "adopter": true, "links": true }
+}
