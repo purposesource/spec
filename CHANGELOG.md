@@ -3050,7 +3050,12 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   means all three, which is how a new link starts (D149 item 4). At least one, in the schema itself (`anyOf`), so the
   api, the editor and the renderer read one rule; the api answers `page.link_display_invalid` with reason
   `none_shown`. Links that show only their logo stand side by side as plain logos. Sponsorship buttons take no
-  display member: they always show their words.
+  display member: they always show their words. A link to a platform whose brand's rules refuse its logo on the page
+  (GitLab, Stack Overflow and DEV at this version: `mark: "neutral"` in the renderer's logo record, which the
+  platform vendors as `packages/contracts/data/platform-marks.json`) must show the platform's name, because the page
+  always shows it: `page.link_display_invalid` with reason `no_mark` at save, check (m) of the description. A
+  platform whose logo is only not yet vendored (LinkedIn, until its own file is) is drawn with its name and not
+  refused. `link-platforms.v1` is unchanged.
 - `website.show` (`$defs.websiteShow`): the globe and the word "Website". It has no `handle` member, because the
   domain always shows, as the one address on the page Purpose Source does not check (design PROFILE-PAGE §5.4).
 - `identity.loginShow`: the GitHub line's logo, the word "GitHub" and "@login", at least one, while `showLogin` is on.
@@ -3097,6 +3102,8 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   owner, only the GitHub account is verified") is gone, because the chip on GitHub alone and the fixed footer carry
   its meaning; sponsorship buttons carry their platform's real logo, or their words alone where no logo is confirmed;
   the cover is drawn only by the `profile` layout; and the accent's `raw` no longer tints a ring round the picture.
+  `theme`'s description says what a failed ground row falls back to: the preset's light row alone, or `purpose`'s
+  two rows where the ground was a palette pair.
 
 ### 1.0.4 — unreleased (2026-10-13; ops decision D138)
 
