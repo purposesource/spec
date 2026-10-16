@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "start": "unnamed",
+  "layout": "paper",
+  "theme": { "preset": "purpose", "accent": null },
+  "picture": { "kind": "rosette" },
+  "cover": { "kind": "none" },
+  "identity": { "displayName": "Robin", "pronouns": null, "bio": null, "showLogin": false },
+  "about": { "on": true, "variant": "medium", "ownText": null, "version": 1 },
+  "address": "anonymous",
+  "search": false,
+  "sections": [
+    { "id": "summary", "on": true },
+    { "id": "certificates", "on": true },
+    { "id": "repositories", "on": false },
+    { "id": "adopter", "on": false },
+    { "id": "links", "on": false },
+    { "id": "sponsors", "on": false }
+  ],
+  "summary": { "projects": true, "organisations": true, "since": true, "certificates": true },
+  "certificates": { "mode": "all-eligible" },
+  "repositories": { "mode": "all", "hidden": [], "years": true },
+  "adopter": { "hidden": [] },
+  "links": [],
+  "website": null,
+  "sponsors": [],
+  "card": { "picture": true, "name": true, "login": true, "summary": true, "adopter": true, "links": false }
+}

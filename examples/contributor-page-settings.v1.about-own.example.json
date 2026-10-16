@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "start": "named",
+  "layout": "paper",
+  "theme": { "preset": "mint", "accent": null },
+  "picture": { "kind": "monogram" },
+  "cover": { "kind": "none" },
+  "identity": { "displayName": "Alex Example", "pronouns": "they/them", "bio": null, "showLogin": true },
+  "about": {
+    "on": true,
+    "variant": "own",
+    "ownText": "I build small accounting libraries that freelancers and tiny firms rely on. I chose Purpose Source because I want that work to stay free for them, while the large companies that use it give something back.\nEvery year my credits become a certificate I can show, and I get a say in which causes the fees help.",
+    "version": 1
+  },
+  "address": "mixed",
+  "search": false,
+  "sections": [
+    { "id": "summary", "on": true },
+    { "id": "certificates", "on": true },
+    { "id": "repositories", "on": true },
+    { "id": "adopter", "on": true },
+    { "id": "links", "on": false },
+    { "id": "sponsors", "on": false }
+  ],
+  "summary": { "projects": true, "organisations": true, "since": true, "certificates": true },
+  "certificates": { "mode": "all-eligible" },
+  "repositories": { "mode": "all", "hidden": [], "years": true },
+  "adopter": { "hidden": [] },
+  "links": [],
+  "website": null,
+  "sponsors": [],
+  "card": { "picture": true, "name": true, "login": true, "summary": true, "adopter": true, "links": false }
+}

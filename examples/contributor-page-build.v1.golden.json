@@ -2,9 +2,10 @@
   "$comment": [
     "Vectors of the one builder (`ContributorPageBuilder`, design PROFILE-PAGE-2026-10-06 §3.6, §8.1) for a rule the public document cannot show: on a page without the login, no repository under the person's own GitHub account is listed or counted, because its group would print the login as the owner's name (schemas/contributor-page.v1.json `repositoriesSection`; contributor-page-settings.v1 check (j)). The document leaves out the very login the rule compares with, so neither schema can enforce it; this file is where the builder's tests (slice P14d) and check:contributor-page meet it.",
     "`input` is the slice of the builder's inputs the rule reads: the person's current GitHub login, `showLogin`, the settings' `repositories` choice, and the credited repositories as the facts and the registry give them at this build (`owner` and `name` are the registry's). `expect` is either the repositories section (null when it has nothing to show and is not drawn), the two counts the summary takes from the same list (each printed only when switched on and not zero), and `leftOut`, every repository the rule removed with the code the editor shows beside it; or `{refused}`, the api's code at save.",
-    "Groups are in owner order and rows in name order (design §8.1). Every owner and name that is listed here is lower-case ASCII, and no two that are sorted together share a first letter, so any name order gives the same answer; the collation itself is the builder's."
+    "Groups are in owner order and rows in name order (design §8.1). Every owner and name that is listed here is lower-case ASCII, and no two that are sorted together share a first letter, so any name order gives the same answer; the collation itself is the builder's.",
+    "`about` (1.2.0; ops decision D163): vectors of the one builder's about block, for the rules the public document cannot show alone: what it writes for the settings' `about` (schemas/contributor-page-settings.v1.json `about`) into the document's `about` (schemas/contributor-page.v1.json `about`). `input.about` is the settings' member; `input.textRules` is the text rules' answer to `ownText` at this build (`accepted` or `refused`; null where there are no words), which the builder asks Psn.PageSafety and this file states, as `credited` states the facts. `expect.about` is the document's member, or null when none is written. The tick off writes nothing; `own` with no words, or with words the rules now refuse, is written as `short`; the version is the settings' own, never stamped by the builder."
   ],
-  "specVersion": "1.0.0",
+  "specVersion": "1.1.0",
   "vectors": [
     {
       "id": "BV-1",
@@ -351,6 +352,101 @@
             "code": "page.repository_shows_login"
           }
         ]
+      }
+    }
+  ],
+  "about": [
+    {
+      "id": "BA-1",
+      "note": "The tick is off: no about block, whatever the variant; the choice is kept in the settings.",
+      "input": {
+        "about": {
+          "on": false,
+          "variant": "medium",
+          "ownText": null,
+          "version": 1
+        },
+        "textRules": null
+      },
+      "expect": {
+        "about": null
+      }
+    },
+    {
+      "id": "BA-2",
+      "note": "In my own words, with no words yet: the page shows our Short text until words exist (CW-38).",
+      "input": {
+        "about": {
+          "on": true,
+          "variant": "own",
+          "ownText": null,
+          "version": 1
+        },
+        "textRules": null
+      },
+      "expect": {
+        "about": {
+          "variant": "short",
+          "version": 1
+        }
+      }
+    },
+    {
+      "id": "BA-3",
+      "note": "In my own words, with words a newer text rule refuses at a rebuild (\"Purpose Source\" followed by \"team\"): our Short text in their place, as a refused bio is left out.",
+      "input": {
+        "about": {
+          "on": true,
+          "variant": "own",
+          "ownText": "Writing for the Purpose Source team here: we keep these tools free.",
+          "version": 1
+        },
+        "textRules": "refused"
+      },
+      "expect": {
+        "about": {
+          "variant": "short",
+          "version": 1
+        }
+      }
+    },
+    {
+      "id": "BA-4",
+      "note": "In my own words, accepted: the words exactly as stored.",
+      "input": {
+        "about": {
+          "on": true,
+          "variant": "own",
+          "ownText": "Purpose Source lets my small libraries stay free for the people who need them most.",
+          "version": 1
+        },
+        "textRules": "accepted"
+      },
+      "expect": {
+        "about": {
+          "variant": "own",
+          "version": 1,
+          "text": "Purpose Source lets my small libraries stay free for the people who need them most."
+        }
+      }
+    },
+    {
+      "id": "BA-5",
+      "note": "Medium, with own words kept from an earlier choice: the words stay in the settings and never reach the document.",
+      "input": {
+        "about": {
+          "on": true,
+          "variant": "medium",
+          "ownText": "Purpose Source lets my small libraries stay free for the people who need them most.",
+          "version": 1
+        },
+        "textRules": "accepted"
+      },
+      "expect": {
+        "about": {
+          "variant": "medium",
+          "version": 1
+        }
       }
     }
   ]

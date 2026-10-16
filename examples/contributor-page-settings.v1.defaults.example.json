@@ -6,6 +6,7 @@
   "picture": { "kind": "github" },
   "cover": { "kind": "none" },
   "identity": { "displayName": null, "pronouns": null, "bio": null, "showLogin": false },
+  "about": { "on": true, "variant": "short", "ownText": null, "version": 1 },
   "address": "anonymous",
   "search": false,
   "sections": [

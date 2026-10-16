@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "current": 1,
+  "versions": [
+    {
+      "version": 1,
+      "from": "2026-10-16",
+      "sha256": "aba6a333bc05cd1f09667423567cc804bb3dc5ffa0827f7f620519360f79b01f",
+      "short": {
+        "heading": "The purpose behind this work",
+        "lint": "copy-lint-allow: mention; copy-lint:allow open-source-mention count='2' reason='D25: the predecessor named once; this marker counts itself'", "paragraphs": ["Open source already helps people. Under Purpose Source, the work on this page can do even more good. It stays free for personal use and smaller organisations, and the fees that large companies pay fund listed charities."],
+        "closing": "same-paragraph"
+      },
+      "medium": {
+        "heading": "The purpose behind this work",
+        "lint": "copy-lint-allow: mention; copy-lint:allow open-source-mention count='2' reason='D25: the predecessor named once; this marker counts itself'", "paragraphs": ["Open source already helps people. Under Purpose Source, the work on this page can do even more good. It stays free for personal use, smaller organisations, non-profits, state schools, universities and public bodies in their own work. Large companies that use it pay a fee, and those fees fund listed charities. The people who build it keep their copyright, and their work can help people they may never meet."],
+        "closing": "same-paragraph"
+      },
+      "long": {
+        "heading": "The purpose behind this work",
+        "lint": "copy-lint-allow: mention; copy-lint:allow open-source-mention count='2' reason='D25: the predecessor named once; this marker counts itself'", "paragraphs": ["Open source already helps people. Under Purpose Source, the work on this page can do even more good, for people its makers may never meet.",
+          "Anyone may use, change and share it under its licence. It stays free for personal use, smaller organisations, non-profits, state schools, universities and public bodies in their own work. Large companies that use it pay a published fee, which maintainers can waive for any organisation they choose. The fees fund listed charities, chosen within seven areas of care: health, education, poverty relief, humanitarian aid, the environment, animal welfare and research. Every cost and every transfer is published.",
+          "The people who build the software keep their copyright, and maintainers keep control. Each release also becomes available under Apache-2.0 four years after its publication. No one is paid from these fees for a contribution. Contributors are credited instead, and have a say in the causes their work supports."],
+        "closing": "own-paragraph"
+      },
+      "proof": {
+        "frame": "Further down, you will find {list}: proof of my part in this work.",
+        "and": " and ",
+        "comma": ", ",
+        "nouns": {
+          "certificates": {"one": "my certificate", "other": "my certificates"},
+          "repositories": {"one": "the project that credited me", "other": "the projects that credited me"},
+          "summary": "how many projects credited me",
+          "adopter": {"one": "the repository where I adopted Purpose Source", "other": "the repositories where I adopted Purpose Source"}
+        }
+      },
+      "invite": {
+        "withCertificates": "If you contribute to Purpose Source projects, you can {link} too.",
+        "withoutCertificates": "If you contribute to Purpose Source projects, you can {link}.",
+        "link": {"words": "earn certificates for your own work", "path": "/for/contributors"}
+      },
+      "own": {
+        "heading": "What Purpose Source means to me",
+        "line": "Purpose Source is shared software with charity built into its licence: free for personal use and smaller organisations, while the fees that large companies pay fund listed charities."
+      },
+      "learnMore": {"words": "Learn more", "path": "/"}
+    }
+  ]
+}

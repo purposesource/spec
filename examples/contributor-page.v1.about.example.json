@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-03-01T00:00:00Z",
+  "source": "fixture",
+  "pid": "r5t8w2k6m9q3v7xz",
+  "versionId": "pgv_r5t8w2k6m9q3v7xzr5t8w2k6m9",
+  "address": "anonymous",
+  "search": false,
+  "layout": "paper",
+  "theme": { "preset": "purpose" },
+  "picture": { "kind": "rosette" },
+  "cover": { "kind": "none" },
+  "identity": { "displayName": "Robin" },
+  "about": { "variant": "medium", "version": 1 },
+  "sections": [
+    { "id": "summary", "projects": 2, "organisations": 2, "since": 2026, "certificates": 1 },
+    {
+      "id": "certificates",
+      "items": [
+        {
+          "cid": "cert_01jr4t6v8x0z2b4d6f8h0k2m4p",
+          "typ": "contributor",
+          "variant": "participation",
+          "years": { "from": 2026, "to": 2026 },
+          "status": "valid",
+          "disclosure": "status-only"
+        }
+      ]
+    }
+  ],
+  "card": { "picture": true, "name": true, "login": false, "summary": true, "adopter": false, "links": false },
+  "autoUpdated": ["summary", "certificate-status"],
+  "factsAsOf": "2027-02"
+}

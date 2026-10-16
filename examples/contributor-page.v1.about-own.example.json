@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-03-01T00:00:00Z",
+  "source": "fixture",
+  "pid": "n4c8r2v6x9k3m7tq",
+  "versionId": "pgv_n4c8r2v6x9k3m7tqn4c8r2v6x9",
+  "address": "mixed",
+  "search": false,
+  "login": "example-contributor",
+  "layout": "paper",
+  "theme": { "preset": "mint" },
+  "picture": { "kind": "monogram", "letters": "AE" },
+  "cover": { "kind": "none" },
+  "identity": { "displayName": "Alex Example", "pronouns": "they/them" },
+  "about": {
+    "variant": "own",
+    "version": 1,
+    "text": "I build small accounting libraries that freelancers and tiny firms rely on. I chose Purpose Source because I want that work to stay free for them, while the large companies that use it give something back.\nEvery year my credits become a certificate I can show, and I get a say in which causes the fees help."
+  },
+  "sections": [
+    { "id": "summary", "projects": 2, "organisations": 1, "since": 2026, "certificates": 1 },
+    {
+      "id": "certificates",
+      "items": [
+        {
+          "cid": "cert_01jk2m4p6r8t0v2x4z6b8d0f2h",
+          "typ": "contributor",
+          "variant": "participation",
+          "years": { "from": 2026, "to": 2026 },
+          "status": "valid",
+          "disclosure": "full",
+          "repos": [{ "nodeId": "R_kgDOSMPL0001", "fullName": "example-org/ledger-tools" }]
+        }
+      ]
+    },
+    {
+      "id": "repositories",
+      "groups": [
+        {
+          "owner": "example-org",
+          "repos": [
+            {
+              "nodeId": "R_kgDOSMPL0001",
+              "name": "ledger-tools",
+              "years": { "from": 2026, "to": 2027 },
+              "listing": "registered"
+            },
+            {
+              "nodeId": "R_kgDOSMPL0002",
+              "name": "tax-tables",
+              "years": { "from": 2027, "to": 2027 },
+              "listing": "registered"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adopter",
+      "items": [
+        {
+          "nodeId": "R_kgDOSMPL0001",
+          "fullName": "example-org/ledger-tools",
+          "evidence": { "kind": "merged-pr", "number": 42 }
+        }
+      ]
+    }
+  ],
+  "card": { "picture": true, "name": true, "login": true, "summary": true, "adopter": true, "links": false },
+  "autoUpdated": ["summary", "repositories", "adopter", "certificate-status", "registry-names", "login"],
+  "factsAsOf": "2027-02"
+}

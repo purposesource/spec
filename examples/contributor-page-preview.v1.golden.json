@@ -3,7 +3,7 @@
     "Worked vectors of the contributor page's previewSha256 (design PROFILE-PAGE-2026-10-06 §3.6; the definition is in schemas/contributor-page.v1.json): the document, the preimage (generatedAt and versionId removed, card.h16 removed, a GitHub picture reduced to {\"kind\":\"github\"}), its RFC 8785 (JCS) text, and the lowercase hex SHA-256 of that text's UTF-8 bytes.",
     "The api and index-build (C#, through the one builder) and any reader recompute every vector. check:contributor-page validates each document against contributor-page.v1 and recomputes the preimage, the text and the digest. A C# serialiser that escapes non-ASCII by default (System.Text.Json does) fails PV-3, which is why it is here."
   ],
-  "specVersion": "1.0.0",
+  "specVersion": "1.1.0",
   "vectors": [
     {
       "id": "PV-1",
@@ -691,6 +691,380 @@
       },
       "canonical": "{\"address\":\"mixed\",\"autoUpdated\":[\"summary\",\"repositories\",\"registry-names\",\"login\",\"github-picture\"],\"card\":{\"adopter\":false,\"links\":false,\"login\":true,\"name\":true,\"picture\":true,\"summary\":true},\"cover\":{\"colour\":\"#0f6b52\",\"kind\":\"solid\"},\"factsAsOf\":\"2027-03\",\"identity\":{\"bio\":\"Building tools for small teams 🌱\\n«Ordnung ist das halbe Leben»\",\"displayName\":\"Zoë Ångström\",\"pronouns\":\"she/her\"},\"layout\":\"minimal\",\"login\":\"zoe-example\",\"picture\":{\"kind\":\"github\"},\"pid\":\"q9v4c7x2m8t1z5k3\",\"schemaVersion\":1,\"search\":false,\"sections\":[{\"groups\":[{\"owner\":\"example-org\",\"repos\":[{\"listing\":\"registered\",\"name\":\"tax-tables\",\"nodeId\":\"R_kgDOSMPL0002\"}]}],\"id\":\"repositories\"},{\"id\":\"summary\",\"projects\":1,\"since\":2027}],\"source\":\"fixture\",\"theme\":{\"preset\":\"mint\"}}",
       "previewSha256": "09ceedf3e9a8423e558a9099bfc01fd2e220cdb03593c5a92f00729b45e5335f"
+    },
+    {
+      "id": "PV-4",
+      "note": "The about block with our Medium text (1.2.0; ops decision D163), the page of examples/contributor-page.v1.about.example.json: `about` is {variant, version} and is inside the preimage like every member, so a new version of our words is a new preview. The commonest launch page: the summary and one status-only certificate, no repositories section.",
+      "document": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-03-01T00:00:00Z",
+        "source": "fixture",
+        "pid": "r5t8w2k6m9q3v7xz",
+        "versionId": "pgv_r5t8w2k6m9q3v7xzr5t8w2k6m9",
+        "address": "anonymous",
+        "search": false,
+        "layout": "paper",
+        "theme": {
+          "preset": "purpose"
+        },
+        "picture": {
+          "kind": "rosette"
+        },
+        "cover": {
+          "kind": "none"
+        },
+        "identity": {
+          "displayName": "Robin"
+        },
+        "about": {
+          "variant": "medium",
+          "version": 1
+        },
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2,
+            "organisations": 2,
+            "since": 2026,
+            "certificates": 1
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "cid": "cert_01jr4t6v8x0z2b4d6f8h0k2m4p",
+                "typ": "contributor",
+                "variant": "participation",
+                "years": {
+                  "from": 2026,
+                  "to": 2026
+                },
+                "status": "valid",
+                "disclosure": "status-only"
+              }
+            ]
+          }
+        ],
+        "card": {
+          "picture": true,
+          "name": true,
+          "login": false,
+          "summary": true,
+          "adopter": false,
+          "links": false
+        },
+        "autoUpdated": [
+          "summary",
+          "certificate-status"
+        ],
+        "factsAsOf": "2027-02"
+      },
+      "preimage": {
+        "schemaVersion": 1,
+        "source": "fixture",
+        "pid": "r5t8w2k6m9q3v7xz",
+        "address": "anonymous",
+        "search": false,
+        "layout": "paper",
+        "theme": {
+          "preset": "purpose"
+        },
+        "picture": {
+          "kind": "rosette"
+        },
+        "cover": {
+          "kind": "none"
+        },
+        "identity": {
+          "displayName": "Robin"
+        },
+        "about": {
+          "variant": "medium",
+          "version": 1
+        },
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2,
+            "organisations": 2,
+            "since": 2026,
+            "certificates": 1
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "cid": "cert_01jr4t6v8x0z2b4d6f8h0k2m4p",
+                "typ": "contributor",
+                "variant": "participation",
+                "years": {
+                  "from": 2026,
+                  "to": 2026
+                },
+                "status": "valid",
+                "disclosure": "status-only"
+              }
+            ]
+          }
+        ],
+        "card": {
+          "picture": true,
+          "name": true,
+          "login": false,
+          "summary": true,
+          "adopter": false,
+          "links": false
+        },
+        "autoUpdated": [
+          "summary",
+          "certificate-status"
+        ],
+        "factsAsOf": "2027-02"
+      },
+      "canonical": "{\"about\":{\"variant\":\"medium\",\"version\":1},\"address\":\"anonymous\",\"autoUpdated\":[\"summary\",\"certificate-status\"],\"card\":{\"adopter\":false,\"links\":false,\"login\":false,\"name\":true,\"picture\":true,\"summary\":true},\"cover\":{\"kind\":\"none\"},\"factsAsOf\":\"2027-02\",\"identity\":{\"displayName\":\"Robin\"},\"layout\":\"paper\",\"picture\":{\"kind\":\"rosette\"},\"pid\":\"r5t8w2k6m9q3v7xz\",\"schemaVersion\":1,\"search\":false,\"sections\":[{\"certificates\":1,\"id\":\"summary\",\"organisations\":2,\"projects\":2,\"since\":2026},{\"id\":\"certificates\",\"items\":[{\"cid\":\"cert_01jr4t6v8x0z2b4d6f8h0k2m4p\",\"disclosure\":\"status-only\",\"status\":\"valid\",\"typ\":\"contributor\",\"variant\":\"participation\",\"years\":{\"from\":2026,\"to\":2026}}]}],\"source\":\"fixture\",\"theme\":{\"preset\":\"purpose\"}}",
+      "previewSha256": "00284ec88c59fff5d699591701f26aa51050e19ffdcf5bbcd54057166c9a39d4"
+    },
+    {
+      "id": "PV-5",
+      "note": "The person's own words (1.2.0; D163 item 4), the page of examples/contributor-page.v1.about-own.example.json: `about.text` keeps its line break, and the digest is over the text as stored.",
+      "document": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-03-01T00:00:00Z",
+        "source": "fixture",
+        "pid": "n4c8r2v6x9k3m7tq",
+        "versionId": "pgv_n4c8r2v6x9k3m7tqn4c8r2v6x9",
+        "address": "mixed",
+        "search": false,
+        "login": "example-contributor",
+        "layout": "paper",
+        "theme": {
+          "preset": "mint"
+        },
+        "picture": {
+          "kind": "monogram",
+          "letters": "AE"
+        },
+        "cover": {
+          "kind": "none"
+        },
+        "identity": {
+          "displayName": "Alex Example",
+          "pronouns": "they/them"
+        },
+        "about": {
+          "variant": "own",
+          "version": 1,
+          "text": "I build small accounting libraries that freelancers and tiny firms rely on. I chose Purpose Source because I want that work to stay free for them, while the large companies that use it give something back.\nEvery year my credits become a certificate I can show, and I get a say in which causes the fees help."
+        },
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2,
+            "organisations": 1,
+            "since": 2026,
+            "certificates": 1
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "cid": "cert_01jk2m4p6r8t0v2x4z6b8d0f2h",
+                "typ": "contributor",
+                "variant": "participation",
+                "years": {
+                  "from": 2026,
+                  "to": 2026
+                },
+                "status": "valid",
+                "disclosure": "full",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0001",
+                    "fullName": "example-org/ledger-tools"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0001",
+                    "name": "ledger-tools",
+                    "years": {
+                      "from": 2026,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  },
+                  {
+                    "nodeId": "R_kgDOSMPL0002",
+                    "name": "tax-tables",
+                    "years": {
+                      "from": 2027,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "nodeId": "R_kgDOSMPL0001",
+                "fullName": "example-org/ledger-tools",
+                "evidence": {
+                  "kind": "merged-pr",
+                  "number": 42
+                }
+              }
+            ]
+          }
+        ],
+        "card": {
+          "picture": true,
+          "name": true,
+          "login": true,
+          "summary": true,
+          "adopter": true,
+          "links": false
+        },
+        "autoUpdated": [
+          "summary",
+          "repositories",
+          "adopter",
+          "certificate-status",
+          "registry-names",
+          "login"
+        ],
+        "factsAsOf": "2027-02"
+      },
+      "preimage": {
+        "schemaVersion": 1,
+        "source": "fixture",
+        "pid": "n4c8r2v6x9k3m7tq",
+        "address": "mixed",
+        "search": false,
+        "login": "example-contributor",
+        "layout": "paper",
+        "theme": {
+          "preset": "mint"
+        },
+        "picture": {
+          "kind": "monogram",
+          "letters": "AE"
+        },
+        "cover": {
+          "kind": "none"
+        },
+        "identity": {
+          "displayName": "Alex Example",
+          "pronouns": "they/them"
+        },
+        "about": {
+          "variant": "own",
+          "version": 1,
+          "text": "I build small accounting libraries that freelancers and tiny firms rely on. I chose Purpose Source because I want that work to stay free for them, while the large companies that use it give something back.\nEvery year my credits become a certificate I can show, and I get a say in which causes the fees help."
+        },
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2,
+            "organisations": 1,
+            "since": 2026,
+            "certificates": 1
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "cid": "cert_01jk2m4p6r8t0v2x4z6b8d0f2h",
+                "typ": "contributor",
+                "variant": "participation",
+                "years": {
+                  "from": 2026,
+                  "to": 2026
+                },
+                "status": "valid",
+                "disclosure": "full",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0001",
+                    "fullName": "example-org/ledger-tools"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0001",
+                    "name": "ledger-tools",
+                    "years": {
+                      "from": 2026,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  },
+                  {
+                    "nodeId": "R_kgDOSMPL0002",
+                    "name": "tax-tables",
+                    "years": {
+                      "from": 2027,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "nodeId": "R_kgDOSMPL0001",
+                "fullName": "example-org/ledger-tools",
+                "evidence": {
+                  "kind": "merged-pr",
+                  "number": 42
+                }
+              }
+            ]
+          }
+        ],
+        "card": {
+          "picture": true,
+          "name": true,
+          "login": true,
+          "summary": true,
+          "adopter": true,
+          "links": false
+        },
+        "autoUpdated": [
+          "summary",
+          "repositories",
+          "adopter",
+          "certificate-status",
+          "registry-names",
+          "login"
+        ],
+        "factsAsOf": "2027-02"
+      },
+      "canonical": "{\"about\":{\"text\":\"I build small accounting libraries that freelancers and tiny firms rely on. I chose Purpose Source because I want that work to stay free for them, while the large companies that use it give something back.\\nEvery year my credits become a certificate I can show, and I get a say in which causes the fees help.\",\"variant\":\"own\",\"version\":1},\"address\":\"mixed\",\"autoUpdated\":[\"summary\",\"repositories\",\"adopter\",\"certificate-status\",\"registry-names\",\"login\"],\"card\":{\"adopter\":true,\"links\":false,\"login\":true,\"name\":true,\"picture\":true,\"summary\":true},\"cover\":{\"kind\":\"none\"},\"factsAsOf\":\"2027-02\",\"identity\":{\"displayName\":\"Alex Example\",\"pronouns\":\"they/them\"},\"layout\":\"paper\",\"login\":\"example-contributor\",\"picture\":{\"kind\":\"monogram\",\"letters\":\"AE\"},\"pid\":\"n4c8r2v6x9k3m7tq\",\"schemaVersion\":1,\"search\":false,\"sections\":[{\"certificates\":1,\"id\":\"summary\",\"organisations\":1,\"projects\":2,\"since\":2026},{\"id\":\"certificates\",\"items\":[{\"cid\":\"cert_01jk2m4p6r8t0v2x4z6b8d0f2h\",\"disclosure\":\"full\",\"repos\":[{\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"}],\"status\":\"valid\",\"typ\":\"contributor\",\"variant\":\"participation\",\"years\":{\"from\":2026,\"to\":2026}}]},{\"groups\":[{\"owner\":\"example-org\",\"repos\":[{\"listing\":\"registered\",\"name\":\"ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\",\"years\":{\"from\":2026,\"to\":2027}},{\"listing\":\"registered\",\"name\":\"tax-tables\",\"nodeId\":\"R_kgDOSMPL0002\",\"years\":{\"from\":2027,\"to\":2027}}]}],\"id\":\"repositories\"},{\"id\":\"adopter\",\"items\":[{\"evidence\":{\"kind\":\"merged-pr\",\"number\":42},\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"}]}],\"source\":\"fixture\",\"theme\":{\"preset\":\"mint\"}}",
+      "previewSha256": "15a22d3257def3664f08e9378a5059b1b84a6f77b1c4da710b964e4b1c84444a"
     }
   ]
 }

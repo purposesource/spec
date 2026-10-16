@@ -3090,7 +3090,50 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   without its word, the website without its globe, a `purpose` pair) and `own-ground` (an own colour on `purpose`, a
   link without its username).
 
+
+### 1.2.0 — unreleased (2026-10-16; ops decision D163 and its dated notes) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump (design D163-ABOUT-TEXTS-2026-10-16, version 2 and the technical
+  map). `about`, the page's about block: `{on, variant, ownText, version}`. `on` is the editor's one tick, "Help visitors
+  understand what this is about", on by default (D163 item 1); `variant` is our `short`, `medium` or `long` text, or the
+  person's `own` words (item 2, item 4); `ownText` is kept whatever the variant and shown only with `own`; `version` is the
+  version of `contributor-page-about.v1` the document was saved under. It is not one of `sections`: the block is always first,
+  right under the header, so the six-section list, its reader and the editor's reordering do not move.
+- ALWAYS WRITTEN. `about` is optional, so a document stored before 1.2.0 stays valid, but unlike 1.1.0's members it is never
+  left out at its default, because its absence means "stored before 1.2.0": the api reads such a draft as on, Short and no
+  words, writes `about` at every save, and a version stored without it builds no about block. The schema says so in a new
+  `x-psn.alwaysWritten`, and `check:contributor-page` holds the defaults example to it: `about` at its default, `version`
+  the texts' `current`.
+- THE API OWNS `version` (check (n) of the description): it sets it to the texts' `current` at every save, whatever was sent
+  (the editor may echo it or leave it out), and when it reads a draft, so the editor previews the current words; a published
+  version keeps the one it was frozen with, so its page keeps its words until the person publishes again.
+- OWN WORDS ARE CHECKED LIKE THE BIO (D163 item 4): at most 600 code points and five line breaks, plain text, never linked,
+  through the bio's text rules in the bio's order, refused as `page.text_invalid` at `/about/ownText` with the rule's reason.
+  `own` with no words is stored, and the page shows the Short text until words exist; own words a newer rule refuses make the
+  stored read fail, as a refused bio does, and the builder shows Short in their place.
+- Examples: the defaults example carries `about` at its default; two further examples, `about` (our Medium text on the
+  commonest launch page, the summary and one status-only certificate) and `about-own` (own words of about 300 characters with
+  one line break, on a page that shows the login, its certificates, repositories and adopter items).
+
 ## contributor-page.v1.json
+
+### 1.2.0 — unreleased (2026-10-16; ops decision D163 and its dated notes) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump, optional: every document written under 1.1.x stays valid. `about`,
+  `{variant, version, text?}`, written right after `identity` only while the person's tick is on; absent, the page has no
+  about block (the tick is off, or the version was saved before 1.2.0). `variant` is as built: the settings' `own` with no
+  words, or with words the text rules refuse at this build, is built as `short`. `text`, the person's own words exactly as
+  stored (at most 600 code points and five line breaks), is present with `own` and only then.
+- The block is drawn first, right under the header, before `sections`. It is not a section: never vouched, never on the card,
+  never in `autoUpdated`; its words are `contributor-page-about.v1`'s at `version`, pinned with the published version, and it
+  is inside the preview hash like every member. The renderer composes the proof sentence and the invite at every render from
+  the document's own sections and withholds the invite where certificates are not issued on the document's plane (D160
+  item 8), as `contributor-page-about.v1` describes; a renderer without the version leaves the block out. WHAT A READER CHECKS
+  says the block is Purpose Source's explanation, or the owner's own words followed by ours, not a fact Purpose Source checks.
+- Two further examples, the documents the builder makes of the settings' `about` and `about-own` examples; the preview
+  golden's PV-4 (Medium) and PV-5 (own words with a line break); and the build golden's `about` vectors BA-1 to BA-5: the tick
+  off writes nothing, own with no words and own with refused words write Short, accepted words are written as stored, and
+  own words kept under Medium never reach the document. The three earlier examples and PV-1 to PV-3 keep their bytes.
 
 ### 1.1.0 — unreleased (2026-10-15; ops decision D149 and its dated note) — pre-release
 
@@ -3331,6 +3374,37 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 - `check:links` (new) holds the table to what its shape cannot say and runs every golden case
   through `scripts/lib/link-rules.mjs`, the gate's own reading of the steps (not the platform's
   pipeline), proving each rule able to fail first.
+
+## contributor-page-about.v1.json
+
+### 1.0.0 — unreleased (2026-10-16; ops decision D163 and its dated notes) — pre-release
+
+- Initial publication, **pre-release**: our versioned words for the contributor page's about block, published as DATA the
+  way the link table is: `examples/contributor-page-about.v1.example.json` IS the texts, byte for byte, for the platform
+  (`packages/contracts/data/contributor-page-about.v1.json`: the api stamps `current`, the editor shows the texts) and the
+  website edge (the renderer draws them) to vendor and pin by SHA-256.
+- VERSION 1 is version 2 of design D163-ABOUT-TEXTS-2026-10-16, claim-checked (`wf_6acc77eb-435`): the heading "The purpose
+  behind this work"; Short and Medium as one paragraph each, Long as three; the proof sentence's frame "Further down, you will
+  find {list}: proof of my part in this work." with its seven noun forms (certificates, the projects that credited me, how
+  many projects credited me, the repositories where I adopted Purpose Source, singular and plural); the invite's two forms,
+  with and without "too", linking "earn certificates for your own work" to /for/contributors; the own words' heading "What
+  Purpose Source means to me" and our one line after them; and "Learn more" to the site's root. Each text names the
+  predecessor once, as ops decision D25 allows, never as a descriptor; no charity is named, no figure is printed, no
+  contributor pay is promised.
+- APPEND-ONLY. A version's words never change once published: each entry carries the SHA-256 of its own RFC 8785 text, and
+  `check:contributor-page` holds each published version to the digest it records, so new words are a new version, stamped
+  into drafts at their next save while published pages keep theirs.
+- THE COMPOSITION IS THE CONTRACT. The schema's description states how a renderer draws the block from a document: the proof
+  sentence from the listed valid or expired certificates (C), the repositories section (P) or the summary's projects count
+  without it (Q), and the adopter items (A), always in that order, joined with "and" or a comma then "and"; none of them,
+  no proof sentence; the invite's "too" only with C; the invite withheld where certificates are not issued on the document's
+  plane, the block then ending with Learn more; the own words framed by our heading and line, with no proof sentence and no
+  invite. `examples/contributor-page-about.v1.golden.json` (new) holds 17 sentence vectors (the eleven combinations, singular
+  forms, revoked and superseded certificates left out, the fallback, the invite withheld) and 9 whole blocks, pinned to the
+  texts' SHA-256, recomputed by `check:contributor-page`'s own reading of the rule; every string equals the one the texts'
+  claim check passed.
+- A `lint` member, never drawn, carries this repository's and the website's copy-lint allow markers on the line of each
+  paragraph that names the predecessor.
 
 ## openapi/edge-public.v1.yaml
 

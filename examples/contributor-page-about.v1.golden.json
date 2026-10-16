@@ -1,0 +1,975 @@
+{
+  "$comment": [
+    "Vectors of the contributor page's about block (1.2.0; ops decision D163; schemas/contributor-page-about.v1.json): what a renderer draws from our versioned words and the page document. The words are the texts file's at `version`, which `textsSha256` names by the SHA-256 of its bytes, so this file moves with every new version.",
+    "`sentences`: the proof sentence and the invite composed from a document's sections. `input.sections` is the slice of `contributor-page.v1` `sections` the rule reads (a certificates item's `status`, the repositories section's rows, the summary's `projects`, the adopter items); `input.certificatesIssued` is the renderer's own knowledge of the plane (false on production until ops decision D160 item 8 opens certificates there). `expect.proof` and `expect.invite` are the sentences, null when left out, the invite with its link words as plain text; `expect.link` is the block's one link: the invite's words and path, `inSentence` true, or Learn more and the site's root where the invite is withheld.",
+    "`blocks`: whole blocks per variant, the heading and the paragraphs as drawn (link words as plain text), and the link. For `own`, `input.text` is the document's `about.text` and the paragraphs are the person's words, then our one line, which Learn more follows. A block whose paragraphs name the predecessor writes them on one line after a `lint` member, which is not part of the expected block: this repository's copy-lint reads its allow marker line by line.",
+    "check:contributor-page recomputes every vector with its own reading of the rule (not the renderer). The strings of `blocks` AB-1 to AB-5 and of every sentence are the ones the texts' claim check passed (design D163-ABOUT-TEXTS-2026-10-16, version 2)."
+  ],
+  "specVersion": "1.0.0",
+  "textsSha256": "02e5ea699374b25430d61fa168c8b54a1617ab3f08ba630bc38822b119ddd36d",
+  "version": 1,
+  "sentences": [
+    {
+      "id": "AV-01",
+      "note": "C alone: two listed certificates, valid and expired; the invite says \"too\".",
+      "input": {
+        "sections": [
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "valid"
+              },
+              {
+                "status": "expired"
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find my certificates: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work too.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-02",
+      "note": "P alone: the repositories section, two rows; no certificate, so no \"too\".",
+      "input": {
+        "sections": [
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "name": "ledger-tools"
+                  },
+                  {
+                    "name": "tax-tables"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find the projects that credited me: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-03",
+      "note": "Q alone, the commonest page at launch: the summary counts the projects and no repositories section lists them.",
+      "input": {
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find how many projects credited me: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-04",
+      "note": "A alone: two adopter items.",
+      "input": {
+        "sections": [
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "fullName": "example-org/ledger-tools"
+              },
+              {
+                "fullName": "example-org/tax-tables"
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find the repositories where I adopted Purpose Source: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-05",
+      "note": "C+P: with the repositories section, the summary's count does not make Q.",
+      "input": {
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "valid"
+              },
+              {
+                "status": "expired"
+              }
+            ]
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "name": "ledger-tools"
+                  },
+                  {
+                    "name": "tax-tables"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find my certificates and the projects that credited me: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work too.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-06",
+      "note": "C+Q.",
+      "input": {
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 3
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "valid"
+              },
+              {
+                "status": "valid"
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find my certificates and how many projects credited me: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work too.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-07",
+      "note": "C+A.",
+      "input": {
+        "sections": [
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "valid"
+              },
+              {
+                "status": "expired"
+              }
+            ]
+          },
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "fullName": "example-org/ledger-tools"
+              },
+              {
+                "fullName": "example-org/tax-tables"
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find my certificates and the repositories where I adopted Purpose Source: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work too.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-08",
+      "note": "P+A.",
+      "input": {
+        "sections": [
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "name": "ledger-tools"
+                  },
+                  {
+                    "name": "tax-tables"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "fullName": "example-org/ledger-tools"
+              },
+              {
+                "fullName": "example-org/tax-tables"
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find the projects that credited me and the repositories where I adopted Purpose Source: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-09",
+      "note": "Q+A.",
+      "input": {
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2
+          },
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "fullName": "example-org/ledger-tools"
+              },
+              {
+                "fullName": "example-org/tax-tables"
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find how many projects credited me and the repositories where I adopted Purpose Source: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-10",
+      "note": "C+P+A: three parts, a comma then \"and\", no serial comma.",
+      "input": {
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "valid"
+              },
+              {
+                "status": "expired"
+              }
+            ]
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "name": "ledger-tools"
+                  },
+                  {
+                    "name": "tax-tables"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "fullName": "example-org/ledger-tools"
+              },
+              {
+                "fullName": "example-org/tax-tables"
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find my certificates, the projects that credited me and the repositories where I adopted Purpose Source: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work too.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-11",
+      "note": "C+Q+A.",
+      "input": {
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "valid"
+              },
+              {
+                "status": "expired"
+              }
+            ]
+          },
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "fullName": "example-org/ledger-tools"
+              },
+              {
+                "fullName": "example-org/tax-tables"
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find my certificates, how many projects credited me and the repositories where I adopted Purpose Source: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work too.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-12",
+      "note": "Singular forms: one certificate and one project.",
+      "input": {
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 1
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "valid"
+              }
+            ]
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "name": "ledger-tools"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find my certificate and the project that credited me: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work too.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-13",
+      "note": "Singular adopter beside Q, whose one form serves any count.",
+      "input": {
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 1
+          },
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "fullName": "example-org/ledger-tools"
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find how many projects credited me and the repository where I adopted Purpose Source: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-14",
+      "note": "Revoked and superseded certificates never count: Q alone, and no \"too\".",
+      "input": {
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "revoked"
+              },
+              {
+                "status": "superseded"
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": "Further down, you will find how many projects credited me: proof of my part in this work.",
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-15",
+      "note": "Certificates not issued on this plane: the proof sentence stays, the invite is withheld, and the block ends with Learn more.",
+      "input": {
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "valid"
+              },
+              {
+                "status": "expired"
+              }
+            ]
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "name": "ledger-tools"
+                  },
+                  {
+                    "name": "tax-tables"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": false
+      },
+      "expect": {
+        "proof": "Further down, you will find my certificates and the projects that credited me: proof of my part in this work.",
+        "invite": null,
+        "link": {
+          "words": "Learn more",
+          "path": "/",
+          "inSentence": false
+        }
+      }
+    },
+    {
+      "id": "AV-16",
+      "note": "The fallback: no projects count, no listed valid or expired certificate, no repositories, no adopter: no proof sentence, the invite alone.",
+      "input": {
+        "sections": [
+          {
+            "id": "summary",
+            "since": 2026
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "revoked"
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "proof": null,
+        "invite": "If you contribute to Purpose Source projects, you can earn certificates for your own work.",
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AV-17",
+      "note": "The fallback where certificates are not issued: neither sentence, and Learn more.",
+      "input": {
+        "sections": [
+          {
+            "id": "summary",
+            "since": 2026
+          }
+        ],
+        "certificatesIssued": false
+      },
+      "expect": {
+        "proof": null,
+        "invite": null,
+        "link": {
+          "words": "Learn more",
+          "path": "/",
+          "inSentence": false
+        }
+      }
+    }
+  ],
+  "blocks": [
+    {
+      "id": "AB-1",
+      "note": "Short on a C+P page: the closing joins the one paragraph.",
+      "input": {
+        "variant": "short",
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "valid"
+              },
+              {
+                "status": "expired"
+              }
+            ]
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "name": "ledger-tools"
+                  },
+                  {
+                    "name": "tax-tables"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "heading": "The purpose behind this work",
+        "lint": "copy-lint-allow: mention", "paragraphs": ["Open source already helps people. Under Purpose Source, the work on this page can do even more good. It stays free for personal use and smaller organisations, and the fees that large companies pay fund listed charities. Further down, you will find my certificates and the projects that credited me: proof of my part in this work. If you contribute to Purpose Source projects, you can earn certificates for your own work too."],
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AB-2",
+      "note": "Medium on a C+P page.",
+      "input": {
+        "variant": "medium",
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "valid"
+              },
+              {
+                "status": "expired"
+              }
+            ]
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "name": "ledger-tools"
+                  },
+                  {
+                    "name": "tax-tables"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "heading": "The purpose behind this work",
+        "lint": "copy-lint-allow: mention", "paragraphs": ["Open source already helps people. Under Purpose Source, the work on this page can do even more good. It stays free for personal use, smaller organisations, non-profits, state schools, universities and public bodies in their own work. Large companies that use it pay a fee, and those fees fund listed charities. The people who build it keep their copyright, and their work can help people they may never meet. Further down, you will find my certificates and the projects that credited me: proof of my part in this work. If you contribute to Purpose Source projects, you can earn certificates for your own work too."],
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AB-3",
+      "note": "Long on a C+P page: the closing is a paragraph of its own.",
+      "input": {
+        "variant": "long",
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "valid"
+              },
+              {
+                "status": "expired"
+              }
+            ]
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "name": "ledger-tools"
+                  },
+                  {
+                    "name": "tax-tables"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "heading": "The purpose behind this work",
+        "lint": "copy-lint-allow: mention", "paragraphs": ["Open source already helps people. Under Purpose Source, the work on this page can do even more good, for people its makers may never meet.", "Anyone may use, change and share it under its licence. It stays free for personal use, smaller organisations, non-profits, state schools, universities and public bodies in their own work. Large companies that use it pay a published fee, which maintainers can waive for any organisation they choose. The fees fund listed charities, chosen within seven areas of care: health, education, poverty relief, humanitarian aid, the environment, animal welfare and research. Every cost and every transfer is published.", "The people who build the software keep their copyright, and maintainers keep control. Each release also becomes available under Apache-2.0 four years after its publication. No one is paid from these fees for a contribution. Contributors are credited instead, and have a say in the causes their work supports.", "Further down, you will find my certificates and the projects that credited me: proof of my part in this work. If you contribute to Purpose Source projects, you can earn certificates for your own work too."],
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AB-4",
+      "note": "Short on the commonest launch page (Q alone).",
+      "input": {
+        "variant": "short",
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "heading": "The purpose behind this work",
+        "lint": "copy-lint-allow: mention", "paragraphs": ["Open source already helps people. Under Purpose Source, the work on this page can do even more good. It stays free for personal use and smaller organisations, and the fees that large companies pay fund listed charities. Further down, you will find how many projects credited me: proof of my part in this work. If you contribute to Purpose Source projects, you can earn certificates for your own work."],
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AB-5",
+      "note": "Short in the fallback: straight from the last sentence into the invite.",
+      "input": {
+        "variant": "short",
+        "sections": [
+          {
+            "id": "summary",
+            "since": 2026
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "heading": "The purpose behind this work",
+        "lint": "copy-lint-allow: mention", "paragraphs": ["Open source already helps people. Under Purpose Source, the work on this page can do even more good. It stays free for personal use and smaller organisations, and the fees that large companies pay fund listed charities. If you contribute to Purpose Source projects, you can earn certificates for your own work."],
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AB-6",
+      "note": "Long in the fallback: the last paragraph holds the invite alone.",
+      "input": {
+        "variant": "long",
+        "sections": [
+          {
+            "id": "summary",
+            "since": 2026
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "heading": "The purpose behind this work",
+        "lint": "copy-lint-allow: mention", "paragraphs": ["Open source already helps people. Under Purpose Source, the work on this page can do even more good, for people its makers may never meet.", "Anyone may use, change and share it under its licence. It stays free for personal use, smaller organisations, non-profits, state schools, universities and public bodies in their own work. Large companies that use it pay a published fee, which maintainers can waive for any organisation they choose. The fees fund listed charities, chosen within seven areas of care: health, education, poverty relief, humanitarian aid, the environment, animal welfare and research. Every cost and every transfer is published.", "The people who build the software keep their copyright, and maintainers keep control. Each release also becomes available under Apache-2.0 four years after its publication. No one is paid from these fees for a contribution. Contributors are credited instead, and have a say in the causes their work supports.", "If you contribute to Purpose Source projects, you can earn certificates for your own work."],
+        "link": {
+          "words": "earn certificates for your own work",
+          "path": "/for/contributors",
+          "inSentence": true
+        }
+      }
+    },
+    {
+      "id": "AB-7",
+      "note": "Long where certificates are not issued, in the fallback: our three paragraphs, then Learn more.",
+      "input": {
+        "variant": "long",
+        "sections": [
+          {
+            "id": "summary",
+            "since": 2026
+          }
+        ],
+        "certificatesIssued": false
+      },
+      "expect": {
+        "heading": "The purpose behind this work",
+        "lint": "copy-lint-allow: mention", "paragraphs": ["Open source already helps people. Under Purpose Source, the work on this page can do even more good, for people its makers may never meet.", "Anyone may use, change and share it under its licence. It stays free for personal use, smaller organisations, non-profits, state schools, universities and public bodies in their own work. Large companies that use it pay a published fee, which maintainers can waive for any organisation they choose. The fees fund listed charities, chosen within seven areas of care: health, education, poverty relief, humanitarian aid, the environment, animal welfare and research. Every cost and every transfer is published.", "The people who build the software keep their copyright, and maintainers keep control. Each release also becomes available under Apache-2.0 four years after its publication. No one is paid from these fees for a contribution. Contributors are credited instead, and have a say in the causes their work supports."],
+        "link": {
+          "words": "Learn more",
+          "path": "/",
+          "inSentence": false
+        }
+      }
+    },
+    {
+      "id": "AB-8",
+      "note": "Medium where certificates are not issued, C+Q+A: the proof sentence ends the paragraph, then Learn more.",
+      "input": {
+        "variant": "medium",
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "valid"
+              }
+            ]
+          },
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "fullName": "example-org/ledger-tools"
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": false
+      },
+      "expect": {
+        "heading": "The purpose behind this work",
+        "lint": "copy-lint-allow: mention", "paragraphs": ["Open source already helps people. Under Purpose Source, the work on this page can do even more good. It stays free for personal use, smaller organisations, non-profits, state schools, universities and public bodies in their own work. Large companies that use it pay a fee, and those fees fund listed charities. The people who build it keep their copyright, and their work can help people they may never meet. Further down, you will find my certificate, how many projects credited me and the repository where I adopted Purpose Source: proof of my part in this work."],
+        "link": {
+          "words": "Learn more",
+          "path": "/",
+          "inSentence": false
+        }
+      }
+    },
+    {
+      "id": "AB-9",
+      "note": "The person's own words: their heading, their words with the line break kept, our one line, Learn more; no proof sentence and no invite, whatever the page shows.",
+      "input": {
+        "variant": "own",
+        "text": "Purpose Source lets my small libraries stay free for the people who need them most.\nThe fees large companies pay go further than my time could.",
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 2
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "status": "valid"
+              },
+              {
+                "status": "expired"
+              }
+            ]
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "name": "ledger-tools"
+                  },
+                  {
+                    "name": "tax-tables"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "certificatesIssued": true
+      },
+      "expect": {
+        "heading": "What Purpose Source means to me",
+        "paragraphs": [
+          "Purpose Source lets my small libraries stay free for the people who need them most.\nThe fees large companies pay go further than my time could.",
+          "Purpose Source is shared software with charity built into its licence: free for personal use and smaller organisations, while the fees that large companies pay fund listed charities."
+        ],
+        "link": {
+          "words": "Learn more",
+          "path": "/",
+          "inSentence": false
+        }
+      }
+    }
+  ]
+}

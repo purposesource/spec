@@ -51,6 +51,20 @@
  *              by hand is refused (contributor-page.v1 `repositoriesSection`; settings check (j)).
  *              The gate's own reading of that one builder rule answers every vector, and each
  *              expected section is a valid `repositoriesSection`.
+ *   about      `examples/contributor-page-about.v1.example.json`, our versioned words for the page's about
+ *              block (1.2.0; ops decision D163): its versions run 1 to `current` with no gap, and each
+ *              entry's `sha256` recomputes and equals the digest this gate records for that version
+ *              (ABOUT_FROZEN), so a published text never changes and new words are a new version; the
+ *              frame and the invites hold their one placeholder, the two invites differ by " too"
+ *              alone, each plural noun has two forms, each text keeps within its length, and a `lint`
+ *              marker goes with exactly the paragraphs that name the predecessor (D25). Beside it,
+ *              `examples/contributor-page-about.v1.golden.json`: the proof sentence and the invite
+ *              composed from a document's sections (the eleven combinations, singular forms, revoked
+ *              and superseded certificates left out, the fallback, the invite withheld where
+ *              certificates are not issued) and whole blocks per variant, recomputed by the gate's
+ *              own reading of the rule from the texts the file names by hash. And the build golden's
+ *              `about` vectors: what the builder writes for the settings' about block (nothing with
+ *              the tick off; Short for own words that do not exist or that the rules now refuse).
  *   never      no member of the three page schemas is named for points, shares, bands, ranks,
  *              percentiles, scores, months, amounts or a person's GitHub id, and no published page
  *              example or vector carries a currency figure, a person's GitHub node id (the current
@@ -60,7 +74,9 @@
  *              so the document a new person starts from is the one the schema describes (status-only by
  *              default, the GitHub picture; design §2.4 and the D116 dated note of ~11:50Z), and it
  *              leaves every optional member out (1.1.0: the api writes one only when it differs from
- *              its default, so a document stored before it keeps its bytes and its hash).
+ *              its default, so a document stored before it keeps its bytes and its hash), but for the
+ *              ones the schema lists in `x-psn.alwaysWritten` (1.2.0: `about`), which it carries at their
+ *              default, `about.version` being the texts' `current`.
  *   agree      the closed lists the settings and the public document share are the same lists (1.1.0:
  *              the links' two places, the display parts and the palette ids among them).
  *   facts      in the page examples (1.1.0's further two among them), every link is its table template with its handle, and the
@@ -80,11 +96,16 @@
  *              third place for the links, a background that is neither a palette id nor a lower-case
  *              colour, a ground without an accent, a night row off `purpose` or under an own colour, a
  *              `purpose` swatch without its night row or its accent's night colour, and an own colour
- *              whose accent keeps one.
+ *              whose accent keeps one; and from 1.2.0 (ops decision D163) own words of 601 code points or
+ *              six line breaks or a bidi override, an about block without its version or at version 0, a
+ *              fifth variant, a member of the document's about block the settings own (the tick) or our
+ *              words in it, and own words in the document under another variant or own without them.
  *   admits     what 1.1.0 adds is admitted, proved on copies of the examples: icon-only links beside
  *              the name, the GitHub line's parts, the website's display, a palette swatch and an own
  *              colour in the settings, and a `purpose` pair, an own colour and a swatch of another
- *              preset in the document.
+ *              preset in the document; and what 1.2.0 adds: own words not yet written, own words kept
+ *              under another variant or with the tick off, 600 code points and five line breaks, and in
+ *              the document our Medium text, a later version, and no about block at all.
  *   goldens    every `examples/*.golden.json` is one a gate checks.
  *
  * Every rule is proved able to fail before the examples are trusted to pass.
@@ -115,7 +136,8 @@ const GOLDENS = [
   'contributor-page-preview.v1.golden.json',
   'contributor-page-alias.v1.golden.json',
   'contributor-page-build.v1.golden.json',
-  'contributor-page-ground.v1.golden.json'
+  'contributor-page-ground.v1.golden.json',
+  'contributor-page-about.v1.golden.json'
 ];
 
 const table = example('link-platforms.v1.example.json');
@@ -134,10 +156,17 @@ const real = {
   // 1.1.0's further examples (ops decision D149): the links beside the name with icon-only links and a purpose pair; an own colour.
   header: example('contributor-page.v1.header.example.json'),
   ownGround: example('contributor-page.v1.own-ground.example.json'),
+  // 1.2.0's further examples (ops decision D163): our Medium text on the commonest launch page; the person's own words.
+  aboutPage: example('contributor-page.v1.about.example.json'),
+  aboutOwnPage: example('contributor-page.v1.about-own.example.json'),
+  aboutSettings: example('contributor-page-settings.v1.about-own.example.json'),
+  aboutTexts: example('contributor-page-about.v1.example.json'),
+  aboutTextsSha256: createHash('sha256').update(readFileSync(join(EXAMPLE_DIR, 'contributor-page-about.v1.example.json'))).digest('hex'),
+  aboutGolden: example('contributor-page-about.v1.golden.json'),
   settings: example('contributor-page-settings.v1.example.json'),
   defaults: example('contributor-page-settings.v1.defaults.example.json'),
   alias: example('contributor-page-alias.v1.example.json'),
-  schemas: { page: schemaJson(PAGE), settings: schemaJson(SETTINGS), alias: schemaJson(ALIAS) }
+  schemas: { page: schemaJson(PAGE), settings: schemaJson(SETTINGS), alias: schemaJson(ALIAS), about: schemaJson('contributor-page-about.v1.json') }
 };
 
 /* ------------------------------------------------------------------------- contrast */
@@ -976,6 +1005,176 @@ function buildProblems(golden) {
     if (v.expect.repositories === null) exercised.nothingLeft = true;
   }
   for (const [what, done] of Object.entries(exercised)) if (!done) add(`no vector exercises ${what}`);
+  found.push(...buildAboutProblems(golden.about ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
+  return found;
+}
+
+const validatePageAbout = ajv.getSchema(`${cfg.schemaBaseUrl}/${PAGE}#/properties/about`);
+const validateSettingsAbout = ajv.getSchema(`${cfg.schemaBaseUrl}/${SETTINGS}#/properties/about`);
+
+/**
+ * The gate's own reading of the builder's about rule (1.2.0; contributor-page.v1 `about`), not the builder: nothing while
+ * the tick is off; the person's words while the text rules accept them (`textRules`, the rules' answer the vector states);
+ * Short in place of own words that do not exist or that the rules refuse; the settings' version, never another.
+ */
+function buildAbout(input) {
+  const about = input.about;
+  if (!about.on) return null;
+  if (about.variant !== 'own') return { variant: about.variant, version: about.version };
+  if (about.ownText !== null && input.textRules === 'accepted') return { variant: 'own', version: about.version, text: about.ownText };
+  return { variant: 'short', version: about.version };
+}
+
+function buildAboutProblems(vectors) {
+  const found = [];
+  if (vectors.length === 0) found.push('no about vector — the about rule would pass vacuously');
+  const exercised = { tickOff: false, ownEmpty: false, ownRefused: false, ownShown: false, ownKept: false };
+  for (const v of vectors) {
+    const got = buildAbout(v.input);
+    if (JSON.stringify(sortDeep(got)) !== JSON.stringify(sortDeep(v.expect.about))) found.push(`${v.id}: expects ${JSON.stringify(v.expect.about)}, the rule gives ${JSON.stringify(got)}`);
+    if (!validateSettingsAbout(v.input.about)) found.push(`${v.id}: the input is not a valid settings about block (${ajv.errorsText(validateSettingsAbout.errors)})`);
+    if (v.expect.about && !validatePageAbout(v.expect.about)) found.push(`${v.id}: the expected member is not a valid document about block (${ajv.errorsText(validatePageAbout.errors)})`);
+    if ((v.input.about.ownText === null) !== (v.input.textRules === null)) found.push(`${v.id}: textRules answers own words, and is null exactly where there are none`);
+    const a = v.input.about;
+    if (!a.on) exercised.tickOff = true;
+    if (a.on && a.variant === 'own' && a.ownText === null) exercised.ownEmpty = true;
+    if (a.on && a.variant === 'own' && v.input.textRules === 'refused') exercised.ownRefused = true;
+    if (v.expect.about?.text) exercised.ownShown = true;
+    if (a.on && a.variant !== 'own' && a.ownText !== null) exercised.ownKept = true;
+  }
+  for (const [what, done] of Object.entries(exercised)) if (!done) found.push(`no about vector exercises ${what}`);
+  return found;
+}
+
+/* ---------------------------------------------------------------------------- about */
+
+const ABOUT_FILE = 'contributor-page-about.v1.example.json';
+const ABOUT_GOLDEN = 'contributor-page-about.v1.golden.json';
+/**
+ * The digest of every published version of our words (1.2.0; ops decision D163), each the SHA-256 of the RFC 8785 text of the
+ * entry without its `sha256`. A published version's words never change: new words are a new version, and a new line here,
+ * never an edit of one, so a published page keeps the words it was published with.
+ */
+const ABOUT_FROZEN = { 1: 'aba6a333bc05cd1f09667423567cc804bb3dc5ffa0827f7f620519360f79b01f' };
+const OUR_VARIANTS = ['short', 'medium', 'long'];
+/** Each text's reach in code points, heading and paragraphs together: Short a few sentences, Medium a paragraph, Long a short read. */
+const ABOUT_LIMITS = { short: 400, medium: 700, long: 1600 };
+const PREDECESSOR = /open[\s-]source/i;
+const entryDigest = (entry) => {
+  const { sha256: _, ...rest } = entry;
+  return createHash('sha256').update(Buffer.from(canonical(rest), 'utf8')).digest('hex');
+};
+const occurrences = (text, part) => text.split(part).length - 1;
+
+function aboutTextsProblems(texts) {
+  const found = [];
+  const add = (message) => found.push(['about', `examples/${ABOUT_FILE}: ${message}`]);
+  const versions = texts.versions ?? [];
+  versions.forEach((entry, i) => {
+    if (entry.version !== i + 1) add(`version ${entry.version} stands at place ${i + 1}: versions run 1, 2, ... without a gap`);
+  });
+  if (versions.length === 0 || texts.current !== versions.at(-1).version) add(`current is ${texts.current}, the last version is ${versions.at(-1)?.version}`);
+  for (const [version, digest] of Object.entries(ABOUT_FROZEN)) {
+    const entry = versions.find((v) => v.version === Number(version));
+    if (!entry) add(`version ${version} was published and is gone: the versions are append-only`);
+    else if (entryDigest(entry) !== digest) add(`version ${version}'s words changed (it hashes to ${entryDigest(entry)}, published as ${digest}): new words are a new version`);
+  }
+  for (const entry of versions) {
+    const where = `version ${entry.version}`;
+    if (entry.sha256 !== entryDigest(entry)) add(`${where}: sha256 is ${entry.sha256}, the entry hashes to ${entryDigest(entry)}`);
+    if (!(entry.version in ABOUT_FROZEN)) add(`${where} has no recorded digest (ABOUT_FROZEN): record it as it is published`);
+    for (const name of OUR_VARIANTS) {
+      const variant = entry[name];
+      const length = [...[variant.heading, ...variant.paragraphs].join(' ')].length;
+      if (length > ABOUT_LIMITS[name]) add(`${where} ${name}: ${length} code points, beyond its ${ABOUT_LIMITS[name]}`);
+      if (variant.paragraphs.some((p) => PREDECESSOR.test(p)) !== 'lint' in variant) add(`${where} ${name}: a lint marker goes with a paragraph that names the predecessor, and only there`);
+    }
+    if (occurrences(entry.proof.frame, '{list}') !== 1) add(`${where}: the proof frame holds {list} once`);
+    for (const form of ['withCertificates', 'withoutCertificates']) {
+      if (occurrences(entry.invite[form], '{link}') !== 1) add(`${where}: the invite ${form} holds {link} once`);
+    }
+    if (entry.invite.withCertificates !== entry.invite.withoutCertificates.replace(/\.$/, ' too.')) add(`${where}: the two invites differ by more than " too"`);
+    for (const noun of ['certificates', 'repositories', 'adopter']) {
+      if (entry.proof.nouns[noun].one === entry.proof.nouns[noun].other) add(`${where}: the ${noun} noun has one form for one and another for any other count`);
+    }
+  }
+  return found;
+}
+
+/** The gate's own reading of the proof sentence and the invite (schemas/contributor-page-about.v1.json): not the renderer's. */
+function aboutClosing(entry, input) {
+  const section = (id) => input.sections.find((s) => s.id === id);
+  const certificates = (section('certificates')?.items ?? []).filter((item) => ['valid', 'expired'].includes(item.status)).length;
+  const repositories = section('repositories');
+  const rows = repositories ? repositories.groups.reduce((n, g) => n + g.repos.length, 0) : 0;
+  const counted = !repositories && section('summary')?.projects !== undefined;
+  const adopted = section('adopter')?.items.length ?? 0;
+  const form = (noun, n) => (n === 1 ? noun.one : noun.other);
+  const parts = [];
+  if (certificates > 0) parts.push(['C', form(entry.proof.nouns.certificates, certificates)]);
+  if (rows > 0) parts.push(['P', form(entry.proof.nouns.repositories, rows)]);
+  else if (counted) parts.push(['Q', entry.proof.nouns.summary]);
+  if (adopted > 0) parts.push(['A', form(entry.proof.nouns.adopter, adopted)]);
+  const words = parts.map(([, noun]) => noun);
+  const list = words.length < 3 ? words.join(entry.proof.and) : `${words.slice(0, -1).join(entry.proof.comma)}${entry.proof.and}${words.at(-1)}`;
+  const proof = words.length > 0 ? entry.proof.frame.replace('{list}', list) : null;
+  const invite = input.certificatesIssued
+    ? (certificates > 0 ? entry.invite.withCertificates : entry.invite.withoutCertificates).replace('{link}', entry.invite.link.words)
+    : null;
+  const link = invite
+    ? { words: entry.invite.link.words, path: entry.invite.link.path, inSentence: true }
+    : { words: entry.learnMore.words, path: entry.learnMore.path, inSentence: false };
+  return { expect: { proof, invite, link }, combination: parts.map(([key]) => key).join('+'), singular: [certificates, rows, adopted].includes(1) };
+}
+
+function aboutBlock(entry, input) {
+  if (input.variant === 'own') {
+    return { heading: entry.own.heading, paragraphs: [input.text, entry.own.line], link: { words: entry.learnMore.words, path: entry.learnMore.path, inSentence: false } };
+  }
+  const variant = entry[input.variant];
+  const end = aboutClosing(entry, input).expect;
+  const tail = [end.proof, end.invite].filter(Boolean).join(' ');
+  const paragraphs = [...variant.paragraphs];
+  if (tail && variant.closing === 'same-paragraph') paragraphs[paragraphs.length - 1] = `${paragraphs.at(-1)} ${tail}`;
+  else if (tail) paragraphs.push(tail);
+  return { heading: variant.heading, paragraphs, link: end.link };
+}
+
+function aboutGoldenProblems(golden, texts, textsSha256) {
+  const found = [];
+  const add = (message) => found.push(['about', `examples/${ABOUT_GOLDEN}: ${message}`]);
+  if (golden.textsSha256 !== textsSha256) add(`textsSha256 is ${golden.textsSha256}; the texts' bytes hash to ${textsSha256}: recompute the vectors with the texts`);
+  const entry = (texts.versions ?? []).find((v) => v.version === golden.version);
+  if (!entry) {
+    add(`version ${golden.version} is not one of the texts'`);
+    return found;
+  }
+  const combinations = new Set();
+  const exercised = { singular: false, withheld: false, fallback: false, leftOutStatuses: false, ownBlock: false };
+  for (const v of golden.sentences ?? []) {
+    const got = aboutClosing(entry, v.input);
+    if (JSON.stringify(sortDeep(got.expect)) !== JSON.stringify(sortDeep(v.expect))) add(`${v.id}: expects ${JSON.stringify(v.expect)}, the rule gives ${JSON.stringify(got.expect)}`);
+    if (got.combination) combinations.add(got.combination);
+    if (got.singular) exercised.singular = true;
+    if (!v.input.certificatesIssued) exercised.withheld = true;
+    if (!got.combination && v.input.certificatesIssued) exercised.fallback = true;
+    if (v.input.sections.some((s) => s.id === 'certificates' && s.items.some((i) => ['revoked', 'superseded'].includes(i.status)))) exercised.leftOutStatuses = true;
+  }
+  for (const v of golden.blocks ?? []) {
+    const got = aboutBlock(entry, v.input);
+    // `lint` carries this repository's copy-lint marker on the paragraphs' line, and goes with them exactly where they name the predecessor.
+    const { lint, ...expect } = v.expect;
+    if (JSON.stringify(sortDeep(got)) !== JSON.stringify(sortDeep(expect))) add(`${v.id}: expects ${JSON.stringify(expect)}, the rule gives ${JSON.stringify(got)}`);
+    if ((lint !== undefined) !== (expect.paragraphs ?? []).some((p) => PREDECESSOR.test(p))) add(`${v.id}: a lint marker goes with paragraphs that name the predecessor, and only there`);
+    if (v.input.variant === 'own') exercised.ownBlock = true;
+  }
+  for (const combination of ['C', 'P', 'Q', 'A', 'C+P', 'C+Q', 'C+A', 'P+A', 'Q+A', 'C+P+A', 'C+Q+A']) {
+    if (!combinations.has(combination)) add(`no sentence vector composes ${combination}`);
+  }
+  for (const variant of [...OUR_VARIANTS, 'own']) {
+    if (!(golden.blocks ?? []).some((v) => v.input.variant === variant)) add(`no block vector draws ${variant}`);
+  }
+  for (const [what, done] of Object.entries(exercised)) if (!done) add(`no vector exercises ${what}`);
   return found;
 }
 
@@ -1029,12 +1228,22 @@ function neverProblems(schemaSet, documents) {
  * because the api writes an optional member only when it differs from its default, so a document stored before the
  * member existed keeps its bytes and its hash.
  */
-function defaultsProblems(defaults, settingsSchema) {
+function defaultsProblems(defaults, settingsSchema, aboutCurrent) {
   const found = [];
   const add = (message) => found.push(['defaults', `examples/contributor-page-settings.v1.defaults.example.json: ${message}`]);
   const required = settingsSchema.required ?? [];
+  const always = settingsSchema['x-psn']?.alwaysWritten ?? [];
+  // 1.2.0: what the api stamps rather than defaults (`about.version`, the texts' current).
+  const stamped = { about: { version: aboutCurrent } };
   for (const [member, schema] of Object.entries(settingsSchema.properties)) {
     if (member === 'schemaVersion') continue;
+    if (always.includes(member)) {
+      // Optional (a document stored before it stays valid) but never left out at its default: the api always writes it.
+      const expected = { ...collectDefault(schema), ...(stamped[member] ?? {}) };
+      if (!(member in defaults)) add(`${member} is always written (x-psn.alwaysWritten), but the example leaves it out`);
+      else if (JSON.stringify(sortDeep(defaults[member])) !== JSON.stringify(sortDeep(expected))) add(`${member} is ${JSON.stringify(defaults[member])}, its default as the api writes it is ${JSON.stringify(expected)}`);
+      continue;
+    }
     if (!required.includes(member)) {
       if (member in defaults) add(`${member} is optional and left out at its default, but the example carries ${JSON.stringify(defaults[member])}`);
       if (schema.default === undefined) add(`${member} is optional and names no default, so its absence means nothing`);
@@ -1080,11 +1289,15 @@ function agreeProblems(settingsSchema, pageSchema) {
     ['links placement', s.properties.linksPlacement?.enum, p.properties.linksPlacement?.enum],
     ['link display part', s.$defs.show?.required, p.$defs.show?.required],
     ['website display part', s.$defs.websiteShow?.required, p.$defs.websiteShow?.required],
-    ['palette id', s.$defs.groundId?.enum, p.$defs.groundId?.enum]
+    ['palette id', s.$defs.groundId?.enum, p.$defs.groundId?.enum],
+    ['about variant', s.properties.about?.properties.variant.enum, p.properties.about?.properties.variant.enum]
   ];
   for (const [what, a, b] of pairs) {
     if ((a ?? []).join(',') !== (b ?? []).join(',')) found.push(['agree', `the ${what} lists differ: settings [${a}], page [${b}]`]);
   }
+  // 1.2.0: the variants are our three texts and the person's own, each of which every version of the texts carries.
+  const variants = s.properties.about?.properties.variant.enum ?? [];
+  if (variants.join(',') !== [...OUR_VARIANTS, 'own'].join(',')) found.push(['agree', `the about variants are [${variants}], the texts carry [${[...OUR_VARIANTS, 'own']}]`]);
   return found;
 }
 
@@ -1186,7 +1399,24 @@ const REFUSALS = [
   ['page', 'a pair whose day row is dark', (d) => { d.theme = { preset: 'purpose', accent: ACCENT.purpose, ground: { raw: 'lilac', light: ROW.lilacNight, dark: ROW.lilacNight } }; }],
   ['page', 'a ground row carrying an accent', (d) => { d.theme = { preset: 'mocha', accent: ACCENT.mocha, ground: { raw: 'cream', light: { ...ROW.cream, accent: '#7a4a2a' } } }; }],
   ['page', 'a ground row of an upper-case colour', (d) => { d.theme = { preset: 'mocha', accent: ACCENT.mocha, ground: { raw: 'cream', light: { ...ROW.cream, ground: '#FBF6EC' } } }; }],
-  ['page', 'a ground named by a colour name', (d) => { d.theme = { preset: 'mocha', accent: ACCENT.mocha, ground: { raw: 'Cream', light: ROW.cream } }; }]
+  ['page', 'a ground named by a colour name', (d) => { d.theme = { preset: 'mocha', accent: ACCENT.mocha, ground: { raw: 'Cream', light: ROW.cream } }; }],
+  // 1.2.0 (ops decision D163; design D163-ABOUT-TEXTS-2026-10-16).
+  ['aboutSettings', 'own words of 601 code points', (d) => { d.about.ownText = 'é'.repeat(601); }],
+  ['aboutSettings', 'own words with six line breaks', (d) => { d.about.ownText = 'a\nb\nc\nd\ne\nf\ng'; }],
+  ['aboutSettings', 'own words with a bidi override', (d) => { d.about.ownText = 'I chose \u202eecruoS esopruP'; }],
+  ['aboutSettings', 'empty own words', (d) => { d.about.ownText = ''; }],
+  ['aboutSettings', 'an about block without its version', (d) => { delete d.about.version; }],
+  ['aboutSettings', 'an about block at version 0', (d) => { d.about.version = 0; }],
+  ['aboutSettings', 'a fifth variant', (d) => { d.about.variant = 'custom'; }],
+  ['aboutSettings', 'an about block with a heading of its own', (d) => { d.about.heading = 'Why I am here'; }],
+  ['aboutSettings', 'an about block without the tick', (d) => { delete d.about.on; }],
+  ['aboutOwnPage', 'own words under another variant', (d) => { d.about.variant = 'short'; }],
+  ['aboutOwnPage', 'own without its words', (d) => { delete d.about.text; }],
+  ['aboutOwnPage', 'an about block at version 0', (d) => { d.about.version = 0; }],
+  ['aboutOwnPage', 'the tick in the document', (d) => { d.about.on = true; }],
+  ['aboutOwnPage', 'our words in the document', (d) => { d.about = { variant: 'short', version: 1, paragraphs: ['Open source already helps people.'] }; }], // copy-lint-allow: mention
+  ['aboutOwnPage', 'own words of 601 code points', (d) => { d.about.text = 'é'.repeat(601); }],
+  ['aboutOwnPage', 'own words with six line breaks', (d) => { d.about.text = 'a\nb\nc\nd\ne\nf\ng'; }]
 ];
 
 /** Rows and accents for the 1.1.0 cases: real rows (two palette swatches, and the ground guard's row for #3366cc). */
@@ -1224,14 +1454,29 @@ const ADMITS = [
     sectionOf(d, 'links').website.show = { icon: true, label: false };
     d.linksPlacement = 'header';
     d.loginShow = { icon: true, label: false, handle: false };
-  }]
+  }],
+  // 1.2.0 (ops decision D163).
+  ['aboutSettings', 'own words not yet written', (d) => { d.about.ownText = null; }],
+  ['aboutSettings', 'own words kept under Short', (d) => { d.about.variant = 'short'; }],
+  ['aboutSettings', 'the tick off, the choice and the words kept', (d) => { d.about.on = false; }],
+  ['aboutSettings', 'own words of 600 code points with five line breaks', (d) => { d.about.ownText = `${'é'.repeat(594)}\n\n\n\n\nx`; }],
+  ['aboutOwnPage', 'our Medium text', (d) => { d.about = { variant: 'medium', version: 1 }; }],
+  ['aboutOwnPage', 'a later version of our words', (d) => { d.about = { variant: 'long', version: 2 }; }],
+  ['aboutOwnPage', 'no about block', (d) => { delete d.about; }]
 ];
 
-const CONTRACT = { page: 'contributor-page.v1', anonymous: 'contributor-page.v1', settings: 'contributor-page-settings.v1', alias: 'contributor-page-alias.v1' };
+const CONTRACT = {
+  page: 'contributor-page.v1',
+  anonymous: 'contributor-page.v1',
+  aboutOwnPage: 'contributor-page.v1',
+  settings: 'contributor-page-settings.v1',
+  aboutSettings: 'contributor-page-settings.v1',
+  alias: 'contributor-page-alias.v1'
+};
 
 function refusalProblems(docs, refusals) {
   const found = [];
-  const validators = { page: validatePage, anonymous: validatePage, settings: validateSettings, alias: validateAlias };
+  const validators = { page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, settings: validateSettings, aboutSettings: validateSettings, alias: validateAlias };
   for (const [base, what, breakIt] of refusals) {
     const copy = structuredClone(docs[base]);
     breakIt(copy);
@@ -1242,7 +1487,7 @@ function refusalProblems(docs, refusals) {
 
 function admitsProblems(docs, admits) {
   const found = [];
-  const validators = { page: validatePage, anonymous: validatePage, settings: validateSettings };
+  const validators = { page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, settings: validateSettings, aboutSettings: validateSettings };
   for (const [base, what, change] of admits) {
     const copy = structuredClone(docs[base]);
     change(copy);
@@ -1270,20 +1515,28 @@ function allProblems(state) {
     ...aliasProblems(state.aliasGolden, state.alias, state.page),
     ...buildProblems(state.build),
     ...groundProblems(state.ground, state.contrast, state.themeSha256, state.schemas.settings, state.schemas.page),
+    ...aboutTextsProblems(state.aboutTexts),
+    ...aboutGoldenProblems(state.aboutGolden, state.aboutTexts, state.aboutTextsSha256),
     ...neverProblems(state.schemas, [
       ...PAGE_EXAMPLES.map((name, i) => [`examples/${name}`, i === 0 ? state.page : state.anonymous]),
       ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document]),
       ['examples/contributor-page-alias.v1.example.json', state.alias],
       ['examples/contributor-page.v1.header.example.json', state.header],
-      ['examples/contributor-page.v1.own-ground.example.json', state.ownGround]
+      ['examples/contributor-page.v1.own-ground.example.json', state.ownGround],
+      ['examples/contributor-page.v1.about.example.json', state.aboutPage],
+      ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
+      [`examples/${ABOUT_FILE}`, state.aboutTexts],
+      [`examples/${ABOUT_GOLDEN}`, state.aboutGolden]
     ]),
-    ...defaultsProblems(state.defaults, state.schemas.settings),
+    ...defaultsProblems(state.defaults, state.schemas.settings, state.aboutTexts.current),
     ...agreeProblems(state.schemas.settings, state.schemas.page),
     ...factsProblems([
       ['examples/contributor-page.v1.example.json', state.page],
       ['examples/contributor-page.v1.anonymous.example.json', state.anonymous],
       ['examples/contributor-page.v1.header.example.json', state.header],
-      ['examples/contributor-page.v1.own-ground.example.json', state.ownGround]
+      ['examples/contributor-page.v1.own-ground.example.json', state.ownGround],
+      ['examples/contributor-page.v1.about.example.json', state.aboutPage],
+      ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage]
     ]),
     ...refusalProblems(state, state.refusals ?? REFUSALS),
     ...admitsProblems(state, state.admits ?? ADMITS),
@@ -1340,11 +1593,26 @@ const SELF_TEST = [
   ['ground', (s) => { s.ground.palettes.mint[0].light.ground = '#eef7f2'; }],
   ['ground', (s) => { const t = s.ground.themeCases.find((x) => x.theme.ground?.dark); t.theme.accent.dark = t.theme.accent.light; }],
   ['ground', (s) => { s.ground.themeCases = s.ground.themeCases.filter((x) => !(x.preset === 'purpose' && /^#/.test(x.ground ?? ''))); }],
+  ['build', (s) => { const v = s.build.about.find((x) => x.input.textRules === 'refused'); v.expect.about = { variant: 'own', version: 1, text: v.input.about.ownText }; }],
+  ['build', (s) => { s.build.about = s.build.about.filter((v) => v.input.about.on); }],
+  ['about', (s) => { s.aboutTexts.versions[0].short.paragraphs[0] += ' It is lovely.'; }],
+  ['about', (s) => { s.aboutTexts.current = 2; }],
+  ['about', (s) => { const v = s.aboutTexts.versions[0]; v.invite.withCertificates = v.invite.withoutCertificates; }],
+  ['about', (s) => { delete s.aboutTexts.versions[0].medium.lint; }],
+  ['about', (s) => { s.aboutGolden.textsSha256 = '0'.repeat(64); }],
+  ['about', (s) => { s.aboutGolden.sentences[4].expect.proof = s.aboutGolden.sentences[5].expect.proof; }],
+  ['about', (s) => { s.aboutGolden.sentences = s.aboutGolden.sentences.filter((v) => v.input.certificatesIssued); }],
+  ['about', (s) => { s.aboutGolden.sentences = s.aboutGolden.sentences.filter((v) => v.id !== 'AV-10'); }],
+  ['about', (s) => { s.aboutGolden.blocks[2].expect.paragraphs.pop(); }],
   ['never', (s) => { s.schemas.page.$defs.summarySection.properties.rank = { type: 'integer' }; }],
   ['never', (s) => { s.anonymous.identity.bio = 'Paid CHF 120 to get here'; }],
   ['never', (s) => { s.anonymous.identity.bio = 'MDQ6VXNlcjEyMzQ1Njc='; }],
   ['defaults', (s) => { s.defaults.address = 'login'; }],
   ['defaults', (s) => { s.defaults.linksPlacement = 'section'; }],
+  ['defaults', (s) => { delete s.defaults.about; }],
+  ['defaults', (s) => { s.defaults.about.version = 2; }],
+  ['agree', (s) => { s.schemas.page.properties.about.properties.variant.enum = ['short', 'medium', 'long']; }],
+  ['admits', (s) => { s.admits = [['aboutSettings', 'own words of 601 code points', (d) => { d.about.ownText = 'a'.repeat(601); }]]; }],
   ['agree', (s) => { s.schemas.page.properties.layout.enum = ['paper', 'profile']; }],
   ['agree', (s) => { s.schemas.page.$defs.groundId.enum = s.schemas.page.$defs.groundId.enum.slice(1); }],
   ['admits', (s) => { s.admits = [['settings', 'a background named by a colour name', (d) => { d.theme.ground = 'Cream'; }]]; }],
@@ -1391,6 +1659,8 @@ fail(
     `the status chips and covers match the schemas, ${state.accent.cases.length} accent guard cases recompute, ` +
     `${state.ground.cases.length} ground guard cases, ${Object.values(state.ground.palettes).reduce((n, p) => n + p.reduce((m, s) => m + (s.dark ? 2 : 1), 0), 0)} palette rows and ${state.ground.themeCases.length} document themes recompute, ` +
     `${state.preview.vectors.length} preview vectors recompute, ${state.aliasGolden.vectors.length} alias MAC vectors recompute, ` +
-    `${state.build.vectors.length} builder vectors keep a hidden login off the repository list, no page member or example carries points, money or a GitHub id, ` +
+    `${state.build.vectors.length} builder vectors keep a hidden login off the repository list, ${state.build.about.length} write the about block, ` +
+    `${state.aboutTexts.versions.length} version(s) of our about texts hold their recorded digests, ${state.aboutGolden.sentences.length} about sentences and ${state.aboutGolden.blocks.length} blocks recompute, ` +
+    'no page member or example carries points, money or a GitHub id, ' +
     `the defaults are the schema's, ${REFUSALS.length} refusals and ${ADMITS.length} admissions hold, and every rule was proved able to fail`,
 );
