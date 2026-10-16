@@ -3834,6 +3834,11 @@ which kind of change each entry was.
   operation, status code of an operation, cache class, error code of this API, schema member or enum value
   moved. The description does not gate the website's tests, so the order of pushes does not matter for them.
   `check:openapi-examples` validates the same 67 examples.
+- The same paragraph names the certificate preview's sibling (slice L13), the repository preview
+  `/v1/me/repo-preview/{card|card-github|badge.svg|badge-card.svg|badge-card-dark.svg}?repo={nodeId}`: the same
+  worker draws it, marked `PREVIEW`, from the application's `GET /v1/admin/repos/candidates` for the caller's
+  session, only for a repository that read lists as adoptable and with the name it gives, never one from the
+  request. Same headers, framing and `400 invalid_query`. Wording only, like the line above.
 
 ## coverage/cov-v1.ts
 
