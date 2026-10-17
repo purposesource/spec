@@ -61,7 +61,8 @@
  *              `examples/contributor-page-about.v1.golden.json`: the proof sentence and the invite
  *              composed from a document's sections (the eleven combinations, singular forms, revoked
  *              and superseded certificates left out, the fallback, the invite withheld where
- *              certificates are not issued) and whole blocks per variant, recomputed by the gate's
+ *              certificates are not issued, whose planes it names with the sample following
+ *              production) and whole blocks per variant, recomputed by the gate's
  *              own reading of the rule from the texts the file names by hash. And the build golden's
  *              `about` vectors: what the builder writes for the settings' about block (nothing with
  *              the tick off; Short for own words that do not exist or that the rules now refuse).
@@ -1140,10 +1141,16 @@ function aboutBlock(entry, input) {
   return { heading: variant.heading, paragraphs, link: end.link };
 }
 
-function aboutGoldenProblems(golden, texts, textsSha256) {
+function aboutGoldenProblems(golden, texts, textsSha256, pageSchema) {
   const found = [];
   const add = (message) => found.push(['about', `examples/${ABOUT_GOLDEN}: ${message}`]);
   if (golden.textsSha256 !== textsSha256) add(`textsSha256 is ${golden.textsSha256}; the texts' bytes hash to ${textsSha256}: recompute the vectors with the texts`);
+  // Each plane a document names, and whether certificates are issued there; the sample is drawn on production too, so it follows it.
+  const planes = golden.certificatesIssued ?? {};
+  const sources = pageSchema.properties.source.enum;
+  if (Object.keys(planes).sort().join(',') !== [...sources].sort().join(',')) add(`certificatesIssued names ${Object.keys(planes).join(', ') || 'no plane'}; contributor-page.v1 source is ${sources.join(', ')}`);
+  for (const [plane, issued] of Object.entries(planes)) if (typeof issued !== 'boolean') add(`certificatesIssued.${plane} is true or false`);
+  if (planes.sample !== planes.platform) add("certificatesIssued.sample follows platform: every site build draws the samples, production's included");
   const entry = (texts.versions ?? []).find((v) => v.version === golden.version);
   if (!entry) {
     add(`version ${golden.version} is not one of the texts'`);
@@ -1516,7 +1523,7 @@ function allProblems(state) {
     ...buildProblems(state.build),
     ...groundProblems(state.ground, state.contrast, state.themeSha256, state.schemas.settings, state.schemas.page),
     ...aboutTextsProblems(state.aboutTexts),
-    ...aboutGoldenProblems(state.aboutGolden, state.aboutTexts, state.aboutTextsSha256),
+    ...aboutGoldenProblems(state.aboutGolden, state.aboutTexts, state.aboutTextsSha256, state.schemas.page),
     ...neverProblems(state.schemas, [
       ...PAGE_EXAMPLES.map((name, i) => [`examples/${name}`, i === 0 ? state.page : state.anonymous]),
       ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document]),
@@ -1604,6 +1611,8 @@ const SELF_TEST = [
   ['about', (s) => { s.aboutGolden.sentences = s.aboutGolden.sentences.filter((v) => v.input.certificatesIssued); }],
   ['about', (s) => { s.aboutGolden.sentences = s.aboutGolden.sentences.filter((v) => v.id !== 'AV-10'); }],
   ['about', (s) => { s.aboutGolden.blocks[2].expect.paragraphs.pop(); }],
+  ['about', (s) => { delete s.aboutGolden.certificatesIssued.sample; }],
+  ['about', (s) => { s.aboutGolden.certificatesIssued.sample = true; }],
   ['never', (s) => { s.schemas.page.$defs.summarySection.properties.rank = { type: 'integer' }; }],
   ['never', (s) => { s.anonymous.identity.bio = 'Paid CHF 120 to get here'; }],
   ['never', (s) => { s.anonymous.identity.bio = 'MDQ6VXNlcjEyMzQ1Njc='; }],

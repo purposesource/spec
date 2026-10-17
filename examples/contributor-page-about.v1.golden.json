@@ -3,11 +3,17 @@
     "Vectors of the contributor page's about block (1.2.0; ops decision D163; schemas/contributor-page-about.v1.json): what a renderer draws from our versioned words and the page document. The words are the texts file's at `version`, which `textsSha256` names by the SHA-256 of its bytes, so this file moves with every new version.",
     "`sentences`: the proof sentence and the invite composed from a document's sections. `input.sections` is the slice of `contributor-page.v1` `sections` the rule reads (a certificates item's `status`, the repositories section's rows, the summary's `projects`, the adopter items); `input.certificatesIssued` is the renderer's own knowledge of the plane (false on production until ops decision D160 item 8 opens certificates there). `expect.proof` and `expect.invite` are the sentences, null when left out, the invite with its link words as plain text; `expect.link` is the block's one link: the invite's words and path, `inSentence` true, or Learn more and the site's root where the invite is withheld.",
     "`blocks`: whole blocks per variant, the heading and the paragraphs as drawn (link words as plain text), and the link. For `own`, `input.text` is the document's `about.text` and the paragraphs are the person's words, then our one line, which Learn more follows. A block whose paragraphs name the predecessor writes them on one line after a `lint` member, which is not part of the expected block: this repository's copy-lint reads its allow marker line by line.",
+    "`certificatesIssued`: whether certificates are issued on each plane a document names (`contributor-page.v1` `source`), as a renderer must know it today, and so whether the invite is drawn there: on the development planes (`fixture`) yes; on production (`platform`) not until ops decision D160 item 8 opens certificates there, whose act moves this line and the renderer's together; and the public sample (`sample`), a made-up page every site build draws, production's included, follows production. A vector's `input.certificatesIssued` is one of these values.",
     "check:contributor-page recomputes every vector with its own reading of the rule (not the renderer). The strings of `blocks` AB-1 to AB-5 and of every sentence are the ones the texts' claim check passed (design D163-ABOUT-TEXTS-2026-10-16, version 2)."
   ],
   "specVersion": "1.0.0",
   "textsSha256": "02e5ea699374b25430d61fa168c8b54a1617ab3f08ba630bc38822b119ddd36d",
   "version": 1,
+  "certificatesIssued": {
+    "fixture": true,
+    "platform": false,
+    "sample": false
+  },
   "sentences": [
     {
       "id": "AV-01",

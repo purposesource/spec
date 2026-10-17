@@ -3109,8 +3109,10 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   version keeps the one it was frozen with, so its page keeps its words until the person publishes again.
 - OWN WORDS ARE CHECKED LIKE THE BIO (D163 item 4): at most 600 code points and five line breaks, plain text, never linked,
   through the bio's text rules in the bio's order, refused as `page.text_invalid` at `/about/ownText` with the rule's reason.
-  `own` with no words is stored, and the page shows the Short text until words exist; own words a newer rule refuses make the
-  stored read fail, as a refused bio does, and the builder shows Short in their place.
+  `own` with no words is stored, and the page shows the Short text until words exist. Own words a newer rule refuses fail the
+  stored read as a refused bio does, but the store's readers (the api's draft and version reads, the stewards' read,
+  index-build's rebuild) then read the document as the editor's input with those words taken as none: the person keeps the
+  rest of their draft, a published page is rebuilt rather than withheld, and the builder shows Short in their place.
 - Examples: the defaults example carries `about` at its default; two further examples, `about` (our Medium text on the
   commonest launch page, the summary and one status-only certificate) and `about-own` (own words of about 300 characters with
   one line break, on a page that shows the login, its certificates, repositories and adopter items).
@@ -3128,7 +3130,8 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   never in `autoUpdated`; its words are `contributor-page-about.v1`'s at `version`, pinned with the published version, and it
   is inside the preview hash like every member. The renderer composes the proof sentence and the invite at every render from
   the document's own sections and withholds the invite where certificates are not issued on the document's plane (D160
-  item 8), as `contributor-page-about.v1` describes; a renderer without the version leaves the block out. WHAT A READER CHECKS
+  item 8; production, and the public sample, which is drawn on production too), as `contributor-page-about.v1` describes; a
+  renderer without the version leaves the block out. WHAT A READER CHECKS
   says the block is Purpose Source's explanation, or the owner's own words followed by ours, not a fact Purpose Source checks.
 - Two further examples, the documents the builder makes of the settings' `about` and `about-own` examples; the preview
   golden's PV-4 (Medium) and PV-5 (own words with a line break); and the build golden's `about` vectors BA-1 to BA-5: the tick
@@ -3398,11 +3401,12 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   sentence from the listed valid or expired certificates (C), the repositories section (P) or the summary's projects count
   without it (Q), and the adopter items (A), always in that order, joined with "and" or a comma then "and"; none of them,
   no proof sentence; the invite's "too" only with C; the invite withheld where certificates are not issued on the document's
-  plane, the block then ending with Learn more; the own words framed by our heading and line, with no proof sentence and no
-  invite. `examples/contributor-page-about.v1.golden.json` (new) holds 17 sentence vectors (the eleven combinations, singular
-  forms, revoked and superseded certificates left out, the fallback, the invite withheld) and 9 whole blocks, pinned to the
-  texts' SHA-256, recomputed by `check:contributor-page`'s own reading of the rule; every string equals the one the texts'
-  claim check passed.
+  plane (production until ops decision D160 item 8, and the public sample, which every site build draws, production's
+  included), the block then ending with Learn more; the own words framed by our heading and line, with no proof sentence and
+  no invite. `examples/contributor-page-about.v1.golden.json` (new) names each plane in `certificatesIssued` (the sample
+  following production) and holds 17 sentence vectors (the eleven combinations, singular forms, revoked and superseded
+  certificates left out, the fallback, the invite withheld) and 9 whole blocks, pinned to the texts' SHA-256, recomputed by
+  `check:contributor-page`'s own reading of the rule; every string equals the one the texts' claim check passed.
 - A `lint` member, never drawn, carries this repository's and the website's copy-lint allow markers on the line of each
   paragraph that names the predecessor.
 
