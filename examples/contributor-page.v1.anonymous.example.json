@@ -11,6 +11,7 @@
   "picture": { "kind": "github", "letters": "S" },
   "cover": { "kind": "preset", "preset": "dusk" },
   "identity": { "displayName": "Sam" },
+  "cards": { "icon": "owner", "ownNames": "name", "otherNames": "owner/name" },
   "sections": [
     { "id": "summary", "projects": 2, "since": 2026, "certificates": 1 },
     {

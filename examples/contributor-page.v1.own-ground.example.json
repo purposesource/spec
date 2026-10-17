@@ -26,6 +26,7 @@
   "picture": { "kind": "rosette" },
   "cover": { "kind": "none" },
   "identity": { "displayName": "Sam" },
+  "cards": { "icon": "owner", "ownNames": "name", "otherNames": "owner/name" },
   "sections": [
     { "id": "summary", "projects": 2, "since": 2026, "certificates": 1 },
     {

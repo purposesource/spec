@@ -3117,7 +3117,54 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   commonest launch page, the summary and one status-only certificate) and `about-own` (own words of about 300 characters with
   one line break, on a page that shows the login, its certificates, repositories and adopter items).
 
+### 1.3.0 — unreleased (2026-10-17; ops decision D165) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump. `cards`, `{icon?, ownNames?, otherNames?}`, right after `adopter`:
+  the owner's two choices for the page's project and repository cards (D165 item 3), now that the credited projects, the
+  licence adopter's repositories and the certificates are drawn as a matrix of cards, never collapsed, which a visitor may
+  switch to a list (items 1, 2 and 4; `contributor-page.v1` `cards`). `icon` is `owner` (on an own repository the page's own
+  header picture, on another owner's a monogram tile of the owner's first letter), `github` (the GitHub mark) or `none`;
+  `ownNames` and `otherNames` are `name` or `owner/name`, for a repository under the person's own GitHub account and for one
+  of any other owner, an organisation or another person. A certificate's card takes neither choice.
+- DEFAULTS (D165 item 3, the orchestrator's): `owner`, `name` (the page is already that person's) and `owner/name`. They
+  hold until the editor offers the two choices (item 5).
+- LEFT OUT AT ITS DEFAULT, MEMBER BY MEMBER, as 1.1.0's members are: `cards` and each of its members are optional; the api
+  writes `cards` only when a member differs from its default, and then only those members, so a document stored before 1.3.0
+  reads and serialises to the same bytes and keeps its `settings_sha256` (a published page stays "published"). An unknown
+  member or value is `page.settings_invalid` at its path. Not in `x-psn.alwaysWritten`: its absence means the defaults, not an
+  older document.
+- No new reach for the login: no own repository is listed while it is hidden (check (j)), so `owner/name` never prints a
+  hidden login, and `owner` draws only the person's own header picture, never another account's, and nothing fetched from
+  GitHub (another owner's own picture needs the server to copy it at publish, a later phase).
+- Example: `cards` (the GitHub mark, other owners' repositories by their name alone, `ownNames` left out at its default), on
+  a page that shows the login with an own repository, two organisations' and adopter items. The other examples keep their
+  bytes.
+
 ## contributor-page.v1.json
+
+### 1.3.0 — unreleased (2026-10-17; ops decision D165) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump, optional: every document written under 1.2.x stays valid. `cards`,
+  `{icon, ownNames, otherNames}`, right before `sections`: the settings' `cards` resolved. Unlike 1.1.0's members, the builder
+  writes it on EVERY document, with all three members, each the settings' choice or its default, so a published page keeps
+  the choices it was previewed with even if a default later moves; the renderer reads an absent `cards` (a document built
+  before 1.3.0), or an absent member, as its default. Inside the preview hash; not a section, never on the card, never in
+  `autoUpdated`.
+- HOW THE THREE LISTS ARE DRAWN (D165 items 1, 2 and 4), in `cards`' description and a sentence in each section's: the
+  credited projects, the licence adopter's repositories and the certificates are never collapsed; each is a matrix of cards
+  by default, with a quiet grid and list toggle per section that works without script and stores nothing. Project and
+  repository cards carry the icon and the name `cards` chooses, an own repository being one whose owner is the document's
+  `login` (compared without regard to case); a certificate card is a small certificate sheet ("Contributor certificate", the
+  period large, the status line, the projects a `full` item names by their full names, "Check this certificate" and the id).
+  No fact, link, word rule or safety check moves.
+- THE BYTES OF THE EARLIER EXAMPLES AND PREVIEW VECTORS MOVE (pre-release, policy 5): the six page examples and PV-1 to PV-5
+  are the builder's documents, and the builder now writes the member on every one, so each carries the defaults right before
+  `sections`, and the preview golden (its 1.2.0) recomputes their preimages, texts and hashes. A further example, `cards`, and
+  PV-6 carry the GitHub mark and every repository named alone; the build golden (its 1.2.0) gains the vectors BC-1 to BC-6
+  (no choice, one, two and all three chosen, and the defaults stated). `check:contributor-page` holds every page example and
+  vector to the member and its place, both schemas' defaults to D165's, the settings examples to the stored form, the two
+  lists of each choice to agree, and 10 refusals (a fourth icon, a name form of its own, an unknown member, another shape, the
+  viewer's toggle stored in the document) and 6 admissions, each proved able to fail.
 
 ### 1.2.0 — unreleased (2026-10-16; ops decision D163 and its dated notes) — pre-release
 

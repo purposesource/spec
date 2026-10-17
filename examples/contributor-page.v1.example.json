@@ -19,6 +19,7 @@
     "pronouns": "they/them",
     "bio": "Maintainer of small accounting libraries.\nI contribute through Purpose Source."
   },
+  "cards": { "icon": "owner", "ownNames": "name", "otherNames": "owner/name" },
   "sections": [
     { "id": "summary", "projects": 3, "organisations": 2, "since": 2026, "certificates": 1 },
     {

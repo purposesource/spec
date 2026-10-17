@@ -12,6 +12,7 @@
   "cover": { "kind": "none" },
   "identity": { "displayName": "Robin" },
   "about": { "variant": "medium", "version": 1 },
+  "cards": { "icon": "owner", "ownNames": "name", "otherNames": "owner/name" },
   "sections": [
     { "id": "summary", "projects": 2, "organisations": 2, "since": 2026, "certificates": 1 },
     {

@@ -65,7 +65,16 @@
  *              production) and whole blocks per variant, recomputed by the gate's
  *              own reading of the rule from the texts the file names by hash. And the build golden's
  *              `about` vectors: what the builder writes for the settings' about block (nothing with
- *              the tick off; Short for own words that do not exist or that the rules now refuse).
+ *              the tick off; Short for own words that do not exist or that the rules now refuse). And from
+ *              1.3.0 (ops decision D165) the build golden's `cards` vectors: the builder writes the three
+ *              members resolved, each the settings' choice or its default, on every document, and between
+ *              them the vectors give every value of every member, none, some and all three chosen.
+ *   cards      1.3.0 (ops decision D165): `cards` is optional in both schemas and so is each member; the
+ *              settings' `default` is its members' defaults, which are D165 item 3's (the owner's icon, an
+ *              own repository by its name, another owner's as owner/name), and the document's members
+ *              default alike; every page example and preview vector carries the member with its three
+ *              members, as the builder writes it from 1.3.0; and a settings example stores it as the api
+ *              does, each member left out at its default and the member itself when nothing is left.
  *   never      no member of the three page schemas is named for points, shares, bands, ranks,
  *              percentiles, scores, months, amounts or a person's GitHub id, and no published page
  *              example or vector carries a currency figure, a person's GitHub node id (the current
@@ -79,7 +88,8 @@
  *              ones the schema lists in `x-psn.alwaysWritten` (1.2.0: `about`), which it carries at their
  *              default, `about.version` being the texts' `current`.
  *   agree      the closed lists the settings and the public document share are the same lists (1.1.0:
- *              the links' two places, the display parts and the palette ids among them).
+ *              the links' two places, the display parts and the palette ids among them; 1.3.0: the cards'
+ *              icons and their two name forms).
  *   facts      in the page examples (1.1.0's further two among them), every link is its table template with its handle, and the
  *              summary's counts are the rows the page shows (design §8.1: a count never reveals a
  *              hidden row).
@@ -100,13 +110,17 @@
  *              whose accent keeps one; and from 1.2.0 (ops decision D163) own words of 601 code points or
  *              six line breaks or a bidi override, an about block without its version or at version 0, a
  *              fifth variant, a member of the document's about block the settings own (the tick) or our
- *              words in it, and own words in the document under another variant or own without them.
+ *              words in it, and own words in the document under another variant or own without them; and
+ *              from 1.3.0 (ops decision D165) a fourth icon, a name form of its own, an unknown member of
+ *              `cards` or another shape for it, in either schema, and the viewer's list toggle stored in
+ *              the document.
  *   admits     what 1.1.0 adds is admitted, proved on copies of the examples: icon-only links beside
  *              the name, the GitHub line's parts, the website's display, a palette swatch and an own
  *              colour in the settings, and a `purpose` pair, an own colour and a swatch of another
  *              preset in the document; and what 1.2.0 adds: own words not yet written, own words kept
  *              under another variant or with the tick off, 600 code points and five line breaks, and in
- *              the document our Medium text, a later version, and no about block at all.
+ *              the document our Medium text, a later version, and no about block at all; and what 1.3.0
+ *              adds: no `cards` at all, one member alone and the defaults stated, in either schema.
  *   goldens    every `examples/*.golden.json` is one a gate checks.
  *
  * Every rule is proved able to fail before the examples are trusted to pass.
@@ -164,6 +178,15 @@ const real = {
   aboutTexts: example('contributor-page-about.v1.example.json'),
   aboutTextsSha256: createHash('sha256').update(readFileSync(join(EXAMPLE_DIR, 'contributor-page-about.v1.example.json'))).digest('hex'),
   aboutGolden: example('contributor-page-about.v1.golden.json'),
+  // 1.3.0's further examples (ops decision D165): the GitHub mark on every card and every repository named alone.
+  cardsPage: example('contributor-page.v1.cards.example.json'),
+  cardsSettings: example('contributor-page-settings.v1.cards.example.json'),
+  settingsExamples: Object.fromEntries(
+    readdirSync(EXAMPLE_DIR)
+      .filter((name) => name.startsWith('contributor-page-settings.v1.') && name.endsWith('.example.json'))
+      .sort()
+      .map((name) => [name, example(name)])
+  ),
   settings: example('contributor-page-settings.v1.example.json'),
   defaults: example('contributor-page-settings.v1.defaults.example.json'),
   alias: example('contributor-page-alias.v1.example.json'),
@@ -1007,6 +1030,97 @@ function buildProblems(golden) {
   }
   for (const [what, done] of Object.entries(exercised)) if (!done) add(`no vector exercises ${what}`);
   found.push(...buildAboutProblems(golden.about ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
+  found.push(...buildCardsProblems(golden.cards ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
+  return found;
+}
+
+const validatePageCards = ajv.getSchema(`${cfg.schemaBaseUrl}/${PAGE}#/properties/cards`);
+const validateSettingsCards = ajv.getSchema(`${cfg.schemaBaseUrl}/${SETTINGS}#/properties/cards`);
+
+/**
+ * The gate's own reading of the builder's cards rule (1.3.0; contributor-page.v1 `cards`), not the builder: every member the
+ * settings schema names, the settings' choice where there is one, else that member's default in the settings schema.
+ */
+function buildCards(input, settingsSchema) {
+  const members = settingsSchema.properties.cards?.properties ?? {};
+  return Object.fromEntries(Object.entries(members).map(([name, member]) => [name, input.cards?.[name] ?? member.default]));
+}
+
+function buildCardsProblems(vectors) {
+  const found = [];
+  if (vectors.length === 0) found.push('no cards vector — the cards rule would pass vacuously');
+  const settingsSchema = schemaJson(SETTINGS);
+  const members = settingsSchema.properties.cards?.properties ?? {};
+  const exercised = { none: false, some: false, all: false };
+  for (const [name, member] of Object.entries(members)) for (const value of member.enum ?? []) exercised[`${name} ${value}`] = false;
+  for (const v of vectors) {
+    const got = buildCards(v.input, settingsSchema);
+    if (JSON.stringify(sortDeep(got)) !== JSON.stringify(sortDeep(v.expect.cards))) found.push(`${v.id}: expects ${JSON.stringify(v.expect.cards)}, the rule gives ${JSON.stringify(got)}`);
+    if (v.input.cards !== null && !validateSettingsCards(v.input.cards)) found.push(`${v.id}: the input is not a valid settings cards member (${ajv.errorsText(validateSettingsCards.errors)})`);
+    if (!validatePageCards(v.expect.cards)) found.push(`${v.id}: the expected member is not a valid document cards member (${ajv.errorsText(validatePageCards.errors)})`);
+    const chosen = Object.keys(v.input.cards ?? {}).length;
+    if (chosen === 0) exercised.none = true;
+    else if (chosen < Object.keys(members).length) exercised.some = true;
+    else exercised.all = true;
+    for (const [name, value] of Object.entries(v.input.cards ?? {})) exercised[`${name} ${value}`] = true;
+  }
+  for (const [what, done] of Object.entries(exercised)) if (!done) found.push(`no cards vector exercises ${what}`);
+  return found;
+}
+
+/* ---------------------------------------------------------------------------- cards */
+
+/** D165 item 3's defaults (the orchestrator's): the owner's icon, an own repository by its name, another owner's as owner/name. */
+const CARDS_DEFAULTS = { icon: 'owner', ownNames: 'name', otherNames: 'owner/name' };
+
+/**
+ * 1.3.0 (ops decision D165): `cards` is optional in both schemas, every member optional, the defaults D165's in both; the one
+ * builder writes all three members on every document from 1.3.0, so every page example and preview vector (each the
+ * builder's) carries them; and a settings example stores the member as the api does, each member left out at its default.
+ */
+function cardsProblems(state) {
+  const found = [];
+  const add = (message) => found.push(['cards', message]);
+  const s = state.schemas.settings;
+  const p = state.schemas.page;
+  const sc = s.properties.cards;
+  const pc = p.properties.cards;
+  if (!sc || !pc) {
+    add('a schema has no `cards` member');
+    return found;
+  }
+  const members = Object.keys(sc.properties ?? {});
+  const defaults = Object.fromEntries(members.map((m) => [m, sc.properties[m].default]));
+  if (JSON.stringify(sortDeep(defaults)) !== JSON.stringify(sortDeep(CARDS_DEFAULTS))) add(`the settings' cards defaults are ${JSON.stringify(defaults)}, D165 item 3's are ${JSON.stringify(CARDS_DEFAULTS)}`);
+  if (JSON.stringify(sortDeep(sc.default ?? null)) !== JSON.stringify(sortDeep(defaults))) add(`the settings' cards default is ${JSON.stringify(sc.default)}, its members' defaults are ${JSON.stringify(defaults)}`);
+  if (Object.keys(pc.properties ?? {}).join(',') !== members.join(',')) add(`the document's cards members are [${Object.keys(pc.properties ?? {})}], the settings' [${members}]`);
+  for (const m of members) if (pc.properties?.[m]?.default !== defaults[m]) add(`the document's cards.${m} defaults to ${pc.properties?.[m]?.default}, the settings' to ${defaults[m]}`);
+  if ((sc.required ?? []).length > 0 || (pc.required ?? []).length > 0) add('a cards member is required; every one is optional, absent meaning its default');
+  if ((s.required ?? []).includes('cards') || (p.required ?? []).includes('cards')) add('cards is required; it is optional, so a document from before 1.3.0 stays valid');
+  if ((s['x-psn']?.alwaysWritten ?? []).includes('cards')) add('cards is always written; the api leaves it out at its default');
+  const documents = [
+    ['examples/contributor-page.v1.example.json', state.page],
+    ['examples/contributor-page.v1.anonymous.example.json', state.anonymous],
+    ['examples/contributor-page.v1.header.example.json', state.header],
+    ['examples/contributor-page.v1.own-ground.example.json', state.ownGround],
+    ['examples/contributor-page.v1.about.example.json', state.aboutPage],
+    ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
+    ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
+    ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
+  ];
+  for (const [where, doc] of documents) {
+    const keys = Object.keys(doc.cards ?? {});
+    if ([...keys].sort().join(',') !== [...members].sort().join(',')) add(`${where}: cards is ${JSON.stringify(doc.cards)}; the builder writes all of ${members.join(', ')} on every document`);
+    const order = Object.keys(doc);
+    if ('cards' in doc && order.indexOf('cards') + 1 !== order.indexOf('sections')) add(`${where}: cards is not written right before sections, where the builder writes it`);
+  }
+  if (!state.preview.vectors.some((v) => Object.entries(v.document.cards ?? {}).some(([m, value]) => value !== defaults[m]))) add('no preview vector carries a cards choice other than the defaults');
+  for (const [name, settings] of Object.entries(state.settingsExamples)) {
+    if (!('cards' in settings)) continue;
+    const stored = settings.cards ?? {};
+    if (Object.keys(stored).length === 0) add(`examples/${name}: an empty cards is stored; the api leaves the member out`);
+    for (const [m, value] of Object.entries(stored)) if (value === defaults[m]) add(`examples/${name}: cards.${m} is stored at its default; the api leaves it out`);
+  }
   return found;
 }
 
@@ -1297,7 +1411,11 @@ function agreeProblems(settingsSchema, pageSchema) {
     ['link display part', s.$defs.show?.required, p.$defs.show?.required],
     ['website display part', s.$defs.websiteShow?.required, p.$defs.websiteShow?.required],
     ['palette id', s.$defs.groundId?.enum, p.$defs.groundId?.enum],
-    ['about variant', s.properties.about?.properties.variant.enum, p.properties.about?.properties.variant.enum]
+    ['about variant', s.properties.about?.properties.variant.enum, p.properties.about?.properties.variant.enum],
+    ['card icon', s.properties.cards?.properties.icon.enum, p.properties.cards?.properties.icon.enum],
+    ['own name form', s.properties.cards?.properties.ownNames.enum, p.properties.cards?.properties.ownNames.enum],
+    ['other name form', s.properties.cards?.properties.otherNames.enum, p.properties.cards?.properties.otherNames.enum],
+    ['name forms of own and other', s.properties.cards?.properties.ownNames.enum, s.properties.cards?.properties.otherNames.enum]
   ];
   for (const [what, a, b] of pairs) {
     if ((a ?? []).join(',') !== (b ?? []).join(',')) found.push(['agree', `the ${what} lists differ: settings [${a}], page [${b}]`]);
@@ -1423,7 +1541,18 @@ const REFUSALS = [
   ['aboutOwnPage', 'the tick in the document', (d) => { d.about.on = true; }],
   ['aboutOwnPage', 'our words in the document', (d) => { d.about = { variant: 'short', version: 1, paragraphs: ['Open source already helps people.'] }; }], // copy-lint-allow: mention
   ['aboutOwnPage', 'own words of 601 code points', (d) => { d.about.text = 'é'.repeat(601); }],
-  ['aboutOwnPage', 'own words with six line breaks', (d) => { d.about.text = 'a\nb\nc\nd\ne\nf\ng'; }]
+  ['aboutOwnPage', 'own words with six line breaks', (d) => { d.about.text = 'a\nb\nc\nd\ne\nf\ng'; }],
+  // 1.3.0 (ops decision D165).
+  ['cardsSettings', 'a fourth card icon', (d) => { d.cards.icon = 'organisation'; }],
+  ['cardsSettings', 'a name form of its own', (d) => { d.cards.ownNames = 'login/name'; }],
+  ['cardsSettings', 'an upper-case name form', (d) => { d.cards.otherNames = 'Owner/Name'; }],
+  ['cardsSettings', 'an unknown member of cards', (d) => { d.cards.size = 'large'; }],
+  ['cardsSettings', 'cards as a list', (d) => { d.cards = ['github']; }],
+  ['cardsSettings', 'cards as null', (d) => { d.cards = null; }],
+  ['cardsPage', 'a fourth card icon', (d) => { d.cards.icon = 'avatar'; }],
+  ['cardsPage', 'a name form of its own', (d) => { d.cards.otherNames = 'org/name'; }],
+  ['cardsPage', "the viewer's list toggle stored in the document", (d) => { d.cards.view = 'list'; }],
+  ['cardsPage', 'cards as a string', (d) => { d.cards = 'github'; }]
 ];
 
 /** Rows and accents for the 1.1.0 cases: real rows (two palette swatches, and the ground guard's row for #3366cc). */
@@ -1469,7 +1598,14 @@ const ADMITS = [
   ['aboutSettings', 'own words of 600 code points with five line breaks', (d) => { d.about.ownText = `${'é'.repeat(594)}\n\n\n\n\nx`; }],
   ['aboutOwnPage', 'our Medium text', (d) => { d.about = { variant: 'medium', version: 1 }; }],
   ['aboutOwnPage', 'a later version of our words', (d) => { d.about = { variant: 'long', version: 2 }; }],
-  ['aboutOwnPage', 'no about block', (d) => { delete d.about; }]
+  ['aboutOwnPage', 'no about block', (d) => { delete d.about; }],
+  // 1.3.0 (ops decision D165).
+  ['cardsSettings', 'no cards at all (stored before 1.3.0, or every choice at its default)', (d) => { delete d.cards; }],
+  ['cardsSettings', 'one card choice alone', (d) => { d.cards = { ownNames: 'owner/name' }; }],
+  ['cardsSettings', 'the card defaults stated', (d) => { d.cards = { icon: 'owner', ownNames: 'name', otherNames: 'owner/name' }; }],
+  ['cardsPage', 'no cards at all (a document built before 1.3.0)', (d) => { delete d.cards; }],
+  ['cardsPage', 'one card member alone', (d) => { d.cards = { icon: 'none' }; }],
+  ['cardsPage', 'every card value other than the defaults', (d) => { d.cards = { icon: 'none', ownNames: 'owner/name', otherNames: 'name' }; }]
 ];
 
 const CONTRACT = {
@@ -1478,12 +1614,17 @@ const CONTRACT = {
   aboutOwnPage: 'contributor-page.v1',
   settings: 'contributor-page-settings.v1',
   aboutSettings: 'contributor-page-settings.v1',
+  cardsPage: 'contributor-page.v1',
+  cardsSettings: 'contributor-page-settings.v1',
   alias: 'contributor-page-alias.v1'
 };
 
 function refusalProblems(docs, refusals) {
   const found = [];
-  const validators = { page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, settings: validateSettings, aboutSettings: validateSettings, alias: validateAlias };
+  const validators = {
+    page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage,
+    settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings, alias: validateAlias
+  };
   for (const [base, what, breakIt] of refusals) {
     const copy = structuredClone(docs[base]);
     breakIt(copy);
@@ -1494,7 +1635,10 @@ function refusalProblems(docs, refusals) {
 
 function admitsProblems(docs, admits) {
   const found = [];
-  const validators = { page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, settings: validateSettings, aboutSettings: validateSettings };
+  const validators = {
+    page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage,
+    settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings
+  };
   for (const [base, what, change] of admits) {
     const copy = structuredClone(docs[base]);
     change(copy);
@@ -1532,6 +1676,7 @@ function allProblems(state) {
       ['examples/contributor-page.v1.own-ground.example.json', state.ownGround],
       ['examples/contributor-page.v1.about.example.json', state.aboutPage],
       ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
+      ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
       [`examples/${ABOUT_FILE}`, state.aboutTexts],
       [`examples/${ABOUT_GOLDEN}`, state.aboutGolden]
     ]),
@@ -1543,8 +1688,10 @@ function allProblems(state) {
       ['examples/contributor-page.v1.header.example.json', state.header],
       ['examples/contributor-page.v1.own-ground.example.json', state.ownGround],
       ['examples/contributor-page.v1.about.example.json', state.aboutPage],
-      ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage]
+      ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
+      ['examples/contributor-page.v1.cards.example.json', state.cardsPage]
     ]),
+    ...cardsProblems(state),
     ...refusalProblems(state, state.refusals ?? REFUSALS),
     ...admitsProblems(state, state.admits ?? ADMITS),
     ...goldenFilesProblems(state.goldenFiles)
@@ -1602,6 +1749,17 @@ const SELF_TEST = [
   ['ground', (s) => { s.ground.themeCases = s.ground.themeCases.filter((x) => !(x.preset === 'purpose' && /^#/.test(x.ground ?? ''))); }],
   ['build', (s) => { const v = s.build.about.find((x) => x.input.textRules === 'refused'); v.expect.about = { variant: 'own', version: 1, text: v.input.about.ownText }; }],
   ['build', (s) => { s.build.about = s.build.about.filter((v) => v.input.about.on); }],
+  ['build', (s) => { const v = s.build.cards.find((x) => x.input.cards === null); v.expect.cards.icon = 'github'; }],
+  ['build', (s) => { s.build.cards = s.build.cards.filter((v) => v.input.cards?.icon !== 'none'); }],
+  ['build', (s) => { s.build.cards = s.build.cards.filter((v) => v.input.cards !== null && Object.keys(v.input.cards).length !== 0); }],
+  ['cards', (s) => { delete s.anonymous.cards; }],
+  ['cards', (s) => { delete s.preview.vectors[2].document.cards.otherNames; }],
+  ['cards', (s) => { const { cards, ...rest } = s.aboutPage; s.aboutPage = { ...rest, cards }; }],
+  ['cards', (s) => { s.schemas.settings.properties.cards.properties.ownNames.default = 'owner/name'; }],
+  ['cards', (s) => { s.schemas.page.properties.cards.properties.icon.default = 'github'; }],
+  ['cards', (s) => { s.schemas.page.required = [...s.schemas.page.required, 'cards']; }],
+  ['cards', (s) => { s.settingsExamples['contributor-page-settings.v1.cards.example.json'].cards.ownNames = 'name'; }],
+  ['cards', (s) => { for (const v of s.preview.vectors) v.document.cards = { ...CARDS_DEFAULTS }; }],
   ['about', (s) => { s.aboutTexts.versions[0].short.paragraphs[0] += ' It is lovely.'; }],
   ['about', (s) => { s.aboutTexts.current = 2; }],
   ['about', (s) => { const v = s.aboutTexts.versions[0]; v.invite.withCertificates = v.invite.withoutCertificates; }],
@@ -1621,6 +1779,11 @@ const SELF_TEST = [
   ['defaults', (s) => { delete s.defaults.about; }],
   ['defaults', (s) => { s.defaults.about.version = 2; }],
   ['agree', (s) => { s.schemas.page.properties.about.properties.variant.enum = ['short', 'medium', 'long']; }],
+  ['agree', (s) => { s.schemas.page.properties.cards.properties.icon.enum = ['owner', 'github']; }],
+  ['agree', (s) => { s.schemas.settings.properties.cards.properties.otherNames.enum = ['owner/name', 'name']; }],
+  ['defaults', (s) => { s.defaults.cards = { icon: 'github' }; }],
+  ['admits', (s) => { s.admits = [['cardsSettings', 'the GitHub picture as an icon', (d) => { d.cards.icon = 'avatar'; }]]; }],
+  ['refusals', (s) => { s.refusals = [['cardsPage', 'the cards page unchanged', () => {}]]; }],
   ['admits', (s) => { s.admits = [['aboutSettings', 'own words of 601 code points', (d) => { d.about.ownText = 'a'.repeat(601); }]]; }],
   ['agree', (s) => { s.schemas.page.properties.layout.enum = ['paper', 'profile']; }],
   ['agree', (s) => { s.schemas.page.$defs.groundId.enum = s.schemas.page.$defs.groundId.enum.slice(1); }],
@@ -1669,6 +1832,7 @@ fail(
     `${state.ground.cases.length} ground guard cases, ${Object.values(state.ground.palettes).reduce((n, p) => n + p.reduce((m, s) => m + (s.dark ? 2 : 1), 0), 0)} palette rows and ${state.ground.themeCases.length} document themes recompute, ` +
     `${state.preview.vectors.length} preview vectors recompute, ${state.aliasGolden.vectors.length} alias MAC vectors recompute, ` +
     `${state.build.vectors.length} builder vectors keep a hidden login off the repository list, ${state.build.about.length} write the about block, ` +
+    `${state.build.cards.length} write the cards' choices resolved, ` +
     `${state.aboutTexts.versions.length} version(s) of our about texts hold their recorded digests, ${state.aboutGolden.sentences.length} about sentences and ${state.aboutGolden.blocks.length} blocks recompute, ` +
     'no page member or example carries points, money or a GitHub id, ' +
     `the defaults are the schema's, ${REFUSALS.length} refusals and ${ADMITS.length} admissions hold, and every rule was proved able to fail`,
