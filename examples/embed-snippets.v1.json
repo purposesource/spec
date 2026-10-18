@@ -1,0 +1,20 @@
+{
+  "$comment": [
+    "The page block of the embed tools (FS04-057; ops decisions D115 and D116, slice P15; design PROFILE-PAGE-2026-10-06 §3.4 and §4.9): what a person pastes into a README or a website to show their public contributor page, handed to them by the dashboard's api (`GET /v1/me/embed`) once the page is public, and by nothing else. The api composes it in C# from the three inputs below and is held to this file member for member and character for character.",
+    "`input` is the page's permanent id, the origin the edge answers on (`apiOrigin`, where the badge is drawn) and the origin the page's addresses are on (`pageOrigin`: the public site on production, and the edge's own host elsewhere, where the edge answers every path). `page` is the answer. `stableUrl` is the page's permanent link, the address every snippet links to, so a snippet keeps working through a rename and a change of address shape (design §7.1). `badge` is the flat person badge (openapi/edge-public.v1.yaml `getContributorPageBadge`): its address, and its Markdown and HTML snippets. The badge's words are the edge's; the HTML's `alt` says what the badge says while the page is public.",
+    "The page's card snippets join this file when the cards are drawn (slice P27); until then the card addresses answer the site's generic card, and the answer offers none. Every snippet names the canonical hosts verbatim (CERT-027). A snippet changes here first, and then in the api in the same release."
+  ],
+  "input": {
+    "pid": "7k2m9xq4tpz3r8vd",
+    "apiOrigin": "https://api.purposesource.org",
+    "pageOrigin": "https://purposesource.org"
+  },
+  "page": {
+    "stableUrl": "https://purposesource.org/p/7k2m9xq4tpz3r8vd",
+    "badge": {
+      "url": "https://api.purposesource.org/badge/p/7k2m9xq4tpz3r8vd.svg",
+      "markdown": "[![Purpose Source](https://api.purposesource.org/badge/p/7k2m9xq4tpz3r8vd.svg)](https://purposesource.org/p/7k2m9xq4tpz3r8vd)",
+      "html": "<a href=\"https://purposesource.org/p/7k2m9xq4tpz3r8vd\"><img src=\"https://api.purposesource.org/badge/p/7k2m9xq4tpz3r8vd.svg\" alt=\"Purpose Source: contributor page\" /></a>"
+    }
+  }
+}
