@@ -69,6 +69,14 @@
  *              1.3.0 (ops decision D165) the build golden's `cards` vectors: the builder writes the three
  *              members resolved, each the settings' choice or its default, on every document, and between
  *              them the vectors give every value of every member, none, some and all three chosen.
+ *   adopter    1.4.0 (ops decision D168 item 3): `since` and `until` on an adopter item are years and
+ *              optional; on every page example and preview vector `until` stands only beside `since` and
+ *              never before it (the order a schema cannot hold), and some vector carries both. The build
+ *              golden's `adopter` vectors are answered by the gate's own reading of the builder's rule: a
+ *              registered repository listed with `since` where it is known; one that left (not registered,
+ *              with the recorded quit's year) listed only with both years in order; every other one dropped;
+ *              the person's hide, an evidence no link can be rebuilt from and the first fact per repository
+ *              kept; `until` written on a left item alone; and between them the vectors give each case.
  *   cards      1.3.0 (ops decision D165): `cards` is optional in both schemas and so is each member; the
  *              settings' `default` is its members' defaults, which are D165 item 3's (the owner's icon, an
  *              own repository by its name, another owner's as owner/name), and the document's members
@@ -120,7 +128,10 @@
  *              preset in the document; and what 1.2.0 adds: own words not yet written, own words kept
  *              under another variant or with the tick off, 600 code points and five line breaks, and in
  *              the document our Medium text, a later version, and no about block at all; and what 1.3.0
- *              adds: no `cards` at all, one member alone and the defaults stated, in either schema.
+ *              adds: no `cards` at all, one member alone and the defaults stated, in either schema; and what
+ *              1.4.0 adds: no year on any adopter item, `since` alone, and a left item within one year. And
+ *              1.4.0's refusals: `until` without `since`, a year before 2026, a month or an instant for a
+ *              year, and a marker of a leave of its own.
  *   goldens    every `examples/*.golden.json` is one a gate checks.
  *
  * Every rule is proved able to fail before the examples are trusted to pass.
@@ -181,6 +192,8 @@ const real = {
   // 1.3.0's further examples (ops decision D165): the GitHub mark on every card and every repository named alone.
   cardsPage: example('contributor-page.v1.cards.example.json'),
   cardsSettings: example('contributor-page-settings.v1.cards.example.json'),
+  // 1.4.0's further example (ops decision D168 item 3): the licence adopter's years, a repository that left among them.
+  adopterYearsPage: example('contributor-page.v1.adopter-years.example.json'),
   settingsExamples: Object.fromEntries(
     readdirSync(EXAMPLE_DIR)
       .filter((name) => name.startsWith('contributor-page-settings.v1.') && name.endsWith('.example.json'))
@@ -1031,6 +1044,100 @@ function buildProblems(golden) {
   for (const [what, done] of Object.entries(exercised)) if (!done) add(`no vector exercises ${what}`);
   found.push(...buildAboutProblems(golden.about ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   found.push(...buildCardsProblems(golden.cards ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
+  found.push(...buildAdopterProblems(golden.adopter ?? []).map((message) => ['adopter', `examples/contributor-page-build.v1.golden.json: ${message}`]));
+  return found;
+}
+
+const validateAdopterSection = ajv.getSchema(`${cfg.schemaBaseUrl}/${PAGE}#/$defs/adopterSection`);
+const YEAR_MIN = 2026;
+const YEAR_MAX = 9999;
+
+/**
+ * The gate's own reading of the builder's licence adopter rule (1.4.0; contributor-page.v1 `adopterSection`), not the builder:
+ * the facts in observed order, less the person's hides and any whose evidence no link can be rebuilt from; the first fact of
+ * each repository is its item; a registered repository is listed, with `since` where its year is known; one that left (not
+ * registered, the recorded quit's year passed as `until`) is listed only with both years and `since` no later than `until`;
+ * every other repository drops out; at most 200 items.
+ */
+function buildAdopter(input) {
+  const year = (y) => (Number.isInteger(y) && y >= YEAR_MIN && y <= YEAR_MAX ? y : null);
+  const rebuilt = (f) => (f.kind === 'merged-pr' ? Number.isInteger(f.number) && f.number >= 1 : f.kind === 'direct-commit' && /^[0-9a-f]{40}$/.test(f.oid ?? ''));
+  const first = new Map();
+  for (const f of input.facts) if (!input.hidden.includes(f.nodeId) && rebuilt(f) && !first.has(f.nodeId)) first.set(f.nodeId, f);
+  const items = [];
+  for (const f of first.values()) {
+    const since = year(f.since);
+    const until = year(f.until);
+    const left = !f.registered && since !== null && until !== null && since <= until;
+    if (!f.registered && !left) continue;
+    const item = { nodeId: f.nodeId, fullName: f.fullName, evidence: f.kind === 'merged-pr' ? { kind: f.kind, number: f.number } : { kind: f.kind, oid: f.oid } };
+    if (since !== null) item.since = since;
+    if (left) item.until = until;
+    items.push(item);
+    if (items.length === 200) break;
+  }
+  return items.length > 0 ? { id: 'adopter', items } : null;
+}
+
+function buildAdopterProblems(vectors) {
+  const found = [];
+  if (vectors.length === 0) found.push('no adopter vector — the adopter rule would pass vacuously');
+  const exercised = {
+    sinceWritten: false, noYear: false, leftBoth: false, leftOneYear: false, notLeftDropped: false, undatedLeaveDropped: false,
+    quitBeforeEvidenceDropped: false, restoredSinceOnly: false, hiddenDropped: false, unrebuiltDropped: false, firstFactKept: false, nothingLeft: false
+  };
+  for (const v of vectors) {
+    const got = buildAdopter(v.input);
+    if (JSON.stringify(sortDeep(got)) !== JSON.stringify(sortDeep(v.expect.adopter))) found.push(`${v.id}: expects ${JSON.stringify(v.expect.adopter)}, the rule gives ${JSON.stringify(got)}`);
+    if (v.expect.adopter && !validateAdopterSection(v.expect.adopter)) found.push(`${v.id}: the expected section is not a valid adopterSection (${ajv.errorsText(validateAdopterSection.errors)})`);
+    // `until` on a left item alone: an expected item carries it exactly when the repository is not registered.
+    const facts = v.input.facts;
+    for (const item of v.expect.adopter?.items ?? []) {
+      const fact = facts.find((f) => f.nodeId === item.nodeId);
+      if (!fact) found.push(`${v.id}: ${item.nodeId} is listed with no fact behind it`);
+      else if ('until' in item === fact.registered) found.push(`${v.id}: ${item.nodeId} is ${fact.registered ? 'registered and carries until' : 'not registered and carries no until'}; only a left item carries one, and a left item is listed with it`);
+      if ('until' in item && !(item.since <= item.until)) found.push(`${v.id}: ${item.nodeId} carries until ${item.until} without a since no later than it`);
+    }
+    const listed = new Set((v.expect.adopter?.items ?? []).map((i) => i.nodeId));
+    for (const f of facts) {
+      const item = v.expect.adopter?.items.find((i) => i.nodeId === f.nodeId);
+      if (item && f.registered && Number.isInteger(f.since)) exercised.sinceWritten = true;
+      if (item && f.registered && f.since === null) exercised.noYear = true;
+      if (item && !f.registered && item.since !== item.until) exercised.leftBoth = true;
+      if (item && !f.registered && item.since === item.until) exercised.leftOneYear = true;
+      if (!listed.has(f.nodeId) && !f.registered && f.until === null) exercised.notLeftDropped = true;
+      if (!listed.has(f.nodeId) && !f.registered && f.until !== null && f.since === null) exercised.undatedLeaveDropped = true;
+      if (!listed.has(f.nodeId) && !f.registered && f.since !== null && f.until !== null && f.since > f.until) exercised.quitBeforeEvidenceDropped = true;
+      if (item && f.registered && f.until !== null && !('until' in item)) exercised.restoredSinceOnly = true;
+      if (!listed.has(f.nodeId) && v.input.hidden.includes(f.nodeId)) exercised.hiddenDropped = true;
+      if (f.kind === 'merged-pr' && f.number === null && !listed.has(f.nodeId)) exercised.unrebuiltDropped = true;
+    }
+    if (facts.some((f, i) => facts.findIndex((g) => g.nodeId === f.nodeId) !== i && listed.has(f.nodeId))) exercised.firstFactKept = true;
+    if (v.expect.adopter === null) exercised.nothingLeft = true;
+  }
+  for (const [what, done] of Object.entries(exercised)) if (!done) found.push(`no adopter vector exercises ${what}`);
+  return found;
+}
+
+/**
+ * 1.4.0 (ops decision D168 item 3): on every page document, an adopter item's `until` stands only beside a `since` no later
+ * than it (`dependentRequired` holds the first; no schema can hold the order), each a year of the schema's range; and at
+ * least one preview vector carries a left item, so its hash pins the two members.
+ */
+function adopterYearsProblems(documents, vectors) {
+  const found = [];
+  const add = (message) => found.push(['adopter', message]);
+  for (const [where, doc] of documents) {
+    const section = (doc.sections ?? []).find((s) => s.id === 'adopter');
+    for (const item of section?.items ?? []) {
+      for (const member of ['since', 'until']) {
+        if (member in item && !(Number.isInteger(item[member]) && item[member] >= YEAR_MIN && item[member] <= YEAR_MAX)) add(`${where}: ${item.fullName} carries ${member} ${JSON.stringify(item[member])}, which is no year`);
+      }
+      if ('until' in item && !('since' in item)) add(`${where}: ${item.fullName} carries until without since; a left item is listed only with both years`);
+      if ('until' in item && 'since' in item && item.until < item.since) add(`${where}: ${item.fullName} left in ${item.until}, before its evidence of ${item.since}`);
+    }
+  }
+  if (!vectors.some((v) => (v.document.sections ?? []).some((s) => s.id === 'adopter' && s.items.some((i) => 'until' in i)))) add('no preview vector carries a left adopter item, so no hash pins since and until');
   return found;
 }
 
@@ -1106,6 +1213,7 @@ function cardsProblems(state) {
     ['examples/contributor-page.v1.about.example.json', state.aboutPage],
     ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
     ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
+    ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
     ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
   ];
   for (const [where, doc] of documents) {
@@ -1552,8 +1660,18 @@ const REFUSALS = [
   ['cardsPage', 'a fourth card icon', (d) => { d.cards.icon = 'avatar'; }],
   ['cardsPage', 'a name form of its own', (d) => { d.cards.otherNames = 'org/name'; }],
   ['cardsPage', "the viewer's list toggle stored in the document", (d) => { d.cards.view = 'list'; }],
-  ['cardsPage', 'cards as a string', (d) => { d.cards = 'github'; }]
+  ['cardsPage', 'cards as a string', (d) => { d.cards = 'github'; }],
+  // 1.4.0 (ops decision D168 item 3).
+  ['adopterYearsPage', 'a left year without its since', (d) => { delete leftItem(d).since; }],
+  ['adopterYearsPage', 'a since before 2026', (d) => { sectionOf(d, 'adopter').items[0].since = 2025; }],
+  ['adopterYearsPage', 'a month for a year', (d) => { sectionOf(d, 'adopter').items[0].since = '2026-03'; }],
+  ['adopterYearsPage', 'an instant for a year', (d) => { leftItem(d).until = '2027-02-10T09:00:00Z'; }],
+  ['adopterYearsPage', 'a year that is not a whole number', (d) => { leftItem(d).until = 2027.5; }],
+  ['adopterYearsPage', 'a marker of a leave of its own', (d) => { leftItem(d).left = true; }]
 ];
+
+/** The adopter-years example's item that left (it carries `until`). */
+const leftItem = (d) => sectionOf(d, 'adopter').items.find((i) => 'until' in i);
 
 /** Rows and accents for the 1.1.0 cases: real rows (two palette swatches, and the ground guard's row for #3366cc). */
 const ROW = {
@@ -1605,7 +1723,11 @@ const ADMITS = [
   ['cardsSettings', 'the card defaults stated', (d) => { d.cards = { icon: 'owner', ownNames: 'name', otherNames: 'owner/name' }; }],
   ['cardsPage', 'no cards at all (a document built before 1.3.0)', (d) => { delete d.cards; }],
   ['cardsPage', 'one card member alone', (d) => { d.cards = { icon: 'none' }; }],
-  ['cardsPage', 'every card value other than the defaults', (d) => { d.cards = { icon: 'none', ownNames: 'owner/name', otherNames: 'name' }; }]
+  ['cardsPage', 'every card value other than the defaults', (d) => { d.cards = { icon: 'none', ownNames: 'owner/name', otherNames: 'name' }; }],
+  // 1.4.0 (ops decision D168 item 3).
+  ['adopterYearsPage', 'no year on any adopter item (a document built before 1.4.0)', (d) => { for (const i of sectionOf(d, 'adopter').items) { delete i.since; delete i.until; } d.sections[0].items = d.sections[0].items.filter((i) => i.nodeId !== 'R_kgDOSMPL0005'); }],
+  ['adopterYearsPage', 'since alone on every item', (d) => { for (const i of sectionOf(d, 'adopter').items) { i.since = 2026; delete i.until; } }],
+  ['adopterYearsPage', 'a left item within one year', (d) => { const i = leftItem(d); i.since = 2027; i.until = 2027; }]
 ];
 
 const CONTRACT = {
@@ -1616,13 +1738,14 @@ const CONTRACT = {
   aboutSettings: 'contributor-page-settings.v1',
   cardsPage: 'contributor-page.v1',
   cardsSettings: 'contributor-page-settings.v1',
+  adopterYearsPage: 'contributor-page.v1',
   alias: 'contributor-page-alias.v1'
 };
 
 function refusalProblems(docs, refusals) {
   const found = [];
   const validators = {
-    page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage,
+    page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage, adopterYearsPage: validatePage,
     settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings, alias: validateAlias
   };
   for (const [base, what, breakIt] of refusals) {
@@ -1636,7 +1759,7 @@ function refusalProblems(docs, refusals) {
 function admitsProblems(docs, admits) {
   const found = [];
   const validators = {
-    page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage,
+    page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage, adopterYearsPage: validatePage,
     settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings
   };
   for (const [base, what, change] of admits) {
@@ -1677,6 +1800,7 @@ function allProblems(state) {
       ['examples/contributor-page.v1.about.example.json', state.aboutPage],
       ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
       ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
+      ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
       [`examples/${ABOUT_FILE}`, state.aboutTexts],
       [`examples/${ABOUT_GOLDEN}`, state.aboutGolden]
     ]),
@@ -1689,9 +1813,24 @@ function allProblems(state) {
       ['examples/contributor-page.v1.own-ground.example.json', state.ownGround],
       ['examples/contributor-page.v1.about.example.json', state.aboutPage],
       ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
-      ['examples/contributor-page.v1.cards.example.json', state.cardsPage]
+      ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
+      ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage]
     ]),
     ...cardsProblems(state),
+    ...adopterYearsProblems(
+      [
+        ['examples/contributor-page.v1.example.json', state.page],
+        ['examples/contributor-page.v1.anonymous.example.json', state.anonymous],
+        ['examples/contributor-page.v1.header.example.json', state.header],
+        ['examples/contributor-page.v1.own-ground.example.json', state.ownGround],
+        ['examples/contributor-page.v1.about.example.json', state.aboutPage],
+        ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
+        ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
+        ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
+        ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
+      ],
+      state.preview.vectors
+    ),
     ...refusalProblems(state, state.refusals ?? REFUSALS),
     ...admitsProblems(state, state.admits ?? ADMITS),
     ...goldenFilesProblems(state.goldenFiles)
@@ -1760,6 +1899,16 @@ const SELF_TEST = [
   ['cards', (s) => { s.schemas.page.required = [...s.schemas.page.required, 'cards']; }],
   ['cards', (s) => { s.settingsExamples['contributor-page-settings.v1.cards.example.json'].cards.ownNames = 'name'; }],
   ['cards', (s) => { for (const v of s.preview.vectors) v.document.cards = { ...CARDS_DEFAULTS }; }],
+  ['adopter', (s) => { leftItem(s.adopterYearsPage).since = 2028; }],
+  ['adopter', (s) => { delete leftItem(s.preview.vectors.find((v) => v.id === 'PV-7').document).since; }],
+  ['adopter', (s) => { for (const v of s.preview.vectors) for (const x of v.document.sections) if (x.id === 'adopter') for (const i of x.items) delete i.until; }],
+  ['adopter', (s) => { s.build.adopter.find((v) => v.id === 'BY-8').expect.adopter.items[0].until = 2027; }],
+  ['adopter', (s) => { delete s.build.adopter.find((v) => v.id === 'BY-3').expect.adopter.items[0].until; }],
+  ['adopter', (s) => { s.build.adopter.find((v) => v.id === 'BY-9').expect.adopter.items[0].since = 2026; }],
+  ['adopter', (s) => { s.build.adopter.find((v) => v.id === 'BY-7').expect.adopter = { id: 'adopter', items: [{ nodeId: 'R_kgDOSMPL0067', fullName: 'example-org/comeback', evidence: { kind: 'merged-pr', number: 58 }, since: 2028, until: 2027 }] }; }],
+  ['adopter', (s) => { s.build.adopter = s.build.adopter.filter((v) => v.id !== 'BY-6'); }],
+  ['adopter', (s) => { s.build.adopter = s.build.adopter.filter((v) => v.id !== 'BY-4'); }],
+  ['adopter', (s) => { s.build.adopter = []; }],
   ['about', (s) => { s.aboutTexts.versions[0].short.paragraphs[0] += ' It is lovely.'; }],
   ['about', (s) => { s.aboutTexts.current = 2; }],
   ['about', (s) => { const v = s.aboutTexts.versions[0]; v.invite.withCertificates = v.invite.withoutCertificates; }],
@@ -1783,6 +1932,8 @@ const SELF_TEST = [
   ['agree', (s) => { s.schemas.settings.properties.cards.properties.otherNames.enum = ['owner/name', 'name']; }],
   ['defaults', (s) => { s.defaults.cards = { icon: 'github' }; }],
   ['admits', (s) => { s.admits = [['cardsSettings', 'the GitHub picture as an icon', (d) => { d.cards.icon = 'avatar'; }]]; }],
+  ['admits', (s) => { s.admits = [['adopterYearsPage', 'a left year without its since', (d) => { delete leftItem(d).since; }]]; }],
+  ['refusals', (s) => { s.refusals = [['adopterYearsPage', 'the adopter-years page unchanged', () => {}]]; }],
   ['refusals', (s) => { s.refusals = [['cardsPage', 'the cards page unchanged', () => {}]]; }],
   ['admits', (s) => { s.admits = [['aboutSettings', 'own words of 601 code points', (d) => { d.about.ownText = 'a'.repeat(601); }]]; }],
   ['agree', (s) => { s.schemas.page.properties.layout.enum = ['paper', 'profile']; }],
@@ -1832,7 +1983,7 @@ fail(
     `${state.ground.cases.length} ground guard cases, ${Object.values(state.ground.palettes).reduce((n, p) => n + p.reduce((m, s) => m + (s.dark ? 2 : 1), 0), 0)} palette rows and ${state.ground.themeCases.length} document themes recompute, ` +
     `${state.preview.vectors.length} preview vectors recompute, ${state.aliasGolden.vectors.length} alias MAC vectors recompute, ` +
     `${state.build.vectors.length} builder vectors keep a hidden login off the repository list, ${state.build.about.length} write the about block, ` +
-    `${state.build.cards.length} write the cards' choices resolved, ` +
+    `${state.build.cards.length} write the cards' choices resolved, ${state.build.adopter.length} list the licence adopter's repositories with their years, ` +
     `${state.aboutTexts.versions.length} version(s) of our about texts hold their recorded digests, ${state.aboutGolden.sentences.length} about sentences and ${state.aboutGolden.blocks.length} blocks recompute, ` +
     'no page member or example carries points, money or a GitHub id, ' +
     `the defaults are the schema's, ${REFUSALS.length} refusals and ${ADMITS.length} admissions hold, and every rule was proved able to fail`,

@@ -2,9 +2,10 @@
   "$comment": [
     "Worked vectors of the contributor page's previewSha256 (design PROFILE-PAGE-2026-10-06 §3.6; the definition is in schemas/contributor-page.v1.json): the document, the preimage (generatedAt and versionId removed, card.h16 removed, a GitHub picture reduced to {\"kind\":\"github\"}), its RFC 8785 (JCS) text, and the lowercase hex SHA-256 of that text's UTF-8 bytes.",
     "The api and index-build (C#, through the one builder) and any reader recompute every vector. check:contributor-page validates each document against contributor-page.v1 and recomputes the preimage, the text and the digest. A C# serialiser that escapes non-ASCII by default (System.Text.Json does) fails PV-3, which is why it is here.",
-    "1.3.0 (ops decision D165): the one builder writes `cards`, the cards' three choices resolved, on every document, so PV-1 to PV-5 carry the defaults right before `sections` and were recomputed with it (their documents are the builder's); PV-6 is examples/contributor-page.v1.cards.example.json, the GitHub mark on every card and every repository named alone."
+    "1.3.0 (ops decision D165): the one builder writes `cards`, the cards' three choices resolved, on every document, so PV-1 to PV-5 carry the defaults right before `sections` and were recomputed with it (their documents are the builder's); PV-6 is examples/contributor-page.v1.cards.example.json, the GitHub mark on every card and every repository named alone.",
+    "1.4.0 (ops decision D168 item 3): adopter items gain `since` and `until` (years). Both are optional and written only where the builder knows them, so PV-1 to PV-6 keep their bytes and their hashes (their facts carry no evidence date); PV-7 is examples/contributor-page.v1.adopter-years.example.json, with a dated item, a repository that left and an undated item."
   ],
-  "specVersion": "1.2.0",
+  "specVersion": "1.3.0",
   "vectors": [
     {
       "id": "PV-1",
@@ -1470,6 +1471,197 @@
       },
       "canonical": "{\"about\":{\"variant\":\"short\",\"version\":1},\"address\":\"mixed\",\"autoUpdated\":[\"summary\",\"repositories\",\"adopter\",\"certificate-status\",\"registry-names\",\"login\",\"github-picture\"],\"card\":{\"adopter\":true,\"links\":false,\"login\":true,\"name\":true,\"picture\":true,\"summary\":true},\"cards\":{\"icon\":\"github\",\"otherNames\":\"name\",\"ownNames\":\"name\"},\"cover\":{\"kind\":\"none\"},\"factsAsOf\":\"2027-02\",\"identity\":{\"displayName\":\"Alex Example\"},\"layout\":\"paper\",\"login\":\"example-contributor\",\"picture\":{\"kind\":\"github\"},\"pid\":\"c2d6g8j4k7m3p9tz\",\"schemaVersion\":1,\"search\":false,\"sections\":[{\"certificates\":2,\"id\":\"summary\",\"organisations\":3,\"projects\":3,\"since\":2026},{\"groups\":[{\"owner\":\"example-contributor\",\"repos\":[{\"listing\":\"registered\",\"name\":\"csv-split\",\"nodeId\":\"R_kgDOSMPL0004\",\"years\":{\"from\":2027,\"to\":2027}}]},{\"owner\":\"example-org\",\"repos\":[{\"listing\":\"registered\",\"name\":\"ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\",\"years\":{\"from\":2026,\"to\":2027}}]},{\"owner\":\"other-org\",\"repos\":[{\"listing\":\"no-longer-registered\",\"name\":\"invoice-kit\",\"nodeId\":\"R_kgDOSMPL0003\",\"years\":{\"from\":2026,\"to\":2026}}]}],\"id\":\"repositories\"},{\"id\":\"adopter\",\"items\":[{\"evidence\":{\"kind\":\"direct-commit\",\"oid\":\"a0e2126a4d92cd0cf93496ede3f10827e8fa1865\"},\"fullName\":\"example-contributor/csv-split\",\"nodeId\":\"R_kgDOSMPL0004\"},{\"evidence\":{\"kind\":\"merged-pr\",\"number\":42},\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"}]},{\"id\":\"certificates\",\"items\":[{\"cid\":\"cert_01jt3v5x7z9b1d3f5h7k9m1p3r\",\"disclosure\":\"full\",\"repos\":[{\"fullName\":\"example-contributor/csv-split\",\"nodeId\":\"R_kgDOSMPL0004\"},{\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"}],\"status\":\"valid\",\"typ\":\"contributor\",\"variant\":\"participation\",\"years\":{\"from\":2027,\"to\":2027}},{\"cid\":\"cert_01jk2m4p6r8t0v2x4z6b8d0f2h\",\"disclosure\":\"full\",\"repos\":[{\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"},{\"fullName\":\"other-org/invoice-kit\",\"nodeId\":\"R_kgDOSMPL0003\"}],\"status\":\"expired\",\"typ\":\"contributor\",\"variant\":\"participation\",\"years\":{\"from\":2026,\"to\":2026}}]}],\"source\":\"fixture\",\"theme\":{\"preset\":\"purpose\"}}",
       "previewSha256": "380cf9cb9e829359e632aa738b9311dd0b8f3119ecabb0e10c7a2504a8dd6c2b"
+    },
+    {
+      "id": "PV-7",
+      "note": "The licence adopter's years (1.4.0; ops decision D168 item 3), the page of examples/contributor-page.v1.adopter-years.example.json: an item whose evidence date is stored carries `since` (\"Since 2026\"), a repository that quit carries `since` and `until` (\"2026–2027\"), and an item stored before its date was carries neither; each is inside the preimage like every member, so a year that appears or a repository that leaves is a new preview, which `autoUpdated`'s `adopter` lets a published page take without one. A GitHub picture whose copy does not exist yet is reduced to {\"kind\":\"github\"}, as in PV-2.",
+      "document": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-03-01T00:00:00Z",
+        "source": "fixture",
+        "pid": "y3d7k2m8q4t9v6xz",
+        "versionId": "pgv_y3d7k2m8q4t9v6xzy3d7k2m8q4",
+        "address": "mixed",
+        "search": false,
+        "login": "example-contributor",
+        "layout": "paper",
+        "theme": {
+          "preset": "purpose"
+        },
+        "picture": {
+          "kind": "github",
+          "letters": "AE"
+        },
+        "cover": {
+          "kind": "none"
+        },
+        "identity": {
+          "displayName": "Alex Example"
+        },
+        "about": {
+          "variant": "short",
+          "version": 1
+        },
+        "cards": {
+          "icon": "github",
+          "ownNames": "name",
+          "otherNames": "name"
+        },
+        "sections": [
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "nodeId": "R_kgDOSMPL0001",
+                "fullName": "example-org/ledger-tools",
+                "evidence": {
+                  "kind": "merged-pr",
+                  "number": 42
+                },
+                "since": 2026
+              },
+              {
+                "nodeId": "R_kgDOSMPL0005",
+                "fullName": "example-org/gone",
+                "evidence": {
+                  "kind": "merged-pr",
+                  "number": 7
+                },
+                "since": 2026,
+                "until": 2027
+              },
+              {
+                "nodeId": "R_kgDOSMPL0004",
+                "fullName": "example-contributor/csv-split",
+                "evidence": {
+                  "kind": "direct-commit",
+                  "oid": "a0e2126a4d92cd0cf93496ede3f10827e8fa1865"
+                }
+              },
+              {
+                "nodeId": "R_kgDOSMPL0007",
+                "fullName": "example-contributor/receipt-scanner",
+                "evidence": {
+                  "kind": "direct-commit",
+                  "oid": "5c1b9e47d3f20a68e1c4b7d92f0a3e6c8b5d1f47"
+                },
+                "since": 2027
+              }
+            ]
+          }
+        ],
+        "card": {
+          "picture": true,
+          "name": true,
+          "login": true,
+          "summary": false,
+          "adopter": true,
+          "links": false
+        },
+        "autoUpdated": [
+          "summary",
+          "repositories",
+          "adopter",
+          "certificate-status",
+          "registry-names",
+          "login",
+          "github-picture"
+        ],
+        "factsAsOf": "2027-02"
+      },
+      "preimage": {
+        "schemaVersion": 1,
+        "source": "fixture",
+        "pid": "y3d7k2m8q4t9v6xz",
+        "address": "mixed",
+        "search": false,
+        "login": "example-contributor",
+        "layout": "paper",
+        "theme": {
+          "preset": "purpose"
+        },
+        "picture": {
+          "kind": "github"
+        },
+        "cover": {
+          "kind": "none"
+        },
+        "identity": {
+          "displayName": "Alex Example"
+        },
+        "about": {
+          "variant": "short",
+          "version": 1
+        },
+        "cards": {
+          "icon": "github",
+          "ownNames": "name",
+          "otherNames": "name"
+        },
+        "sections": [
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "nodeId": "R_kgDOSMPL0001",
+                "fullName": "example-org/ledger-tools",
+                "evidence": {
+                  "kind": "merged-pr",
+                  "number": 42
+                },
+                "since": 2026
+              },
+              {
+                "nodeId": "R_kgDOSMPL0005",
+                "fullName": "example-org/gone",
+                "evidence": {
+                  "kind": "merged-pr",
+                  "number": 7
+                },
+                "since": 2026,
+                "until": 2027
+              },
+              {
+                "nodeId": "R_kgDOSMPL0004",
+                "fullName": "example-contributor/csv-split",
+                "evidence": {
+                  "kind": "direct-commit",
+                  "oid": "a0e2126a4d92cd0cf93496ede3f10827e8fa1865"
+                }
+              },
+              {
+                "nodeId": "R_kgDOSMPL0007",
+                "fullName": "example-contributor/receipt-scanner",
+                "evidence": {
+                  "kind": "direct-commit",
+                  "oid": "5c1b9e47d3f20a68e1c4b7d92f0a3e6c8b5d1f47"
+                },
+                "since": 2027
+              }
+            ]
+          }
+        ],
+        "card": {
+          "picture": true,
+          "name": true,
+          "login": true,
+          "summary": false,
+          "adopter": true,
+          "links": false
+        },
+        "autoUpdated": [
+          "summary",
+          "repositories",
+          "adopter",
+          "certificate-status",
+          "registry-names",
+          "login",
+          "github-picture"
+        ],
+        "factsAsOf": "2027-02"
+      },
+      "canonical": "{\"about\":{\"variant\":\"short\",\"version\":1},\"address\":\"mixed\",\"autoUpdated\":[\"summary\",\"repositories\",\"adopter\",\"certificate-status\",\"registry-names\",\"login\",\"github-picture\"],\"card\":{\"adopter\":true,\"links\":false,\"login\":true,\"name\":true,\"picture\":true,\"summary\":false},\"cards\":{\"icon\":\"github\",\"otherNames\":\"name\",\"ownNames\":\"name\"},\"cover\":{\"kind\":\"none\"},\"factsAsOf\":\"2027-02\",\"identity\":{\"displayName\":\"Alex Example\"},\"layout\":\"paper\",\"login\":\"example-contributor\",\"picture\":{\"kind\":\"github\"},\"pid\":\"y3d7k2m8q4t9v6xz\",\"schemaVersion\":1,\"search\":false,\"sections\":[{\"id\":\"adopter\",\"items\":[{\"evidence\":{\"kind\":\"merged-pr\",\"number\":42},\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\",\"since\":2026},{\"evidence\":{\"kind\":\"merged-pr\",\"number\":7},\"fullName\":\"example-org/gone\",\"nodeId\":\"R_kgDOSMPL0005\",\"since\":2026,\"until\":2027},{\"evidence\":{\"kind\":\"direct-commit\",\"oid\":\"a0e2126a4d92cd0cf93496ede3f10827e8fa1865\"},\"fullName\":\"example-contributor/csv-split\",\"nodeId\":\"R_kgDOSMPL0004\"},{\"evidence\":{\"kind\":\"direct-commit\",\"oid\":\"5c1b9e47d3f20a68e1c4b7d92f0a3e6c8b5d1f47\"},\"fullName\":\"example-contributor/receipt-scanner\",\"nodeId\":\"R_kgDOSMPL0007\",\"since\":2027}]}],\"source\":\"fixture\",\"theme\":{\"preset\":\"purpose\"}}",
+      "previewSha256": "2bfded3e94d812f74a5712bc9a833a419249804297f25466a996044a6d69f89b"
     }
   ]
 }

@@ -4,9 +4,10 @@
     "`input` is the slice of the builder's inputs the rule reads: the person's current GitHub login, `showLogin`, the settings' `repositories` choice, and the credited repositories as the facts and the registry give them at this build (`owner` and `name` are the registry's). `expect` is either the repositories section (null when it has nothing to show and is not drawn), the two counts the summary takes from the same list (each printed only when switched on and not zero), and `leftOut`, every repository the rule removed with the code the editor shows beside it; or `{refused}`, the api's code at save.",
     "Groups are in owner order and rows in name order (design §8.1). Every owner and name that is listed here is lower-case ASCII, and no two that are sorted together share a first letter, so any name order gives the same answer; the collation itself is the builder's.",
     "`about` (1.2.0; ops decision D163): vectors of the one builder's about block, for the rules the public document cannot show alone: what it writes for the settings' `about` (schemas/contributor-page-settings.v1.json `about`) into the document's `about` (schemas/contributor-page.v1.json `about`). `input.about` is the settings' member; `input.textRules` is the text rules' answer to `ownText` at this build (`accepted` or `refused`; null where there are no words), which the builder asks Psn.PageSafety and this file states, as `credited` states the facts. `expect.about` is the document's member, or null when none is written. The tick off writes nothing; `own` with no words, or with words the rules now refuse, is written as `short`; the version is the settings' own, never stamped by the builder.",
-    "`cards` (1.3.0; ops decision D165): vectors of the one builder's cards member: what it writes for the settings' `cards` (schemas/contributor-page-settings.v1.json `cards`, stored with each member left out at its default and the member itself left out when all three are) into the document's `cards` (schemas/contributor-page.v1.json `cards`). `input.cards` is the settings' member, or null where the settings carry none (stored before 1.3.0, or every choice at its default); `expect.cards` is the document's member, which the builder writes on every document with all three members resolved. Which repository is the person's own is the renderer's reading of the document (its `login`), not the builder's."
+    "`cards` (1.3.0; ops decision D165): vectors of the one builder's cards member: what it writes for the settings' `cards` (schemas/contributor-page-settings.v1.json `cards`, stored with each member left out at its default and the member itself left out when all three are) into the document's `cards` (schemas/contributor-page.v1.json `cards`). `input.cards` is the settings' member, or null where the settings carry none (stored before 1.3.0, or every choice at its default); `expect.cards` is the document's member, which the builder writes on every document with all three members resolved. Which repository is the person's own is the renderer's reading of the document (its `login`), not the builder's.",
+    "`adopter` (1.4.0; ops decision D168 item 3): vectors of the one builder's licence adopter section, for the rules the public document cannot show alone: which repositories are listed and which years each item carries (schemas/contributor-page.v1.json `adopterSection`). `input.facts` are the builder's adopter facts in observed order, each with its repository's registry name, its evidence (`number` for `merged-pr`, `oid` for `direct-commit`, null where it has none), `registered` (the registry lists the repository at this build), `since` (the UTC year of the evidence's own date, null where none is stored) and `until` (the UTC year of the registry's recorded quit, which the callers pass for a repository that quit; null otherwise); `input.hidden` is the settings' `adopter.hidden`. `expect.adopter` is the section, or null when it has nothing to show. A registered repository is listed with `since` where it is known; one that left (not registered, with `until`) is listed only with both years, `since` no later than `until`; every other repository drops out."
   ],
-  "specVersion": "1.2.0",
+  "specVersion": "1.3.0",
   "vectors": [
     {
       "id": "BV-1",
@@ -547,6 +548,340 @@
           "icon": "owner",
           "ownNames": "name",
           "otherNames": "owner/name"
+        }
+      }
+    }
+  ],
+  "adopter": [
+    {
+      "id": "BY-1",
+      "note": "A registered repository whose evidence date is stored: its item carries `since`, the UTC year of the pull request's merge (\"Since 2026\").",
+      "input": {
+        "hidden": [],
+        "facts": [
+          {
+            "nodeId": "R_kgDOSMPL0061",
+            "fullName": "example-org/ledger-tools",
+            "kind": "merged-pr",
+            "number": 42,
+            "oid": null,
+            "registered": true,
+            "since": 2026,
+            "until": null
+          }
+        ]
+      },
+      "expect": {
+        "adopter": {
+          "id": "adopter",
+          "items": [
+            {
+              "nodeId": "R_kgDOSMPL0061",
+              "fullName": "example-org/ledger-tools",
+              "evidence": {
+                "kind": "merged-pr",
+                "number": 42
+              },
+              "since": 2026
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "BY-2",
+      "note": "Registered, with no evidence date stored (a fact from before 1.4.0, until the person's next check dates it): the item carries no year, never a guessed one.",
+      "input": {
+        "hidden": [],
+        "facts": [
+          {
+            "nodeId": "R_kgDOSMPL0062",
+            "fullName": "example-contributor/csv-split",
+            "kind": "direct-commit",
+            "number": null,
+            "oid": "3f7a1c9e5b2d8046a1e9c3b7d5f20e8a6c4b1d93",
+            "registered": true,
+            "since": null,
+            "until": null
+          }
+        ]
+      },
+      "expect": {
+        "adopter": {
+          "id": "adopter",
+          "items": [
+            {
+              "nodeId": "R_kgDOSMPL0062",
+              "fullName": "example-contributor/csv-split",
+              "evidence": {
+                "kind": "direct-commit",
+                "oid": "3f7a1c9e5b2d8046a1e9c3b7d5f20e8a6c4b1d93"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "BY-3",
+      "note": "LEFT: the person merged the licence in 2026 and the repository quit (FS-02 T5) in 2027, recorded: it stays listed with both years, `since` 2026 and `until` 2027, drawn \"2026–2027\".",
+      "input": {
+        "hidden": [],
+        "facts": [
+          {
+            "nodeId": "R_kgDOSMPL0063",
+            "fullName": "example-org/gone",
+            "kind": "merged-pr",
+            "number": 7,
+            "oid": null,
+            "registered": false,
+            "since": 2026,
+            "until": 2027
+          }
+        ]
+      },
+      "expect": {
+        "adopter": {
+          "id": "adopter",
+          "items": [
+            {
+              "nodeId": "R_kgDOSMPL0063",
+              "fullName": "example-org/gone",
+              "evidence": {
+                "kind": "merged-pr",
+                "number": 7
+              },
+              "since": 2026,
+              "until": 2027
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "BY-4",
+      "note": "Left within one year (a commit of 2027, a quit of 2027): both members are written, and the renderer draws the one year.",
+      "input": {
+        "hidden": [],
+        "facts": [
+          {
+            "nodeId": "R_kgDOSMPL0064",
+            "fullName": "other-org/short-lived",
+            "kind": "direct-commit",
+            "number": null,
+            "oid": "9b2e6d1f4a8c3075e2b9d4a6f1c8e3b7a5d20f6c",
+            "registered": false,
+            "since": 2027,
+            "until": 2027
+          }
+        ]
+      },
+      "expect": {
+        "adopter": {
+          "id": "adopter",
+          "items": [
+            {
+              "nodeId": "R_kgDOSMPL0064",
+              "fullName": "other-org/short-lived",
+              "evidence": {
+                "kind": "direct-commit",
+                "oid": "9b2e6d1f4a8c3075e2b9d4a6f1c8e3b7a5d20f6c"
+              },
+              "since": 2027,
+              "until": 2027
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "BY-5",
+      "note": "Not registered, and no `until`: a delisting (T7), a suspension, a quit the registry recorded no date for (a repository imported from registry-v0), or a repository gone from the registry otherwise. None is a leave of the licence the page can date, so the item drops out, as before 1.4.0, and with nothing left the section is not drawn.",
+      "input": {
+        "hidden": [],
+        "facts": [
+          {
+            "nodeId": "R_kgDOSMPL0065",
+            "fullName": "other-org/invoice-kit",
+            "kind": "merged-pr",
+            "number": 3,
+            "oid": null,
+            "registered": false,
+            "since": 2026,
+            "until": null
+          }
+        ]
+      },
+      "expect": {
+        "adopter": null
+      }
+    },
+    {
+      "id": "BY-6",
+      "note": "A repository that quit, recorded in 2027, whose evidence date is not stored: `until` is never written alone, so the item drops out until the person's next check dates its evidence; the registered repository beside it stays.",
+      "input": {
+        "hidden": [],
+        "facts": [
+          {
+            "nodeId": "R_kgDOSMPL0066",
+            "fullName": "example-org/old-site",
+            "kind": "merged-pr",
+            "number": 11,
+            "oid": null,
+            "registered": false,
+            "since": null,
+            "until": 2027
+          },
+          {
+            "nodeId": "R_kgDOSMPL0061",
+            "fullName": "example-org/ledger-tools",
+            "kind": "merged-pr",
+            "number": 42,
+            "oid": null,
+            "registered": true,
+            "since": 2026,
+            "until": null
+          }
+        ]
+      },
+      "expect": {
+        "adopter": {
+          "id": "adopter",
+          "items": [
+            {
+              "nodeId": "R_kgDOSMPL0061",
+              "fullName": "example-org/ledger-tools",
+              "evidence": {
+                "kind": "merged-pr",
+                "number": 42
+              },
+              "since": 2026
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "BY-7",
+      "note": "A quit recorded before the evidence (the licence merged again in 2028 into a repository the registry still records as quit since 2027, before any restore): `until` would precede `since`, so the item drops out.",
+      "input": {
+        "hidden": [],
+        "facts": [
+          {
+            "nodeId": "R_kgDOSMPL0067",
+            "fullName": "example-org/comeback",
+            "kind": "merged-pr",
+            "number": 58,
+            "oid": null,
+            "registered": false,
+            "since": 2028,
+            "until": 2027
+          }
+        ]
+      },
+      "expect": {
+        "adopter": null
+      }
+    },
+    {
+      "id": "BY-8",
+      "note": "Registered again after a quit (T8's restore): the item carries `since` alone. Its callers pass no `until` for a registered repository, and were one passed (the quit before the restore), the builder still writes none: only a left item carries one.",
+      "input": {
+        "hidden": [],
+        "facts": [
+          {
+            "nodeId": "R_kgDOSMPL0068",
+            "fullName": "example-org/restored",
+            "kind": "merged-pr",
+            "number": 19,
+            "oid": null,
+            "registered": true,
+            "since": 2026,
+            "until": 2027
+          }
+        ]
+      },
+      "expect": {
+        "adopter": {
+          "id": "adopter",
+          "items": [
+            {
+              "nodeId": "R_kgDOSMPL0068",
+              "fullName": "example-org/restored",
+              "evidence": {
+                "kind": "merged-pr",
+                "number": 19
+              },
+              "since": 2026
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "BY-9",
+      "note": "The person's own hide drops a repository, left or not; a fact whose evidence the renderer could not rebuild (a merged pull request with no number) is never an item; and of two facts on one repository the first in observed order is its item, with that fact's own year, so the year always dates the evidence the item links to.",
+      "input": {
+        "hidden": [
+          "R_kgDOSMPL0063"
+        ],
+        "facts": [
+          {
+            "nodeId": "R_kgDOSMPL0063",
+            "fullName": "example-org/gone",
+            "kind": "merged-pr",
+            "number": 7,
+            "oid": null,
+            "registered": false,
+            "since": 2026,
+            "until": 2027
+          },
+          {
+            "nodeId": "R_kgDOSMPL0069",
+            "fullName": "Tidy-Tools/xlsx-lite",
+            "kind": "merged-pr",
+            "number": null,
+            "oid": null,
+            "registered": true,
+            "since": 2026,
+            "until": null
+          },
+          {
+            "nodeId": "R_kgDOSMPL0062",
+            "fullName": "example-contributor/csv-split",
+            "kind": "direct-commit",
+            "number": null,
+            "oid": "3f7a1c9e5b2d8046a1e9c3b7d5f20e8a6c4b1d93",
+            "registered": true,
+            "since": 2028,
+            "until": null
+          },
+          {
+            "nodeId": "R_kgDOSMPL0062",
+            "fullName": "example-contributor/csv-split",
+            "kind": "merged-pr",
+            "number": 5,
+            "oid": null,
+            "registered": true,
+            "since": 2026,
+            "until": null
+          }
+        ]
+      },
+      "expect": {
+        "adopter": {
+          "id": "adopter",
+          "items": [
+            {
+              "nodeId": "R_kgDOSMPL0062",
+              "fullName": "example-contributor/csv-split",
+              "evidence": {
+                "kind": "direct-commit",
+                "oid": "3f7a1c9e5b2d8046a1e9c3b7d5f20e8a6c4b1d93"
+              },
+              "since": 2028
+            }
+          ]
         }
       }
     }

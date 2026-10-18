@@ -3188,6 +3188,35 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 
 ## contributor-page.v1.json
 
+### 1.4.0 — unreleased (2026-10-18; ops decision D168 item 3) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump, optional: every document written under 1.3.x stays valid. Each
+  licence adopter item may carry `since` and `until`, both `$defs.year`, written after `evidence`, and `until` only beside
+  `since` (`dependentRequired`).
+- `since` is the UTC year of the item's own evidence on GitHub: its pull request's merge (`merged-pr`) or its commit's
+  committed date (`direct-commit`). The order asked for it "required from 1.4.0", but a document carries `schemaVersion` 1
+  and no minor, so a required member would refuse every document written before it, the website's pinned 1.0.4 to 1.3.0
+  fixtures among them. It is optional instead, and the description says a 1.4.0 builder writes it wherever the evidence
+  date is stored; an item without it shows no year, never a guessed one.
+- LEFT means a quit (FS-02 T5): the LICENSE changed away from the Purpose Source License, its text removed or replaced as
+  the licence watcher finds it (FS02-042's `quit` and `quit-file-deleted`). A repository that quit, which dropped out of
+  the section before 1.4.0, stays listed with `until`, the UTC year of the registry's recorded quit event, and only with
+  both years in order. A delisting (T7, for cause), a suspension (gone, blocked, archived or private), a quit with no
+  recorded date (a registry-v0 import), a quit recorded before the evidence and a leave whose evidence date is not stored
+  drop the item as before: an `until` there would say the repository left the licence when it did not, and a page never
+  shows a repository that left as though it were still under the licence. A restore (T8) carries `since` alone, and a
+  repository of the Association's own is never listed (ops decision D167). The renderer draws "Since 2026",
+  "2026–2027" (one year where both are the same) or nothing; `cards`' description names the years among a licence
+  repository card's facts.
+- A further example, `adopter-years` (a dated merge, a repository that quit, an undated fact and a dated direct commit, the
+  section alone on its page), and PV-7, its preview vector; the preview golden (its 1.3.0) keeps PV-1 to PV-6's bytes, since
+  their facts carry no date. The build golden (its 1.3.0) gains the vectors BY-1 to BY-9: dated, undated, left over two
+  years and within one, not left, a leave with no evidence date, a quit before the evidence, a restore, and the person's
+  hide, an evidence no link rebuilds and the first fact per repository. `check:contributor-page` holds the order of the two
+  years on every page example and vector, answers the BY vectors by its own reading of the rule, and adds 6 refusals
+  (`until` without `since`, a year before 2026, a month, an instant, a fraction, a marker of a leave) and 3 admissions, each
+  proved able to fail.
+
 ### 1.3.0 — unreleased (2026-10-17; ops decision D165) — pre-release
 
 - **Pre-release** addition under policy 5, a minor bump, optional: every document written under 1.2.x stays valid. `cards`,
