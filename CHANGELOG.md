@@ -1348,6 +1348,51 @@ value inside `v1` is not additive (versioning policy 1).*
 - Every other mention in this changelog of the second kit or its schema file now names kit-1, the
   kit in force, or this file; the counts of schemas under 0.1.0 are one lower.
 
+### 1.2.0 — unreleased (2026-10-18; ops decision D115, slice P05) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump, optional: every document valid under 1.1.0
+  stays valid, and `kits/kit-1.json` and its example keep their bytes (SHA-256
+  `01e9b1995a48dd16f48e7db8f823467a13233206c604db64b2f037e57e35385e`). `variants.contributor`, for
+  the participation certificate (`contributor.participation`), carries `face`: the words the
+  certificate renderer takes from the kit for a contributor certificate and its share card, and
+  without which it draws no production contributor certificate (D115's plan §3.3: "Wording comes
+  from the kit").
+- THE FACE (`$defs.face`) is exactly the renderer's ten words: `classLabel`, `headline`, `lead`,
+  `holderLine`, `periodLine`, `statusOnlyLine`, `moneyLine`, `more`, `projectOne` and `projectMany`,
+  each required and a non-empty string, because the renderer refuses a contributor certificate
+  whose kit lacks one. Each admits only the placeholders the renderer fills for it and no other
+  brace: `{period}` in `periodLine`, `statusOnlyLine` and `moneyLine`, `{amount}` in `moneyLine`,
+  `{n}` in `more` and `projectMany`, none in the other five. `moneyLine` is printed only when the
+  certificate signs a figure the holder helped direct (MKT-037), so it must name `{amount}`.
+- THE REST OF THE VARIANT is every variant's shape: one `base` line, lines and templates that end
+  with the verification sentence, notes, prohibitions and the binding statement. Its lines and
+  templates may name two placeholders that join the closed set for it alone, `{login}` (the
+  holder's GitHub login) and `{projects}` (the credited projects). It applies to
+  `contributor.participation` and nothing else, and its `badge` is `null`: it attests no coverage.
+  No prohibition is required of it, as none is of `sponsor`: its rules and its prohibited phrases
+  come with its words.
+- THE OTHER THREE VARIANTS DO NOT MOVE. `supporter`, `statusOnly` and `sponsor` refuse a `face`,
+  and `{login}` and `{projects}` in their lines and templates, so each admits exactly what it
+  admitted under 1.1.0.
+- Wording: the description's first sentence names a contributor beside an organisation; its rule
+  (1) now says "for any claim it permits", because the face's words are the certificate's own and
+  not wording a holder may use; its new rule (6) states the face; `consumers` and `fsRefs` (D115,
+  MKT-037) say the same.
+- NO KIT CARRIES THE WORDS YET. kit-1 has no contributor variant: a contributor's words are
+  approved on their own (D115, slice P05), and kit-1 takes the variant only then.
+  `examples/claim-kit.v1.contributor.example.json` is a further example: kit-1 with the variant
+  added and nothing else changed, its words the ones the certificate renderer's tests draw and its
+  first note opening "SAMPLE — not published wording". It is the one example of this contract
+  that is not a published kit byte for byte, because no published kit carries the variant.
+- `check:kits` holds the sample to kit-1 outside its variant, to its SAMPLE note and to the
+  document rules, and proves the variant's shape both ways over it: 2 admissions (a contributor
+  share template, a sponsor variant beside the contributor's) and 18 refusals, each by the member
+  and the keyword it is about (a face missing a word, with a word of its own, with an empty word,
+  with a stray placeholder, with a money line lacking `{amount}`; a contributor variant without a
+  face, for another class too, with a badge, with a line outside the closed set or without the
+  sentence; a face on each of the other three variants; `{login}` or `{projects}` in a supporter
+  line or template, a status-only line or a sponsor line).
+
 ## ct-segment.v1.json
 
 ### 1.0.0 — unreleased

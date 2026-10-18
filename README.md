@@ -108,7 +108,7 @@ needs a toolchain is not really published.
 | `certificate.v1.json` | the certificate JWS payload profile | first public version |
 | `certificate-record.v1.json` | `/certs/{cert_id}.json` | first public version |
 | `certificate-policy.v1.json` | `/certs/policy/latest.json` | first public version |
-| `claim-kit.v1.json` | `kits/kit-{version}.json` here, published at `/kits/{version}.json` — the example is the published document; the shape of ops decision D44 since 1.1.0 (lines, templates, badge, pledge) | first public version |
+| `claim-kit.v1.json` | `kits/kit-{version}.json` here, published at `/kits/{version}.json` — the example is the published document; the shape of ops decision D44 since 1.1.0 (lines, templates, badge, pledge); since 1.2.0 an optional contributor variant with the words a contributor certificate prints, which no kit carries yet: `examples/claim-kit.v1.contributor.example.json` shows it with sample words | first public version |
 | `ct-segment.v1.json` | `/ct/{n}.json`, `/ct/latest.json` | first public version |
 | `ct-checkpoint.v1.json` | payload published at `/ct/checkpoint-latest.json` | first public version |
 | `ledger-row.v1.json` | one ledger row | first public version |

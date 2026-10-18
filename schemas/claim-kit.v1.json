@@ -2,20 +2,20 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://purposesource.org/spec/schemas/claim-kit.v1.json",
   "title": "Claim-language kit — /kits/{version}.json",
-  "description": "The exact wording an organisation may use to describe a certificate publicly, the framing that is contractually excluded, and the binding statement printed on the certificate face (CERT-050…053, FS08-070). A kit is a versioned DOCUMENT rather than a page: `kitVersion` is what a certificate payload's `claimKitVersion` pins at issuance (D17), so the wording that was in force when a certificate was issued stays readable after the wording changes. It carries only PATTERNS with braced placeholders, never a filled-in claim: a kit carrying one organisation's values would publish a single purchase's claim as if it governed every purchase. The shape is ops decision D44's (2026-09-15): several lines, share templates, named rules, a coverage badge and a give-something-back line tied to the pledge, where the first shape allowed one pattern per variant and required every variant to prohibit \"we give back\". It replaced the first shape in place on 2026-10-12 (ops decision D136, versioning policy 5): no kit under either shape has been published (`publishedAt` null).\n\nWHAT THIS SHAPE MAKES STRUCTURAL. (1) THE MONEY LINE IS THE PLEDGE OR NOTHING: the only place the document states where a Purpose Fee goes is `pledge.text`, which must equal the canonical pledge of statutes Art. 5(5) byte for byte (a test in the publishing repositories holds that equality; JSON Schema cannot), and a line reaches it only through the `{pledge}` placeholder. (2) EVERY CLAIM ENDS WITH THE ONE VERIFICATION SENTENCE (CERT-027): every line whose `use` is `base`, `line` or `gated`, and every template, ends with it; a `clause` is added inside a line and does not. (3) THE SUPPORTER RULES ARE NAMED BY ID, and the ten ids D44 fixes are required, so a later edit cannot quietly drop one; the reviewer phrases \"we support charity\" and \"any unquantified social-impact framing\" stay required members of the supporter's `prohibited` list (FS-08 §8). (4) A BADGE IS A COVERAGE BADGE: its text is fixed to the Purpose Source name, the lane or the waiver designation, and the live status, and the supporter badge carries the EU consumer notice. (5) A GATED LINE IS CLOSED IN THE DOCUMENT: its gate names a fact the holder checks on the public record, and a published kit never opens a gate by editing itself.\n\nTwo variants are required: `supporter` for the payment class and `statusOnly` for the licence-status class, which permits coverage-status wording exclusively and no supporter or impact phrasing anywhere (CERT-052, MKT-034). A third, `sponsor`, for the sponsor certificate (`supporter.sponsor`), is optional: kit-1 carries none, because that certificate's wording waits for the tax adviser's answer, and the kit that adds it needs no change to this schema. No figure of any kind appears in the document. The document carries no `generatedAt`; `publishedAt` is null until the document is first published at its permalink on the apex, and immutable from then on (D32).",
+  "description": "The exact wording an organisation or a contributor may use to describe a certificate publicly, the framing that is contractually excluded, and the binding statement printed on the certificate face (CERT-050…053, FS08-070). A kit is a versioned DOCUMENT rather than a page: `kitVersion` is what a certificate payload's `claimKitVersion` pins at issuance (D17), so the wording that was in force when a certificate was issued stays readable after the wording changes. It carries only PATTERNS with braced placeholders, never a filled-in claim: a kit carrying one organisation's values would publish a single purchase's claim as if it governed every purchase. The shape is ops decision D44's (2026-09-15): several lines, share templates, named rules, a coverage badge and a give-something-back line tied to the pledge, where the first shape allowed one pattern per variant and required every variant to prohibit \"we give back\". It replaced the first shape in place on 2026-10-12 (ops decision D136, versioning policy 5): no kit under either shape has been published (`publishedAt` null).\n\nWHAT THIS SHAPE MAKES STRUCTURAL. (1) THE MONEY LINE IS THE PLEDGE OR NOTHING: the only place the document states where a Purpose Fee goes, for any claim it permits, is `pledge.text`, which must equal the canonical pledge of statutes Art. 5(5) byte for byte (a test in the publishing repositories holds that equality; JSON Schema cannot), and a line reaches it only through the `{pledge}` placeholder. (2) EVERY CLAIM ENDS WITH THE ONE VERIFICATION SENTENCE (CERT-027): every line whose `use` is `base`, `line` or `gated`, and every template, ends with it; a `clause` is added inside a line and does not. (3) THE SUPPORTER RULES ARE NAMED BY ID, and the ten ids D44 fixes are required, so a later edit cannot quietly drop one; the reviewer phrases \"we support charity\" and \"any unquantified social-impact framing\" stay required members of the supporter's `prohibited` list (FS-08 §8). (4) A BADGE IS A COVERAGE BADGE: its text is fixed to the Purpose Source name, the lane or the waiver designation, and the live status, and the supporter badge carries the EU consumer notice. (5) A GATED LINE IS CLOSED IN THE DOCUMENT: its gate names a fact the holder checks on the public record, and a published kit never opens a gate by editing itself. (6) A CONTRIBUTOR CERTIFICATE PRINTS THE KIT'S WORDS: the `contributor` variant carries `face`, the words the certificate renderer takes from the kit for a contributor certificate and its share card, each holding only the placeholders the renderer fills for it, so a published kit can neither leave a contributor render without a word nor make it print a bare brace. These are the certificate's own words; what a holder may say stays the variant's lines and templates. No other variant carries a face, and only the contributor's lines and templates may name `{login}` and `{projects}`.\n\nTwo variants are required: `supporter` for the payment class and `statusOnly` for the licence-status class, which permits coverage-status wording exclusively and no supporter or impact phrasing anywhere (CERT-052, MKT-034). A third, `sponsor`, for the sponsor certificate (`supporter.sponsor`), is optional: kit-1 carries none, because that certificate's wording waits for the tax adviser's answer, and the kit that adds it needs no change to this schema. A fourth, `contributor`, for the participation certificate (`contributor.participation`), is optional too: kit-1 carries none, because a contributor's words are approved on their own (ops decision D115, slice P05), and `examples/claim-kit.v1.contributor.example.json` shows the variant with sample words. No figure of any kind appears in the document. The document carries no `generatedAt`; `publishedAt` is null until the document is first published at its permalink on the apex, and immutable from then on (D32).",
   "x-psn": {
-    "specVersion": "1.1.0",
+    "specVersion": "1.2.0",
     "phase": "P-M2",
     "artifactPath": "/kits/{version}.json",
     "authoritative": true,
     "producer": "authored in this repository as kits/kit-{version}.json and published as-is (P-M2: vendored byte-identically by the website and served at its permalink; P-M3: emitted into the artifact plane by jobs.index-build)",
     "consumers": [
-      "the certificate renderer, which embeds the kit as an integral PDF page carrying the binding statement",
+      "the certificate renderer, which embeds the kit as an integral PDF page carrying the binding statement, and prints a contributor certificate's face words from the contributor variant",
       "the kit page and its raw endpoint on the website",
       "the checkout statement that delivers the kit at purchase",
       "OSPO reviewers, journalists and counsel checking a published claim against the document that governs it"
     ],
-    "fsRefs": ["FS-08 §8 (FS08-070…072)", "FS-05 §3.1 step 5", "D17", "D44", "D136", "CERT-027", "CERT-050…053", "CERT-062", "MKT-011…013", "MKT-032…035", "NEV-016", "NEV-017"],
+    "fsRefs": ["FS-08 §8 (FS08-070…072)", "FS-05 §3.1 step 5", "D17", "D44", "D115", "D136", "CERT-027", "CERT-050…053", "CERT-062", "MKT-011…013", "MKT-032…035", "MKT-037", "NEV-016", "NEV-017"],
     "vsRefs": ["VS-31", "VS-30"],
     "changelog": "CHANGELOG.md#claim-kitv1json"
   },
@@ -42,8 +42,8 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["supporter", "statusOnly"],
-      "description": "The kit variants, one per certificate class that embeds a kit: `supporter` for the payment class, `statusOnly` for the licence-status class, and optionally `sponsor` for the sponsor certificate. These keys are this document's own, in the camelCase every key here uses. The published certificate policy distinguishes the same variants with the `kitVariant` tokens `supporter`, `status-only` and `sponsor`, so a consumer joining the two files maps the policy's `status-only` onto `statusOnly` — indexing this object with the policy token directly resolves to nothing for every licence-status class. `supporter` and `statusOnly` are required: a kit that published one and left the other out would leave a class of holder with no permitted wording at all, which is the state CERT-053 exists to prevent.",
-      "$comment": "D44 (FIXES-2): `sponsor` is optional. kit-1 carries no sponsor variant, because the sponsor certificate's wording waits for the tax adviser's answer (LEG-094); the kit that adds it does so under this same schema, and a `supporter.sponsor` certificate pins that kit.",
+      "description": "The kit variants, one per certificate class that embeds a kit: `supporter` for the payment class, `statusOnly` for the licence-status class, optionally `sponsor` for the sponsor certificate, and optionally `contributor` for the participation certificate. These keys are this document's own, in the camelCase every key here uses. The published certificate policy distinguishes the same variants with the `kitVariant` tokens `supporter`, `status-only` and `sponsor`, so a consumer joining the two files maps the policy's `status-only` onto `statusOnly` — indexing this object with the policy token directly resolves to nothing for every licence-status class. The policy has no token for `contributor` while it records the contributor class as not issuable; a renderer finds a variant by its `appliesTo`. `supporter` and `statusOnly` are required: a kit that published one and left the other out would leave a class of holder with no permitted wording at all, which is the state CERT-053 exists to prevent.",
+      "$comment": "D44 (FIXES-2): `sponsor` is optional. kit-1 carries no sponsor variant, because the sponsor certificate's wording waits for the tax adviser's answer (LEG-094); the kit that adds it does so under this same schema, and a `supporter.sponsor` certificate pins that kit. D115 (slice P05): `contributor` is optional as well. kit-1 carries none, because a contributor's words are approved on their own; the kit that adds it carries `face`, which no other variant may.",
       "properties": {
         "supporter": {
           "allOf": [
@@ -51,7 +51,12 @@
             {
               "required": ["rules"],
               "properties": {
-                "lines": { "contains": { "properties": { "text": { "pattern": "\\{pledge\\}" } }, "required": ["text"] } },
+                "lines": {
+                  "contains": { "properties": { "text": { "pattern": "\\{pledge\\}" } }, "required": ["text"] },
+                  "items": { "properties": { "text": { "not": { "pattern": "\\{(?:login|projects)\\}" } } } }
+                },
+                "templates": { "items": { "properties": { "text": { "not": { "pattern": "\\{(?:login|projects)\\}" } } } } },
+                "face": false,
                 "badge": {
                   "type": "object",
                   "required": ["euConsumerNotice"],
@@ -86,8 +91,9 @@
             { "$ref": "#/$defs/variant" },
             {
               "properties": {
-                "lines": { "items": { "properties": { "text": { "not": { "pattern": "\\{(?:amount|band|pledge|tier|figure)\\}|give something back|Purpose Fee" } } } } },
+                "lines": { "items": { "properties": { "text": { "not": { "pattern": "\\{(?:amount|band|pledge|tier|figure|login|projects)\\}|give something back|Purpose Fee" } } } } },
                 "templates": { "maxItems": 0 },
+                "face": false,
                 "badge": { "type": "object", "properties": { "text": { "const": "Purpose Source · waiver · {status}" } } },
                 "prohibited": {
                   "allOf": [
@@ -106,8 +112,21 @@
             { "$ref": "#/$defs/variant" },
             {
               "properties": {
-                "lines": { "items": { "properties": { "text": { "not": { "pattern": "\\{(?:pledge|lane|band|categories|figure)\\}|give something back|Purpose Fee:" } } } } },
+                "lines": { "items": { "properties": { "text": { "not": { "pattern": "\\{(?:pledge|lane|band|categories|figure|login|projects)\\}|give something back|Purpose Fee:" } } } } },
                 "templates": { "maxItems": 0 },
+                "face": false,
+                "badge": { "const": null }
+              }
+            }
+          ]
+        },
+        "contributor": {
+          "allOf": [
+            { "$ref": "#/$defs/variant" },
+            {
+              "required": ["face"],
+              "properties": {
+                "appliesTo": { "const": ["contributor.participation"] },
                 "badge": { "const": null }
               }
             }
@@ -136,8 +155,8 @@
     "placeholderText": {
       "type": "string",
       "minLength": 10,
-      "pattern": "^(?:[^{}]|\\{(?:organisation|lane|period|amount|band|categories|status|tier|pledge|figure)\\})*$",
-      "description": "Text whose only braces are the closed placeholder set: {organisation} {lane} {period} {amount} {band} {categories} {status} {tier} {pledge} {figure}."
+      "pattern": "^(?:[^{}]|\\{(?:organisation|lane|period|amount|band|categories|status|tier|pledge|figure|login|projects)\\})*$",
+      "description": "Text whose only braces are the closed placeholder set: {organisation} {lane} {period} {amount} {band} {categories} {status} {tier} {pledge} {figure} {login} {projects}. {login}, the holder's GitHub login, and {projects}, the credited projects, are the contributor variant's: every other variant refuses them."
     },
     "claimText": {
       "allOf": [
@@ -217,6 +236,7 @@
           "uniqueItems": true,
           "items": { "type": "string", "pattern": "^(?:contributor|steward|supporter|license-status|topup)\\.(?:participation|registration|impact|entitlement|gift-funder|waived-funder|donation|sponsor|waiver|under-threshold|gifted-pass|x2|x5|x10)$" }
         },
+        "face": { "$ref": "#/$defs/face" },
         "lines": {
           "type": "array",
           "minItems": 1,
@@ -231,6 +251,29 @@
         "rules": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/rule" } },
         "prohibited": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 5 } },
         "binding": { "const": "public claims about this certificate are governed by the enclosed claim-language kit" }
+      }
+    },
+    "face": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classLabel", "headline", "lead", "holderLine", "periodLine", "statusOnlyLine", "moneyLine", "more", "projectOne", "projectMany"],
+      "description": "The words of a contributor certificate that come from the kit, never from the renderer's template (ops decision D115, slice P05): its full face, its status-only face, which names neither the holder nor a project, and its share card. Every member is required and is a non-empty string, because the renderer refuses a contributor certificate whose kit lacks one. Each admits only the placeholders the renderer fills for it and no other brace, so a word never prints one bare: `{period}` is the certificate's period in words, `{amount}` the figure the certificate signs, and `{n}` a number of projects. These are the certificate's own words, printed from the facts it signs; what a holder may say about the certificate is the variant's lines and templates.",
+      "properties": {
+        "classLabel": { "type": "string", "minLength": 1, "pattern": "^[^{}]*$", "description": "The class's name, in the certificate's head and above the share card's headline. No placeholder." },
+        "headline": { "type": "string", "minLength": 1, "pattern": "^[^{}]*$", "description": "The share card's headline. No placeholder." },
+        "lead": { "type": "string", "minLength": 1, "pattern": "^[^{}]*$", "description": "The words before the holder's name on the full face. No placeholder." },
+        "holderLine": { "type": "string", "minLength": 1, "pattern": "^[^{}]*$", "description": "The words after the holder's name on the full face. No placeholder." },
+        "periodLine": { "type": "string", "minLength": 1, "pattern": "^(?:[^{}]|\\{period\\})*$", "description": "The line under them on the full face; it may name `{period}`." },
+        "statusOnlyLine": { "type": "string", "minLength": 1, "pattern": "^(?:[^{}]|\\{period\\})*$", "description": "The one sentence of the status-only face; it may name `{period}`." },
+        "moneyLine": {
+          "type": "string",
+          "minLength": 1,
+          "allOf": [{ "pattern": "^(?:[^{}]|\\{(?:amount|period)\\})*$" }, { "pattern": "\\{amount\\}" }],
+          "description": "Printed only when the certificate signs a figure the holder helped direct (MKT-037). It names that figure, `{amount}`, and may name `{period}`: a money line without its figure would state an impact nobody could check."
+        },
+        "more": { "type": "string", "minLength": 1, "pattern": "^(?:[^{}]|\\{n\\})*$", "description": "How many projects a picture leaves out; it may name `{n}`." },
+        "projectOne": { "type": "string", "minLength": 1, "pattern": "^[^{}]*$", "description": "The label over a single project. No placeholder." },
+        "projectMany": { "type": "string", "minLength": 1, "pattern": "^(?:[^{}]|\\{n\\})*$", "description": "The label over two or more projects; it may name `{n}`." }
       }
     }
   }
