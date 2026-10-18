@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.12.0
+  version: 1.13.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -1016,10 +1016,21 @@ paths:
         the same bytes, whatever its status and display, because its verify page says it is not
         verified. A certificate signed with a non-production key still says `test` off production.
 
-        **Only a contributor's certificate has badge words yet.** An organisation's certificate is
-        governed by the claim kit, whose badge words the edge does not draw yet, and a steward's has
-        no words at all; their badge files answer `404 artifact_not_found` unless the record was
-        erased. A file name of none of the four shapes answers the same `404` and reads nothing.
+        **An organisation's certificate has badge words in two cases only.** A listed company's
+        Entitlement (a `supporter.entitlement` certificate shown in full, as its payer asked to be
+        listed, and logged, as a credited contributor's must be) says the claim kit's badge words
+        after the label, from the kit's
+        `Purpose Source · {lane} Entitlement · {status}`: `{lane} Entitlement · verified` while its
+        status is `valid` (the word for a certificate in force: no picture says "valid"), and
+        `{lane} Entitlement · expired` once it is expired by the clock, where `{lane}` is `Project`,
+        `Portfolio` or `Pass`, the lane its scope names. Its card reads `Purpose Source` over the same words and the live line. It is
+        typographic, with no rosette, and names no organisation, band, amount or period. Every other
+        organisation's certificate (an unlisted company, a waiver, a sponsor or another supporter
+        variant, a person's supporter certificate, a revoked or superseded Entitlement, and an
+        Entitlement with any other `disclosure` or with no log position) has no badge words yet, and
+        a steward's has none at all; their badge files answer `404 artifact_not_found`
+        unless the record was erased. A file name of none of the four shapes answers the same `404`
+        and reads nothing.
 
         **A non-production plane, or a non-production key, on production answers
         `400 sandbox_artifact_on_prod`**, as the certificate record's route does: a production
@@ -1094,6 +1105,22 @@ paths:
                     message: revoked
                     color: '#8a1f1f'
                     cacheSeconds: 3600
+                entitlement:
+                  summary: A listed company's Project Entitlement in force
+                  value:
+                    schemaVersion: 1
+                    label: purpose source
+                    message: Project Entitlement · verified
+                    color: '#1d5c3c'
+                    cacheSeconds: 3600
+                entitlementExpired:
+                  summary: A listed company's Pass Entitlement, expired by the clock
+                  value:
+                    schemaVersion: 1
+                    label: purpose source
+                    message: Pass Entitlement · expired
+                    color: '#45505c'
+                    cacheSeconds: 3600
                 notFound:
                   summary: No published certificate with this id, whatever the reason, or a contributor's certificate with no log position — 200 with an error-shaped body
                   value:
@@ -1120,15 +1147,15 @@ paths:
         '404':
           description: |
             The file name is none of the four badge shapes (nothing was read), or the certificate is
-            an organisation's or a steward's, for which no badge words are drawn, and its record was
-            not erased.
+            a steward's or an organisation's other than a listed company's logged Entitlement in force
+            or expired by the clock, for which no badge words are drawn, and its record was not erased.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
               examples:
                 noBadge:
-                  summary: Not a badge file, or no badge words for this certificate's class
+                  summary: Not a badge file, or no badge words for this certificate
                   value:
                     error:
                       code: artifact_not_found

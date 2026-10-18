@@ -2831,6 +2831,34 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 - One further example, `examples/badge.v1.certificate.example.json` (`credited 2026`), validated
   like the main one.
 
+### 1.2.0 — unreleased (2026-10-20; ops decision D115's dated note of 2026-10-13T07:01Z item 1) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: what a certificate badge's canonical messages cover widens, and the
+  description says so. No member, constraint or enum moved, and every body that validated still
+  validates.
+- The publicity plan's two company rows (ops `design/contributor-publicity/PLAN-2026-10-05.md`
+  §2.2: a listed company, an expired one), moved out of P13b by the dated note, are drawn: a LISTED
+  company's Entitlement (a `supporter.entitlement` certificate shown in full, whose payer asked to be
+  listed, and logged: its record carries its transparency-log position, as a credited contributor's
+  must, `edge-public.v1` 1.11.2) says the claim kit's badge text after the label, kit-1
+  `variants.supporter.badge` ("Purpose Source · {lane} Entitlement · {status}"):
+  `{lane} Entitlement · verified` while its status is `valid`, coloured `#1d5c3c`, and
+  `{lane} Entitlement · expired` once it is expired by the clock, coloured `#45505c`. `{lane}` is
+  `Project`, `Portfolio` or `Pass`, the lane its scope names, as the render job's company card names
+  it. The kit's `valid` is drawn as `verified`, the badge vocabulary's word for a certificate in
+  force, because no picture says "valid" (plan §1 item 2, §8, binding correction 9): that word is the
+  orchestrator's decision of 2026-10-19, and the operator reads the words.
+- Every other organisation's certificate keeps its `404`: an unlisted company, a waiver, a sponsor
+  or another supporter variant, a person's supporter certificate, a revoked or superseded
+  Entitlement (the kit's `{status}` has `revoked`, but the plan's table has no company row for it),
+  and an Entitlement whose record carries any other `disclosure` or no log position, which is
+  answered as an unlisted one. So does a steward's. A non-production key says `test` where words are
+  drawn, and an erased certificate `not found`, as before. No message names the organisation or
+  states a band, an amount or a period.
+- One further example, `examples/badge.v1.entitlement.example.json`
+  (`Project Entitlement · verified`), validated like the main one; `check:examples` validates 59
+  examples (24 of them further examples of a schema's shape).
+
 ## stats.v1.json
 
 ### 1.0.0 — unreleased
@@ -4132,6 +4160,27 @@ which kind of change each entry was.
 - `contributor-page.v1` 1.4.1 and `contributor-page-settings.v1` 1.3.1 say the same of the website's link, wording only.
   The description does not gate the website's tests, so the order of pushes does not matter for them.
   `check:openapi-examples` validates the same 67 examples.
+
+### 1.13.0 — unreleased (2026-10-20; ops decision D115's dated note of 2026-10-13T07:01Z item 1) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: `getCertificateBadge` answers a listed company's certificate with its badge
+  instead of `404`, so a documented response changes. No operation, status code of an operation, cache
+  class, error code, schema member or enum value moved; `badge.v1` 1.2.0 documents the new messages.
+- A listed company's Entitlement (a `supporter.entitlement` certificate shown in full and logged, by
+  1.11.2's rule for a credited contributor's) says the claim kit's badge words after the label:
+  `{lane} Entitlement · verified` while `valid`, `{lane} Entitlement · expired` once expired by the
+  clock, `{lane}` being `Project`, `Portfolio` or `Pass`. Its card reads `Purpose Source` over the same
+  words and the live line, typographic, with no rosette, and it names no organisation, band, amount or
+  period. These are the publicity plan's two company rows (§2.2), which slice P13b left for a
+  follow-up; `verified` stands for the kit's `valid` by the orchestrator's decision of 2026-10-19, a
+  word the operator reads.
+- Every other organisation's certificate (an unlisted company, a waiver, a sponsor or another supporter
+  variant, a person's supporter certificate, a revoked or superseded Entitlement, an Entitlement with
+  any other `disclosure` or no log position) and a steward's still answer `404 artifact_not_found`, and
+  the `404`'s description says which. Two examples are added to the `200`, `entitlement` and
+  `entitlementExpired`. Push this file before the website's edge change, whose specs read `badge.v1`'s
+  new further example from the published spec. `check:openapi-examples` validates 69 examples (67
+  before).
 
 ## coverage/cov-v1.ts
 
