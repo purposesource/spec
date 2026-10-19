@@ -1,0 +1,15 @@
+{
+  "ledId": "led_01kdqe40fcmqsh65b2ef0kfyr3",
+  "month": "2027-11",
+  "seq": 420,
+  "type": "interest-in",
+  "amountMinor": 75,
+  "currency": "CHF",
+  "batchId": "bat_01kmk6k96qb489wd6rp6djeb3g",
+  "externalKey": "int:bsl_01ktx0yy85bfa6vystkxg5hnfh",
+  "note": "Interest credited to the fees account on 2027-11-30, passed on with this close without costs or reserve retention (statutes Art. 6a(3)).",
+  "emittingJob": "jobs.allocator",
+  "createdAt": "2027-12-01T09:10:00Z",
+  "prevHash": "8d18ffec8cf266e9da7e92b1b64050f84bc954d3a365f5483bf9b3e43bbc7339",
+  "rowHash": "cfe62b0fa93f14508d23b13242f30acf7a6c358cf210d2bc2ef280801e61e5b4"
+}
