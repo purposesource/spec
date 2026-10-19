@@ -996,9 +996,9 @@ paths:
 
         **A badge never claims more than its verify page:** a contributor's certificate whose record
         carries no transparency-log position (`ct` null or absent, or without an integer `seq` and
-        `segment`) answers the same `not found` badge as an unknown certificate, the same bytes,
-        whatever its status and display, because its verify page says it is not verified. A
-        certificate signed with a non-production key still says `test` off production.
+        `segment`, each at least 0) answers the same `not found` badge as an unknown certificate,
+        the same bytes, whatever its status and display, because its verify page says it is not
+        verified. A certificate signed with a non-production key still says `test` off production.
 
         **Only a contributor's certificate has badge words yet.** An organisation's certificate is
         governed by the claim kit, whose badge words the edge does not draw yet, and a steward's has
@@ -1027,7 +1027,8 @@ paths:
         '200':
           description: |
             The badge, as SVG for the three image shapes and as a `badge.v1` body for `.json`;
-            `not found` for every certificate that is not published. Cached `max-age=300,
+            `not found` for every certificate that is not published, and for a contributor's
+            certificate whose record carries no transparency-log position. Cached `max-age=300,
             s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800`: production purges
             them whenever the certificate's card changes, and any other change shows within about an
             hour, or later while the edge answers errors (a shared cache may then keep the last good
@@ -1078,7 +1079,7 @@ paths:
                     color: '#8a1f1f'
                     cacheSeconds: 3600
                 notFound:
-                  summary: No published certificate with this id, whatever the reason — 200 with an error-shaped body
+                  summary: No published certificate with this id, whatever the reason, or a contributor's certificate with no log position — 200 with an error-shaped body
                   value:
                     schemaVersion: 1
                     isError: true

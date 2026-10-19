@@ -4026,7 +4026,9 @@ which kind of change each entry was.
   whatever its status and display, because its verify page says it is not verified; the verified sentence no longer
   lists "with no log position". A certificate signed with a non-production key still says `test` off production. The
   card's wording is unchanged (such a record already gets the generic card). Still 1.11.2, unreleased, and still
-  wording only: no operation, status code, cache class, error code, schema member or enum value moved.
+  wording only: no operation, status code, cache class, error code, schema member or enum value moved. Its review
+  made the position read as the edge reads it (integer `seq` and `segment`, each at least 0, as the record's schema
+  requires) and named the same case in the `200` response's description and the `notFound` example's summary.
 
 ## coverage/cov-v1.ts
 
