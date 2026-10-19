@@ -1369,8 +1369,9 @@ value inside `v1` is not additive (versioning policy 1).*
   templates may name two placeholders that join the closed set for it alone, `{login}` (the
   holder's GitHub login) and `{projects}` (the credited projects). It applies to
   `contributor.participation` and nothing else, and its `badge` is `null`: it attests no coverage.
-  No prohibition is required of it, as none is of `sponsor`: its rules and its prohibited phrases
-  come with its words.
+  At least one prohibition is required of it (`prohibited` `minItems` 1, added at review on
+  2026-10-19): the renderer refuses a contributor variant that lists none, so a kit it would
+  refuse is refused when it is published, not when a certificate is drawn.
 - THE OTHER THREE VARIANTS DO NOT MOVE. `supporter`, `statusOnly` and `sponsor` refuse a `face`,
   and `{login}` and `{projects}` in their lines and templates, so each admits exactly what it
   admitted under 1.1.0.

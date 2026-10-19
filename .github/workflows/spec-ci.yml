@@ -58,6 +58,16 @@ jobs:
         # because somebody will copy it.
         run: npm run check:examples
 
+      - name: The claim-language kits hold their document rules
+        # Added 2026-10-19 (PS-1950's review): npm test ran it and ci did not. The kits are
+        # published wording; their rules (verification sentence, pledge once, no figure, the
+        # sample variant marked SAMPLE, the contributor shape's refusals) belong in the gate.
+        run: npm run check:kits
+
+      - name: The designation examples hold their rules
+        # Added with the kits step, for the same reason: npm test ran it and ci did not.
+        run: npm run check:designations
+
       - name: The category menu is one list, and every copy of it is identical
         # After the examples step, because this compares the menu's SLUGS and the menu
         # example has to be a valid instance first.

@@ -313,6 +313,7 @@ function contributorShapeProblems(sample, validate) {
     ['a contributor variant without a face', '/variants/contributor', 'required', (v, c) => { delete c.face; }],
     ['a contributor variant for another class too', '/variants/contributor/appliesTo', 'const', (v, c) => { c.appliesTo.push('steward.registration'); }],
     ['a contributor variant with a badge', '/variants/contributor/badge', 'const', (v, c) => { c.badge = structuredClone(v.statusOnly.badge); }],
+    ['a contributor variant with no prohibition', '/variants/contributor/prohibited', 'minItems', (v, c) => { c.prohibited = []; }],
     ['a contributor line naming a placeholder outside the set', '/variants/contributor/lines/0/text', 'pattern', (v, c) => { c.lines[0].text = `{name} is a credited contributor. ${verify}`; }],
     ['a contributor line without the verification sentence', '/variants/contributor/lines/0/text', 'pattern', (v, c) => { c.lines[0].text = '{login} is a credited contributor to {projects}.'; }],
     ['a face on the supporter variant', '/variants/supporter/face', 'false schema', (v, c) => { v.supporter.face = structuredClone(c.face); }],

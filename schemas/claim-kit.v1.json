@@ -127,7 +127,8 @@
               "required": ["face"],
               "properties": {
                 "appliesTo": { "const": ["contributor.participation"] },
-                "badge": { "const": null }
+                "badge": { "const": null },
+                "prohibited": { "minItems": 1, "description": "At least one prohibition: the certificate renderer refuses a contributor variant that lists none (RENDER_KIT_NO_CONTRIBUTOR_WORDS), so a kit it would refuse is refused here, when the kit is published." }
               }
             }
           ]
