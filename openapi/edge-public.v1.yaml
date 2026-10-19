@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.11.1
+  version: 1.11.2
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -971,9 +971,12 @@ paths:
         the same behind an image proxy, in dark mode and with no fonts. Nothing is stored.
 
         **What a badge says is fixed words and a period, and nothing a record withholds.** A
-        contributor's certificate shown in full says `credited {years}`, and its card reads
+        contributor's certificate shown in full (its record's `disclosure` is `full` or absent) and
+        logged (its record carries its transparency-log position `ct`, `seq` and `segment`) says
+        `credited {years}`, and its card reads
         `Credited contributor` over `Purpose Source · {years} · {n} projects` (`1 project` for
-        one), the number of projects it credits. Recorded status-only, it says `verified {years}`,
+        one), the number of projects it credits. Recorded status-only, with any other `disclosure`, or
+        with no log position, it says `verified {years}`,
         and its card reads `Purpose Source` over `verified · {years}` (`verified` alone when the
         period does not read): no headline, no count and no rosette. A badge names nobody, so anyone can embed anyone's; `Credited contributor` is drawn
         only on a card whose verify page names the holder, and a status-only record's cannot, so its
@@ -1201,7 +1204,8 @@ paths:
         page names as its link-preview image and the holder shares. It prints the certificate's id
         and "Issued {month}", never a live status. The edge serves the copy the platform's index
         build placed on the published plane (`cards/{cid}.png`), and only while the certificate's
-        published record is shown in full and is `valid`, or `expired` by the clock (one card serves
+        published record is shown in full (`disclosure` `full` or absent), carries its transparency-log
+        position (`ct`), and is `valid`, or `expired` by the clock (one card serves
         both): a card left in storage after the holder withdrew to status-only is never served, and
         neither is the card of a revoked or superseded certificate, because the file in storage may
         still be the one drawn before its status changed. Those answer the generic card for now.
