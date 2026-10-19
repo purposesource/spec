@@ -975,8 +975,8 @@ paths:
         logged (its record carries its transparency-log position `ct`, `seq` and `segment`) says
         `credited {years}`, and its card reads
         `Credited contributor` over `Purpose Source · {years} · {n} projects` (`1 project` for
-        one), the number of projects it credits. Recorded status-only, with any other `disclosure`, or
-        with no log position, it says `verified {years}`,
+        one), the number of projects it credits. Logged and recorded status-only, or with any other
+        `disclosure`, it says `verified {years}`,
         and its card reads `Purpose Source` over `verified · {years}` (`verified` alone when the
         period does not read): no headline, no count and no rosette. A badge names nobody, so anyone can embed anyone's; `Credited contributor` is drawn
         only on a card whose verify page names the holder, and a status-only record's cannot, so its
@@ -993,6 +993,12 @@ paths:
         the subject's request, whatever the certificate's class) all answer `200` with the same
         `not found` badge, the same bytes for every one of them (the `.json` body carries
         `isError: true`), so a README never shows a broken image and no probe tells them apart.
+
+        **A badge never claims more than its verify page:** a contributor's certificate whose record
+        carries no transparency-log position (`ct` null or absent, or without an integer `seq` and
+        `segment`) answers the same `not found` badge as an unknown certificate, the same bytes,
+        whatever its status and display, because its verify page says it is not verified. A
+        certificate signed with a non-production key still says `test` off production.
 
         **Only a contributor's certificate has badge words yet.** An organisation's certificate is
         governed by the claim kit, whose badge words the edge does not draw yet, and a steward's has

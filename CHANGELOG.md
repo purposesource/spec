@@ -4011,15 +4011,22 @@ which kind of change each entry was.
   session, only for a repository that read lists as adoptable and with the name it gives, never one from the
   request. Same headers, framing and `400 invalid_query`. Wording only, like the line above.
 
-### 1.11.2 — unreleased (2026-10-19; PS-1949's review, the orchestrator's follow-up, website `aa049f4`) — wording only
+### 1.11.2 — unreleased (2026-10-19; PS-1949's review, the orchestrator's follow-up, website `aa049f4` and `1ab7eea`) — wording only
 
 - Patch: `getCertificateBadge` and `getCertificateCard` say what the edge does since website `aa049f4`. A contributor's
   certificate is credited (badge `credited {years}`, its own card) only when its published record is shown in full
   (`disclosure` is `full` or absent; any other value names nobody) and carries its transparency-log position (`ct`
-  with integer `seq` and `segment`). A record without it answers like a status-only one: `verified {years}` and the
-  generic card. The platform writes `ct` in the issuance transaction, so a published production record always has
-  it; the rule closes the gap for an imported or anomalous record. No operation, status code, cache class, error
-  code, schema member or enum value moved. The description does not gate the website's tests.
+  with integer `seq` and `segment`). A logged record with any other display answers like a status-only one:
+  `verified {years}` and the generic card. The platform writes `ct` in the issuance transaction, so a published
+  production record always has it; the rule closes the gap for an imported or anomalous record. No operation, status
+  code, cache class, error code, schema member or enum value moved. The description does not gate the website's tests.
+- Amended the same day (website `1ab7eea`, the orchestrator's decision that a badge never claims more than its verify
+  page): `getCertificateBadge` says that a contributor's certificate whose record has no transparency-log position
+  answers the same `not found` badge as an unknown certificate (the same bytes; the `.json` carries `isError: true`),
+  whatever its status and display, because its verify page says it is not verified; the verified sentence no longer
+  lists "with no log position". A certificate signed with a non-production key still says `test` off production. The
+  card's wording is unchanged (such a record already gets the generic card). Still 1.11.2, unreleased, and still
+  wording only: no operation, status code, cache class, error code, schema member or enum value moved.
 
 ## coverage/cov-v1.ts
 
