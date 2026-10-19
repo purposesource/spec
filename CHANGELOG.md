@@ -3210,6 +3210,23 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   edge's heads-up page in a new tab, which shows the domain and the whole address first, and the page names the website
   itself in `<link rel="me">` (`contributor-page.v1` 1.4.1).
 
+### 1.4.0 — unreleased (2026-10-19; ops decision D160 item 3) — pre-release
+
+- **Pre-release** under policy 5, a minor bump: no member, value or shape moves, and the api refuses more. A certificate's
+  display is one choice in three steps, Private, Public link and On my page (D160 item 3), and a page lists only what its
+  holder put On my page (guard (a)), in `all-eligible` as in `selected`, and still only in the display that matches the page.
+  So `all-eligible` never lists a certificate its holder has not put there, an automatic yearly certificate included, which
+  starts Private. `certificates`' description says so.
+- Check (c) refuses, at every save and again at publish, a certificate of the caller's own in `certificates.selected` that its
+  holder has not put On my page: `page.certificate_not_on_my_page`, whatever its display, since choosing On my page writes the
+  display that matches the page. A cid that is not the caller's keeps `page.certificate_not_allowed`, as an unknown one does,
+  and so does one On my page in the other display. Where the step is kept (the holder's own display events) is the platform's,
+  never a member of this document.
+- No document changes shape: a settings document stored before 1.4.0 reads and serialises to the same bytes and keeps its
+  `settings_sha256`. A published version whose `selected` names a certificate not On my page is built without it, as the
+  builder drops whatever the facts no longer allow, and a later save or publish of such a draft is refused until the person
+  takes it out or puts it On my page. The examples keep their bytes.
+
 ## contributor-page.v1.json
 
 ### 1.4.1 — unreleased (2026-10-20; ops decision D178 item 4) — wording only
