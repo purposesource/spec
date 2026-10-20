@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.11.2
+  version: 1.12.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -93,6 +93,22 @@ info:
     retired or old login address answers like a page that never existed), and a page that is
     not public answers the same `404` at `/p/{pid}` as before. QR codes, snippets, badges and
     cards keep naming `/p/{pid}`.
+
+    Each of the three addresses has a heads-up page one segment further: `/p/{pid}/leave`,
+    `/u/{login}/leave` and `/u/{login}/{pid}/leave` (ops decision D178 item 4). A page's links
+    to the platforms it draws (the social platforms and the sponsorship platforms of
+    `link-platforms.v1`) are rebuilt on each platform's own domain and open directly; the one
+    link that may name any domain, the person's website, opens the heads-up page in a new tab.
+    It answers for exactly the page its address answers, and only while that page has a
+    website: it shows the website's domain as the page shows it (an internationalised name in
+    Unicode only where the page would, otherwise its A-labels) and the whole address, with a
+    link that continues there in the same tab and one back to the page. Its only destination is
+    the published page's own website: nothing of the request but its path is read, so it never
+    sends a reader to an address the request names. It carries the page's headers (no script,
+    `X-Frame-Options: DENY`, `Cache-Control: public, max-age=60`) and `X-Robots-Tag: noindex,
+    nofollow` on every address, and every other case answers the same `404` as a page that does
+    not exist. The page itself names the website in a `<link rel="me">`, so rel-me verification
+    still finds the address.
 
     On this API's host every `/p/*` and `/u/*` path answers `301` to the same path on the site
     host (a mis-cased or slash-ended address to its lower-case form), and nothing is read to

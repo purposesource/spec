@@ -3203,7 +3203,24 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   a page that shows the login with an own repository, two organisations' and adopter items. The other examples keep their
   bytes.
 
+### 1.3.1 — unreleased (2026-10-20; ops decision D178 item 4) — wording only
+
+- Wording only, a patch under policy 3: no member, value or constraint moves, and no stored document changes. `website`'s
+  description said it is shown with `rel="me nofollow ugc noopener noreferrer"`. Since D178 item 4 its link opens the
+  edge's heads-up page in a new tab, which shows the domain and the whole address first, and the page names the website
+  itself in `<link rel="me">` (`contributor-page.v1` 1.4.1).
+
 ## contributor-page.v1.json
+
+### 1.4.1 — unreleased (2026-10-20; ops decision D178 item 4) — wording only
+
+- Wording only, a patch under policy 3: no member, value or constraint moves, and the builder's vectors do not change.
+  `linksSection` said every link carries `rel="nofollow ugc noopener noreferrer"`, "plus `me` for Mastodon and the
+  website", and no `target`. Since D178 item 4 that holds for the platform links, which go to the platforms' own domains
+  and open directly. The website, the one link that may name any domain, opens the edge's heads-up page at the address the
+  page is served at followed by `/leave`, in a new tab (`target="_blank"`, `rel="nofollow noopener noreferrer"`); that page
+  shows the domain and the whole address before the reader goes on, and the page names the website itself in a
+  `<link rel="me">` in its head (`openapi/edge-public.v1.yaml` 1.12.0).
 
 ### 1.4.0 — unreleased (2026-10-18; ops decision D168 item 3) — pre-release
 
@@ -4075,6 +4092,29 @@ which kind of change each entry was.
   wording only: no operation, status code, cache class, error code, schema member or enum value moved. Its review
   made the position read as the edge reads it (integer `seq` and `segment`, each at least 0, as the record's schema
   requires) and named the same case in the `200` response's description and the `notFound` example's summary.
+
+### 1.12.0 — unreleased (2026-10-20; ops decision D178 item 4) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: the site host gains a heads-up page at each of the contributor page's three addresses, and
+  the page's website link opens it, in place. No operation, status code of an operation, cache class, error code, schema
+  member or enum value of this API moved: the page is not a route of this API (1.9.0), and this host's `301` for every
+  `/p/*` and `/u/*` path is unchanged (a heads-up path goes to the site host like any other).
+- `info.description`'s "Contributor pages are not routes of this API" names the heads-up page, `{address}/leave`:
+  `/p/{pid}/leave`, `/u/{login}/leave` and `/u/{login}/{pid}/leave`. The operator's rule (D178 item 4) is that a link on a
+  person's page that leaves for a domain not on an approved list shows the domain and the address before it opens. The
+  approved list is the platforms the page already draws, the social platforms and the eight sponsorship platforms of
+  `link-platforms.v1`, whose links are rebuilt on each platform's own domain and open directly. The one link that may name
+  any domain is the person's website, which now opens the heads-up page in a new tab. That page answers for exactly the
+  page its address answers, and only while the page has a website; it shows the domain as the page shows it (an
+  internationalised name in Unicode only where the page would, otherwise its A-labels) and the whole address, with
+  "Continue to the website" in the same tab (the domain is written large above it) and "Back to {name}'s page". Its only destination is the published page's own
+  website: it reads nothing of the request but its path, so it is no open redirect. It carries the page's headers (no
+  script, `X-Frame-Options: DENY`, `Cache-Control: public, max-age=60`) with `X-Robots-Tag: noindex, nofollow` on every
+  address, and every other case is the same `404` as a page that does not exist. The page names the website itself in a
+  `<link rel="me">` in its head, so rel-me verification still finds the address.
+- `contributor-page.v1` 1.4.1 and `contributor-page-settings.v1` 1.3.1 say the same of the website's link, wording only.
+  The description does not gate the website's tests, so the order of pushes does not matter for them.
+  `check:openapi-examples` validates the same 67 examples.
 
 ## coverage/cov-v1.ts
 
