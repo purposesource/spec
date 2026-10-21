@@ -39,8 +39,8 @@
  *              valid `contributor-page.v1`, its preimage is the document reduced exactly as that
  *              schema's description defines, its text is the RFC 8785 form of the preimage, and
  *              `previewSha256` is the SHA-256 of that text's UTF-8 bytes (design §3.6). The vectors
- *              between them reduce a GitHub picture, keep an upload, drop a card's files, and
- *              carry non-ASCII text. Every string of a preimage is well-formed Unicode: a lone
+ *              between them reduce a GitHub picture, keep an upload, drop a card's files, drop an
+ *              organisation's picture (1.5.0) and carry non-ASCII text. Every string of a preimage is well-formed Unicode: a lone
  *              surrogate is refused, never serialised (I-JSON, as RFC 8785 assumes).
  *   alias      `examples/contributor-page-alias.v1.golden.json`: each vector's message, HMAC-SHA256
  *              under the published test key, and addressMac (the first 26 characters of the
@@ -77,6 +77,18 @@
  *              with the recorded quit's year) listed only with both years in order; every other one dropped;
  *              the person's hide, an evidence no link can be rebuilt from and the first fact per repository
  *              kept; `until` written on a left item alone; and between them the vectors give each case.
+ *   organisations
+ *              1.5.0 (ops decision D165 item 3, the organisation's picture): on every page example and preview vector, a
+ *              repository group's or an adopter item's `picture` stands only where `autoUpdated` names
+ *              `organisation-pictures` (so only while the cards' icon is the owner's), never on the document's own login,
+ *              and one login carries one `h16` on the whole page (the rules a schema cannot hold); some vector names a
+ *              copy on a group and on an item, so its hash proves step (4) of the preview hash drops them. The build
+ *              golden's `organisations` vectors are answered by the gate's own reading of the builder's judgment: a login
+ *              is an organisation's only while the icon is `owner`, it is not the person's own, and every repository the
+ *              page shows under it has GitHub's stored answer, each an `Organization`, one owner, under that login; and
+ *              between them the vectors give a copy named and one not drawn, the icon off, an answer missing, two owners,
+ *              a login that moved, the person's own login, both sections at once, a folded case and a person's
+ *              repository, whose owner's id no expected entry ever names.
  *   cards      1.3.0 (ops decision D165): `cards` is optional in both schemas and so is each member; the
  *              settings' `default` is its members' defaults, which are D165 item 3's (the owner's icon, an
  *              own repository by its name, another owner's as owner/name), and the document's members
@@ -131,7 +143,10 @@
  *              adds: no `cards` at all, one member alone and the defaults stated, in either schema; and what
  *              1.4.0 adds: no year on any adopter item, `since` alone, and a left item within one year. And
  *              1.4.0's refusals: `until` without `since`, a year before 2026, a month or an instant for a
- *              year, and a marker of a leave of its own.
+ *              year, and a marker of a leave of its own. And 1.5.0's: an organisation's picture as an address,
+ *              with a member of its own, as a bare string or with a malformed `h16`, and `organisation-pictures`
+ *              kept current under the GitHub mark; and what it admits: `organisation-pictures` with no copy named
+ *              yet, and a copy on an adopter item alone.
  *   goldens    every `examples/*.golden.json` is one a gate checks.
  *
  * Every rule is proved able to fail before the examples are trusted to pass.
@@ -194,6 +209,8 @@ const real = {
   cardsSettings: example('contributor-page-settings.v1.cards.example.json'),
   // 1.4.0's further example (ops decision D168 item 3): the licence adopter's years, a repository that left among them.
   adopterYearsPage: example('contributor-page.v1.adopter-years.example.json'),
+  // 1.5.0's further example (ops decision D165 item 3): an organisation's picture on its group and its adopter item.
+  organisationPage: example('contributor-page.v1.organisation-pictures.example.json'),
   settingsExamples: Object.fromEntries(
     readdirSync(EXAMPLE_DIR)
       .filter((name) => name.startsWith('contributor-page-settings.v1.') && name.endsWith('.example.json'))
@@ -883,6 +900,11 @@ function preimage(document) {
   delete out.versionId;
   if (out.card) delete out.card.h16;
   if (out.picture?.kind === 'github') out.picture = { kind: 'github' };
+  // 1.5.0, step (4): an organisation's picture on a repository group or an adopter item.
+  for (const section of out.sections ?? []) {
+    if (section.id === 'repositories') for (const group of section.groups ?? []) delete group.picture;
+    if (section.id === 'adopter') for (const item of section.items ?? []) delete item.picture;
+  }
   return out;
 }
 
@@ -893,7 +915,7 @@ function previewProblems(golden) {
   const add = (rule, message) => found.push([rule, `examples/contributor-page-preview.v1.golden.json: ${message}`]);
   const vectors = golden.vectors ?? [];
   if (vectors.length === 0) add('preview', 'no vectors — this gate would pass vacuously');
-  const exercised = { githubReduced: false, uploadKept: false, cardDropped: false, nonAscii: false };
+  const exercised = { githubReduced: false, uploadKept: false, cardDropped: false, groupPictureDropped: false, itemPictureDropped: false, nonAscii: false };
   for (const v of vectors) {
     if (!validatePage(v.document)) add('preview', `${v.id}: the document is not a valid contributor-page.v1 (${ajv.errorsText(validatePage.errors)})`);
     for (const text of [...strings(v.document), ...keysOf(v.document)].filter((s) => !s.isWellFormed())) {
@@ -914,6 +936,9 @@ function previewProblems(golden) {
     if (v.document.picture?.kind === 'github' && Object.keys(v.document.picture).length > 1) exercised.githubReduced = true;
     if (v.document.picture?.kind === 'upload' || v.document.cover?.kind === 'upload') exercised.uploadKept = true;
     if (v.document.card?.h16) exercised.cardDropped = true;
+    const sectionOfVector = (id) => (v.document.sections ?? []).find((x) => x.id === id);
+    if ((sectionOfVector('repositories')?.groups ?? []).some((g) => 'picture' in g)) exercised.groupPictureDropped = true;
+    if ((sectionOfVector('adopter')?.items ?? []).some((i) => 'picture' in i)) exercised.itemPictureDropped = true;
     if (/[^\u0000-\u007f]/.test(text)) exercised.nonAscii = true;
   }
   for (const [what, done] of Object.entries(exercised)) if (!done) add('preview', `no vector exercises ${what}`);
@@ -1045,6 +1070,7 @@ function buildProblems(golden) {
   found.push(...buildAboutProblems(golden.about ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   found.push(...buildCardsProblems(golden.cards ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   found.push(...buildAdopterProblems(golden.adopter ?? []).map((message) => ['adopter', `examples/contributor-page-build.v1.golden.json: ${message}`]));
+  found.push(...buildOrganisationsProblems(golden.organisations ?? []).map((message) => ['organisations', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   return found;
 }
 
@@ -1141,6 +1167,106 @@ function adopterYearsProblems(documents, vectors) {
   return found;
 }
 
+/* ---------------------------------------------------------------------- organisations */
+
+const byLoginOrder = (a, b) => {
+  const [x, y] = [a.toLowerCase(), b.toLowerCase()];
+  return x < y ? -1 : x > y ? 1 : 0;
+};
+
+/**
+ * The gate's own reading of the builder's judgment of an organisation's picture (1.5.0; contributor-page.v1
+ * `$defs.organisationPicture`), not the builder: only while the cards' icon is `owner`; per login, compared without regard to
+ * case, over every repository the page shows under it in both sections; never the person's own login; judged only when every
+ * one of those repositories has a stored answer, each an `Organization` under that login, all one owner. Each entry keeps the
+ * page's first spelling of the login and names the copy the render job holds for that owner, or null.
+ */
+function buildOrganisations(input) {
+  if (input.icon !== 'owner') return [];
+  const own = typeof input.login === 'string' ? input.login.toLowerCase() : null;
+  const logins = new Map();
+  for (const shown of input.shown) {
+    const key = shown.owner.toLowerCase();
+    if (!logins.has(key)) logins.set(key, { login: shown.owner, rows: [] });
+    logins.get(key).rows.push(shown);
+  }
+  const out = [];
+  for (const [key, { login, rows }] of logins) {
+    if (key === own) continue;
+    const answers = rows.map((r) => input.answers[r.nodeId]);
+    if (answers.some((a) => !a || a.ownerType !== 'Organization' || typeof a.ownerLogin !== 'string' || a.ownerLogin.toLowerCase() !== key)) continue;
+    const owners = new Set(answers.map((a) => a.ownerNodeId));
+    if (owners.size !== 1) continue;
+    const [ownerNodeId] = owners;
+    out.push({ login, ownerNodeId, h16: input.drawn[ownerNodeId] ?? null });
+  }
+  return out.sort((a, b) => byLoginOrder(a.login, b.login));
+}
+
+function buildOrganisationsProblems(vectors) {
+  const found = [];
+  if (vectors.length === 0) found.push('no organisations vector — the organisation picture rule would pass vacuously');
+  const exercised = {
+    named: false, notDrawn: false, iconOff: false, unanswered: false, twoOwners: false, loginMoved: false, ownLogin: false,
+    bothSections: false, caseFolded: false, personNever: false
+  };
+  for (const v of vectors) {
+    const got = buildOrganisations(v.input);
+    if (JSON.stringify(got) !== JSON.stringify(v.expect.organisations)) found.push(`${v.id}: expects ${JSON.stringify(v.expect.organisations)}, the rule gives ${JSON.stringify(got)}`);
+    for (const entry of v.expect.organisations ?? []) {
+      if (PERSON_NODE_ID.test(entry.ownerNodeId)) found.push(`${v.id}: ${entry.login} is judged an organisation's under a person's node id ${entry.ownerNodeId}; a person's picture is never named`);
+      if (entry.h16 !== null && !/^[0-9a-f]{16}$/.test(entry.h16)) found.push(`${v.id}: ${entry.login}'s copy is named ${JSON.stringify(entry.h16)}, which is no h16`);
+    }
+    const judged = new Set((v.expect.organisations ?? []).map((e) => e.login.toLowerCase()));
+    const answers = Object.values(v.input.answers);
+    if ((v.expect.organisations ?? []).some((e) => e.h16 !== null)) exercised.named = true;
+    if ((v.expect.organisations ?? []).some((e) => e.h16 === null)) exercised.notDrawn = true;
+    if (v.input.icon !== 'owner' && answers.some((a) => a.ownerType === 'Organization')) exercised.iconOff = true;
+    if (v.input.shown.some((r) => !(r.nodeId in v.input.answers) && !judged.has(r.owner.toLowerCase()))) exercised.unanswered = true;
+    const logins = new Set(v.input.shown.map((r) => r.owner.toLowerCase()));
+    for (const key of logins) {
+      const rows = v.input.shown.filter((r) => r.owner.toLowerCase() === key).map((r) => v.input.answers[r.nodeId]).filter(Boolean);
+      if (new Set(rows.map((a) => a.ownerNodeId)).size > 1 && !judged.has(key)) exercised.twoOwners = true;
+      if (rows.some((a) => a.ownerType === 'Organization' && a.ownerLogin.toLowerCase() !== key) && !judged.has(key)) exercised.loginMoved = true;
+      if (key === v.input.login.toLowerCase() && rows.some((a) => a.ownerType === 'Organization')) exercised.ownLogin = true;
+      if (rows.some((a) => a.ownerType === 'User') && !judged.has(key)) exercised.personNever = true;
+    }
+    if (v.input.shown.some((r, i) => v.input.shown.findIndex((x) => x.nodeId === r.nodeId) !== i) && judged.size > 0) exercised.bothSections = true;
+    if ((v.expect.organisations ?? []).some((e) => e.login !== e.login.toLowerCase())) exercised.caseFolded = true;
+  }
+  for (const [what, done] of Object.entries(exercised)) if (!done) found.push(`no organisations vector exercises ${what}`);
+  return found;
+}
+
+/**
+ * 1.5.0 (ops decision D165 item 3): on every page document, an organisation's picture stands only where `autoUpdated` names
+ * `organisation-pictures` (which the schema holds to the owner's icon), never on the document's own login, and with one `h16`
+ * for one login across the projects' groups and the adopter's items; and some vector names a copy on a group and on an item.
+ */
+function organisationsProblems(documents, vectors) {
+  const found = [];
+  const add = (message) => found.push(['organisations', message]);
+  for (const [where, doc] of documents) {
+    const pictures = [];
+    for (const group of (doc.sections ?? []).find((s) => s.id === 'repositories')?.groups ?? []) {
+      if ('picture' in group) pictures.push([group.owner, group.picture]);
+    }
+    for (const item of (doc.sections ?? []).find((s) => s.id === 'adopter')?.items ?? []) {
+      if ('picture' in item) pictures.push([item.fullName.split('/')[0], item.picture]);
+    }
+    if (pictures.length > 0 && !(doc.autoUpdated ?? []).includes('organisation-pictures')) add(`${where}: an organisation's picture is named, and autoUpdated does not name organisation-pictures`);
+    const h16s = new Map();
+    for (const [login, picture] of pictures) {
+      if (typeof doc.login === 'string' && login.toLowerCase() === doc.login.toLowerCase()) add(`${where}: ${login}, the page owner's own login, carries an organisation's picture; an own repository keeps the page's own`);
+      const key = login.toLowerCase();
+      if (h16s.has(key) && h16s.get(key) !== picture?.h16) add(`${where}: ${login} carries two copies, ${h16s.get(key)} and ${picture?.h16}; one login is one organisation on the page`);
+      h16s.set(key, picture?.h16);
+    }
+  }
+  if (!vectors.some((v) => ((v.document.sections ?? []).find((s) => s.id === 'repositories')?.groups ?? []).some((g) => 'picture' in g))) add('no preview vector names an organisation\'s copy on a group, so no hash proves step (4) drops it');
+  return found;
+}
+
 const validatePageCards = ajv.getSchema(`${cfg.schemaBaseUrl}/${PAGE}#/properties/cards`);
 const validateSettingsCards = ajv.getSchema(`${cfg.schemaBaseUrl}/${SETTINGS}#/properties/cards`);
 
@@ -1214,6 +1340,7 @@ function cardsProblems(state) {
     ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
     ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
     ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
+    ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
     ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
   ];
   for (const [where, doc] of documents) {
@@ -1667,8 +1794,18 @@ const REFUSALS = [
   ['adopterYearsPage', 'a month for a year', (d) => { sectionOf(d, 'adopter').items[0].since = '2026-03'; }],
   ['adopterYearsPage', 'an instant for a year', (d) => { leftItem(d).until = '2027-02-10T09:00:00Z'; }],
   ['adopterYearsPage', 'a year that is not a whole number', (d) => { leftItem(d).until = 2027.5; }],
-  ['adopterYearsPage', 'a marker of a leave of its own', (d) => { leftItem(d).left = true; }]
+  ['adopterYearsPage', 'a marker of a leave of its own', (d) => { leftItem(d).left = true; }],
+  // 1.5.0 (ops decision D165 item 3).
+  ['organisationPage', "an organisation's picture as an address", (d) => { orgGroup(d).picture = { h16: '9b2e4c6a8d0f1e3a', url: 'https://avatars.githubusercontent.com/u/1?v=4' }; }],
+  ['organisationPage', "an organisation's picture as a bare string", (d) => { orgGroup(d).picture = '9b2e4c6a8d0f1e3a'; }],
+  ['organisationPage', "an organisation's picture with an upper-case h16", (d) => { sectionOf(d, 'adopter').items[0].picture = { h16: '9B2E4C6A8D0F1E3A' }; }],
+  ['organisationPage', "an organisation's picture with no h16", (d) => { orgGroup(d).picture = {}; }],
+  ['organisationPage', "an organisation's picture naming its owner's node id", (d) => { orgGroup(d).picture.ownerNodeId = 'O_kgDOSMPL0101'; }],
+  ['organisationPage', 'organisation-pictures kept current under the GitHub mark', (d) => { d.cards.icon = 'github'; }]
 ];
+
+/** The organisation-pictures example's group that names an organisation's copy. */
+const orgGroup = (d) => sectionOf(d, 'repositories').groups.find((g) => 'picture' in g);
 
 /** The adopter-years example's item that left (it carries `until`). */
 const leftItem = (d) => sectionOf(d, 'adopter').items.find((i) => 'until' in i);
@@ -1727,7 +1864,11 @@ const ADMITS = [
   // 1.4.0 (ops decision D168 item 3).
   ['adopterYearsPage', 'no year on any adopter item (a document built before 1.4.0)', (d) => { for (const i of sectionOf(d, 'adopter').items) { delete i.since; delete i.until; } d.sections[0].items = d.sections[0].items.filter((i) => i.nodeId !== 'R_kgDOSMPL0005'); }],
   ['adopterYearsPage', 'since alone on every item', (d) => { for (const i of sectionOf(d, 'adopter').items) { i.since = 2026; delete i.until; } }],
-  ['adopterYearsPage', 'a left item within one year', (d) => { const i = leftItem(d); i.since = 2027; i.until = 2027; }]
+  ['adopterYearsPage', 'a left item within one year', (d) => { const i = leftItem(d); i.since = 2027; i.until = 2027; }],
+  // 1.5.0 (ops decision D165 item 3).
+  ['organisationPage', 'organisation-pictures with no copy named yet', (d) => { delete orgGroup(d).picture; for (const i of sectionOf(d, 'adopter').items) delete i.picture; }],
+  ['organisationPage', "an organisation's copy on an adopter item alone", (d) => { delete orgGroup(d).picture; }],
+  ['organisationPage', 'organisation-pictures with no cards member (the owner\'s icon by default)', (d) => { delete d.cards; }]
 ];
 
 const CONTRACT = {
@@ -1739,6 +1880,7 @@ const CONTRACT = {
   cardsPage: 'contributor-page.v1',
   cardsSettings: 'contributor-page-settings.v1',
   adopterYearsPage: 'contributor-page.v1',
+  organisationPage: 'contributor-page.v1',
   alias: 'contributor-page-alias.v1'
 };
 
@@ -1746,7 +1888,7 @@ function refusalProblems(docs, refusals) {
   const found = [];
   const validators = {
     page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage, adopterYearsPage: validatePage,
-    settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings, alias: validateAlias
+    organisationPage: validatePage, settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings, alias: validateAlias
   };
   for (const [base, what, breakIt] of refusals) {
     const copy = structuredClone(docs[base]);
@@ -1760,7 +1902,7 @@ function admitsProblems(docs, admits) {
   const found = [];
   const validators = {
     page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage, adopterYearsPage: validatePage,
-    settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings
+    organisationPage: validatePage, settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings
   };
   for (const [base, what, change] of admits) {
     const copy = structuredClone(docs[base]);
@@ -1801,6 +1943,7 @@ function allProblems(state) {
       ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
       ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
       ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
+      ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
       [`examples/${ABOUT_FILE}`, state.aboutTexts],
       [`examples/${ABOUT_GOLDEN}`, state.aboutGolden]
     ]),
@@ -1814,7 +1957,8 @@ function allProblems(state) {
       ['examples/contributor-page.v1.about.example.json', state.aboutPage],
       ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
       ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
-      ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage]
+      ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
+      ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage]
     ]),
     ...cardsProblems(state),
     ...adopterYearsProblems(
@@ -1827,6 +1971,22 @@ function allProblems(state) {
         ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
         ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
         ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
+        ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
+        ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
+      ],
+      state.preview.vectors
+    ),
+    ...organisationsProblems(
+      [
+        ['examples/contributor-page.v1.example.json', state.page],
+        ['examples/contributor-page.v1.anonymous.example.json', state.anonymous],
+        ['examples/contributor-page.v1.header.example.json', state.header],
+        ['examples/contributor-page.v1.own-ground.example.json', state.ownGround],
+        ['examples/contributor-page.v1.about.example.json', state.aboutPage],
+        ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
+        ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
+        ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
+        ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
         ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
       ],
       state.preview.vectors
@@ -1909,6 +2069,16 @@ const SELF_TEST = [
   ['adopter', (s) => { s.build.adopter = s.build.adopter.filter((v) => v.id !== 'BY-6'); }],
   ['adopter', (s) => { s.build.adopter = s.build.adopter.filter((v) => v.id !== 'BY-4'); }],
   ['adopter', (s) => { s.build.adopter = []; }],
+  ['preview', (s) => { const v = s.preview.vectors.find((x) => x.id === 'PV-8'); v.preimage = structuredClone(v.document); delete v.preimage.generatedAt; delete v.preimage.versionId; v.preimage.picture = { kind: 'github' }; }],
+  ['organisations', (s) => { s.build.organisations.find((v) => v.id === 'BO-1').expect.organisations.push({ login: 'sam-codes', ownerNodeId: 'U_kgDOSMPL0113', h16: '2d4f6a8c0e1b3d5f' }); }],
+  ['organisations', (s) => { s.build.organisations.find((v) => v.id === 'BO-4').expect.organisations = [{ login: 'example-org', ownerNodeId: 'O_kgDOSMPL0101', h16: '9b2e4c6a8d0f1e3a' }]; }],
+  ['organisations', (s) => { s.build.organisations.find((v) => v.id === 'BO-7').expect.organisations = [{ login: 'example-contributor', ownerNodeId: 'O_kgDOSMPL0101', h16: '9b2e4c6a8d0f1e3a' }]; }],
+  ['organisations', (s) => { s.build.organisations = s.build.organisations.filter((v) => v.id !== 'BO-6'); }],
+  ['organisations', (s) => { s.build.organisations = []; }],
+  ['organisations', (s) => { s.organisationPage.autoUpdated = s.organisationPage.autoUpdated.filter((x) => x !== 'organisation-pictures'); }],
+  ['organisations', (s) => { sectionOf(s.organisationPage, 'repositories').groups[0].picture = { h16: '9b2e4c6a8d0f1e3a' }; }],
+  ['organisations', (s) => { sectionOf(s.organisationPage, 'adopter').items[0].picture = { h16: '0000000000000000' }; }],
+  ['organisations', (s) => { for (const v of s.preview.vectors) for (const x of v.document.sections) if (x.id === 'repositories') for (const g of x.groups) delete g.picture; }],
   ['about', (s) => { s.aboutTexts.versions[0].short.paragraphs[0] += ' It is lovely.'; }],
   ['about', (s) => { s.aboutTexts.current = 2; }],
   ['about', (s) => { const v = s.aboutTexts.versions[0]; v.invite.withCertificates = v.invite.withoutCertificates; }],
@@ -1935,6 +2105,8 @@ const SELF_TEST = [
   ['admits', (s) => { s.admits = [['adopterYearsPage', 'a left year without its since', (d) => { delete leftItem(d).since; }]]; }],
   ['refusals', (s) => { s.refusals = [['adopterYearsPage', 'the adopter-years page unchanged', () => {}]]; }],
   ['refusals', (s) => { s.refusals = [['cardsPage', 'the cards page unchanged', () => {}]]; }],
+  ['refusals', (s) => { s.refusals = [['organisationPage', 'the organisation-pictures page unchanged', () => {}]]; }],
+  ['admits', (s) => { s.admits = [['organisationPage', "an organisation's picture as an address", (d) => { orgGroup(d).picture.url = 'https://avatars.githubusercontent.com/u/1?v=4'; }]]; }],
   ['admits', (s) => { s.admits = [['aboutSettings', 'own words of 601 code points', (d) => { d.about.ownText = 'a'.repeat(601); }]]; }],
   ['agree', (s) => { s.schemas.page.properties.layout.enum = ['paper', 'profile']; }],
   ['agree', (s) => { s.schemas.page.$defs.groundId.enum = s.schemas.page.$defs.groundId.enum.slice(1); }],
@@ -1984,6 +2156,7 @@ fail(
     `${state.preview.vectors.length} preview vectors recompute, ${state.aliasGolden.vectors.length} alias MAC vectors recompute, ` +
     `${state.build.vectors.length} builder vectors keep a hidden login off the repository list, ${state.build.about.length} write the about block, ` +
     `${state.build.cards.length} write the cards' choices resolved, ${state.build.adopter.length} list the licence adopter's repositories with their years, ` +
+    `${state.build.organisations.length} judge whose organisation picture a page may name, ` +
     `${state.aboutTexts.versions.length} version(s) of our about texts hold their recorded digests, ${state.aboutGolden.sentences.length} about sentences and ${state.aboutGolden.blocks.length} blocks recompute, ` +
     'no page member or example carries points, money or a GitHub id, ' +
     `the defaults are the schema's, ${REFUSALS.length} refusals and ${ADMITS.length} admissions hold, and every rule was proved able to fail`,

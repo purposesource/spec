@@ -3,9 +3,10 @@
     "Worked vectors of the contributor page's previewSha256 (design PROFILE-PAGE-2026-10-06 §3.6; the definition is in schemas/contributor-page.v1.json): the document, the preimage (generatedAt and versionId removed, card.h16 removed, a GitHub picture reduced to {\"kind\":\"github\"}), its RFC 8785 (JCS) text, and the lowercase hex SHA-256 of that text's UTF-8 bytes.",
     "The api and index-build (C#, through the one builder) and any reader recompute every vector. check:contributor-page validates each document against contributor-page.v1 and recomputes the preimage, the text and the digest. A C# serialiser that escapes non-ASCII by default (System.Text.Json does) fails PV-3, which is why it is here.",
     "1.3.0 (ops decision D165): the one builder writes `cards`, the cards' three choices resolved, on every document, so PV-1 to PV-5 carry the defaults right before `sections` and were recomputed with it (their documents are the builder's); PV-6 is examples/contributor-page.v1.cards.example.json, the GitHub mark on every card and every repository named alone.",
-    "1.4.0 (ops decision D168 item 3): adopter items gain `since` and `until` (years). Both are optional and written only where the builder knows them, so PV-1 to PV-6 keep their bytes and their hashes (their facts carry no evidence date); PV-7 is examples/contributor-page.v1.adopter-years.example.json, with a dated item, a repository that left and an undated item."
+    "1.4.0 (ops decision D168 item 3): adopter items gain `since` and `until` (years). Both are optional and written only where the builder knows them, so PV-1 to PV-6 keep their bytes and their hashes (their facts carry no evidence date); PV-7 is examples/contributor-page.v1.adopter-years.example.json, with a dated item, a repository that left and an undated item.",
+    "1.5.0 (ops decision D165 item 3, the organisation's picture): `autoUpdated` gains `organisation-pictures`, which the one builder writes from the settings alone (the cards' icon `owner`, and the projects section, or the adopter section with the login shown, switched on), so PV-1, PV-3 and PV-5 carry it and were recomputed with it (their documents are the builder's); PV-2, PV-4, PV-6 and PV-7 keep their bytes. The `picture` of a repository group and of an adopter item (an organisation's copy) leaves the preimage, step (4): PV-8 is examples/contributor-page.v1.organisation-pictures.example.json, an organisation's copy named on its group and on its adopter item, a person's group and the page owner's own beside it."
   ],
-  "specVersion": "1.3.0",
+  "specVersion": "1.4.0",
   "vectors": [
     {
       "id": "PV-1",
@@ -212,7 +213,8 @@
           "adopter",
           "certificate-status",
           "registry-names",
-          "login"
+          "login",
+          "organisation-pictures"
         ],
         "factsAsOf": "2027-02"
       },
@@ -415,12 +417,13 @@
           "adopter",
           "certificate-status",
           "registry-names",
-          "login"
+          "login",
+          "organisation-pictures"
         ],
         "factsAsOf": "2027-02"
       },
-      "canonical": "{\"address\":\"login\",\"autoUpdated\":[\"summary\",\"repositories\",\"adopter\",\"certificate-status\",\"registry-names\",\"login\"],\"card\":{\"adopter\":true,\"links\":true,\"login\":true,\"name\":true,\"picture\":true,\"summary\":true},\"cards\":{\"icon\":\"owner\",\"otherNames\":\"owner/name\",\"ownNames\":\"name\"},\"cover\":{\"angle\":135,\"from\":\"#1d5c3c\",\"kind\":\"gradient\",\"to\":\"#e0b04a\"},\"factsAsOf\":\"2027-02\",\"identity\":{\"bio\":\"Maintainer of small accounting libraries.\\nI contribute through Purpose Source.\",\"displayName\":\"Alex Example\",\"pronouns\":\"they/them\"},\"layout\":\"paper\",\"login\":\"example-contributor\",\"picture\":{\"h16\":\"6616e65bafbcf60a\",\"kind\":\"upload\"},\"pid\":\"7k2m9xq4tpz3r8vd\",\"schemaVersion\":1,\"search\":true,\"sections\":[{\"certificates\":1,\"id\":\"summary\",\"organisations\":2,\"projects\":3,\"since\":2026},{\"groups\":[{\"owner\":\"example-org\",\"repos\":[{\"listing\":\"registered\",\"name\":\"ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\",\"years\":{\"from\":2026,\"to\":2027}},{\"listing\":\"registered\",\"name\":\"tax-tables\",\"nodeId\":\"R_kgDOSMPL0002\",\"years\":{\"from\":2027,\"to\":2027}}]},{\"owner\":\"other-org\",\"repos\":[{\"listing\":\"no-longer-registered\",\"name\":\"invoice-kit\",\"nodeId\":\"R_kgDOSMPL0003\",\"years\":{\"from\":2026,\"to\":2026}}]}],\"id\":\"repositories\"},{\"id\":\"adopter\",\"items\":[{\"evidence\":{\"kind\":\"merged-pr\",\"number\":42},\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"},{\"evidence\":{\"kind\":\"direct-commit\",\"oid\":\"a0e2126a4d92cd0cf93496ede3f10827e8fa1865\"},\"fullName\":\"example-contributor/csv-split\",\"nodeId\":\"R_kgDOSMPL0004\"}]},{\"id\":\"certificates\",\"items\":[{\"cid\":\"cert_01jk2m4p6r8t0v2x4z6b8d0f2h\",\"disclosure\":\"full\",\"repos\":[{\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"},{\"fullName\":\"other-org/invoice-kit\",\"nodeId\":\"R_kgDOSMPL0003\"}],\"status\":\"expired\",\"typ\":\"contributor\",\"variant\":\"participation\",\"years\":{\"from\":2026,\"to\":2026}}]},{\"id\":\"links\",\"items\":[{\"handle\":\"alex-example\",\"platform\":\"linkedin\",\"url\":\"https://www.linkedin.com/in/alex-example\"},{\"handle\":\"alex\",\"instance\":\"fosstodon.org\",\"platform\":\"mastodon\",\"url\":\"https://fosstodon.org/@alex\"},{\"handle\":\"alex:matrix.org\",\"platform\":\"matrix\",\"url\":\"https://matrix.to/#/@alex:matrix.org\"},{\"form\":\"invite\",\"handle\":\"ledgertools\",\"platform\":\"discord\",\"url\":\"https://discord.gg/ledgertools\"},{\"handle\":\"0000-0002-1825-0097\",\"platform\":\"orcid\",\"url\":\"https://orcid.org/0000-0002-1825-0097\"}],\"website\":{\"url\":\"https://alex.dev/\"}},{\"id\":\"sponsors\",\"items\":[{\"handle\":\"example-contributor\",\"platform\":\"github-sponsors\",\"url\":\"https://github.com/sponsors/example-contributor\"},{\"handle\":\"alex.example\",\"platform\":\"liberapay\",\"url\":\"https://liberapay.com/alex.example\"}]}],\"source\":\"fixture\",\"theme\":{\"accent\":{\"dark\":\"#4280d5\",\"light\":\"#3670bf\",\"print\":\"#3875c9\",\"raw\":\"#3a7bd5\"},\"preset\":\"purpose\"}}",
-      "previewSha256": "4eb7bf7a1e34acff61ac0148e4792ec53736bc7832d1bed28b16bb7eab90dd8c"
+      "canonical": "{\"address\":\"login\",\"autoUpdated\":[\"summary\",\"repositories\",\"adopter\",\"certificate-status\",\"registry-names\",\"login\",\"organisation-pictures\"],\"card\":{\"adopter\":true,\"links\":true,\"login\":true,\"name\":true,\"picture\":true,\"summary\":true},\"cards\":{\"icon\":\"owner\",\"otherNames\":\"owner/name\",\"ownNames\":\"name\"},\"cover\":{\"angle\":135,\"from\":\"#1d5c3c\",\"kind\":\"gradient\",\"to\":\"#e0b04a\"},\"factsAsOf\":\"2027-02\",\"identity\":{\"bio\":\"Maintainer of small accounting libraries.\\nI contribute through Purpose Source.\",\"displayName\":\"Alex Example\",\"pronouns\":\"they/them\"},\"layout\":\"paper\",\"login\":\"example-contributor\",\"picture\":{\"h16\":\"6616e65bafbcf60a\",\"kind\":\"upload\"},\"pid\":\"7k2m9xq4tpz3r8vd\",\"schemaVersion\":1,\"search\":true,\"sections\":[{\"certificates\":1,\"id\":\"summary\",\"organisations\":2,\"projects\":3,\"since\":2026},{\"groups\":[{\"owner\":\"example-org\",\"repos\":[{\"listing\":\"registered\",\"name\":\"ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\",\"years\":{\"from\":2026,\"to\":2027}},{\"listing\":\"registered\",\"name\":\"tax-tables\",\"nodeId\":\"R_kgDOSMPL0002\",\"years\":{\"from\":2027,\"to\":2027}}]},{\"owner\":\"other-org\",\"repos\":[{\"listing\":\"no-longer-registered\",\"name\":\"invoice-kit\",\"nodeId\":\"R_kgDOSMPL0003\",\"years\":{\"from\":2026,\"to\":2026}}]}],\"id\":\"repositories\"},{\"id\":\"adopter\",\"items\":[{\"evidence\":{\"kind\":\"merged-pr\",\"number\":42},\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"},{\"evidence\":{\"kind\":\"direct-commit\",\"oid\":\"a0e2126a4d92cd0cf93496ede3f10827e8fa1865\"},\"fullName\":\"example-contributor/csv-split\",\"nodeId\":\"R_kgDOSMPL0004\"}]},{\"id\":\"certificates\",\"items\":[{\"cid\":\"cert_01jk2m4p6r8t0v2x4z6b8d0f2h\",\"disclosure\":\"full\",\"repos\":[{\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"},{\"fullName\":\"other-org/invoice-kit\",\"nodeId\":\"R_kgDOSMPL0003\"}],\"status\":\"expired\",\"typ\":\"contributor\",\"variant\":\"participation\",\"years\":{\"from\":2026,\"to\":2026}}]},{\"id\":\"links\",\"items\":[{\"handle\":\"alex-example\",\"platform\":\"linkedin\",\"url\":\"https://www.linkedin.com/in/alex-example\"},{\"handle\":\"alex\",\"instance\":\"fosstodon.org\",\"platform\":\"mastodon\",\"url\":\"https://fosstodon.org/@alex\"},{\"handle\":\"alex:matrix.org\",\"platform\":\"matrix\",\"url\":\"https://matrix.to/#/@alex:matrix.org\"},{\"form\":\"invite\",\"handle\":\"ledgertools\",\"platform\":\"discord\",\"url\":\"https://discord.gg/ledgertools\"},{\"handle\":\"0000-0002-1825-0097\",\"platform\":\"orcid\",\"url\":\"https://orcid.org/0000-0002-1825-0097\"}],\"website\":{\"url\":\"https://alex.dev/\"}},{\"id\":\"sponsors\",\"items\":[{\"handle\":\"example-contributor\",\"platform\":\"github-sponsors\",\"url\":\"https://github.com/sponsors/example-contributor\"},{\"handle\":\"alex.example\",\"platform\":\"liberapay\",\"url\":\"https://liberapay.com/alex.example\"}]}],\"source\":\"fixture\",\"theme\":{\"accent\":{\"dark\":\"#4280d5\",\"light\":\"#3670bf\",\"print\":\"#3875c9\",\"raw\":\"#3a7bd5\"},\"preset\":\"purpose\"}}",
+      "previewSha256": "ad02a109632f64cc3b8381cb4357ac783a12f32229c02f306836beafaa1a0a65"
     },
     {
       "id": "PV-2",
@@ -650,7 +653,8 @@
           "repositories",
           "registry-names",
           "login",
-          "github-picture"
+          "github-picture",
+          "organisation-pictures"
         ],
         "factsAsOf": "2027-03"
       },
@@ -717,12 +721,13 @@
           "repositories",
           "registry-names",
           "login",
-          "github-picture"
+          "github-picture",
+          "organisation-pictures"
         ],
         "factsAsOf": "2027-03"
       },
-      "canonical": "{\"address\":\"mixed\",\"autoUpdated\":[\"summary\",\"repositories\",\"registry-names\",\"login\",\"github-picture\"],\"card\":{\"adopter\":false,\"links\":false,\"login\":true,\"name\":true,\"picture\":true,\"summary\":true},\"cards\":{\"icon\":\"owner\",\"otherNames\":\"owner/name\",\"ownNames\":\"name\"},\"cover\":{\"colour\":\"#0f6b52\",\"kind\":\"solid\"},\"factsAsOf\":\"2027-03\",\"identity\":{\"bio\":\"Building tools for small teams 🌱\\n«Ordnung ist das halbe Leben»\",\"displayName\":\"Zoë Ångström\",\"pronouns\":\"she/her\"},\"layout\":\"minimal\",\"login\":\"zoe-example\",\"picture\":{\"kind\":\"github\"},\"pid\":\"q9v4c7x2m8t1z5k3\",\"schemaVersion\":1,\"search\":false,\"sections\":[{\"groups\":[{\"owner\":\"example-org\",\"repos\":[{\"listing\":\"registered\",\"name\":\"tax-tables\",\"nodeId\":\"R_kgDOSMPL0002\"}]}],\"id\":\"repositories\"},{\"id\":\"summary\",\"projects\":1,\"since\":2027}],\"source\":\"fixture\",\"theme\":{\"preset\":\"mint\"}}",
-      "previewSha256": "59a887de70851e63ad10377ce9ca017b302f0b7fe85405ec4f407a00a11b6888"
+      "canonical": "{\"address\":\"mixed\",\"autoUpdated\":[\"summary\",\"repositories\",\"registry-names\",\"login\",\"github-picture\",\"organisation-pictures\"],\"card\":{\"adopter\":false,\"links\":false,\"login\":true,\"name\":true,\"picture\":true,\"summary\":true},\"cards\":{\"icon\":\"owner\",\"otherNames\":\"owner/name\",\"ownNames\":\"name\"},\"cover\":{\"colour\":\"#0f6b52\",\"kind\":\"solid\"},\"factsAsOf\":\"2027-03\",\"identity\":{\"bio\":\"Building tools for small teams 🌱\\n«Ordnung ist das halbe Leben»\",\"displayName\":\"Zoë Ångström\",\"pronouns\":\"she/her\"},\"layout\":\"minimal\",\"login\":\"zoe-example\",\"picture\":{\"kind\":\"github\"},\"pid\":\"q9v4c7x2m8t1z5k3\",\"schemaVersion\":1,\"search\":false,\"sections\":[{\"groups\":[{\"owner\":\"example-org\",\"repos\":[{\"listing\":\"registered\",\"name\":\"tax-tables\",\"nodeId\":\"R_kgDOSMPL0002\"}]}],\"id\":\"repositories\"},{\"id\":\"summary\",\"projects\":1,\"since\":2027}],\"source\":\"fixture\",\"theme\":{\"preset\":\"mint\"}}",
+      "previewSha256": "5c0fffd0c8f4791c94f7531fcf92e26791ead3078b974eeedcc7bf379021dc3b"
     },
     {
       "id": "PV-4",
@@ -989,7 +994,8 @@
           "adopter",
           "certificate-status",
           "registry-names",
-          "login"
+          "login",
+          "organisation-pictures"
         ],
         "factsAsOf": "2027-02"
       },
@@ -1111,12 +1117,13 @@
           "adopter",
           "certificate-status",
           "registry-names",
-          "login"
+          "login",
+          "organisation-pictures"
         ],
         "factsAsOf": "2027-02"
       },
-      "canonical": "{\"about\":{\"text\":\"I build small accounting libraries that freelancers and tiny firms rely on. I chose Purpose Source because I want that work to stay free for them, while the large companies that use it give something back.\\nEvery year my credits become a certificate I can show, and I get a say in which causes the fees help.\",\"variant\":\"own\",\"version\":1},\"address\":\"mixed\",\"autoUpdated\":[\"summary\",\"repositories\",\"adopter\",\"certificate-status\",\"registry-names\",\"login\"],\"card\":{\"adopter\":true,\"links\":false,\"login\":true,\"name\":true,\"picture\":true,\"summary\":true},\"cards\":{\"icon\":\"owner\",\"otherNames\":\"owner/name\",\"ownNames\":\"name\"},\"cover\":{\"kind\":\"none\"},\"factsAsOf\":\"2027-02\",\"identity\":{\"displayName\":\"Alex Example\",\"pronouns\":\"they/them\"},\"layout\":\"paper\",\"login\":\"example-contributor\",\"picture\":{\"kind\":\"monogram\",\"letters\":\"AE\"},\"pid\":\"n4c8r2v6x9k3m7tq\",\"schemaVersion\":1,\"search\":false,\"sections\":[{\"certificates\":1,\"id\":\"summary\",\"organisations\":1,\"projects\":2,\"since\":2026},{\"id\":\"certificates\",\"items\":[{\"cid\":\"cert_01jk2m4p6r8t0v2x4z6b8d0f2h\",\"disclosure\":\"full\",\"repos\":[{\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"}],\"status\":\"valid\",\"typ\":\"contributor\",\"variant\":\"participation\",\"years\":{\"from\":2026,\"to\":2026}}]},{\"groups\":[{\"owner\":\"example-org\",\"repos\":[{\"listing\":\"registered\",\"name\":\"ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\",\"years\":{\"from\":2026,\"to\":2027}},{\"listing\":\"registered\",\"name\":\"tax-tables\",\"nodeId\":\"R_kgDOSMPL0002\",\"years\":{\"from\":2027,\"to\":2027}}]}],\"id\":\"repositories\"},{\"id\":\"adopter\",\"items\":[{\"evidence\":{\"kind\":\"merged-pr\",\"number\":42},\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"}]}],\"source\":\"fixture\",\"theme\":{\"preset\":\"mint\"}}",
-      "previewSha256": "fc44601919f39747bf47c4f079d8fee056823dc58c3226732ab06c6f67f38bca"
+      "canonical": "{\"about\":{\"text\":\"I build small accounting libraries that freelancers and tiny firms rely on. I chose Purpose Source because I want that work to stay free for them, while the large companies that use it give something back.\\nEvery year my credits become a certificate I can show, and I get a say in which causes the fees help.\",\"variant\":\"own\",\"version\":1},\"address\":\"mixed\",\"autoUpdated\":[\"summary\",\"repositories\",\"adopter\",\"certificate-status\",\"registry-names\",\"login\",\"organisation-pictures\"],\"card\":{\"adopter\":true,\"links\":false,\"login\":true,\"name\":true,\"picture\":true,\"summary\":true},\"cards\":{\"icon\":\"owner\",\"otherNames\":\"owner/name\",\"ownNames\":\"name\"},\"cover\":{\"kind\":\"none\"},\"factsAsOf\":\"2027-02\",\"identity\":{\"displayName\":\"Alex Example\",\"pronouns\":\"they/them\"},\"layout\":\"paper\",\"login\":\"example-contributor\",\"picture\":{\"kind\":\"monogram\",\"letters\":\"AE\"},\"pid\":\"n4c8r2v6x9k3m7tq\",\"schemaVersion\":1,\"search\":false,\"sections\":[{\"certificates\":1,\"id\":\"summary\",\"organisations\":1,\"projects\":2,\"since\":2026},{\"id\":\"certificates\",\"items\":[{\"cid\":\"cert_01jk2m4p6r8t0v2x4z6b8d0f2h\",\"disclosure\":\"full\",\"repos\":[{\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"}],\"status\":\"valid\",\"typ\":\"contributor\",\"variant\":\"participation\",\"years\":{\"from\":2026,\"to\":2026}}]},{\"groups\":[{\"owner\":\"example-org\",\"repos\":[{\"listing\":\"registered\",\"name\":\"ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\",\"years\":{\"from\":2026,\"to\":2027}},{\"listing\":\"registered\",\"name\":\"tax-tables\",\"nodeId\":\"R_kgDOSMPL0002\",\"years\":{\"from\":2027,\"to\":2027}}]}],\"id\":\"repositories\"},{\"id\":\"adopter\",\"items\":[{\"evidence\":{\"kind\":\"merged-pr\",\"number\":42},\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"}]}],\"source\":\"fixture\",\"theme\":{\"preset\":\"mint\"}}",
+      "previewSha256": "7703322c5162956ec1fad81824fdf59565ba846e490a76c5ef72cac8c5fea4d9"
     },
     {
       "id": "PV-6",
@@ -1662,6 +1669,292 @@
       },
       "canonical": "{\"about\":{\"variant\":\"short\",\"version\":1},\"address\":\"mixed\",\"autoUpdated\":[\"summary\",\"repositories\",\"adopter\",\"certificate-status\",\"registry-names\",\"login\",\"github-picture\"],\"card\":{\"adopter\":true,\"links\":false,\"login\":true,\"name\":true,\"picture\":true,\"summary\":false},\"cards\":{\"icon\":\"github\",\"otherNames\":\"name\",\"ownNames\":\"name\"},\"cover\":{\"kind\":\"none\"},\"factsAsOf\":\"2027-02\",\"identity\":{\"displayName\":\"Alex Example\"},\"layout\":\"paper\",\"login\":\"example-contributor\",\"picture\":{\"kind\":\"github\"},\"pid\":\"y3d7k2m8q4t9v6xz\",\"schemaVersion\":1,\"search\":false,\"sections\":[{\"id\":\"adopter\",\"items\":[{\"evidence\":{\"kind\":\"merged-pr\",\"number\":42},\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\",\"since\":2026},{\"evidence\":{\"kind\":\"merged-pr\",\"number\":7},\"fullName\":\"example-org/gone\",\"nodeId\":\"R_kgDOSMPL0005\",\"since\":2026,\"until\":2027},{\"evidence\":{\"kind\":\"direct-commit\",\"oid\":\"a0e2126a4d92cd0cf93496ede3f10827e8fa1865\"},\"fullName\":\"example-contributor/csv-split\",\"nodeId\":\"R_kgDOSMPL0004\"},{\"evidence\":{\"kind\":\"direct-commit\",\"oid\":\"5c1b9e47d3f20a68e1c4b7d92f0a3e6c8b5d1f47\"},\"fullName\":\"example-contributor/receipt-scanner\",\"nodeId\":\"R_kgDOSMPL0007\",\"since\":2027}]}],\"source\":\"fixture\",\"theme\":{\"preset\":\"purpose\"}}",
       "previewSha256": "2bfded3e94d812f74a5712bc9a833a419249804297f25466a996044a6d69f89b"
+    },
+    {
+      "id": "PV-8",
+      "note": "An organisation's picture (1.5.0; ops decision D165 item 3), the page of examples/contributor-page.v1.organisation-pictures.example.json: `example-org`'s group and its licence adopter item each name the organisation's copy `o-9b2e4c6a8d0f1e3a-96.png` (`$defs.organisationPicture`), and both leave the preimage (step (4)), as the private preview names none: the api copies nothing, and the published page gains the copy when it exists, under `autoUpdated`'s `organisation-pictures`. `sam-codes`, a person, and the page owner's own `example-contributor` carry none. A GitHub picture whose copy exists is reduced to {\"kind\":\"github\"}, its letters with it, as in PV-3.",
+      "document": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-03-01T00:00:00Z",
+        "source": "fixture",
+        "pid": "q4w8e2r6t9y3z5x7",
+        "versionId": "pgv_q4w8e2r6t9y3z5x7q4w8e2r6t9",
+        "address": "mixed",
+        "search": false,
+        "login": "example-contributor",
+        "layout": "paper",
+        "theme": {
+          "preset": "purpose"
+        },
+        "picture": {
+          "kind": "github",
+          "h16": "5e6f7a8b9c0d1e2f",
+          "letters": "AE"
+        },
+        "cover": {
+          "kind": "none"
+        },
+        "identity": {
+          "displayName": "Alex Example"
+        },
+        "about": {
+          "variant": "short",
+          "version": 1
+        },
+        "cards": {
+          "icon": "owner",
+          "ownNames": "name",
+          "otherNames": "owner/name"
+        },
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 4,
+            "organisations": 3,
+            "since": 2026
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-contributor",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0004",
+                    "name": "csv-split",
+                    "years": {
+                      "from": 2027,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  }
+                ]
+              },
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0001",
+                    "name": "ledger-tools",
+                    "years": {
+                      "from": 2026,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  },
+                  {
+                    "nodeId": "R_kgDOSMPL0002",
+                    "name": "tax-tables",
+                    "years": {
+                      "from": 2027,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  }
+                ],
+                "picture": {
+                  "h16": "9b2e4c6a8d0f1e3a"
+                }
+              },
+              {
+                "owner": "sam-codes",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0013",
+                    "name": "dotfiles",
+                    "years": {
+                      "from": 2026,
+                      "to": 2026
+                    },
+                    "listing": "registered"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "nodeId": "R_kgDOSMPL0001",
+                "fullName": "example-org/ledger-tools",
+                "evidence": {
+                  "kind": "merged-pr",
+                  "number": 42
+                },
+                "since": 2026,
+                "picture": {
+                  "h16": "9b2e4c6a8d0f1e3a"
+                }
+              },
+              {
+                "nodeId": "R_kgDOSMPL0004",
+                "fullName": "example-contributor/csv-split",
+                "evidence": {
+                  "kind": "direct-commit",
+                  "oid": "a0e2126a4d92cd0cf93496ede3f10827e8fa1865"
+                },
+                "since": 2027
+              }
+            ]
+          }
+        ],
+        "card": {
+          "picture": true,
+          "name": true,
+          "login": true,
+          "summary": true,
+          "adopter": true,
+          "links": false
+        },
+        "autoUpdated": [
+          "summary",
+          "repositories",
+          "adopter",
+          "registry-names",
+          "login",
+          "github-picture",
+          "organisation-pictures"
+        ],
+        "factsAsOf": "2027-02"
+      },
+      "preimage": {
+        "schemaVersion": 1,
+        "source": "fixture",
+        "pid": "q4w8e2r6t9y3z5x7",
+        "address": "mixed",
+        "search": false,
+        "login": "example-contributor",
+        "layout": "paper",
+        "theme": {
+          "preset": "purpose"
+        },
+        "picture": {
+          "kind": "github"
+        },
+        "cover": {
+          "kind": "none"
+        },
+        "identity": {
+          "displayName": "Alex Example"
+        },
+        "about": {
+          "variant": "short",
+          "version": 1
+        },
+        "cards": {
+          "icon": "owner",
+          "ownNames": "name",
+          "otherNames": "owner/name"
+        },
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 4,
+            "organisations": 3,
+            "since": 2026
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-contributor",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0004",
+                    "name": "csv-split",
+                    "years": {
+                      "from": 2027,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  }
+                ]
+              },
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0001",
+                    "name": "ledger-tools",
+                    "years": {
+                      "from": 2026,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  },
+                  {
+                    "nodeId": "R_kgDOSMPL0002",
+                    "name": "tax-tables",
+                    "years": {
+                      "from": 2027,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  }
+                ]
+              },
+              {
+                "owner": "sam-codes",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0013",
+                    "name": "dotfiles",
+                    "years": {
+                      "from": 2026,
+                      "to": 2026
+                    },
+                    "listing": "registered"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "nodeId": "R_kgDOSMPL0001",
+                "fullName": "example-org/ledger-tools",
+                "evidence": {
+                  "kind": "merged-pr",
+                  "number": 42
+                },
+                "since": 2026
+              },
+              {
+                "nodeId": "R_kgDOSMPL0004",
+                "fullName": "example-contributor/csv-split",
+                "evidence": {
+                  "kind": "direct-commit",
+                  "oid": "a0e2126a4d92cd0cf93496ede3f10827e8fa1865"
+                },
+                "since": 2027
+              }
+            ]
+          }
+        ],
+        "card": {
+          "picture": true,
+          "name": true,
+          "login": true,
+          "summary": true,
+          "adopter": true,
+          "links": false
+        },
+        "autoUpdated": [
+          "summary",
+          "repositories",
+          "adopter",
+          "registry-names",
+          "login",
+          "github-picture",
+          "organisation-pictures"
+        ],
+        "factsAsOf": "2027-02"
+      },
+      "canonical": "{\"about\":{\"variant\":\"short\",\"version\":1},\"address\":\"mixed\",\"autoUpdated\":[\"summary\",\"repositories\",\"adopter\",\"registry-names\",\"login\",\"github-picture\",\"organisation-pictures\"],\"card\":{\"adopter\":true,\"links\":false,\"login\":true,\"name\":true,\"picture\":true,\"summary\":true},\"cards\":{\"icon\":\"owner\",\"otherNames\":\"owner/name\",\"ownNames\":\"name\"},\"cover\":{\"kind\":\"none\"},\"factsAsOf\":\"2027-02\",\"identity\":{\"displayName\":\"Alex Example\"},\"layout\":\"paper\",\"login\":\"example-contributor\",\"picture\":{\"kind\":\"github\"},\"pid\":\"q4w8e2r6t9y3z5x7\",\"schemaVersion\":1,\"search\":false,\"sections\":[{\"id\":\"summary\",\"organisations\":3,\"projects\":4,\"since\":2026},{\"groups\":[{\"owner\":\"example-contributor\",\"repos\":[{\"listing\":\"registered\",\"name\":\"csv-split\",\"nodeId\":\"R_kgDOSMPL0004\",\"years\":{\"from\":2027,\"to\":2027}}]},{\"owner\":\"example-org\",\"repos\":[{\"listing\":\"registered\",\"name\":\"ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\",\"years\":{\"from\":2026,\"to\":2027}},{\"listing\":\"registered\",\"name\":\"tax-tables\",\"nodeId\":\"R_kgDOSMPL0002\",\"years\":{\"from\":2027,\"to\":2027}}]},{\"owner\":\"sam-codes\",\"repos\":[{\"listing\":\"registered\",\"name\":\"dotfiles\",\"nodeId\":\"R_kgDOSMPL0013\",\"years\":{\"from\":2026,\"to\":2026}}]}],\"id\":\"repositories\"},{\"id\":\"adopter\",\"items\":[{\"evidence\":{\"kind\":\"merged-pr\",\"number\":42},\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\",\"since\":2026},{\"evidence\":{\"kind\":\"direct-commit\",\"oid\":\"a0e2126a4d92cd0cf93496ede3f10827e8fa1865\"},\"fullName\":\"example-contributor/csv-split\",\"nodeId\":\"R_kgDOSMPL0004\",\"since\":2027}]}],\"source\":\"fixture\",\"theme\":{\"preset\":\"purpose\"}}",
+      "previewSha256": "b7a9e7c251d3797aa1d910d7c492ee7dfcdb90fb90883fe4726318e2aecc312e"
     }
   ]
 }

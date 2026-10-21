@@ -3255,7 +3255,52 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   builder drops whatever the facts no longer allow, and a later save or publish of such a draft is refused until the person
   takes it out or puts it On my page. The examples keep their bytes.
 
+### 1.4.1 — unreleased (2026-10-21; ops decision D165 item 3, the organisation's picture) — wording only
+
+- Wording only, a patch under policy 3: no member, value or constraint moves, and no stored document changes. `cards.icon`'s
+  description said that `owner` draws a monogram tile for every other owner and that no organisation's or other person's own
+  picture is drawn. From `contributor-page.v1` 1.5.0 the same choice draws an organisation's own picture where GitHub's own
+  answer for the repository says its owner is an organisation (the copy the render job makes at publish, never fetched by the
+  page), and the tile otherwise; no other person's picture is drawn.
+
 ## contributor-page.v1.json
+
+### 1.5.0 — unreleased (2026-10-21; ops decision D165 item 3, the organisation's picture) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump, optional: every document written under 1.4.x stays valid, and a
+  renderer before 1.5.0 ignores the new member, as it ignores every unknown member, and draws the tile. A repository group
+  (`repositoriesSection.groups[]`) and a licence adopter item (`adopterSection.items[]`) may carry `picture`,
+  `$defs.organisationPicture`, `{h16}`: the organisation's own GitHub picture as our copy `p/{pid}/o-{h16}-96.png`, a 96-pixel
+  PNG whose `h16` is its own bytes', drawn on that owner's cards in place of the monogram tile (D165 item 3: "the project's
+  owner or organisation picture"; the orchestrator's CW-41 and its answer of 2026-10-18T09:25Z).
+- WHOSE (`$defs.organisationPicture` states the rule): only an organisation's, by GitHub's own answer for every repository the
+  document shows under that login, in the projects' and the licence adopter's sections together (the owner's `__typename`,
+  stored per repository with the owner's node id, never guessed from a login or an id), all one organisation under that very
+  login; never the page owner's own login, and only while `cards.icon` is `owner`. A repository owned by any other user keeps
+  the tile: that is another person, who chose nothing here. One login carries one `h16` on the whole page, and an answer that
+  is missing, a `User`, or stale (a login that moved) leaves the tile.
+- HOW IT GETS THERE: the render job fetches the picture from GitHub's picture host alone (`org.avatar.requested`, the
+  sibling of the owner's `page.avatar.requested`), keeps its first frame cropped to the centre square and re-encodes it with
+  no metadata; index-build copies it beside the document, and the edge serves it only while the live document names it.
+  Nothing is fetched from GitHub when a page is viewed: a public page's `img-src` stays `'self'`.
+- `autoUpdated` gains `organisation-pictures`, written from the settings alone (the cards' icon `owner`, and the projects
+  section, or the adopter section with the login shown, switched on), so a copy that appears, or a new one after the
+  organisation changes its picture, needs no new preview, and the preview hash never moves with what GitHub answers. The
+  schema holds that it is written only with `cards.icon` `owner`. THE PREVIEW HASH gains step (4): every group's and adopter
+  item's `picture` is removed, since the private preview names none (the api copies nothing).
+- FILES names `o-{h16}-96.png`; `cards`, `repositoriesSection` and `adopterSection` say how the icon is chosen, and `cards`
+  no longer says that no other account's picture is drawn: no other person's is; `$defs.h16` names the new drawing.
+- The named and `about-own` examples gain `organisation-pictures` (their documents are the builder's), and so do PV-1, PV-3
+  and PV-5, recomputed; the other examples and vectors keep their bytes. A further example, `organisation-pictures` (an
+  organisation's copy on its group and its adopter item, a person's group and the page owner's own beside it), and PV-8, its
+  preview vector, whose preimage drops both pictures. The preview golden (its 1.4.0) and the build golden (its 1.4.0), which
+  gains the vectors BO-1 to BO-9: a copy named and one not drawn yet, the icon off, an answer missing, two owners, a login that
+  moved, the person's own login, both sections at once, a folded case, and a person's repository. `check:contributor-page`
+  holds on every page example and vector that a picture stands only with `organisation-pictures`, never on the document's own
+  login, and with one `h16` per login; answers the BO vectors by its own reading of the judgment, and refuses a person's node id
+  in any expected entry; and adds 6 refusals (a picture as an address, as a bare string, with an upper-case `h16`, with no `h16`,
+  naming its owner's node id, and `organisation-pictures` under the GitHub mark) and 3 admissions (`organisation-pictures` with
+  no copy named yet, a copy on an adopter item alone, no `cards` member), each proved able to fail.
 
 ### 1.4.1 — unreleased (2026-10-20; ops decision D178 item 4) — wording only
 

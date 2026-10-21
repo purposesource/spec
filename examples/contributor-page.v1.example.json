@@ -84,6 +84,6 @@
     }
   ],
   "card": { "picture": true, "name": true, "login": true, "summary": true, "adopter": true, "links": true, "h16": "78169a7818d4e20f" },
-  "autoUpdated": ["summary", "repositories", "adopter", "certificate-status", "registry-names", "login"],
+  "autoUpdated": ["summary", "repositories", "adopter", "certificate-status", "registry-names", "login", "organisation-pictures"],
   "factsAsOf": "2027-02"
 }
