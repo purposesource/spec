@@ -4182,6 +4182,18 @@ which kind of change each entry was.
   new further example from the published spec. `check:openapi-examples` validates 69 examples (67
   before).
 
+### 1.13.1 — unreleased (2026-10-21; ops decision D73 item 1, the certificate log mirror plan's slice 4) — wording only
+
+- Patch: `getCtCheckpoint`'s description said the checkpoint is mirrored into a public git repository
+  "where the commit history is an independent medium we do not control the timestamps of". It is not.
+  The repository is ours, and its commit dates are written by the mirror's own workflow, so they prove
+  nothing about time. What lies outside the Association's control is Software Heritage's archive of the
+  repository (D73 item 1), and Software Heritage's visit date, which the mirror records beside each
+  checkpoint, is the independent clock. The description now says so, as the mirror repository's own
+  README does. No operation, status code, cache class, error code, schema member or enum value moved.
+  The description does not gate the website's tests, so the order of pushes does not matter for them.
+  `check:openapi-examples` validates the same 69 examples.
+
 ## coverage/cov-v1.ts
 
 The published coverage function, versioned together with its vectors (`coverage/vectors.json`)
