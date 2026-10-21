@@ -3217,11 +3217,11 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   holder put On my page (guard (a)), in `all-eligible` as in `selected`, and still only in the display that matches the page.
   So `all-eligible` never lists a certificate its holder has not put there, an automatic yearly certificate included, which
   starts Private. `certificates`' description says so.
-- Check (c) refuses, at every save and again at publish, a certificate of the caller's own in `certificates.selected` that its
-  holder has not put On my page: `page.certificate_not_on_my_page`, whatever its display, since choosing On my page writes the
-  display that matches the page. A cid that is not the caller's keeps `page.certificate_not_allowed`, as an unknown one does,
-  and so does one On my page in the other display. Where the step is kept (the holder's own display events) is the platform's,
-  never a member of this document.
+- Check (c) refuses, at every save and again at publish, one of the caller's own contributor participation certificates in
+  `certificates.selected` that its holder has not put On my page: `page.certificate_not_on_my_page`, whatever its display,
+  since choosing On my page writes the display that matches the page. A cid that is not the caller's keeps
+  `page.certificate_not_allowed`, as an unknown one does, and so does one On my page in the other display. Where the step is
+  kept (the holder's own display events) is the platform's, never a member of this document.
 - No document changes shape: a settings document stored before 1.4.0 reads and serialises to the same bytes and keeps its
   `settings_sha256`. A published version whose `selected` names a certificate not On my page is built without it, as the
   builder drops whatever the facts no longer allow, and a later save or publish of such a draft is refused until the person
