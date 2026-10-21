@@ -115,6 +115,7 @@ needs a toolchain is not really published.
 | `ledger-export.v1.json` | `/ledger/{YYYY}-{MM}.json` (+ CSV twin) | first public version |
 | `ledger-chain.v1.json` | `/ledger/chain.json` | first public version |
 | `cost-support.v1.json` | one calendar month of the published cost-support table | P-M3 producer, v0 hand-maintained |
+| `fees-account-statement.v1.json` | `/fees-account/{YYYY-MM}.json` — the published statement of the fees account for one locked month: every line the bank booked, with its class, and nothing that identifies a payer or a natural person (statutes Art. 12(1), Art. 20(1)) | P-M3 producer |
 | `recipient-list.v1.json` | `/recipient-list/{version}.json` — one released version of the Recipient List (kept by the board, outside the statutes), each entry pending or active, written once | P-M3 producer |
 | `recipient-lists.v1.json` | `/recipient-list/index.json` — every released List version, newest first, with its state (released, recorded, late or void), its proven publication and its notice, and every immediate removal with its published ground | P-M3 producer |
 | `allocation-key.v1.json` | `/allocation-keys/{YYYY-MM}.json` — the board's allocation key for one month, released by two steward approvals before the month and written once, with the exact text they approved | P-M3 producer |
@@ -140,6 +141,17 @@ artifact catalogue did not yet name — that deferral was deliberate — so each
 `x-psn.artifactPath` rather than claiming a URL. The cost-support table still does: at v0 it is
 hand-maintained and rendered on the transparency page, a published file whose schema is the
 contract whether the producer is a job or a person.
+
+The `fees-account-statement.v1` row (2026-10-21) is the statement the statutes make the proof of
+the money rules: every allocation and every transfer is reconcilable against it (Art. 12(1)), by
+anyone and without a profession (Art. 20(1)). It lists what the bank booked on the fees account in a
+locked month, line by line, with the class each line has in the Association's records, the bank's
+own reference and, on the Association's own transfers, their end-to-end identifier: on a transfer's
+first attempt the one the published transfer carries, and on a later attempt that one with the
+attempt's number after it. It never carries a counterparty's name or account, remittance text,
+return details, anything a steward wrote or a single personnel payment, so nothing in it identifies a
+payer or a natural person: a personnel cost is published as one line per function, never by name,
+and a month holding a personnel payment is withheld rather than published line by line.
 
 The `recipient-list.v1` and `recipient-lists.v1` rows (FS-00 §6.2's dated note of 2026-10-01)
 publish the Recipient List the way the allocation key is published: each released version is

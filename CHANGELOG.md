@@ -82,6 +82,11 @@ The designations' publication in summary (2026-10-08; ops decisions D117 §6 and
 more, with its own section below: `designations-summary.v1.json`, the registry-wide monthly totals of
 the projects' designations and, from 5 designators, of the contributors' — thirty-four schemas in all.
 
+The fees account's published statement (2026-10-21; statutes Art. 12 para. 1 and Art. 20 para. 1) adds one more,
+with its own section below: `fees-account-statement.v1.json`, one locked month's booked lines of the fees account with
+their classes and nothing that identifies a payer or a natural person — thirty-six schemas in all, the thirty-fifth
+being `contributor-page-about.v1.json` (2026-10-16), whose section is below and which these paragraphs had not counted.
+
 ### Contracts published beyond the initially-scoped ten
 
 Seven schemas were added because another repository's acceptance test names a schema
@@ -2202,6 +2207,67 @@ reasoning: no month export has ever been published with a row in it.
   §4(4)). The description now names the deadline of statutes Art. 6a(4), counted from the
   credit of the month's earliest rail payout, without its number. No property, type, enum or
   meaning changes.
+
+## fees-account-statement.v1.json
+
+### 1.0.0 — unreleased (2026-10-21; statutes Art. 12 para. 1 and Art. 20 para. 1; the payout design's §11.2)
+
+- New. The published statement of the fees account for one locked month, at `/fees-account/{YYYY-MM}.json` (the month in
+  the path, outside `ledger/`, as the designations summary's `/designations/{YYYY-MM}.json`): every line the bank booked
+  on the fees account in the month, one row each, in booking-date order. The statutes make this statement the proof of the
+  money rules: every allocation and every transfer is reconcilable against it (Art. 12 para. 1), without a profession
+  (Art. 20 para. 1). FS-00 §6.2's dated note that adopts the path lands with this version and records the departures
+  below.
+- `x-psn.authoritative` is `false`, as for the other contracts something else governs (`recipient-list.v1`'s annex, for
+  one): the bank's booked statement governs the records this document restates, and where the two disagree the bank's
+  statement governs.
+- One document per locked month in which the bank booked a line on the account: an open month has none, and neither has
+  a locked month with no booked line, a month before the account was opened or a month withheld for a personnel line
+  (below). Rendered by `jobs.index-build` from the first run after the lock, from the fees account's lines and their
+  classes (platform migration 0094), through a platform migration of its own: a view that gives `indexbuild_ro` ten
+  columns of each booked line, the end-to-end identifier only where it has the Association's own form, and a
+  column-scoped read of the classes. Neither reaches a column that can name a counterparty, nor who classed a line and
+  why.
+- Each line: `bookingDate`, `valueDate` where the bank gave one, `direction` (`credit` or `debit`), the bank's `reversal`
+  indicator, `amountMinor` (always positive) and `currency` as the bank booked them; `class`, the line's current class in
+  the Association's records (the nineteen of the payout design's §6); `bankReference`, the bank's own reference for the
+  line's entry or transaction (ISO 20022 `AcctSvcrRef`), which the transactions of one collective entry can share; and,
+  on a `transfer-out` or `transfer-returned` line only, `endToEndId`, the identifier of the Association's own transfer,
+  `psn-YYYYMM-` and twelve characters, with `-n` for its attempt n from 2 to 9 (the first attempt's is `cost-support.v1`'s
+  `transfers[].endToEndId`). An identifier in any other form, which a paying party chose, is never published.
+- Nothing identifies a payer or a natural person: no counterparty name or account, remittance text, return information,
+  bank file, steward or steward's reason, and no single personnel payment, its date, its amount or its bank reference;
+  every object is closed. A line whose money is no Purpose Fee shows its amount and its class alone; the class is the
+  published ground.
+- A line classed `personnel` is refused in `lines`. Personnel costs are published as one line per function, never by name
+  (statutes Art. 6f para. 4), and once a paid role exists each payment's date, amount and bank reference would describe
+  the person who holds it. The net monthly figure per function that would stand in for such lines is not part of this
+  version, so a locked month holding a `personnel` line is withheld, with an alarm, rather than published. No such line
+  exists while nobody is remunerated, as at founding (Art. 6f para. 5).
+- A published statement changes in two cases only: the bank delivers a line booked in the month after the month locked,
+  and the statement lists it; or a line that had no class when the month locked, delivered late or not, takes its first
+  class, and the statement shows it. That class takes effect in the first open month (`effectMonth`), and until then the
+  line carries no `class`. A locked month's lines and classes are otherwise append-only and final, so its statement is
+  stable.
+- A published statement never shrinks: a render that would list fewer lines, or carry an earlier `generatedAt`, keeps the
+  published bytes and warns. So neither the owner's documented hand removal of a wrongly loaded bank file from the store
+  nor the store's deletion of lines after their ten years withdraws a published line.
+- `generatedAt` is the latest of `lockedAt` and the instants at which the lines the statement lists and the classes it
+  shows were recorded, so either change moves it past `lockedAt`. It is the document's own instant and not the plane's,
+  a departure from `publish-log.v1`'s statement that every artifact of a batch carries the batch's `generatedAt`, as
+  `allocation-key.v1`'s and `recipient-list.v1`'s are; FS-00 §6.2's note adopting the path records it.
+- Version 1 publishes no balance yet. The opening and closing balances join it in place before the first published month
+  with a bank line, and with them a document for every locked month from the account's opening month, so that an absent
+  document can be told from a month without movement.
+- `source` is required and admits `sample`, `fixture` and `platform` only: the curated registry never held a bank line.
+- Examples: `fees-account-statement.v1.example.json` (a fixture month: two payouts, three transfers, one returned and sent
+  again as attempt 2, the transfer charges, the reserve retention, an invoice, a misdirected credit and its return,
+  interest and the account fee) and `fees-account-statement.v1.late-line.example.json` (a sample month whose statement
+  changed after its lock: a line classed for the next month, and a line with no class yet).
+- `check:fees-account-statement` (new) holds the examples to what the schema cannot state (each line in the month, the
+  date order, an `effectMonth` after its booking month, `generatedAt` never before `lockedAt` and after it beside an
+  `effectMonth`), holds that dating rule to four planted documents, and proves the contract still refuses what must
+  never be published (29 refusals, a `personnel` line among them) and admits what a real month holds (8 admissions).
 
 ## recipient-list.v1.json
 

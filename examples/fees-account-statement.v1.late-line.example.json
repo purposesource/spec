@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-09-03T07:41:12Z",
+  "source": "sample",
+  "month": "2027-08",
+  "lockedAt": "2027-09-01T05:00:00Z",
+  "lines": [
+    {
+      "bookingDate": "2027-08-02",
+      "valueDate": "2027-08-02",
+      "direction": "debit",
+      "reversal": false,
+      "amountMinor": 245000,
+      "currency": "CHF",
+      "class": "transfer-out",
+      "bankReference": "STMT-2027-08-0102",
+      "endToEndId": "psn-202707-5gj7km2ps4tv"
+    },
+    {
+      "bookingDate": "2027-08-05",
+      "valueDate": "2027-08-05",
+      "direction": "credit",
+      "reversal": false,
+      "amountMinor": 301220,
+      "currency": "CHF",
+      "class": "payout-credit",
+      "bankReference": "STMT-2027-08-0140"
+    },
+    {
+      "bookingDate": "2027-08-31",
+      "valueDate": "2027-08-31",
+      "direction": "credit",
+      "reversal": false,
+      "amountMinor": 87410,
+      "currency": "CHF",
+      "class": "payout-credit",
+      "effectMonth": "2027-09",
+      "bankReference": "STMT-2027-08-0399"
+    },
+    {
+      "bookingDate": "2027-08-31",
+      "direction": "debit",
+      "reversal": false,
+      "amountMinor": 30,
+      "currency": "CHF",
+      "bankReference": "STMT-2027-08-0400"
+    }
+  ]
+}

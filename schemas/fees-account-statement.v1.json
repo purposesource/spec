@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/fees-account-statement.v1.json",
+  "title": "Fees-account statement — /fees-account/{YYYY-MM}.json",
+  "description": "The published statement of the fees account for one locked month: one row per line the bank booked on the fees account in that month, with its booking and value date, its direction, the bank's reversal indicator, its amount and currency, the class the Association's records give it, the bank's own reference, and, on a transfer of the Association's own, that transfer's end-to-end identifier. It is the statement the statutes publish as the proof of the money rules: every allocation and every transfer is independently reconcilable against it and the other published evidence (statutes Art. 12 para. 1), and anyone can reconcile it without a profession (Art. 20 para. 1). The bank's booked statement governs the records this document restates, so it is not authoritative: where the two disagree, the bank's statement governs.\n\nNOTHING HERE IDENTIFIES A PAYER OR A NATURAL PERSON (Art. 12 para. 1, Art. 20 para. 1). No counterparty name or account, no remittance or payment text, no return information, no bank file, no steward who classed a line and no reason a steward wrote is published, nor any single personnel payment, its date, its amount or its bank reference, and every object is closed, so no member can carry one. A line whose money came from someone who is no payer of a Purpose Fee shows its amount and its class alone: the class is the published ground (a `misdirected` credit, for one, is money that is no Purpose Fee, returned at once, Art. 6a para. 3). An end-to-end identifier is published only on the Association's own transfers and only in the form the Association gives them, never one a paying party chose.\n\nPERSONNEL COSTS NEVER APPEAR LINE BY LINE. They are published monthly as one line per function, never by name (Art. 6f para. 4, Art. 6e), and once a paid role exists, each payment's date, amount and bank reference would describe the person who holds it in more detail than the statutes publish. So a line classed `personnel` is refused in `lines`, and the one net monthly figure per function that would stand in for such lines is not part of this version. A locked month holding a line classed `personnel` is withheld rather than published: it has no document, and its producer raises an alarm. No such line exists while nobody is remunerated, as at founding (Art. 6f para. 5).\n\nTHE PATH. One document per LOCKED month in which the bank booked at least one line on the fees account, at `/fees-account/{YYYY-MM}.json` on the public data plane (FS-00 §6.2), its month in the path the way the designations summary's is, and like it outside `ledger/`, which the platform's index build reads as months. `jobs.index-build` renders it from the first run after the month's lock. An open month has no document: its lines are still arriving and being classed. A locked month in which the bank booked nothing on the account, a month before the account was opened and a month withheld for a `personnel` line have no document either. Version 1 publishes no balance yet: the opening and closing balances join it in place before the first published month with a bank line, and with them a document for every locked month from the account's opening month, so that an absent document can be told from a month without movement.\n\nREGENERATED, NOT WRITTEN ONCE, AND STILL STABLE. The store keeps every line and every class append-only, and a line of a locked month takes one first class and never another, so a locked month's document changes in two cases only: the bank delivers a line booked in that month after the month locked, and the document lists it; or a line that had no class when the month locked, delivered late or not, takes its first class, and the document shows it. That class takes effect in the first open month (`effectMonth`), where the line's money is accounted, never by reopening the locked month (statutes Art. 6a para. 4: allocation data arriving after a lock counts only for later locks). `generatedAt` is the latest of the lock's instant and the instants at which the lines the document lists and the classes it shows were recorded, so a line or a class of either case moves it past `lockedAt`. A published document never shrinks: a render that would list fewer lines than the document already published, or carry an earlier `generatedAt`, keeps the published bytes and warns. So neither the owner's documented hand removal of a wrongly loaded bank file from the store nor the store's deletion of lines after their ten years ever withdraws a published line.\n\nRECONCILING. Each line states what the bank booked: `direction` and `amountMinor` are the bank's, never netted, and a reversal is its own line (`reversal`). A transfer to a listed recipient organisation is a `transfer-out` line carrying its `endToEndId`: on the transfer's first attempt the identifier of the published transfer (`cost-support.v1` `transfers[].endToEndId`, in the table of the month whose share it transfers), and on a later attempt that identifier with the attempt's number after it, so a bank line and a published transfer are matched by anyone holding both. `bankReference` is the bank's own reference for the line's entry or transaction, so published evidence that names a bank line by it resolves to its row here, or to the rows of one collective entry. The lines are in booking-date order, earliest first; the order of the lines of one day carries no meaning.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (producer: `jobs.index-build`, from the fees account's booked bank lines and their classes, platform migration 0094, read through a view that gives it ten columns of each booked line and the end-to-end identifier only in the Association's own form, and through a column-scoped grant on the classes). Nothing is published under this contract yet.",
+    "artifactPath": "/fees-account/{YYYY-MM}.json — one per locked month in which the bank booked a line on the fees account, unless a line of it is classed `personnel`",
+    "authoritative": false,
+    "producer": "`jobs.index-build` (P-M3), from `bank_statement_lines` and `bank_line_classes` (platform migration 0094): the booked lines through a view that gives `indexbuild_ro` ten of their columns, the end-to-end identifier only where it has the Association's own form, and never a counterparty, remittance or return column; the classes through a column-scoped read that leaves out who classed a line and why. A sample plane's builder renders it from its sample dataset",
+    "consumers": [
+      "the public transparency page of each month (FS-01)",
+      "anyone reconciling an allocation or a transfer against the fees account (statutes Art. 12 para. 1, Art. 20 para. 1)"
+    ],
+    "fsRefs": [
+      "FS-00 §6.2",
+      "statutes Art. 12 para. 1",
+      "statutes Art. 20 para. 1",
+      "statutes Art. 6a paras. 3 and 4",
+      "statutes Art. 6f paras. 4 and 5",
+      "ops design money-cycle/PAYOUT-RECONCILIATION-DESIGN-v2-2026-10-09.md §4.2, §4.3, §6 and §11.2"
+    ],
+    "vsRefs": ["VS-05"],
+    "changelog": "CHANGELOG.md#fees-account-statementv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "source", "month", "lockedAt", "lines"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The document's envelope instant (FS-00 §6.2), derived from the records and never from a clock: the latest of `lockedAt` and the instants at which the store recorded each line the document lists and the class it shows for that line. Never earlier than `lockedAt`: it is `lockedAt` while every such instant is at or before it, and moves past it with each line or class recorded later, such as a line the bank delivered after the lock, or the first class of a line that had none when the month locked. It never moves back: a render that would carry an earlier `generatedAt` than the published document keeps the published bytes. It is the document's own instant, not the plane's: a locked month's statement renders to the same bytes on every later run until such a line or class is recorded, so it differs from the `generatedAt` of the `/meta/publish-log.json` batch that lists this path whenever a newer row existed then. That departs from `publish-log.v1`'s statement that every artifact of a batch carries the batch's `generatedAt`, as `allocation-key.v1` and `recipient-list.v1` do; FS-00 §6.2's dated note that adopts this document's path records the departure."
+    },
+    "source": {
+      "enum": ["sample", "fixture", "platform"],
+      "description": "Which plane produced this document, in the envelope's vocabulary (FS-00 §6.2): `platform` is `jobs.index-build` in `PSN_ENV=prod`, `fixture` every other environment of it, `sample` a sample plane. `sample` and `fixture` declare a NON-PRODUCTION plane, which a production deployment refuses to serve (`sandbox_artifact_on_prod`). Required, and `registry-v0` is not admitted: the curated registry never held a bank line."
+    },
+    "month": {
+      "$ref": "#/$defs/monthKey",
+      "description": "The month whose booked lines this statement lists, `YYYY-MM`. It names the document's path, and every line's `bookingDate` is in it."
+    },
+    "lockedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The instant the month locked, the same instant its ledger export states (`ledger-export.v1` `lockedAt`). A month that is not locked has no statement."
+    },
+    "lines": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/line" },
+      "description": "Every line the bank booked on the fees account in `month`, one row each, in booking-date order, earliest first; the order of the lines of one day carries no meaning. A line the bank sent only as an advice and has not booked is not here, and a line classed `personnel` never is: a month holding one has no document. Never empty: a month with no booked line has no document."
+    }
+  },
+  "$defs": {
+    "monthKey": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+    },
+    "line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bookingDate", "direction", "reversal", "amountMinor", "currency"],
+      "properties": {
+        "bookingDate": {
+          "type": "string",
+          "format": "date",
+          "description": "The day the bank booked the entry (ISO 20022 `BookgDt`), as a Europe/Zurich calendar day. Always in the document's `month`."
+        },
+        "valueDate": {
+          "type": "string",
+          "format": "date",
+          "description": "The entry's value date (ISO 20022 `ValDt`). Absent where the bank gave none."
+        },
+        "direction": {
+          "enum": ["credit", "debit"],
+          "description": "`credit`: money onto the fees account; `debit`: money off it (ISO 20022 `CdtDbtInd` `CRDT` and `DBIT`)."
+        },
+        "reversal": {
+          "type": "boolean",
+          "description": "The bank's reversal indicator (ISO 20022 `RvslInd`): `true` on an entry that reverses an earlier one, whose `direction` is then the opposite of the entry it reverses; `false` otherwise."
+        },
+        "amountMinor": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "The amount the bank booked, in minor units of `currency`, always positive: `direction` says which way it moved."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "The entry's currency (ISO 4217)."
+        },
+        "class": {
+          "enum": [
+            "payout-credit",
+            "paddle-debit",
+            "onward-from-own-account",
+            "transfer-out",
+            "transfer-returned",
+            "reserve-retention",
+            "invoice",
+            "personnel",
+            "bank-charge",
+            "interest",
+            "misdirected",
+            "misdirected-return",
+            "ausgleich",
+            "authority",
+            "self-collected",
+            "outflow-refund",
+            "payout-returned",
+            "payout-recredit",
+            "fees-account-change"
+          ],
+          "description": "What the line is, in the Association's records: its current class, given by the reconciliation pass or by a steward, one per line, and never changed once the line's month is locked. `payout-credit`: a payout of Purpose Fees from the payment processor. `paddle-debit`: the processor collecting a negative balance, the reversal of a receipt. `onward-from-own-account`: a payout first received on another account of the Association, moved onto the fees account, which is no new receipt. `transfer-out`: a transfer to a listed recipient organisation. `transfer-returned`: such a transfer coming back, whose share is held. `reserve-retention`: the month's retention, moved to the operations reserve. `invoice`: an invoice of a direct cost paid from the fees account, which an entry of the month's published cost table names as its evidence. `personnel`: a personnel cost paid from the fees account (statutes Art. 6f), never published line by line: a line of this class is refused here, and a month holding one is withheld. `bank-charge`: a charge of the bank on the account, a direct cost of its class. `interest`: interest credited on the account. `misdirected`: money that is no Purpose Fee (paid in error, twice or too much, a donation, a tax amount), returned at once. `misdirected-return`: that return. `ausgleich`: a compensation from another activity of the Association, which never flows back. `authority`: a seizure, freeze or charge by an authority. `self-collected`: a Purpose Fee the Association collected itself. `outflow-refund`: money coming back from one of the account's own outflows other than a transfer to a recipient organisation (a supplier's refund, a charge the bank refunds), which reduces that outflow. `payout-returned`: a payout of the processor that the bank sent back or reversed. `payout-recredit`: the processor's re-sending of a returned payout. `fees-account-change`: the move of the balance to a new fees account. Absent: the line has no class yet. In a locked month's statement, such a line had no class when the month locked, whether the bank delivered it late or not; its one class, when it comes, takes effect in the first open month (`effectMonth`)."
+        },
+        "effectMonth": {
+          "$ref": "#/$defs/monthKey",
+          "description": "Present only where the line's class takes effect in a month after the line's booking month: a line with no class when its month locked takes its one class in the first open month, and is accounted there, never by reopening the locked month. Absent on every other line, whose class takes effect in its own booking month."
+        },
+        "bankReference": {
+          "type": "string",
+          "pattern": "^[!-~]([ -~]{0,33}[!-~])?$",
+          "description": "The bank's own reference for the line's entry or transaction (ISO 20022 `AcctSvcrRef`, at most 35 characters), so that published evidence naming a bank line by that reference resolves to its row here, or to the rows of one collective entry whose transactions carry none of their own. Absent where the bank gave none."
+        },
+        "endToEndId": {
+          "type": "string",
+          "pattern": "^psn-[0-9]{4}(0[1-9]|1[0-2])-[0-9abcdefghjkmnpqrstvwxyz]{12}(-[2-9])?$",
+          "description": "The end-to-end identifier of the Association's own transfer on this line: `psn-YYYYMM-` and the last 12 characters of the recipient's ULID, where `YYYYMM` is the month whose share the transfer carries, with `-n` after it for the transfer's attempt n from 2 to 9. The first attempt's identifier is the one the published transfer carries (`cost-support.v1` `transfers[].endToEndId`), and every later attempt's starts with it. Present only on a `transfer-out` or `transfer-returned` line whose entry carries an identifier of that form, and on no other line: an identifier a paying party chose is never published."
+        }
+      },
+      "dependentRequired": {
+        "effectMonth": ["class"]
+      },
+      "allOf": [
+        {
+          "$comment": "An end-to-end identifier is published only on the Association's own transfers: on any other class, and on a line with no class, the member is refused.",
+          "if": {
+            "not": {
+              "required": ["class"],
+              "properties": { "class": { "enum": ["transfer-out", "transfer-returned"] } }
+            }
+          },
+          "then": {
+            "not": { "required": ["endToEndId"] }
+          }
+        },
+        {
+          "$comment": "A personnel cost is published only as one line per function, never by name (statutes Art. 6f para. 4): a line classed `personnel` is refused, and a month holding one is withheld rather than published.",
+          "if": {
+            "required": ["class"],
+            "properties": { "class": { "const": "personnel" } }
+          },
+          "then": false
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-08-02T05:00:00Z",
+  "source": "fixture",
+  "month": "2027-07",
+  "lockedAt": "2027-08-02T05:00:00Z",
+  "lines": [
+    {
+      "bookingDate": "2027-07-01",
+      "valueDate": "2027-07-01",
+      "direction": "debit",
+      "reversal": false,
+      "amountMinor": 182450,
+      "currency": "CHF",
+      "class": "transfer-out",
+      "bankReference": "STMT-2027-07-0114",
+      "endToEndId": "psn-202706-7kq2m4vx9tra"
+    },
+    {
+      "bookingDate": "2027-07-01",
+      "valueDate": "2027-07-01",
+      "direction": "debit",
+      "reversal": false,
+      "amountMinor": 121630,
+      "currency": "CHF",
+      "class": "transfer-out",
+      "bankReference": "STMT-2027-07-0115",
+      "endToEndId": "psn-202706-1b5h8c3d6e9f"
+    },
+    {
+      "bookingDate": "2027-07-01",
+      "valueDate": "2027-07-01",
+      "direction": "debit",
+      "reversal": false,
+      "amountMinor": 60815,
+      "currency": "CHF",
+      "class": "transfer-out",
+      "bankReference": "STMT-2027-07-0116",
+      "endToEndId": "psn-202706-3nz8hb6wq1cd"
+    },
+    {
+      "bookingDate": "2027-07-01",
+      "valueDate": "2027-07-01",
+      "direction": "debit",
+      "reversal": false,
+      "amountMinor": 450,
+      "currency": "CHF",
+      "class": "bank-charge",
+      "bankReference": "STMT-2027-07-0117"
+    },
+    {
+      "bookingDate": "2027-07-01",
+      "valueDate": "2027-07-01",
+      "direction": "debit",
+      "reversal": false,
+      "amountMinor": 18200,
+      "currency": "CHF",
+      "class": "reserve-retention",
+      "bankReference": "STMT-2027-07-0118"
+    },
+    {
+      "bookingDate": "2027-07-06",
+      "valueDate": "2027-07-06",
+      "direction": "credit",
+      "reversal": false,
+      "amountMinor": 412345,
+      "currency": "CHF",
+      "class": "payout-credit",
+      "bankReference": "STMT-2027-07-0201"
+    },
+    {
+      "bookingDate": "2027-07-09",
+      "valueDate": "2027-07-09",
+      "direction": "credit",
+      "reversal": false,
+      "amountMinor": 5000,
+      "currency": "CHF",
+      "class": "misdirected",
+      "bankReference": "STMT-2027-07-0233"
+    },
+    {
+      "bookingDate": "2027-07-12",
+      "valueDate": "2027-07-12",
+      "direction": "debit",
+      "reversal": false,
+      "amountMinor": 5000,
+      "currency": "CHF",
+      "class": "misdirected-return",
+      "bankReference": "STMT-2027-07-0240"
+    },
+    {
+      "bookingDate": "2027-07-14",
+      "valueDate": "2027-07-14",
+      "direction": "debit",
+      "reversal": false,
+      "amountMinor": 2400,
+      "currency": "CHF",
+      "class": "invoice",
+      "bankReference": "STMT-2027-07-0251"
+    },
+    {
+      "bookingDate": "2027-07-21",
+      "valueDate": "2027-07-21",
+      "direction": "credit",
+      "reversal": false,
+      "amountMinor": 198700,
+      "currency": "CHF",
+      "class": "payout-credit",
+      "bankReference": "STMT-2027-07-0302"
+    },
+    {
+      "bookingDate": "2027-07-23",
+      "valueDate": "2027-07-23",
+      "direction": "credit",
+      "reversal": false,
+      "amountMinor": 60815,
+      "currency": "CHF",
+      "class": "transfer-returned",
+      "bankReference": "STMT-2027-07-0315",
+      "endToEndId": "psn-202706-3nz8hb6wq1cd"
+    },
+    {
+      "bookingDate": "2027-07-26",
+      "valueDate": "2027-07-26",
+      "direction": "debit",
+      "reversal": false,
+      "amountMinor": 60815,
+      "currency": "CHF",
+      "class": "transfer-out",
+      "bankReference": "STMT-2027-07-0322",
+      "endToEndId": "psn-202706-3nz8hb6wq1cd-2"
+    },
+    {
+      "bookingDate": "2027-07-30",
+      "valueDate": "2027-07-30",
+      "direction": "credit",
+      "reversal": false,
+      "amountMinor": 37,
+      "currency": "CHF",
+      "class": "interest",
+      "bankReference": "STMT-2027-07-0390"
+    },
+    {
+      "bookingDate": "2027-07-30",
+      "valueDate": "2027-07-30",
+      "direction": "debit",
+      "reversal": false,
+      "amountMinor": 500,
+      "currency": "CHF",
+      "class": "bank-charge",
+      "bankReference": "STMT-2027-07-0391"
+    }
+  ]
+}
