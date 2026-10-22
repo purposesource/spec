@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-03-14T15:30:00Z",
+  "keys": [
+    {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4",
+      "y": "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM",
+      "kid": "psn-prod-2026-1",
+      "use": "sig",
+      "alg": "ES256",
+      "psn:status": "retired",
+      "psn:validityWindow": {
+        "notBefore": "2026-01-01T00:00:00Z",
+        "notAfter": "2027-01-01T00:00:00Z"
+      }
+    },
+    {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
+      "y": "x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0",
+      "kid": "psn-prod-2027-1",
+      "use": "sig",
+      "alg": "ES256",
+      "psn:status": "compromised",
+      "psn:validityWindow": {
+        "notBefore": "2027-01-01T00:00:00Z",
+        "notAfter": "2027-03-10T06:00:00Z"
+      }
+    },
+    {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "Oxk1RcEKmFTjftyG6Khg3yT1VzdKEQJCNnSQiwxOAD4",
+      "y": "adyzG6O1dOUNrPLM_b3mSdZE563jrFzk2spi9kTP1iQ",
+      "kid": "psn-prod-2027-2",
+      "use": "sig",
+      "alg": "ES256",
+      "psn:status": "active",
+      "psn:validityWindow": {
+        "notBefore": "2027-03-14T09:00:00Z",
+        "notAfter": null
+      }
+    }
+  ]
+}

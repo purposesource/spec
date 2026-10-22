@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-03-14T15:30:00Z",
+  "source": "platform",
+  "date": "2027-03-14",
+  "keys": [
+    {
+      "kid": "psn-prod-2027-1",
+      "exposure": {
+        "from": "2027-03-10T06:00:00Z",
+        "until": "2027-03-13T22:40:00Z"
+      }
+    }
+  ],
+  "forged": [
+    {
+      "seq": 118240,
+      "h": "8373828fa6b6dfe26de9d8a414796a6d36b8e3a8d1c42ececaa5d050cdc93fc4"
+    },
+    {
+      "seq": 118251,
+      "h": "0588f10d13155c5d3b93a6c5179ab155b62d041e2003124832b13ffa8ba076bc"
+    }
+  ]
+}

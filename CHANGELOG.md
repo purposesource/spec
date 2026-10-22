@@ -87,6 +87,11 @@ with its own section below: `fees-account-statement.v1.json`, one locked month's
 their classes and nothing that identifies a payer or a natural person — thirty-six schemas in all, the thirty-fifth
 being `contributor-page-about.v1.json` (2026-10-16), whose section is below and which these paragraphs had not counted.
 
+The signing key set and its incident lists (2026-10-22; FS-08 §11 and its dated note of 2026-09-26, PS-2080) add two
+more, each with its own section below: `jwks.v1.json`, the key set `/jwks.json` and `/sandbox/jwks.json` publish, as one
+self-contained file equal to the API description's `Jwks` component; and `key-incidents.v1.json`, the list a key's
+compromise publishes at `/ct/incident-{date}.json` — thirty-eight schemas in all.
+
 ### Contracts published beyond the initially-scoped ten
 
 Seven schemas were added because another repository's acceptance test names a schema
@@ -1492,6 +1497,66 @@ value inside `v1` is not additive (versioning policy 1).*
 
 - Initial publication. The signed head commitment that makes retroactive tampering
   provable.
+
+## jwks.v1.json
+
+### 1.0.0 — unreleased (2026-10-22; FS-08 §11 and its dated note of 2026-09-26; the go-live backlog's GLB:1067, PS-2080)
+
+- New. The signing key set `/jwks.json` and `/sandbox/jwks.json` publish, as one self-contained file: an RFC 7517 key set
+  with `psn:status` and `psn:validityWindow` on each key (FS08-102). Until now the contract existed only as the `Jwks`
+  component of `openapi/edge-public.v1.yaml`, which the two routes still answer with and which the website's and the
+  platform's gates read from the API description; this file is that component keyword for keyword, annotations aside,
+  and `check:jwks` holds the two equal. `edge-public.v1` 1.15.0 tightens the component in the same release, so the file
+  starts at the tightened contract.
+- **A production key states its standing.** Every `psn-prod-` key carries both members, which every public verifier has
+  required since website `4b96f0c` (2026-09-26). A key states both or neither, and only a test key (`psn-dev-`,
+  `psn-sandbox-`) may state neither, as a sample plane publishes its fixture keys. A `retired` or `compromised` key
+  states where its window ends (`notAfter` a string): the verifiers refuse a retired key whose window never closed and
+  a compromised key that does not say where acceptance ends. A window that closes before it opens is admitted, because
+  JSON Schema cannot compare two instants, and every verifier refuses it; it is the shape the platform publishes a key
+  WITHDRAWN in.
+- **The `notAfter` reading of a compromised key** follows the published verifiers' `key-window.mjs`: the instant from
+  which nothing the key signed is accepted, the earlier of its retirement and the earliest moment someone else may have
+  held it, never moved later; an earlier token is accepted with a warning, and the key's incident list
+  (`key-incidents.v1`) names the log entries found forged.
+- `x-psn.keyVerdict` publishes the verdict a verifier gives against the set: its twenty codes, `typ_unknown` among them,
+  each in one of five classes (accept, warn, token, key-set, unsupported), and the claim each protected-header `typ` is
+  dated by: `application/psn-cert+jws` by `iat`, `application/psn-ct-checkpoint+jws` by `asOf`, and a token with no `typ`
+  (an entitlement record) by `generatedAt`. `getJwks` describes the rule in prose and names the same codes.
+- Examples: `jwks.v1.example.json` (a production set after a rotation: one key retired, one active),
+  `jwks.v1.compromised.example.json` (after a compromise: the compromised key's window closed where its exposure began,
+  and the expedited successor active), `jwks.v1.sample.example.json` (a sample plane's test key stating neither member)
+  and `jwks.v1.sandbox.example.json` (the sandbox set, marked).
+- `check:jwks` (new) holds the two copies equal, holds `getJwks` and `x-psn.keyVerdict` to the same codes and each `typ`
+  to the claim its contract fixes, holds the key set and incident list examples to what the schemas cannot say (each
+  kid once, windows in order, sandbox keys only in the marked set, one active production key, a compromised key's
+  window against its incident list), and proves 15 refusals and 7 admissions on both copies; each example rule is held to
+  a planted document it must flag.
+- Nothing is mirrored: the platform's `packages/contracts` mirrors no key set, and the website's and the platform's
+  gates read the component, whose members did not move.
+
+## key-incidents.v1.json
+
+### 1.0.0 — unreleased (2026-10-22; FS08-104 and FS-08 §11's dated note of 2026-09-26; the go-live backlog's GLB:1067, PS-2080)
+
+- New. The list a signing key's compromise publishes, at `/ct/incident-{date}.json`, the path FS-00 §6.2's amendment note
+  of 2026-09-01 reserved for forged-certificate incident lists and nothing has emitted: the keys the incident concerns,
+  each with the exposure window its enumeration covered (`from`, the earliest moment someone else may have held it;
+  `until`, its containment), and every transparency-log entry in that window whose hash matches no issuance record, by
+  its position (`seq`) and hash (`h`), once each, in log order. An enumeration that found nothing is published with
+  `forged` empty. An issuance record missing from the log is a process failure and is never listed here; genuine
+  certificates from the window are reissued with supersede links, which the log and the certificate records carry.
+- Final once published, so the edge may cache it as a closed log segment: `{date}` is `date`, the UTC date of
+  `generatedAt`, the instant the incident was recorded. A date names one list, and a later finding is a list of its own.
+  The key set's `notAfter` for a listed key is the earlier of its retirement and `exposure.from`. A sandbox key is never
+  named, because sandbox signatures never enter the log. `source` is required and admits `sample`, `fixture` and
+  `platform` only.
+- Nothing is published under it yet: no key has been compromised, `jobs.index-build` does not render the path (go-live
+  backlog GLB:798, triage row L2.6-40), and the edge does not route it (L2.6-41), so the API description gains no
+  operation for it in this release.
+- Examples: `key-incidents.v1.example.json` (the compromise `jwks.v1.compromised.example.json` shows, two forged entries)
+  and `key-incidents.v1.none-found.example.json` (a fixture plane's incident whose enumeration found nothing).
+  `check:jwks` holds both to their dating, order and exposure rules, and proves 12 refusals and 3 admissions.
 
 ## ledger-row.v1.json
 
@@ -4336,6 +4401,26 @@ which kind of change each entry was.
   kit and the registry page's are held to it member for member, and each offers the README card only where its
   deployment's edge serves the cards. The website's and the platform's halves read the golden from this repository's
   main, so the three land together, this file first. `check:openapi-examples` validates the same 69 examples.
+
+### 1.15.0 — unreleased (2026-10-22; FS-08 §11 and its dated note of 2026-09-26; the go-live backlog's GLB:1067, PS-2080) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: the `Jwks` component refuses key sets it admitted, so a published contract tightens. No
+  operation, status code, cache class, error code, schema member or enum value moved.
+- **A production key states its standing**: every `psn-prod-` key now REQUIRES `psn:status` and `psn:validityWindow`
+  (`allOf`), a key states both or neither (`dependentRequired`), and a `retired` or `compromised` key states where its
+  window ends. Every public verifier already refuses each of these, every producer already writes them, and every key
+  set published so far (the committed production set, the platform's, the sample plane's test keys stating neither)
+  still validates. The two `psn:` members and `notAfter` gain descriptions, the last with the compromised key's reading
+  as the published verifiers apply it.
+- **The verdict**: `getJwks` describes how a verifier judges a signature against the set, in the verifiers' order, with
+  every code, `typ_unknown` among them: a token whose protected-header `typ` no contract dates cannot be placed in a
+  window, so its signature is not accepted and nothing is asserted either way. The codes and their classes, and the
+  claim each `typ` is dated by, are `jwks.v1.json`'s `x-psn.keyVerdict`. `getSandboxJwks` says the same rule applies.
+- `schemas/jwks.v1.json` (new) is the component as a file; `check:jwks` holds the two equal. The component's members,
+  constants and kid pattern did not move, so the website's tests that hold its readers to the component
+  (`tests/unit/jwks.test.mjs`) and its plane gate stay as they are; the platform validates its rendered set against the
+  same component. One example is added to `getJwks`'s `200`, `afterCompromise`, and `check:openapi-examples` validates
+  70 examples (69 before).
 
 ## coverage/cov-v1.ts
 

@@ -109,6 +109,13 @@ jobs:
         # is proved able to fail first (the check's planted documents).
         run: npm run check:fees-account-statement
 
+      - name: The key set is one contract in two places, its verdict is published whole, and it refuses what a verifier refuses
+        # PS-2080 (the go-live backlog's GLB:1067): `schemas/jwks.v1.json` and the `Jwks` component of the API description
+        # stay equal keyword for keyword, `getJwks` names every code of `x-psn.keyVerdict` and no other, each `typ` is dated
+        # by the claim its contract fixes, the key set and incident list examples keep what the schemas cannot say, and both
+        # copies refuse a production key without its standing. Each rule is proved able to fail first.
+        run: npm run check:jwks
+
       - name: The contributor page's link table keeps its rules and gives every golden answer
         # After the examples step, because the table is an example (it IS the published table, as
         # the category menu's example is the menu) and has to be a valid instance first. The schema

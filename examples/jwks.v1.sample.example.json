@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-02-01T05:00:00Z",
+  "source": "sample",
+  "keys": [
+    {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "YOUlLvHkJj-VXpM8bMnFdYkxUg-0madgAwgA8QieIjo",
+      "y": "zMzLnuMwFrwzJpZtBkDV5AhjM6esurAgDx67Kmr6DPY",
+      "kid": "psn-dev-2026-1",
+      "alg": "ES256",
+      "use": "sig"
+    }
+  ]
+}

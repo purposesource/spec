@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.14.0
+  version: 1.15.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -559,6 +559,48 @@ paths:
 
         Sandbox keys are a **disjoint set** published only at the sandbox path. A
         production route refuses sandbox key material outright.
+
+        **How a verifier judges a signature against this set.** The published verifiers (the
+        /verify page, by id and pasted; the coverage route; the operator's delivery and
+        checkpoint tools) apply one rule, in this order. The first step that fails decides, and
+        every answer carries a stable code:
+
+        1. The token names exactly one key the set carries (`kid_missing`, `kid_unknown`,
+           `kid_ambiguous`), its protected header says `ES256` (`alg_unsupported`), and that
+           entry is an ES256 P-256 signing key (`key_unusable`). The header is never asked what
+           to do, only whether it is what the profile requires.
+        2. The entry states its status and its window. A test key that states neither is
+           accepted on its `kid` (`key_test_unmanaged`), and nothing it signs is a credential.
+           Any other entry is refused when it states no status, a status the set does not
+           define, no window, or a window that is not a pair of instants in order
+           (`key_status_missing`, `key_status_unknown`, `key_window_missing`,
+           `key_window_malformed`), and so is a retired key whose window never closed
+           (`retired_key_open_window`) and a compromised key with no `notAfter`
+           (`compromise_instant_missing`).
+        3. The token states when it was signed, in the claim its family's contract fixes, and
+           that instant lies inside the window (`signed_at_missing`, `signed_before_window`,
+           `signed_after_window`). A reader that knows what it fetched dates it by that family,
+           as the coverage route dates an entitlement record. A reader that holds only the token
+           goes by its protected header's `typ`: `application/psn-cert+jws` is a certificate,
+           dated by `iat` (`certificate.v1`); `application/psn-ct-checkpoint+jws` is a
+           checkpoint, dated by `asOf` (`ct-checkpoint.v1`); and a token with no `typ` is an
+           entitlement record, dated by `generatedAt` (`entitlement-record.v1`, which fixes no
+           `typ`). Any other `typ` is `typ_unknown`: no contract says when such a token was
+           signed, so no window can be applied, the signature is not accepted, and nothing is
+           asserted about the token either way.
+        4. The status decides the rest. `active` is accepted (`key_active`), and `retired`
+           inside its window (`key_retired`). A `compromised` key refuses whatever is dated at
+           or after its `notAfter` (`signed_after_compromise`) and accepts an earlier token
+           WITH A WARNING (`key_compromised_before`): the date is the signer's own claim, and
+           whoever holds a compromised key can backdate it, so the reader is told to check the
+           transparency log and the key's incident list.
+
+        Each code falls in one of five classes: accepted; accepted with a warning; refused
+        because the TOKEN is not one this key could have made; refused because the KEY SET does
+        not settle the question (the signature is not accepted, and nothing is asserted about
+        the token: the /verify page says CANNOT VALIDATE); and refused as UNSUPPORTED, for
+        `typ_unknown` alone. `schemas/jwks.v1.json` publishes the codes and their classes in
+        `x-psn.keyVerdict`, and the claim each `typ` is dated by.
       tags: [keys]
       x-psn-phase: P-M2
       responses:
@@ -597,6 +639,45 @@ paths:
                         "psn:validityWindow":
                           notBefore: '2026-01-01T00:00:00Z'
                           notAfter: '2027-01-01T00:00:00Z'
+                afterCompromise:
+                  summary: After a compromise, its key's window closed where someone else may first have held it
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-03-14T15:30:00Z'
+                    keys:
+                      - kty: EC
+                        crv: P-256
+                        x: MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4
+                        y: 4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM
+                        kid: psn-prod-2026-1
+                        use: sig
+                        alg: ES256
+                        "psn:status": retired
+                        "psn:validityWindow":
+                          notBefore: '2026-01-01T00:00:00Z'
+                          notAfter: '2027-01-01T00:00:00Z'
+                      - kty: EC
+                        crv: P-256
+                        x: f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU
+                        y: x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0
+                        kid: psn-prod-2027-1
+                        use: sig
+                        alg: ES256
+                        "psn:status": compromised
+                        "psn:validityWindow":
+                          notBefore: '2027-01-01T00:00:00Z'
+                          notAfter: '2027-03-10T06:00:00Z'
+                      - kty: EC
+                        crv: P-256
+                        x: Oxk1RcEKmFTjftyG6Khg3yT1VzdKEQJCNnSQiwxOAD4
+                        y: adyzG6O1dOUNrPLM_b3mSdZE563jrFzk2spi9kTP1iQ
+                        kid: psn-prod-2027-2
+                        use: sig
+                        alg: ES256
+                        "psn:status": active
+                        "psn:validityWindow":
+                          notBefore: '2027-03-14T09:00:00Z'
+                          notAfter: null
         '429':
           $ref: '#/components/responses/RateLimited'
         '503':
@@ -610,7 +691,8 @@ paths:
         The integrator test-mode key set, documented as non-production. Sandbox
         certificates sign with these keys, are marked as sandbox in every response body
         and header, and **never enter the transparency log**. No route ever merges this
-        set with the production set.
+        set with the production set. A sandbox signature is judged against it by the rule
+        `getJwks` describes.
       tags: [keys]
       x-psn-phase: P-M4
       responses:
@@ -3572,6 +3654,23 @@ components:
         bundle when storage holds nothing — a key set is worth serving with fewer envelope
         members than not at all, because it is the document a client resolves a `kid`
         against in order to check a signature.
+
+        **A production key states its standing.** Every `psn-prod-` key carries `psn:status`
+        and `psn:validityWindow`: every public verifier refuses a production key that does not
+        say whether, and from when to when, it was entitled to sign. A key states both members
+        or neither, and only a test key (`psn-dev-`, `psn-sandbox-`) may state neither: a
+        sample plane publishes its committed fixture keys that way, the verifiers accept them
+        on their `kid` alone, and nothing they sign is a credential. A `retired` or
+        `compromised` key states where its window ends (`notAfter`), because the verifiers
+        refuse a retired key whose window never closed and a compromised key that does not say
+        where acceptance ends. JSON Schema cannot compare two instants, so a window that closes
+        before it opens is admitted here and refused by every verifier (`key_window_malformed`):
+        it is the shape in which the platform publishes a key WITHDRAWN when the standing its
+        row states is one no verifier could accept.
+
+        **The same contract as a file.** `schemas/jwks.v1.json` (1.15.0) is this component as
+        one self-contained download, and `check:jwks` holds the two equal keyword for keyword.
+        How a verifier judges a signature against the set is in `getJwks`.
       properties:
         schemaVersion:
           type: integer
@@ -3616,6 +3715,29 @@ components:
           items:
             type: object
             required: [kty, crv, x, y, kid, use, alg]
+            dependentRequired:
+              "psn:status": ["psn:validityWindow"]
+              "psn:validityWindow": ["psn:status"]
+            allOf:
+              - if:
+                  properties:
+                    kid:
+                      pattern: '^psn-prod-'
+                  required: [kid]
+                then:
+                  required: ["psn:status", "psn:validityWindow"]
+              - if:
+                  properties:
+                    "psn:status":
+                      enum: [retired, compromised]
+                  required: ["psn:status"]
+                then:
+                  properties:
+                    "psn:validityWindow":
+                      required: [notAfter]
+                      properties:
+                        notAfter:
+                          type: string
             properties:
               kty:
                 type: string
@@ -3641,9 +3763,17 @@ components:
               "psn:status":
                 type: string
                 enum: [active, retired, compromised]
+                description: |
+                  `active`: the one production key new issuance uses (FS08-101). `retired`: a
+                  rotation closed it, and what it signed inside its window keeps verifying
+                  (CERT-022). `compromised`: someone else may have held it (CERT-023); its
+                  `notAfter` says from when nothing it signed is accepted.
               "psn:validityWindow":
                 type: object
                 required: [notBefore]
+                description: |
+                  When the key was entitled to sign: from `notBefore`, inclusive, to `notAfter`,
+                  exclusive, so at a rotation instant exactly one key is valid.
                 properties:
                   notBefore:
                     type: string
@@ -3651,6 +3781,16 @@ components:
                   notAfter:
                     type: [string, 'null']
                     format: date-time
+                    description: |
+                      The first instant the key may NOT have signed at; null, or absent, while
+                      the key is current. On a `compromised` key it is where acceptance ends:
+                      the earlier of its retirement and the earliest moment someone else may
+                      have held it, and it is never moved later. A key retired at R and found
+                      compromised afterwards keeps R, or forgeries dated between the two would
+                      turn from refused into accepted with a warning. A token the key signed
+                      before it is accepted with a warning, because that date is the signer's
+                      own claim; the key's incident list (`key-incidents.v1`, at
+                      `/ct/incident-{date}.json`) names the log entries found forged.
 
     DomainIndex:
       type: object

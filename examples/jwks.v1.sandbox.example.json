@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-06-01T05:00:00Z",
+  "sandbox": true,
+  "keys": [
+    {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0",
+      "y": "SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps",
+      "kid": "psn-sandbox-2026-1",
+      "use": "sig",
+      "alg": "ES256",
+      "psn:status": "active",
+      "psn:validityWindow": {
+        "notBefore": "2026-01-01T00:00:00Z",
+        "notAfter": null
+      }
+    }
+  ]
+}

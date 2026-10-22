@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/jwks.v1.json",
+  "title": "Signing key set — /jwks.json and /sandbox/jwks.json",
+  "description": "The public keys every Purpose Source signature is checked against: an RFC 7517 key set, with two members of our own on each key, `psn:status` and `psn:validityWindow` (FS08-102). Production's set is published at `/jwks.json` and the integrator test mode's at `/sandbox/jwks.json`, two disjoint documents that no route merges (FS08-103, FS10-050). The two routes answer with the `Jwks` component of `openapi/edge-public.v1.yaml`; this file is that component as one self-contained download, and `check:jwks` holds the two equal keyword for keyword, so a verifier that fetches only this file holds a key set to the same contract the routes publish.\n\nRETIRED KEYS NEVER LEAVE (CERT-022). A rotation appends a key and re-statuses the old one; it never removes one, so a certificate signed years ago still resolves its `kid` here. A compromised key stays too: its window is the public statement of what it signed that is still accepted.\n\nA PRODUCTION KEY STATES ITS STANDING. Every `psn-prod-` key carries `psn:status` and `psn:validityWindow`, because every public verifier refuses a production key that does not say whether, and from when to when, it was entitled to sign. A key states both members or neither, and only a test key (`psn-dev-`, `psn-sandbox-`) may state neither: a sample plane publishes its committed fixture keys that way, the verifiers accept them on their `kid` alone, and nothing they sign is a credential.\n\nTHE WINDOW. `notBefore` is inclusive and `notAfter` exclusive, so at a rotation instant exactly one key is valid. `notAfter` is null, or absent, while a key is current. A `retired` or `compromised` key states it, because the verifiers refuse a retired key whose window never closed and a compromised key that does not say where acceptance ends. JSON Schema cannot compare two instants, so a window that closes before it opens is admitted here and refused by every verifier (`key_window_malformed`): it is the shape in which the platform publishes a key WITHDRAWN when the standing its row states is one no verifier could accept.\n\nA COMPROMISED KEY'S WINDOW ENDS WHERE ACCEPTANCE ENDS (FS08-104, CERT-023, and FS-08 §11's dated note of 2026-09-26). The set has no member of its own for a compromise instant, so on a `compromised` key `notAfter` is the instant from which nothing the key signed is accepted: the earlier of its retirement and the earliest moment someone else may have held it. It is never moved later: a key retired at R and found compromised afterwards keeps R, or forgeries dated between the two would turn from refused into accepted with a warning. A token the key signed before `notAfter` is accepted with a warning, because that date is the signer's own claim and whoever holds a compromised key can backdate it; the incident list (`key-incidents.v1`, at `/ct/incident-{date}.json`) names the transparency-log entries found forged.\n\nHOW A VERIFIER JUDGES A SIGNATURE against the set is described in `getJwks` of the API description, and `x-psn.keyVerdict` below publishes its codes, the class of each, and the claim each protected-header `typ` is dated by.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M2 (`/jwks.json`: the production set committed to the website and served by the edge; from P-M3 rendered by `jobs.index-build` from `signing_keys`) · P-M4 (`/sandbox/jwks.json`, with the sandbox tenant)",
+    "artifactPath": "/jwks.json · /sandbox/jwks.json",
+    "authoritative": true,
+    "component": "openapi/edge-public.v1.yaml#/components/schemas/Jwks",
+    "producer": "P-M3: `jobs.index-build` renders the set from `signing_keys`, each key's two `psn:` members from the row's columns; the edge serves the committed production set when storage holds none",
+    "consumers": ["the /verify page (by id and pasted)", "the edge's coverage route", "the operator's delivery and checkpoint tools", "independent verifiers and auditors"],
+    "keyVerdict": {
+      "rule": "The published verifiers' rule, in the order `getJwks` gives it; the first step that fails decides, and each answer carries one of these codes.",
+      "outcomes": {
+        "accept": "the key could have made the signature then (the signature must still verify)",
+        "warn": "accepted, with something the reader must be told: the key is compromised, and the token's date is the signer's own claim",
+        "token": "refused: the TOKEN is not one this key could validly have made",
+        "key-set": "refused: the published key set does not settle the question; nothing is asserted about the token either way",
+        "unsupported": "refused: the token's `typ` is not one whose signing instant a contract fixes, so no window can be applied; nothing is asserted either way"
+      },
+      "codes": {
+        "key_active": "accept",
+        "key_retired": "accept",
+        "key_test_unmanaged": "accept",
+        "key_compromised_before": "warn",
+        "kid_missing": "token",
+        "kid_unknown": "token",
+        "alg_unsupported": "token",
+        "signed_at_missing": "token",
+        "signed_before_window": "token",
+        "signed_after_window": "token",
+        "signed_after_compromise": "token",
+        "kid_ambiguous": "key-set",
+        "key_unusable": "key-set",
+        "key_status_missing": "key-set",
+        "key_status_unknown": "key-set",
+        "key_window_missing": "key-set",
+        "key_window_malformed": "key-set",
+        "retired_key_open_window": "key-set",
+        "compromise_instant_missing": "key-set",
+        "typ_unknown": "unsupported"
+      },
+      "signingInstant": [
+        { "typ": "application/psn-cert+jws", "contract": "certificate.v1", "claim": "iat" },
+        { "typ": "application/psn-ct-checkpoint+jws", "contract": "ct-checkpoint.v1", "claim": "asOf" },
+        { "typ": null, "contract": "entitlement-record.v1", "claim": "generatedAt" }
+      ]
+    },
+    "fsRefs": ["FS-00 §6.2", "FS-08 §11 (FS08-100…FS08-104) and its dated note of 2026-09-26", "FS-10 FS10-050", "CERT-021", "CERT-022", "CERT-023"],
+    "vsRefs": ["VS-08", "VS-25"],
+    "changelog": "CHANGELOG.md#jwksv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["keys"],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1,
+      "description": "The contract version, as FS-00 §6.2 asks of every artifact. Optional here because the edge mints the production set from its own bundle when storage holds none; the publishing build always stamps it."
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the publishing build produced this key set. On the published artifact it is also the response's `Last-Modified`; a minted answer carries no `Last-Modified`, and omits this member entirely when the deployment has no build instant to state — never a guessed one."
+    },
+    "source": {
+      "enum": ["registry-v0", "sample", "fixture", "platform"],
+      "description": "Which plane produced this artifact. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders such an artifact is labelled sample, and a production deployment refuses to serve it (FS-10 §2 v0 note; the edge route answers `sandbox_artifact_on_prod`). `registry-v0` is the P-M2 production source of record — the curated registry repository the index is built from. `platform` is the P-M3 producer of record — the platform database, rendered by `jobs.index-build`. Optional, and its absence asserts nothing: an artifact whose body cannot carry the label borrows the plane's declaration from `/registry/index/meta.json`."
+    },
+    "sandbox": {
+      "type": "boolean",
+      "description": "`true` on `/sandbox/jwks.json` and nowhere else — the in-band marker FS08-103 asks for, so a client holding only the body still knows the set is test-mode material. ABSENT rather than `false` on the production set: which document it is decides that, and a flag saying so could be copied onto a set that is not this one."
+    },
+    "keys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kty", "crv", "x", "y", "kid", "use", "alg"],
+        "dependentRequired": {
+          "psn:status": ["psn:validityWindow"],
+          "psn:validityWindow": ["psn:status"]
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "kid": { "pattern": "^psn-prod-" } }, "required": ["kid"] },
+            "then": { "required": ["psn:status", "psn:validityWindow"] }
+          },
+          {
+            "if": { "properties": { "psn:status": { "enum": ["retired", "compromised"] } }, "required": ["psn:status"] },
+            "then": { "properties": { "psn:validityWindow": { "required": ["notAfter"], "properties": { "notAfter": { "type": "string" } } } } }
+          }
+        ],
+        "properties": {
+          "kty": { "type": "string", "const": "EC" },
+          "crv": { "type": "string", "const": "P-256" },
+          "x": { "type": "string", "description": "base64url x coordinate." },
+          "y": { "type": "string", "description": "base64url y coordinate." },
+          "kid": { "type": "string", "pattern": "^psn-(dev|prod|sandbox)-[0-9]{4}-[0-9]+$" },
+          "use": { "type": "string", "const": "sig" },
+          "alg": { "type": "string", "const": "ES256" },
+          "psn:status": {
+            "type": "string",
+            "enum": ["active", "retired", "compromised"],
+            "description": "`active`: the one production key new issuance uses (FS08-101). `retired`: a rotation closed it, and what it signed inside its window keeps verifying (CERT-022). `compromised`: someone else may have held it (CERT-023); its `notAfter` says from when nothing it signed is accepted."
+          },
+          "psn:validityWindow": {
+            "type": "object",
+            "required": ["notBefore"],
+            "description": "When the key was entitled to sign: from `notBefore`, inclusive, to `notAfter`, exclusive, so at a rotation instant exactly one key is valid.",
+            "properties": {
+              "notBefore": { "type": "string", "format": "date-time" },
+              "notAfter": {
+                "type": ["string", "null"],
+                "format": "date-time",
+                "description": "The first instant the key may NOT have signed at; null, or absent, while the key is current. On a `compromised` key it is where acceptance ends: the earlier of its retirement and the earliest moment someone else may have held it, never moved later."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

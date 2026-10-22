@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/key-incidents.v1.json",
+  "title": "Key incident list — /ct/incident-{date}.json",
+  "description": "The public list a signing key's compromise publishes: the keys it concerns, the exposure window each was enumerated over, and every transparency-log entry inside that window found FORGED, signed with the key and never issued by the Association (FS08-104, CERT-023; FS-00 §6.2's amendment note of 2026-09-01 reserves the path). A relying party holding a token signed by a compromised key before its `notAfter` is told by every public verifier that the token's date is the signer's own claim (`key_compromised_before`); this list is where it checks: the SHA-256 of the token's compact JWS is the hash the log states for it, and a hash listed here was never issued.\n\nWHAT IS FORGED. The key-compromise procedure (RB-04 steps 3 and 6) re-verifies the log against the Association's issuance records for each key's exposure window. A log entry in the window whose hash matches no issuance record was signed with the key and never issued, and it is listed here by its position in the log (`seq`) and its hash (`h`), in log order. An issuance record whose hash is missing from the log is a different failure, a broken log-before-deliver step, investigated and never listed here. An enumeration that found nothing is published too, with `forged` empty: it is the honest answer. Genuine certificates from the window are reissued under new ids with supersede links (`key-compromise-reissue`), which the log and the certificate records carry; this list does not.\n\nTHE KEYS AND THEIR WINDOWS. Each key the incident concerns is named by its `kid` with the exposure window its enumeration covered: from the earliest moment someone else may have held the key (`from`) to its containment (`until`). In the key set (`jwks.v1`) the key is then `compromised`, and its `notAfter` is the earlier of its retirement and `from`. A sandbox key is never named: sandbox signatures never enter the log (FS08-103).\n\nFINAL ONCE PUBLISHED. A list never changes, so the edge may cache it as it caches a closed log segment. `{date}` in the path is `date`, the UTC date of `generatedAt`, the instant the incident was recorded, and not the plane's: every render writes the same bytes. A date names one list; anything found after a list was published is published as a list of its own, on a later date. Nothing in a list names a person: a log entry carries a family and a hash, never a subject, and so does this list.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (producer: `jobs.index-build`, from an incident recorded by the key-compromise procedure). Nothing is published under this contract yet: no key has been compromised, nothing emits the path, and the edge does not route it yet.",
+    "artifactPath": "/ct/incident-{date}.json — one per recorded incident, final once published",
+    "authoritative": true,
+    "producer": "`jobs.index-build` (P-M3), from an append-only record the key-compromise procedure writes (RB-04 step 6); a sample plane's builder may render a labelled one",
+    "consumers": ["relying parties holding a token signed by a compromised key", "the /verify page's warning on such a token", "independent auditors re-running the enumeration against the log"],
+    "fsRefs": ["FS-00 §6.2 amendment note 2026-09-01", "FS-08 §11 (FS08-104) and its dated note of 2026-09-26", "FS-08 §12 (FS08-110…FS08-114)", "FS-10 FS10-050", "CERT-023", "CERT-030", "CERT-033"],
+    "vsRefs": ["VS-08", "VS-28"],
+    "changelog": "CHANGELOG.md#key-incidentsv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "source", "date", "keys", "forged"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The instant the incident was recorded, after its enumeration: the document's own instant, not the plane's, so every render writes the same bytes. Its UTC date is `date`."
+    },
+    "source": {
+      "enum": ["sample", "fixture", "platform"],
+      "description": "Which plane produced this list. `sample` and `fixture` declare a NON-PRODUCTION plane: every page that renders it is labelled sample, and a production deployment refuses to serve it. `platform` is the producer of record, the platform database rendered by `jobs.index-build`. Required: a list of forged hashes from a synthetic plane must never pass for a production one. The curated registry never recorded an incident, so `registry-v0` is not admitted."
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "description": "The `{date}` of the list's path, `/ct/incident-{date}.json`: the UTC date of `generatedAt`. A date names one list."
+    },
+    "keys": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Every key the incident concerns, each once, in `kid` order.",
+      "items": { "$ref": "#/$defs/key" }
+    },
+    "forged": {
+      "type": "array",
+      "description": "Every log entry inside a listed key's exposure window whose hash matches no issuance record, each once, in log order (`seq` ascending). Empty when the enumeration found none.",
+      "items": { "$ref": "#/$defs/forgedEntry" }
+    }
+  },
+  "$defs": {
+    "key": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kid", "exposure"],
+      "properties": {
+        "kid": {
+          "type": "string",
+          "pattern": "^psn-(dev|prod)-[0-9]{4}-[0-9]+$",
+          "description": "The compromised key, as the key set names it. Never a sandbox key: sandbox signatures never enter the log."
+        },
+        "exposure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["from", "until"],
+          "description": "The exposure window the incident declared for this key and its enumeration covered: the instants every step of the procedure is scoped by.",
+          "properties": {
+            "from": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The earliest moment someone else may have held the key. The key set's `notAfter` for the key is the earlier of its retirement and this instant."
+            },
+            "until": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The key's containment: the instant its vault version was disabled, after which it signs nothing. Later than `from`, and not later than `generatedAt`."
+            }
+          }
+        }
+      }
+    },
+    "forgedEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seq", "h"],
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The entry's global sequence number in the transparency log (`ct-segment.v1`), so an auditor finds it in its segment."
+        },
+        "h": {
+          "$ref": "#/$defs/sha256",
+          "description": "The entry's hash as the log states it: for a signed token, the SHA-256 of its compact JWS (CERT-030). A relying party computes it over the token it holds and looks for it here."
+        }
+      }
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}
