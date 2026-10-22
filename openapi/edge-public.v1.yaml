@@ -579,13 +579,14 @@ paths:
            (`compromise_instant_missing`).
         3. The token states when it was signed, in the claim its family's contract fixes, and
            that instant lies inside the window (`signed_at_missing`, `signed_before_window`,
-           `signed_after_window`). A reader that knows what it fetched dates it by that family,
-           as the coverage route dates an entitlement record. A reader that holds only the token
-           goes by its protected header's `typ`: `application/psn-cert+jws` is a certificate,
-           dated by `iat` (`certificate.v1`); `application/psn-ct-checkpoint+jws` is a
-           checkpoint, dated by `asOf` (`ct-checkpoint.v1`); and a token with no `typ` is an
-           entitlement record, dated by `generatedAt` (`entitlement-record.v1`, which fixes no
-           `typ`). Any other `typ` is `typ_unknown`: no contract says when such a token was
+           `signed_after_window`; on a compromised key, an instant at or after `notAfter` is
+           step 4's `signed_after_compromise`). A reader that knows what it fetched dates it by
+           that family, as the coverage route dates an entitlement record. A reader that holds
+           only the token goes by its protected header's `typ`: `application/psn-cert+jws` is a
+           certificate, dated by `iat` (`certificate.v1`); `application/psn-ct-checkpoint+jws`
+           is a checkpoint, dated by `asOf` (`ct-checkpoint.v1`); and a token with no `typ` is
+           an entitlement record, dated by `generatedAt` (`entitlement-record.v1`, which fixes
+           no `typ`). Any other `typ` is `typ_unknown`: no contract says when such a token was
            signed, so no window can be applied, the signature is not accepted, and nothing is
            asserted about the token either way.
         4. The status decides the rest. `active` is accepted (`key_active`), and `retired`

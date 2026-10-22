@@ -4416,6 +4416,8 @@ which kind of change each entry was.
   every code, `typ_unknown` among them: a token whose protected-header `typ` no contract dates cannot be placed in a
   window, so its signature is not accepted and nothing is asserted either way. The codes and their classes, and the
   claim each `typ` is dated by, are `jwks.v1.json`'s `x-psn.keyVerdict`. `getSandboxJwks` says the same rule applies.
+  A compromised key's token dated at or after its `notAfter` is step 4's `signed_after_compromise`, never step 3's
+  `signed_after_window`, as the website's `key-window.mjs` decides it.
 - `schemas/jwks.v1.json` (new) is the component as a file; `check:jwks` holds the two equal. The component's members,
   constants and kid pattern did not move, so the website's tests that hold its readers to the component
   (`tests/unit/jwks.test.mjs`) and its plane gate stay as they are; the platform validates its rendered set against the
