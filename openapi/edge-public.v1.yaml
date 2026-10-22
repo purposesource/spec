@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.15.0
+  version: 1.16.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -594,7 +594,7 @@ paths:
            or after its `notAfter` (`signed_after_compromise`) and accepts an earlier token
            WITH A WARNING (`key_compromised_before`): the date is the signer's own claim, and
            whoever holds a compromised key can backdate it, so the reader is told to check the
-           transparency log and the key's incident list.
+           transparency log and the incident lists the key names (`psn:incidents`).
 
         Each code falls in one of five classes: accepted; accepted with a warning; refused
         because the TOKEN is not one this key could have made; refused because the KEY SET does
@@ -668,6 +668,7 @@ paths:
                         "psn:validityWindow":
                           notBefore: '2027-01-01T00:00:00Z'
                           notAfter: '2027-03-10T06:00:00Z'
+                        "psn:incidents": [/ct/incident-2027-03-14.json]
                       - kty: EC
                         crv: P-256
                         x: Oxk1RcEKmFTjftyG6Khg3yT1VzdKEQJCNnSQiwxOAD4
@@ -3647,8 +3648,8 @@ components:
       required: [keys]
       description: |
         An RFC 7517 key set, plus two namespaced members per key: `psn:status` and
-        `psn:validityWindow`. Retired keys are kept forever so that old certificates keep
-        verifying.
+        `psn:validityWindow`, and on a compromised key a third, `psn:incidents`. Retired keys
+        are kept forever so that old certificates keep verifying.
 
         `keys` is the only REQUIRED member. The envelope below travels with the published
         artifact, and the same document is also minted by the edge deployment from its own
@@ -3668,6 +3669,12 @@ components:
         before it opens is admitted here and refused by every verifier (`key_window_malformed`):
         it is the shape in which the platform publishes a key WITHDRAWN when the standing its
         row states is one no verifier could accept.
+
+        **A compromised key names its incident lists** (1.16.0). `psn:incidents` lists the
+        paths of the `/ct/incident-{date}.json` documents (`key-incidents.v1`) that name the
+        key, earliest first, so a reader told to check a token against them finds them from the
+        key itself. Only a `compromised` key carries it, and it may lack it until its first list
+        is published.
 
         **The same contract as a file.** `schemas/jwks.v1.json` (1.15.0) is this component as
         one self-contained download, and `check:jwks` holds the two equal keyword for keyword.
@@ -3719,6 +3726,12 @@ components:
             dependentRequired:
               "psn:status": ["psn:validityWindow"]
               "psn:validityWindow": ["psn:status"]
+            dependentSchemas:
+              "psn:incidents":
+                required: ["psn:status"]
+                properties:
+                  "psn:status":
+                    const: compromised
             allOf:
               - if:
                   properties:
@@ -3792,6 +3805,19 @@ components:
                       before it is accepted with a warning, because that date is the signer's
                       own claim; the key's incident list (`key-incidents.v1`, at
                       `/ct/incident-{date}.json`) names the log entries found forged.
+              "psn:incidents":
+                type: array
+                minItems: 1
+                uniqueItems: true
+                description: |
+                  On a `compromised` key only: the path of every incident list that names the
+                  key, `/ct/incident-{date}.json` (`key-incidents.v1`), earliest first. A path is
+                  read against the host that served this set: the API host and the apex both
+                  serve `/ct/*`. A list is final once published, so a later finding adds a path
+                  and never changes one. Absent until the key's first list is published.
+                items:
+                  type: string
+                  pattern: '^/ct/incident-[0-9]{4}-[0-9]{2}-[0-9]{2}\.json$'
 
     DomainIndex:
       type: object
