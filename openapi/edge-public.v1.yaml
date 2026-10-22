@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.13.1
+  version: 1.14.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -38,7 +38,10 @@ info:
 
     Not every route is live yet. Each operation carries `x-psn-phase`:
 
-    - `P-M2` — live in the first public version.
+    - `P-M2` — live in the first public version. The twelve README card names of
+      `getRepositoryBadge` are the exception: the edge draws them only where the deployment's
+      README card switch is on, and production's is off, so there each is still read as a badge
+      name, as it was before the cards existed.
     - `P-M3` — the computed coverage endpoint. At P-M2 the coverage proof is the
       published entitlement JWS plus the human verify page; the endpoint activates later
       with no schema change. The two allocation-key routes are P-M3 as well: their
@@ -160,7 +163,7 @@ tags:
   - name: designations
     description: "Designations in summary: the projects' and, behind a floor, the contributors' designations for each month (advisory; routes money only after the fairness review, D27)."
   - name: badges
-    description: README badges — the shields.io endpoint body, and the SVG badges the edge draws for a repository and for a certificate.
+    description: README badges — the shields.io endpoint body, and the SVG badges the edge draws for a repository, its README cards included, and for a certificate.
   - name: cards
     description: Share and link-preview images — a certificate's card and a repository's project cards (PNG), with the generic card as their fallback.
   - name: contributor-pages
@@ -1169,7 +1172,7 @@ paths:
   /badge/repo/{badgeFile}:
     get:
       operationId: getRepositoryBadge
-      summary: The README badges of one repository (SVG)
+      summary: The README badges and README cards of one repository (SVG)
       description: |
         The repository badge's own look, drawn by the edge with every word pre-outlined: a flat
         20-pixel badge, `{nodeId}.svg`, and a 420×88 card badge in a light and a dark version,
@@ -1183,6 +1186,32 @@ paths:
         organisations display. The shields.io endpoint stays as it is, beside these.
 
         A storage outage answers the neutral badge, which asserts nothing, as the endpoint does.
+
+        **The README cards** (ops decisions D150, D151 and D154) are the two pictures Purpose Source's
+        adoption pull request writes into a README, twelve names per repository: the top form,
+        `{nodeId}-top.svg`, 440×84, for the top of a README, and the full card,
+        `{nodeId}-showcase.svg`, 440×255 (440×233 without its line on contributor certificates), for
+        its License section; each with Purpose Source's mark (no further suffix), with the repository
+        owner's GitHub picture (`-picture`) or with no icon (`-noicon`), and each in a dark version too
+        (`-dark`): `{nodeId}-(top|showcase)(-picture|-noicon)?(-dark)?.svg`. A card says what the
+        badge decides, from the same two reads. A registered repository's card draws its owner and
+        name from its published registry record, the licence's name, and, on the full card, the
+        licence's version and the month the repository became registered. A suspended, quit or
+        delisted repository, an outage, and a registered repository whose record cannot be read get
+        the slim neutral strip "Status: see the registry page" (440×56), which asserts nothing; an
+        unknown id gets the strip "Shows here once this repository is registered", at `200` so a
+        README never shows a broken image. The owner's picture is fetched by the edge from GitHub by
+        the record's owner id and embedded in the card, which is drawn without it when GitHub does not
+        give it or the owner objected to it. The README cards may carry Purpose Source's mark, only
+        beside the words "Purpose Source License" (ops decision D151 item 2): the one exception to the
+        text-only rule above.
+
+        **The cards are served only where the deployment's README card switch is on, and production's
+        is off.** Where it is off, a card name is read as before the cards existed: as the flat badge
+        of a node id that ends in the card's suffix, which answers `not registered` for an id in the
+        current form and `400 invalid_repo_id` for a legacy one. Nothing should embed a card before
+        its deployment serves them: the adoption pull request writes none until then, and the badge
+        kits offer none.
       tags: [badges]
       x-psn-phase: P-M2
       parameters:
@@ -1191,19 +1220,25 @@ paths:
           required: true
           description: >-
             The repository's GitHub node id, in either form GitHub has issued (`%3D` is read as `=`),
-            followed by `.svg`, `-card.svg` or `-card-dark.svg`. A value that is not a repository node
-            id answers `400 invalid_repo_id` before any read. A node id that itself ends in `-card` is
-            read as the card of the shorter id.
+            followed by `.svg`, `-card.svg` or `-card-dark.svg`, or by one of the twelve README card
+            suffixes, `-(top|showcase)(-picture|-noicon)?(-dark)?.svg`. A value that is not a repository
+            node id answers `400 invalid_repo_id` before any read. A node id that itself ends in `-card`
+            is read as the card of the shorter id, and, where the README cards are served, one that ends
+            in a card's suffix is read as that card of the shorter id.
           schema:
             type: string
-            pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})(?:\.svg|-card\.svg|-card-dark\.svg)$'
+            pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})(?:\.svg|-card\.svg|-card-dark\.svg|-(?:top|showcase)(?:-picture|-noicon)?(?:-dark)?\.svg)$'
           example: R_kgDOAbc123-card.svg
       responses:
         '200':
           description: |
             The badge (SVG), including the neutral and the unknown forms. Cached `max-age=300,
             s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800`, like the shields.io
-            endpoint.
+            endpoint. A README card is cached the same way, but for two cases: the strip for an
+            unknown id, `max-age=60, s-maxage=60`, so a repository whose pull request has just been
+            merged shows its card within a minute of its registration; and a card drawn without what
+            it should show (the owner's picture GitHub did not give, or a record that could not be
+            read), `max-age=300, s-maxage=300`, so that it heals soon.
           headers:
             Cache-Control:
               schema:
@@ -1229,7 +1264,7 @@ paths:
                       message: A repository is identified by its GitHub node id.
                       traceId: 01jp4cdq0z04c8jm6d1g5e7k9p
         '404':
-          description: The file name is none of the three badge shapes. Nothing was read.
+          description: The file name is none of the badge and README card shapes above. Nothing was read.
           content:
             application/json:
               schema:

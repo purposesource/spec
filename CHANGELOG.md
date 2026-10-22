@@ -4305,6 +4305,38 @@ which kind of change each entry was.
   The description does not gate the website's tests, so the order of pushes does not matter for them.
   `check:openapi-examples` validates the same 69 examples.
 
+### 1.14.0 — unreleased (2026-10-22; ops decisions D150, D151 and D154; design `design/readme-kit-2026-10-15` §3.5 and §6.2, slices W3 and C1) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: `getRepositoryBadge` names the README cards, which the edge has drawn under the same route
+  since the kit's slice W2, behind a switch. No operation, status code, error code, schema member or enum value moved:
+  the `badgeFile` parameter's pattern and description name the twelve card suffixes, the description says what a card
+  draws, and the `200` response gains the cards' two cache lines.
+- Twelve names per repository, `{nodeId}-(top|showcase)(-picture|-noicon)?(-dark)?.svg`: the top form (440×84, for the
+  top of a README) and the full card (440×255, or 440×233 without its line on contributor certificates, for a README's
+  License section), each with Purpose Source's mark, the repository owner's GitHub picture or no icon, light and dark.
+  A card says what the badge decides, from the same two reads: a registered repository's card draws its owner and name
+  from its registry record, the licence's name, and on the full card the licence's version and the month it became
+  registered; a suspended, quit or delisted repository, an outage and a registered repository whose record cannot be
+  read get the slim neutral strip; an unknown id gets the strip "Shows here once this repository is registered", at
+  `200`. The owner's picture is fetched by the edge from GitHub by the record's owner id and embedded; the card is drawn
+  without it when GitHub does not give it or the owner objected. The mark stands only beside the words "Purpose Source
+  License" (D151 item 2), the one exception the description now states to the text-only rule of the repository's
+  badges. The cache lines are the badge's, except the unknown strip's `max-age=60, s-maxage=60` and, for a card drawn
+  without what it should show, `max-age=300, s-maxage=300` (design §3.5).
+- **Where the deployment's README card switch is off, as production's is, a card name is read as before the cards
+  existed**: as the flat badge of a node id that ends in the card's suffix, `not registered` for an id in the current
+  form and `400 invalid_repo_id` for a legacy one. The description says so, and so does the phase list in
+  `info.description`. Nothing writes a card before its deployment serves them: the adoption pull request's README kit
+  and both badge kits follow the same switch.
+- The badge kit's golden, `examples/repo-badge-kit.v1.json`, names them in the same release (design §6.2: one
+  coordinated step). `input` gains `nameWithOwner`, which the card's alt text names, and `kit` gains `readme`: per form,
+  `top` and `showcase`, its three icons' light and dark addresses (`mark`, `picture`, `noicon`; `url`, `darkUrl`) and
+  `section`, the marked part the adoption tool writes for it, with Purpose Source's mark and the contributors' line,
+  byte for byte, its fingerprint included, so a part pasted by hand is one the tool knows as its own. The dashboard's
+  kit and the registry page's are held to it member for member, and each offers the README card only where its
+  deployment's edge serves the cards. The website's and the platform's halves read the golden from this repository's
+  main, so the three land together, this file first. `check:openapi-examples` validates the same 69 examples.
+
 ## coverage/cov-v1.ts
 
 The published coverage function, versioned together with its vectors (`coverage/vectors.json`)
