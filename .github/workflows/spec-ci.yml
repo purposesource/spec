@@ -103,6 +103,12 @@ jobs:
         # example. Each rule is proved able to fail first.
         run: npm run check:allocation-keys
 
+      - name: The fees-account statement examples keep their month, order and dating, and the contract refuses what must never be published
+        # PS-1970 (D-OPEN PRD v2 §11.2, the orchestrator's word of 2026-10-21): fees-account-statement.v1's examples keep
+        # their booking order and dating rule, and the contract refuses a personnel line and a payer's own text. Each rule
+        # is proved able to fail first (the check's planted documents).
+        run: npm run check:fees-account-statement
+
       - name: The contributor page's link table keeps its rules and gives every golden answer
         # After the examples step, because the table is an example (it IS the published table, as
         # the category menu's example is the menu) and has to be a valid instance first. The schema
