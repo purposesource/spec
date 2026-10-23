@@ -21,7 +21,8 @@
  *      rename is one edit and a test run rather than a hunt.
  *   4. EVERY CLAIM ENDS WITH THE EXCLUSIVE-VERIFICATION SENTENCE, spelled from spec.config.json
  *      (CERT-027): every line whose `use` is not `clause` (a clause is words added inside a line)
- *      and every template, and the document's own `verify` member is that sentence. The schemas pin the sentence too; this asserts it against
+ *      and every template, a contributor variant's volunteer word set included (1.3.0), and the
+ *      document's own `verify` member is that sentence. The schemas pin the sentence too; this asserts it against
  *      the configured host rather than against a literal, which is the half a rename would break.
  *   5. NO CURRENCY FIGURE, ANYWHERE IN THE DOCUMENT. A kit publishes a pattern with braced
  *      placeholders, never one organisation's filled-in claim, and a figure inside a document the
@@ -101,22 +102,25 @@ for (const [version, id] of KIT_SCHEMA_IDS) {
 
 /**
  * Every claim a kit publishes that must end with the verification sentence, as [where, text]:
- * each line whose `use` is not `clause`, and each template. A member that is not a string is the
- * schema's to report, not this rule's.
+ * each line whose `use` is not `clause`, and each template, of every variant and of a contributor
+ * variant's volunteer word set (1.3.0, ops decision D181), which publishes lines and templates of its
+ * own. A member that is not a string is the schema's to report, not this rule's.
  */
 function claimsOf(kit) {
   const claims = [];
   for (const [name, variant] of Object.entries(kit?.variants ?? {})) {
-    (Array.isArray(variant?.lines) ? variant.lines : []).forEach((line, index) => {
-      if (line?.use !== 'clause' && typeof line?.text === 'string') {
-        claims.push([`variants.${name}.lines[${index}] (${line.id})`, line.text]);
-      }
-    });
-    (Array.isArray(variant?.templates) ? variant.templates : []).forEach((template, index) => {
-      if (typeof template?.text === 'string') {
-        claims.push([`variants.${name}.templates[${index}] (${template.id})`, template.text]);
-      }
-    });
+    for (const [at, set] of [[`variants.${name}`, variant], [`variants.${name}.volunteer`, variant?.volunteer]]) {
+      (Array.isArray(set?.lines) ? set.lines : []).forEach((line, index) => {
+        if (line?.use !== 'clause' && typeof line?.text === 'string') {
+          claims.push([`${at}.lines[${index}] (${line.id})`, line.text]);
+        }
+      });
+      (Array.isArray(set?.templates) ? set.templates : []).forEach((template, index) => {
+        if (typeof template?.text === 'string') {
+          claims.push([`${at}.templates[${index}] (${template.id})`, template.text]);
+        }
+      });
+    }
   }
   return claims;
 }
@@ -461,6 +465,12 @@ function selfTest() {
     change(kit);
     return kit;
   };
+  /** A contributor variant whose own claims are well formed and whose volunteer word set takes `set`'s lines or templates. */
+  const volunteerSet = (set) => ({
+    lines: [{ id: 'holder', use: 'base', text: `{login} contributed to {projects}. ${cfg.verifyStatement}` }],
+    templates: [],
+    volunteer: { lines: [{ id: 'holder', use: 'base', text: `{login} volunteered on {projects}. ${cfg.verifyStatement}` }], templates: [], ...set },
+  });
 
   const cases = [
     ['kit-9.json', wellFormed, null],
@@ -471,6 +481,9 @@ function selfTest() {
     ['kit-9.json', { ...wellFormed, schemaVersion: undefined }, 'names no published kit shape'],
     ['kit-9.json', changed((kit) => { kit.variants.supporter.lines[0].text = '{organisation} holds something.'; }), 'lines[0] (holder) must end with'],
     ['kit-9.json', changed((kit) => { kit.variants.supporter.templates[0].text = 'Verify at purposesource.org/verify.'; }), 'templates[0] (post) must end with'],
+    // A contributor variant's volunteer word set publishes claims of its own (claim-kit.v1 1.3.0, ops decision D181).
+    ['kit-9.json', changed((kit) => { kit.variants.contributor = volunteerSet({ lines: [{ id: 'holder', use: 'base', text: '{login} volunteered on {projects}.' }] }); }), 'variants.contributor.volunteer.lines[0] (holder) must end with'],
+    ['kit-9.json', changed((kit) => { kit.variants.contributor = volunteerSet({ templates: [{ id: 'post', channel: 'short-post', text: 'Happy to have volunteered on {projects}.' }] }); }), 'variants.contributor.volunteer.templates[0] (post) must end with'],
     ['kit-9.json', changed((kit) => { kit.verify = 'verify at purposesource.org'; }), 'verify must be'],
   ];
 

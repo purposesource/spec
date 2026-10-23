@@ -1515,7 +1515,9 @@ value inside `v1` is not additive (versioning policy 1).*
   volunteer face without the share line, a volunteer status-only sentence naming `{login}`, a
   volunteer word set with a member of its own, without its base line, or with a line that does not
   end with the verification sentence, and a volunteer word set on each of the other three variants.
-  The money-line case no longer spells the retired words.
+  The money-line case no longer spells the retired words. Its rule 4 (every claim ends with the
+  verification sentence spelled from the configuration) reads the volunteer word set's lines and
+  templates as well as the variant's own, and its self-test proves both able to fail.
 
 ## ct-segment.v1.json
 
