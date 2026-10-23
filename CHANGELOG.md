@@ -3112,6 +3112,31 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   (`Project Entitlement · verified`), validated like the main one; `check:examples` validates 59
   examples (24 of them further examples of a schema's shape).
 
+### 1.3.0 — unreleased (2026-10-23; ops decision D182 item 1 and its dated note of 2026-10-23T20:55Z, CW-49) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: what a certificate badge's canonical messages cover moves, and the
+  descriptions say so. No member, constraint, enum or example moved, and every body that validated
+  still validates.
+- **A company's paid certificate is never read as erased.** An erasure's tombstone is a record
+  revoked at the subject's request (`subject-request`) of any type but `supporter`: a person's
+  erasure, a contributor's, a steward's or a waiver's, still answers `not found` with `isError`. A
+  company's paid certificate (`supporter`) is revoked under the same class by commerce when its
+  payment is refunded in full or an upheld chargeback takes it back (ops decision D90's dated note of
+  2026-10-23), which erases nothing, so it reads as revoked, as its verify page reads it ("Revoked on
+  {date} ({class})"). The edge has read it so since website `068e68d`.
+- **A listed company's revoked Entitlement has words**: `{lane} Entitlement · revoked`, coloured
+  `#8a1f1f` as a revoked certificate's, whatever its revocation class. These are kit-1's own words
+  (`variants.supporter.badge`: "{status} is valid, expired or revoked"), drawn exactly as the two
+  company rows of 1.2.0 are; 1.2.0 left the status out because the publicity plan's table has no
+  company row for it. The orchestrator's decision of 2026-10-23 (CW-49): a company's paid certificate
+  once revoked reads revoked on every public surface, in the kit's form on its badge (website
+  `068e68d` drew the bare `revoked`; CW-49's website follow-up draws the kit's form).
+- Every other organisation's certificate keeps its `404`, an unlisted company's revoked or not, and
+  so does a listed company's superseded Entitlement. The message's description no longer says a
+  listed company's certificate can be erased into `not found`: a `supporter` certificate's
+  revocation at the subject's request is no erasure. No message names the organisation or states a
+  band, an amount or a period.
+
 ## stats.v1.json
 
 ### 1.0.0 — unreleased
@@ -4604,6 +4629,31 @@ which kind of change each entry was.
   (`tests/unit/jwks.test.mjs`) and its plane gate stay as they are; the platform validates its rendered set against the
   same component. One example is added to `getJwks`'s `200`, `afterCompromise`, and `check:openapi-examples` validates
   70 examples (69 before).
+
+### 1.16.0 — unreleased (2026-10-23; ops decision D182 item 1 and its dated note of 2026-10-23T20:55Z, CW-49) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: `getCertificateBadge` answers two kinds of record differently from what
+  1.13.0 described, so documented responses change. No operation, status code of an operation, cache
+  class, error code, schema member, enum value or example moved; `badge.v1` 1.3.0 documents the
+  messages. The edge has read a `supporter` certificate's revocation so since website `068e68d`
+  (CW-49's website half), and draws the kit's form with CW-49's website follow-up; this release
+  makes the description true of both.
+- **A company's paid certificate is no erasure.** "Any certificate whose record was erased (a
+  revocation at the subject's request, whatever the certificate's class)" now reads: a record revoked
+  at the subject's request (`subject-request`) of any type but `supporter`. A person's erasure (a
+  contributor's, a steward's, a waiver's) still answers the `not found` badge, the same bytes as an
+  unknown id. A company's paid certificate (`supporter`) revoked under that class, which commerce
+  writes at a full refund or an upheld chargeback (ops decision D90's dated note of 2026-10-23),
+  reads as revoked, as its verify page does.
+- **A listed company's revoked Entitlement says `{lane} Entitlement · revoked`**, whatever its
+  revocation class, instead of `404`: kit-1's own badge words (its `{status}` is valid, expired or
+  revoked), drawn as the two company rows are, its card `Purpose Source` over the same words and the
+  live line. Its verify page says "Revoked on {date} ({class})", so the badge claims no more than the
+  page. An unlisted company's certificate, revoked or not, and a listed company's superseded
+  Entitlement still answer `404 artifact_not_found`, and the `404`'s description says which, and
+  which records are erased.
+- The description does not gate the website's tests, so the order of pushes does not matter for
+  them. `check:openapi-examples` validates the same 70 examples.
 
 ## coverage/cov-v1.ts
 

@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.15.0
+  version: 1.16.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -1084,17 +1084,24 @@ paths:
         only on a card whose verify page names the holder, and a status-only record's cannot, so its
         card says nothing more than its flat badge does (ops decision D137 item 4). `{years}` is the
         period's year or its first and last year (`2025–2026`). Every card's last line is
-        `Live status from purposesource.org`. A revoked certificate says `revoked`, a superseded one
-        `updated, see new`, and a certificate signed with a non-production key says `test` (served
-        off production only). No badge carries a name, a login, a project name, a figure or a point.
+        `Live status from purposesource.org`. A revoked certificate says `revoked` (a listed company's
+        Entitlement says it in the claim kit's words, below), a superseded one `updated, see new`, and
+        a certificate signed with a non-production key says `test` (served off production only). No
+        badge carries a name, a login, a project name, a figure or a point.
         The card of a certificate shown in full draws the certificate's rosette, a pattern from the
         token's public hash: it is decoration, and it proves nothing.
 
         **A certificate that is not published answers like one that never existed:** an unknown
-        identifier, a malformed one, and any certificate whose record was erased (a revocation at
-        the subject's request, whatever the certificate's class) all answer `200` with the same
-        `not found` badge, the same bytes for every one of them (the `.json` body carries
-        `isError: true`), so a README never shows a broken image and no probe tells them apart.
+        identifier, a malformed one, and any certificate whose record was erased all answer `200`
+        with the same `not found` badge, the same bytes for every one of them (the `.json` body
+        carries `isError: true`), so a README never shows a broken image and no probe tells them
+        apart. A record reads as erased when it was revoked at the subject's request
+        (`subject-request`) and its type is any but `supporter`: a person's erasure leaves exactly
+        that tombstone (`certificate-record.v1`), whatever the certificate's type, a contributor's,
+        a steward's or a waiver's. A company's paid certificate (`supporter`) revoked under the same
+        class is no erasure: commerce revokes it so when its payment is refunded in full or an upheld
+        chargeback takes it back, and its badge reads it as revoked, as its verify page does
+        ("Revoked on {date} ({class})").
 
         **A badge never claims more than its verify page:** a contributor's certificate whose record
         carries no transparency-log position (`ct` null or absent, or without an integer `seq` and
@@ -1102,21 +1109,24 @@ paths:
         the same bytes, whatever its status and display, because its verify page says it is not
         verified. A certificate signed with a non-production key still says `test` off production.
 
-        **An organisation's certificate has badge words in two cases only.** A listed company's
-        Entitlement (a `supporter.entitlement` certificate shown in full, as its payer asked to be
-        listed, and logged, as a credited contributor's must be) says the claim kit's badge words
-        after the label, from the kit's
+        **An organisation's certificate has badge words as a listed company's Entitlement only.** A
+        listed company's Entitlement (a `supporter.entitlement` certificate shown in full, as its
+        payer asked to be listed, and logged, as a credited contributor's must be) says the claim
+        kit's badge words after the label, from the kit's
         `Purpose Source · {lane} Entitlement · {status}`: `{lane} Entitlement · verified` while its
-        status is `valid` (the word for a certificate in force: no picture says "valid"), and
-        `{lane} Entitlement · expired` once it is expired by the clock, where `{lane}` is `Project`,
-        `Portfolio` or `Pass`, the lane its scope names. Its card reads `Purpose Source` over the same words and the live line. It is
-        typographic, with no rosette, and names no organisation, band, amount or period. Every other
-        organisation's certificate (an unlisted company, a waiver, a sponsor or another supporter
-        variant, a person's supporter certificate, a revoked or superseded Entitlement, and an
-        Entitlement with any other `disclosure` or with no log position) has no badge words yet, and
-        a steward's has none at all; their badge files answer `404 artifact_not_found`
-        unless the record was erased. A file name of none of the four shapes answers the same `404`
-        and reads nothing.
+        status is `valid` (the word for a certificate in force: no picture says "valid"),
+        `{lane} Entitlement · expired` once it is expired by the clock, and
+        `{lane} Entitlement · revoked` once it is revoked, whatever its revocation class (a full
+        refund or an upheld chargeback, which revoke it at the subject's request, included), where
+        `{lane}` is `Project`, `Portfolio` or `Pass`, the lane its scope names. Its card reads
+        `Purpose Source` over the same words and the live line. It is typographic, with no rosette,
+        and names no organisation, band, amount or period. Every other organisation's certificate
+        (an unlisted company, revoked or not, a waiver, a sponsor or another supporter variant, a
+        person's supporter certificate, a superseded Entitlement, and an Entitlement with any other
+        `disclosure` or with no log position) has no badge words yet, and a steward's has none at
+        all; their badge files answer `404 artifact_not_found` unless the record was erased (above:
+        never a `supporter` certificate's). A file name of none of the four shapes answers the same
+        `404` and reads nothing.
 
         **A non-production plane, or a non-production key, on production answers
         `400 sandbox_artifact_on_prod`**, as the certificate record's route does: a production
@@ -1233,8 +1243,9 @@ paths:
         '404':
           description: |
             The file name is none of the four badge shapes (nothing was read), or the certificate is
-            a steward's or an organisation's other than a listed company's logged Entitlement in force
-            or expired by the clock, for which no badge words are drawn, and its record was not erased.
+            a steward's or an organisation's other than a listed company's logged Entitlement in force,
+            expired by the clock or revoked, for which no badge words are drawn, and its record was not
+            erased (revoked at the subject's request, on a certificate of any type but `supporter`).
           content:
             application/json:
               schema:
