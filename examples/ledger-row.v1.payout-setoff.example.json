@@ -1,0 +1,21 @@
+{
+  "ledId": "led_01k7hyz19ba047a6qcgfszymsw",
+  "month": "2027-11",
+  "seq": 416,
+  "type": "payout-setoff",
+  "amountMinor": -500,
+  "currency": "CHF",
+  "entId": "ent_01knm9zy3r711zr16ky5q3ghdf",
+  "coId": "co_01k0b2hsfjxd2sphyrjqgfg0xd",
+  "lane": "project",
+  "repoNodeId": "R_kgDOAbc456",
+  "batchId": "bat_01kmk6k96qb489wd6rp6djeb3g",
+  "externalKey": "set:SAMPLE-REMIT-002711:adj_01kqj2jwgq37p8g7t86bzykygw",
+  "note": "The payment rail kept 500 of its fee on the refund of this purchase: the refund cost the payout 9500, and its intake row is 9000.",
+  "emittingJob": "jobs.allocator",
+  "createdAt": "2027-12-01T09:10:00Z",
+  "prevHash": "b0337117135634fbc29013c503dcda507794a96f1fea361ef0894a1d29cf57e0",
+  "rowHash": "a509b6e51be68539f8e5ec40b585914b2a65dc6df5140097a4cc6eea10cac727",
+  "payoutRef": "SAMPLE-REMIT-002711",
+  "movement": "retained-fee"
+}

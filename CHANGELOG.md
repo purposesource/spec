@@ -1867,6 +1867,61 @@ row the new-file rule binds absolutely.
   The per-payout clock and the token's name are unchanged. No property, type, enum or meaning
   of an existing row changes.
 
+### 1.6.0 — unreleased (2026-10-19; the credit-month key: ops decisions D60 item 2, adopted by D64 item 1, D123 item 2 and D125 item 3)
+
+- Additive. Three row types join the enum. They are the rows the close of a month on the
+  credit-month key writes inside its lock, before its allocation rows (Calculation Rules Nr. 4:
+  a payout's month is the month of its first receipt):
+  - `payout-assign`: one per intake row a carried payout settles. It names the intake row
+    (`assignedLedId`), that row's month (`assignedMonth`), its amount with its sign
+    (`assignedAmountMinor`) and the payout (`payoutRef`). Its own `amountMinor` is 0, so the
+    chain's sum counts nothing twice; the close's pool counts `assignedAmountMinor`. The intake
+    row keeps the month it was booked in and is never touched.
+  - `payout-setoff`: one per deduction or credit the payment rail booked on a carried payout
+    with no intake row of its own: its transfer fee, a fee kept on a refund or charged on a
+    chargeback, a credit, a rebate, a chargeback warning and its reversal, a fee handed back on
+    refunded tax, and the two amounts a close with a named divergence writes (`unexplained`,
+    `unitemised`). Each reduces or adds to the net money, as ops decision D123 item 2 rules, and
+    none is a running cost of the Association.
+  - `interest-in`: one per credit of interest on the fees account, passed on with the close
+    without costs or reserve retention (statutes Art. 6a(3)).
+- Additive. Five optional members, each carried only by its own types: `assignedLedId`,
+  `assignedMonth`, `assignedAmountMinor`, `payoutRef` (1 to 120 characters, the payout's
+  remittance reference) and `movement` (ten values). A `payout-assign` row also carries the
+  `scope` of the term its intake row's money arrived for, copied in its three members, so a
+  credit-month month's allocation can be re-derived from its own file.
+- The shape rules are four conditionals:
+  - `payout-assign`: `amountMinor` 0; the four assignment members and `externalKey` required;
+    `externalKey` is `asg:` and a `led_` id; no `movement`.
+  - `payout-setoff`: `payoutRef`, `movement` and `externalKey` required; `externalKey` starts
+    `set:` and names the movement after a second colon; no assignment member and no `scope`.
+  - `interest-in`: `amountMinor` above 0; `externalKey` is `int:` and a `bsl_` id, the fees
+    account's statement line that credited the interest; none of the five members and no
+    `scope`.
+  - Every other type: none of the five members. `scope` stays open to the types that carried it
+    before.
+
+  What a schema cannot say, a reader checks across rows: a `payout-assign` row's `externalKey`
+  is `asg:` and its own `assignedLedId`; no `assignedLedId` appears on two `payout-assign` rows,
+  in any months; and the assigned intake row is in `assignedMonth` with that amount, payer,
+  purchase, lane, repository and scope.
+- `movement` has no value for a charge a bank takes off a payout before the fees account credits
+  it. Under the recorded default that charge is a bank charge of the fees account, a direct cost
+  (statutes Art. 6(1) item 1), not a set-off. The question is still open: were the charge ruled a
+  reduction of the payout's net instead, `bank-incoming-charge` would join the enum by a later
+  minor.
+- Wording. The file's description, `type`, `month`, `amountMinor`, `scope`, `externalKey` and
+  `note` say what the new rows are. `holdStatus` now says each share is transferred "no later
+  than the deadline of statutes Art. 6a(4), `transferDueBy` per payout" in the month's
+  `cost-support.v1` document, the earliest of them where a close carries several payouts.
+- Nothing is removed and no rule of an existing type moves, so every row valid under 1.5.4 is
+  valid under 1.6.0. No committed row's `rowHash` preimage moves either: no existing row carries
+  a new member (FS07-040).
+- Three further examples are rows of the November 2027 close in `ledger-export.v1`'s credit-month
+  example: `examples/ledger-row.v1.payout-assign.example.json`,
+  `examples/ledger-row.v1.payout-setoff.example.json` and
+  `examples/ledger-row.v1.interest-in.example.json`.
+
 ## ledger-export.v1.json
 
 ### 1.0.0 — unreleased
@@ -2151,6 +2206,48 @@ reasoning: no month export has ever been published with a row in it.
   of the following month and no later than sixty days after the credit of the month's earliest
   rail payout. No property, type, enum or meaning changes.
 
+### 1.9.0 — unreleased (2026-10-19; the credit-month key, with `ledger-row.v1` 1.6.0 and `cost-support.v1` 1.4.0)
+
+- Additive. `poolBasis`, `settlement-month` or `credit-month`, says which rule the month's pool
+  follows, so a reader knows which rows to add up (FS07-020; ops decision D60 item 2, adopted by
+  D64 item 1).
+  - `credit-month`: the pool is the Purpose Fees of the payouts the close carries: those credited
+    in the month, and any credited earlier and found only after its own month's close, which the
+    next close carries under its own key (ops decision D125 item 3). It is the sum of
+    `assignedAmountMinor` over the `payout-assign` rows and of `amountMinor` over the
+    `payout-setoff` rows. The intake rows booked in such a month count in the month whose close
+    assigns them, and interest is passed on beside the pool.
+  - `settlement-month`: the pool is the intake booked in the month, as before.
+  - A producer writes `credit-month` on every month from the first month on the key, open or
+    locked. Absent means `settlement-month`: a month locked before the key keeps its bytes
+    (FS07-051), and a P-M2 file allocates nothing.
+- `totals.pool` gains its description: the pool by the rule `poolBasis` names. On
+  `credit-month` it is written once the month is locked and equals the month's `cost-support.v1`
+  `purposeFeesNetMinor`; interest is never part of it.
+- Additive, mirroring `ledger-row.v1` 1.6.0. The export row admits the three new row types and
+  the five members: a month on the credit-month key publishes its close's rows, and each must
+  validate here unchanged so the chain re-walks from the export alone. The five members are
+  APPENDED after `rowHash`, in `ledger-row.v1`'s order. The export row stays `ledger-row.v1`'s
+  member set plus `date`, and every column a CSV twin already carries keeps its position.
+- The CSV twin's header is now written down, in `rows`: `exportRow`'s members in their order,
+  as both producers already render it. A month whose export does not say `poolBasis`
+  `credit-month` leaves out the five new members, which no row of such a month can carry. So no
+  twin already published changes a byte (FS07-051), and a credit-month twin carries the five as
+  its last five columns.
+- Wording (ops decisions D124 and D125, as in 1.8.1). The export row's `holdStatus` says each
+  share is transferred "no later than the deadline of statutes Art. 6a(4), `transferDueBy` per
+  payout" in the month's `cost-support.v1` document, the earliest of them where a close carries
+  several payouts. It names no number.
+- `x-psn.phase` names the credit-month months. Nothing is removed and no meaning moves: every
+  document valid under 1.8.1 is valid under 1.9.0, and the main example is unchanged.
+- A further example, `examples/ledger-export.v1.credit-month.example.json`: November 2027,
+  locked on 1 December on the credit-month key. It carries a sale booked in November that is not
+  in November's pool; four assignments (three October intake rows paid by payout
+  `SAMPLE-REMIT-002711`, and a September one paid by `SAMPLE-REMIT-002710`, which reached another
+  account of the Association in October and was found after October's close); three set-offs; an
+  interest credit; the charged line, the retention, four transfers and the lock. Its sums agree
+  with `cost-support.v1`'s example of the same month.
+
 ## ledger-chain.v1.json
 
 ### 1.0.0 — unreleased
@@ -2389,6 +2486,51 @@ reasoning: no month export has ever been published with a row in it.
   §4(4)). The description now names the deadline of statutes Art. 6a(4), counted from the
   credit of the month's earliest rail payout, without its number. No property, type, enum or
   meaning changes.
+
+### 1.4.0 — unreleased (2026-10-19; the credit-month key, with `ledger-row.v1` 1.6.0 and `ledger-export.v1` 1.9.0; ops decisions D123 item 2 and D125)
+
+- Additive. `payouts[]` (`$defs.payout`) lists the payouts the month's close carries, on a month
+  whose pool follows the payouts credited in it (`ledger-export.v1` `poolBasis` `credit-month`;
+  Calculation Rules Nr. 4). It is present on every such month, empty when the close carried
+  none, and absent on any other month. Each payout carries:
+  - `payoutRef`, the remittance reference that groups the month's `payout-assign` and
+    `payout-setoff` ledger rows;
+  - `creditedOn`, the day the Association first received it (the first receipt on another
+    account of the Association, where it arrived there first; statutes Art. 6a(1)), with
+    `creditMonth` and `closedLate`: credited in an earlier month and found only after that
+    month's close (ops decision D125 item 3);
+  - `netMinor`, what the payment rail paid, negative for a debit of a negative balance;
+    `setOffs[]`, the rail's own deductions and credits, one entry per movement, with the
+    movements of `ledger-row.v1` (ops decision D123 item 2); `heldMinor`, the part that belongs
+    to purchases on a hold; and `bankDeductionMinor`, what a bank took off before the credit;
+  - `deadlineDays` (60 since ops decision D125) and `transferDueBy`, `creditedOn` plus those
+    days: the payout's own deadline (statutes Art. 6a(4));
+  - `evidence`: the rail's statement of the payout and, once it is matched, the fees account's
+    line that credited it; never a statement file or its hash.
+- Identity (6) is new: where `payouts[]` is present, `purposeFeesNetMinor` is the sum over it of
+  `netMinor` − `heldMinor`, and each `transferDueBy` is `creditedOn` plus `deadlineDays` days.
+  The month's ledger rows grouped by `payoutRef` add up to each payout's `netMinor` −
+  `heldMinor`. Only a ledger that moved to the key from the older rule can see a payout carry an
+  item an earlier month already allocated; such an item is in neither figure.
+- Additive. `interestMinor`: the interest credited to the fees account that the close passes on,
+  the sum of the month's `interest-in` rows. Interest is not Purpose Fees and is passed on
+  without costs or reserve retention (statutes Art. 6a(3)), so identity (3) becomes
+  `passedOnMinor` = `purposeFeesNetMinor` − `chargedToFeesMinor` − `reserveRetentionMinor` +
+  `interestMinor`. Absent, it is 0, and every identity reads as before.
+- `bankDeductionMinor` follows the recorded default: a bank's charge on an incoming payout does
+  not reduce the payout's Purpose Fees, which are the payment rail's figure (statutes Art. 5(5)),
+  and is a bank charge of the fees account (statutes Art. 6(1) item 1). The question is still
+  open, and `ledger-row.v1` 1.6.0 says what would change were it ruled the other way.
+- Wording. `purposeFeesNetMinor` says what F is on a credit-month month. `transfers` says each
+  share goes "no later than the deadline of statutes Art. 6a(4), `transferDueBy` per payout in
+  `payouts[]`", the earliest of them where the close carries several, as `ledger-row.v1` 1.6.0
+  and `ledger-export.v1` 1.9.0 say it.
+- Nothing is removed and no meaning moves: every document valid under 1.3.1 is valid under
+  1.4.0, and the three examples are unchanged.
+- A further example, `examples/cost-support.v1.credit-month.example.json`: the close of November
+  2027, the month of `ledger-export.v1`'s credit-month example. Two payouts, one of them
+  October's and found late; a held purchase; three set-offs; an interest credit of 75; and four
+  transfers due no later than 3 December 2027, the late payout's deadline.
 
 ## fees-account-statement.v1.json
 
