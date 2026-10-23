@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-04-05T08:00:00Z",
+  "source": "fixture",
+  "publishedAt": "2027-03-12T14:00:00Z",
+  "sha256": "f31961ea0c08ac7f247c49bf8e8d00cafac1c081a9d11dc43ad4adeac42357c1",
+  "supersedesSha256": "90052363414e66ddab79a0725cddcc103710d62caf935e9a6b4779c62d84efde",
+  "document": {
+    "consultationId": "csl_01mb2r8dqhv6xc0s3kfnj7aw5p",
+    "version": 2,
+    "kind": "withdrawal",
+    "title": "Should projects show the board's answer?",
+    "summary": "",
+    "audience": "admins",
+    "sample": false,
+    "advisory": true,
+    "algoVersion": null,
+    "provisional": false,
+    "resolution": {
+      "date": "2027-03-04",
+      "reference": "BR-2027-03-04",
+      "recusals": null
+    },
+    "openedAt": "2027-03-05T12:00:00Z",
+    "closesAt": "2027-04-04T12:00:00Z",
+    "asked": {
+      "from": 15,
+      "to": 19
+    },
+    "rule": {
+      "version": "csl-electorate-v1",
+      "contributorWindowMonths": null,
+      "windowFirst": null,
+      "windowLast": null,
+      "adminMinAgeMonths": 12,
+      "adminMinStars": 50,
+      "adminsPerOwner": 3,
+      "minimumAsked": 15
+    },
+    "questions": [
+      {
+        "no": 1,
+        "kind": "single",
+        "prompt": "Should a registered project show the board's answer in its README?",
+        "required": true,
+        "options": [
+          {
+            "no": 1,
+            "label": "Yes"
+          },
+          {
+            "no": 2,
+            "label": "No"
+          },
+          {
+            "no": 3,
+            "label": "Only if the project chooses to"
+          }
+        ]
+      }
+    ],
+    "withdrawal": {
+      "at": "2027-03-12T14:00:00Z",
+      "reference": "BR-2027-03-12"
+    }
+  }
+}

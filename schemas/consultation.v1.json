@@ -1,0 +1,563 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/consultation.v1.json",
+  "title": "Advisory vote — /consultations/{consultationId}.json",
+  "description": "The latest published version of one advisory vote the Association's board asked, exactly as the platform stored it, with the facts a reader needs to check it. The board asks the people who build and run the software for advice: a result is advice only, and the board decides (ops decision D143). The platform computes each version of a vote's public document once, at the act that publishes it, with the small-count rule already applied, and stores it numbered and chained (platform migration 0098, `consultation_publications`, append-only for every role). This file carries the newest of those versions: `document` is that version's document, byte for byte the JSON value the platform stored; `sha256` is the SHA-256 of `document` in its RFC 8785 canonical form; `supersedesSha256` is the same hash of the version it replaced, so a reader who kept an earlier copy can check that this one follows it.\n\nTHE VERSIONS. Version 1, `announcement`, is written when the vote opens: what it asks, of whom (as a range of five), and until when. When it closes, the close counts the answers, wipes them in the same step and writes the `result`, whose `boardAnswer` is null while the board's answer is pending. The board's answer is published as an `answer`, the result again with `boardAnswer` set; a later answer act publishes the next `answer`. A vote withdrawn while it was open publishes a `withdrawal` instead of any result. Nothing else is ever published, and a version, once published, is never changed: a correction is the next version.\n\nWHAT IS NEVER IN IT. No person: no name, login, account or key, and no list of who was asked. No ballot and no written answer, ever: written answers are read by the Association's stewards and board without the writer's name, and are never published. No count by group, by repository or by any signal, so nothing can be subtracted from anything else. For project admins, not the list of projects that qualified, nor any count per project. The repository figures under `repositories` count projects, never people.\n\nTHE SMALL-COUNT RULE, as the stored figures show it (ops decision D143 item 11). The people asked are published only as a range of five, `asked` (from 5⌊N/5⌋ to that plus 4). The turnout reads `fewerThan5` when fewer than 5 answered, `almostAll` when fewer than 5 of those asked did not answer, and the number otherwise. Counts per question are published only when at least 10 answered and at least 5 of those asked did not; then a question publishes every one of its counts if each is at least 5, and none of them otherwise (`withheld`). A written-answer question publishes no count. Every count this document can carry is therefore at least 5.\n\nWHAT A READER CHECKS, stated here because JSON Schema cannot relate two numbers or two documents: `sha256` is the SHA-256 of `document`'s RFC 8785 form; `asked.to` is `asked.from` + 4; a numeric turnout is no more than `asked.to`; question numbers run 1, 2, 3… in order, and so do each question's option numbers; a published count names every option of its question once, in order, and its option counts sum to `respondents` for a single-choice question, while for a tick-any question each option's `count` and `notTicked` sum to `respondents`; an optional question's `noAnswer` is the numeric turnout less its `respondents`; a later version repeats every frozen fact of version 1 (the title, the summary, the audience, the board's resolution, the open period, the people asked, the rule and the questions' words); the open period runs forward (`openedAt` before `closesAt`), `closedAt` is never before `closesAt` and a withdrawal never before `openedAt`; each version's `publishedAt` is no earlier than that of the version it replaced; and the file's `generatedAt` is never earlier than `publishedAt`. The platform's renderer refuses to publish a version that fails any of these, and withholds every `/consultations/` path of that run instead.\n\nPRE-RELEASE. Nothing outside the build depends on this contract yet, so it changes in place inside its v1 until the public launch (versioning policy rule 5).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (producer: `jobs.index-build`, from `consultation_publications`, platform migration 0098, which the build reads as `indexbuild_ro`, the only role granted it besides the api's writer). Pre-release: published on the dev plane from the first index-build run after its renderer ships; not routed by the edge in v1.",
+    "artifactPath": "/consultations/{consultationId}.json — rewritten when a vote publishes its next version; read from the plane at build time and mirrored by the site under /artifacts/consultations/; not served by the edge in v1",
+    "authoritative": true,
+    "producer": "`jobs.index-build` (P-M3), the only `blob-public` writer, from every stored version of every vote: the platform's api writes each version once, at the act that publishes it (the opening, the close, the board's answer, a withdrawal), and the build publishes the newest one",
+    "consumers": [
+      "the public results pages, /voting and /voting/{consultationId}",
+      "members, auditors and anyone checking what the board was told",
+      "the consultations index, `consultation-index.v1`, which lists each vote's newest version by its number and `sha256`"
+    ],
+    "fsRefs": [
+      "FS-00 §1 (public surfaces read published artifacts only)",
+      "FS-00 §6.2 (the artifact plane)",
+      "FS06-020 (a figure derived from PP-v0 is provisional)",
+      "ops decision D143 (advisory votes; item 11: the small-count rule)",
+      "platform migration 0098 (`consultation_publications`)"
+    ],
+    "vsRefs": ["VS-05"],
+    "changelog": "CHANGELOG.md#consultationv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "source", "publishedAt", "sha256", "supersedesSha256", "document"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": {
+      "$ref": "#/$defs/instant",
+      "description": "The plane's envelope instant (FS-00 §6.2): derived from the rows the build read, never from a clock. Every version's publication instant is among those rows, so it is never earlier than `publishedAt`."
+    },
+    "source": {
+      "enum": ["sample", "fixture", "platform"],
+      "description": "Which plane produced this document, in the envelope's vocabulary (FS-00 §6.2): `platform` is `jobs.index-build` in `PSN_ENV=prod`, `fixture` every other environment, `sample` a sample plane. `sample` and `fixture` declare a non-production plane, which a production deployment refuses to serve. A `platform` document never carries a sample vote. `registry-v0` is not admitted: the curated registry never held a vote."
+    },
+    "publishedAt": {
+      "$ref": "#/$defs/instant",
+      "description": "When the act that published this version ran, as the platform stored it: the opening for the announcement, the close for the result, the board's answer act for an answer, the withdrawal for a withdrawal notice."
+    },
+    "sha256": {
+      "$ref": "#/$defs/sha256",
+      "description": "The SHA-256 of `document` in its RFC 8785 canonical form, as the platform computed it when it stored the version. The consultations index lists the same value for this version."
+    },
+    "supersedesSha256": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "The `sha256` of the version this one replaced: null exactly on version 1, which replaces nothing. The platform refuses to store a version that does not name the version just before it, so the published history of a vote is one unbroken chain."
+    },
+    "document": { "$ref": "#/$defs/document" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "document": { "properties": { "version": { "const": 1 } }, "required": ["version"] } },
+        "required": ["document"]
+      },
+      "then": { "properties": { "supersedesSha256": { "type": "null" } } },
+      "else": { "properties": { "supersedesSha256": { "type": "string" } } }
+    },
+    {
+      "if": { "properties": { "source": { "const": "platform" } }, "required": ["source"] },
+      "then": { "properties": { "document": { "properties": { "sample": { "const": false } } } } }
+    }
+  ],
+  "$defs": {
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One version of a vote's public document, as the platform stored it. Every version repeats the frozen facts of the opening: the vote, whom it asks, the board's resolution, the open period, the people asked as a range of five, the rule with the numbers it used, and the questions. A result or an answer adds the close's figures and the board's answer (null while pending); a withdrawal adds the board's reference for it.",
+      "required": [
+        "consultationId",
+        "version",
+        "kind",
+        "title",
+        "summary",
+        "audience",
+        "sample",
+        "advisory",
+        "algoVersion",
+        "provisional",
+        "resolution",
+        "openedAt",
+        "closesAt",
+        "asked",
+        "rule",
+        "questions"
+      ],
+      "properties": {
+        "consultationId": {
+          "type": "string",
+          "pattern": "^csl_[0-9a-hjkmnp-tv-z]{26}$",
+          "description": "The vote's id: `csl_` and a lowercase ULID. It is the file's name."
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "This version's number, from 1: one more than the version it replaced."
+        },
+        "kind": {
+          "enum": ["announcement", "result", "answer", "withdrawal"],
+          "description": "What this version publishes. `announcement`: version 1, written when the vote opened; the vote takes answers until `closesAt`. `result`: the close's result, the board's answer pending. `answer`: the result with the board's answer. `withdrawal`: the vote was withdrawn while it was open, and nothing was counted."
+        },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120, "description": "The vote's title, on one line." },
+        "summary": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "What the board asks and why, in its own words; may be empty. Line breaks are kept."
+        },
+        "audience": {
+          "enum": ["contributors", "admins", "both"],
+          "description": "Whom the vote asks, chosen in the draft and frozen at the opening: people who contribute to a registered project (a project counted their work in one of the rule's closed months), people who run one (an admin of a registered project with a public track record), or both, on one combined list where each person counts once."
+        },
+        "sample": {
+          "type": "boolean",
+          "description": "True for a vote taken on the test environment to try voting out, whose board reference starts `SAMPLE-`; such a vote skips the minimum of people asked and the admin numbers, and every surface that shows it marks it SAMPLE. Never true on a `platform` document."
+        },
+        "advisory": {
+          "const": true,
+          "description": "The result is advice: the board decides, and publishes its answer beside the result."
+        },
+        "algoVersion": {
+          "type": ["string", "null"],
+          "enum": ["PP-v0", null],
+          "description": "`PP-v0` where the vote asks people who contribute, because who was asked was read from that version's monthly contribution counts; null for a vote that asks project admins alone, which reads no contribution data."
+        },
+        "provisional": {
+          "type": "boolean",
+          "description": "True exactly where `algoVersion` is set: a figure derived from PP-v0 is provisional (FS06-020)."
+        },
+        "resolution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["date", "reference", "recusals"],
+          "description": "The board resolution that opened the vote, as minuted.",
+          "properties": {
+            "date": { "$ref": "#/$defs/day", "description": "The resolution's date." },
+            "reference": { "$ref": "#/$defs/reference", "description": "Its minutes reference. A `SAMPLE-` reference marks a sample vote, and only a sample vote has one." },
+            "recusals": {
+              "type": ["string", "null"],
+              "minLength": 1,
+              "maxLength": 1000,
+              "description": "The recusals as minuted, or null when none was minuted."
+            }
+          }
+        },
+        "openedAt": { "$ref": "#/$defs/instant", "description": "When the vote opened, and who is asked was fixed." },
+        "closesAt": {
+          "$ref": "#/$defs/instant",
+          "description": "When the vote stops taking answers. The close then runs on its own, normally within minutes, and publishes the result."
+        },
+        "asked": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["from", "to"],
+          "description": "How many people were asked, as a range of five: `from` is 5⌊N/5⌋ for the N people on the frozen list, and `to` is `from` + 4. The number itself is never published. A range from 0 is a sample's, which may ask fewer than 5.",
+          "properties": {
+            "from": { "type": "integer", "minimum": 0, "multipleOf": 5 },
+            "to": { "type": "integer", "minimum": 4 }
+          }
+        },
+        "rule": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "version",
+            "contributorWindowMonths",
+            "windowFirst",
+            "windowLast",
+            "adminMinAgeMonths",
+            "adminMinStars",
+            "adminsPerOwner",
+            "minimumAsked"
+          ],
+          "description": "The rule that decided who was asked, with the numbers it used at the opening. The numbers are settings, so a later change applies only to votes opened after it; the rule keeps its name whatever the numbers.",
+          "properties": {
+            "version": { "type": "string", "pattern": "^csl-electorate-v[0-9]+$", "description": "The rule's name." },
+            "contributorWindowMonths": {
+              "type": ["integer", "null"],
+              "minimum": 1,
+              "description": "How many of the most recently closed months a contributor's credit was read from; null for a vote that asks project admins alone."
+            },
+            "windowFirst": {
+              "anyOf": [{ "$ref": "#/$defs/month" }, { "type": "null" }],
+              "description": "The first of those months, `YYYY-MM`; null where `contributorWindowMonths` is."
+            },
+            "windowLast": {
+              "anyOf": [{ "$ref": "#/$defs/month" }, { "type": "null" }],
+              "description": "The last of those months, `YYYY-MM`; null where `contributorWindowMonths` is."
+            },
+            "adminMinAgeMonths": {
+              "type": ["integer", "null"],
+              "minimum": 0,
+              "description": "How long a project had to have existed on GitHub, in whole months, for its admins to be asked; null for a vote that asks people who contribute alone, and for a sample vote."
+            },
+            "adminMinStars": {
+              "type": ["integer", "null"],
+              "minimum": 0,
+              "description": "How many GitHub stars it needed; null where `adminMinAgeMonths` is."
+            },
+            "adminsPerOwner": {
+              "type": ["integer", "null"],
+              "minimum": 1,
+              "description": "How many people one GitHub owner gives a voice to, across all its projects: the first who claimed one of its qualifying projects and still hold that claim; null where `adminMinAgeMonths` is."
+            },
+            "minimumAsked": {
+              "type": ["integer", "null"],
+              "minimum": 1,
+              "description": "The fewest people a vote may ask: no vote opens below it. Null for a sample vote, which skips it."
+            }
+          }
+        },
+        "questions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "contains": { "properties": { "kind": { "enum": ["single", "multiple"] } }, "required": ["kind"] },
+          "description": "The questions as frozen at the opening, numbered from 1 in order; at least one of them has choices. On a result or an answer each carries its counts in their published form.",
+          "items": { "$ref": "#/$defs/question" }
+        },
+        "closedAt": { "$ref": "#/$defs/instant", "description": "When the close ran: the answers were counted and wiped in the same step. On a result or an answer only." },
+        "turnout": { "$ref": "#/$defs/turnout" },
+        "perQuestion": {
+          "enum": ["published", "fewerThan10", "almostAll"],
+          "description": "Whether counts per question are published. `published`: at least 10 answered and at least 5 of those asked did not, so each question publishes its counts or withholds them on its own. `fewerThan10`: fewer than 10 answered, so nothing per question is published. `almostAll`: fewer than 5 of those asked did not answer, so nothing per question is published, because the counts would show who took part. On a result or an answer only."
+        },
+        "repositories": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["counting", "truncated", "associationOwn", "ownerUnrecorded"],
+          "description": "For a vote that asks people who contribute, the registered projects whose counts decided who was asked; null for a vote that asks project admins alone, whose projects are never counted in a result. Figures about projects, never about people. On a result or an answer only.",
+          "properties": {
+            "counting": { "type": "integer", "minimum": 0, "description": "The counting projects that credited anyone in the rule's months." },
+            "truncated": { "type": "integer", "minimum": 0, "description": "Of them, those whose count was read from a list of exactly 100 contributors, the most GitHub lists, so anyone after them was not counted." },
+            "associationOwn": { "type": "integer", "minimum": 0, "description": "Of them, the Association's own projects, which count for people who contribute." },
+            "ownerUnrecorded": { "type": "integer", "minimum": 0, "description": "Of them, those whose registry record names no owner, so they cannot be told apart from the Association's own." }
+          }
+        },
+        "boardAnswer": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["text", "date", "reference"],
+          "description": "The board's answer to the result: null on a result, while it is pending; set on an answer. There is no due date. On a result or an answer only.",
+          "properties": {
+            "text": { "type": "string", "minLength": 1, "maxLength": 20000, "description": "The answer in the board's words. Line breaks are kept." },
+            "date": { "$ref": "#/$defs/day", "description": "The day the board gave it." },
+            "reference": { "$ref": "#/$defs/reference", "description": "Its minutes reference." }
+          }
+        },
+        "withdrawal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["at", "reference"],
+          "description": "The vote was withdrawn while it was open: every answer was wiped, and nothing was counted. On a withdrawal only.",
+          "properties": {
+            "at": { "$ref": "#/$defs/instant", "description": "When it was withdrawn." },
+            "reference": { "$ref": "#/$defs/reference", "description": "The board's minutes reference for the withdrawal." }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "enum": ["result", "answer"] } }, "required": ["kind"] },
+          "then": {
+            "required": ["closedAt", "turnout", "perQuestion", "repositories", "boardAnswer"],
+            "properties": { "questions": { "items": { "required": ["counts"] } } }
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                { "required": ["closedAt"] },
+                { "required": ["turnout"] },
+                { "required": ["perQuestion"] },
+                { "required": ["repositories"] },
+                { "required": ["boardAnswer"] }
+              ]
+            },
+            "properties": { "questions": { "items": { "not": { "required": ["counts"] } } } }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "withdrawal" } }, "required": ["kind"] },
+          "then": { "required": ["withdrawal"] },
+          "else": { "not": { "required": ["withdrawal"] } }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "announcement" } }, "required": ["kind"] },
+          "then": { "properties": { "version": { "const": 1 } } },
+          "else": { "properties": { "version": { "minimum": 2 } } }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "result" } }, "required": ["kind"] },
+          "then": { "properties": { "boardAnswer": { "type": "null" } } }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "answer" } }, "required": ["kind"] },
+          "then": { "properties": { "boardAnswer": { "type": "object" } } }
+        },
+        {
+          "if": { "properties": { "audience": { "enum": ["contributors", "both"] } }, "required": ["audience"] },
+          "then": {
+            "properties": {
+              "algoVersion": { "const": "PP-v0" },
+              "provisional": { "const": true },
+              "rule": {
+                "properties": {
+                  "contributorWindowMonths": { "type": "integer" },
+                  "windowFirst": { "type": "string" },
+                  "windowLast": { "type": "string" }
+                }
+              },
+              "repositories": { "type": "object" }
+            }
+          },
+          "else": {
+            "properties": {
+              "algoVersion": { "type": "null" },
+              "provisional": { "const": false },
+              "rule": {
+                "properties": {
+                  "contributorWindowMonths": { "type": "null" },
+                  "windowFirst": { "type": "null" },
+                  "windowLast": { "type": "null" }
+                }
+              },
+              "repositories": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "audience": { "enum": ["admins", "both"] }, "sample": { "const": false } },
+            "required": ["audience", "sample"]
+          },
+          "then": {
+            "properties": {
+              "rule": {
+                "properties": {
+                  "adminMinAgeMonths": { "type": "integer" },
+                  "adminMinStars": { "type": "integer" },
+                  "adminsPerOwner": { "type": "integer" }
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "rule": {
+                "properties": {
+                  "adminMinAgeMonths": { "type": "null" },
+                  "adminMinStars": { "type": "null" },
+                  "adminsPerOwner": { "type": "null" }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "sample": { "const": true } }, "required": ["sample"] },
+          "then": {
+            "properties": {
+              "resolution": { "properties": { "reference": { "pattern": "^SAMPLE-" } } },
+              "rule": { "properties": { "minimumAsked": { "type": "null" } } }
+            }
+          },
+          "else": {
+            "properties": {
+              "resolution": { "properties": { "reference": { "not": { "pattern": "^SAMPLE-" } } } },
+              "rule": { "properties": { "minimumAsked": { "type": "integer" } } }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "turnout": { "properties": { "state": { "const": "fewerThan5" } }, "required": ["state"] } },
+            "required": ["turnout"]
+          },
+          "then": { "properties": { "perQuestion": { "const": "fewerThan10" } } }
+        },
+        {
+          "if": { "properties": { "perQuestion": { "const": "published" } }, "required": ["perQuestion"] },
+          "then": {
+            "properties": {
+              "turnout": { "properties": { "state": { "const": "count" }, "count": { "minimum": 10 } }, "required": ["count"] },
+              "questions": {
+                "items": {
+                  "if": { "properties": { "kind": { "enum": ["single", "multiple"] } }, "required": ["kind"] },
+                  "then": { "properties": { "counts": { "properties": { "state": { "enum": ["published", "withheld"] } } } } }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "perQuestion": { "enum": ["fewerThan10", "almostAll"] } }, "required": ["perQuestion"] },
+          "then": {
+            "properties": {
+              "questions": {
+                "items": {
+                  "if": { "properties": { "kind": { "enum": ["single", "multiple"] } }, "required": ["kind"] },
+                  "then": { "properties": { "counts": { "properties": { "state": { "const": "notPublished" } } } } }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "turnout": { "properties": { "state": { "const": "count" }, "count": { "minimum": 10 } }, "required": ["state", "count"] } },
+            "required": ["turnout"]
+          },
+          "then": { "properties": { "perQuestion": { "const": "published" } } }
+        },
+        {
+          "if": { "properties": { "perQuestion": { "const": "almostAll" } }, "required": ["perQuestion"] },
+          "then": { "properties": { "turnout": { "properties": { "state": { "const": "almostAll" } } } } }
+        }
+      ]
+    },
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no", "kind", "prompt", "required", "options"],
+      "description": "One question as frozen at the opening. A written-answer question is always optional and has no options; a question with choices has 2 to 12.",
+      "properties": {
+        "no": { "type": "integer", "minimum": 1, "maximum": 10, "description": "Its number, from 1, in the order asked." },
+        "kind": {
+          "enum": ["single", "multiple", "text"],
+          "description": "`single`: choose one. `multiple`: tick any that apply, at least one. `text`: a written answer, if the person wants to give one; never published, and never counted."
+        },
+        "prompt": { "type": "string", "minLength": 1, "maxLength": 1000, "description": "The question's words. Line breaks are kept." },
+        "required": { "type": "boolean", "description": "Whether an answer had to answer it. A written-answer question is never required." },
+        "options": {
+          "type": "array",
+          "maxItems": 12,
+          "description": "The choices, numbered from 1 in order; empty for a written-answer question.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["no", "label"],
+            "properties": {
+              "no": { "type": "integer", "minimum": 1, "maximum": 12 },
+              "label": { "type": "string", "minLength": 1, "maxLength": 200, "description": "The choice's words, on one line." }
+            }
+          }
+        },
+        "counts": { "$ref": "#/$defs/counts" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "text" } }, "required": ["kind"] },
+          "then": {
+            "properties": {
+              "required": { "const": false },
+              "options": { "maxItems": 0 },
+              "counts": { "properties": { "state": { "const": "noCount" } } }
+            }
+          },
+          "else": {
+            "properties": {
+              "options": { "minItems": 2 },
+              "counts": { "properties": { "state": { "not": { "const": "noCount" } } } }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "multiple" } }, "required": ["kind"] },
+          "then": { "properties": { "counts": { "properties": { "options": { "items": { "required": ["notTicked"] } } } } } }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "single" } }, "required": ["kind"] },
+          "then": { "properties": { "counts": { "properties": { "options": { "items": { "not": { "required": ["notTicked"] } } } } } } }
+        },
+        {
+          "if": { "properties": { "required": { "const": true } }, "required": ["required"] },
+          "then": { "properties": { "counts": { "properties": { "noAnswer": { "type": "null" } } } } },
+          "else": { "properties": { "counts": { "properties": { "noAnswer": { "type": "integer" } } } } }
+        }
+      ]
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "description": "One question's counts in their published form. With `published`, every count of the question, each at least 5: who answered it, each choice's count (and for a tick-any question, how many who answered it did not tick that choice), and an optional question's \"no answer\". With any other state, no figure at all.",
+      "properties": {
+        "state": {
+          "enum": ["published", "withheld", "notPublished", "noCount"],
+          "description": "`published`: every count is at least 5, so all are published. `withheld`: a count would be under 5, so none is published: \"Counts withheld for this question, so that small counts cannot be worked out.\" `notPublished`: nothing per question is published for this vote (`perQuestion` says why). `noCount`: a written-answer question, which publishes no count, ever."
+        },
+        "respondents": {
+          "type": "integer",
+          "minimum": 10,
+          "description": "How many of those who answered the vote answered this question. At least 10, because a published question has at least two counts of at least 5."
+        },
+        "noAnswer": {
+          "type": ["integer", "null"],
+          "minimum": 5,
+          "description": "For an optional question, how many who answered the vote left this question out; null for a required question."
+        },
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 12,
+          "description": "Each choice's count, by its number, in the question's order, every choice once.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["no", "count"],
+            "properties": {
+              "no": { "type": "integer", "minimum": 1, "maximum": 12 },
+              "count": { "type": "integer", "minimum": 5, "description": "How many chose it." },
+              "notTicked": {
+                "type": "integer",
+                "minimum": 5,
+                "description": "For a tick-any question only: how many who answered the question did not tick it."
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "const": "published" } }, "required": ["state"] },
+          "then": { "required": ["respondents", "noAnswer", "options"] },
+          "else": {
+            "not": { "anyOf": [{ "required": ["respondents"] }, { "required": ["noAnswer"] }, { "required": ["options"] }] }
+          }
+        }
+      ]
+    },
+    "turnout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "description": "How many answered, in its published form: `fewerThan5` when fewer than 5 answered, whatever the number; `almostAll` when fewer than 5 of those asked did not answer, with no number; otherwise `count`, the number exactly (at least 5, and no more than `asked.to`). An answer counts when it was not blank at the close. On a result or an answer only.",
+      "properties": {
+        "state": { "enum": ["fewerThan5", "almostAll", "count"] },
+        "count": { "type": "integer", "minimum": 5 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "const": "count" } }, "required": ["state"] },
+          "then": { "required": ["count"] },
+          "else": { "not": { "required": ["count"] } }
+        }
+      ]
+    },
+    "instant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "description": "A UTC instant to the second, FS-00 §6.1's one spelling."
+    },
+    "day": { "type": "string", "format": "date", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "month": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "reference": { "type": "string", "minLength": 1, "maxLength": 200 }
+  }
+}

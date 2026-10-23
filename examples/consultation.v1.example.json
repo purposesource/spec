@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-04-05T08:00:00Z",
+  "source": "fixture",
+  "publishedAt": "2027-04-02T10:11:12Z",
+  "sha256": "58cc9ebb9c559b3ada54880d7f43446f5b144e468d8ab5fb4093c6656a9c21c1",
+  "supersedesSha256": "88c8f037c3e14070568186423cbec078d7baa33ffdf104df041f8e46f5f71dc0",
+  "document": {
+    "consultationId": "csl_01mbx3q5tcz0d7r9fqkgw2he4n",
+    "version": 3,
+    "kind": "answer",
+    "title": "How often should the board ask for advice?",
+    "summary": "The board wants to know how often people who build and run the software would like to be asked, and where a new vote should be announced.\nThe result is advice: the board decides, and publishes its answer beside it.",
+    "audience": "both",
+    "sample": false,
+    "advisory": true,
+    "algoVersion": "PP-v0",
+    "provisional": true,
+    "resolution": {
+      "date": "2027-02-20",
+      "reference": "BR-2027-02-20",
+      "recusals": "A board member who runs a registered project took no part in drafting question 2."
+    },
+    "openedAt": "2027-03-01T09:00:00Z",
+    "closesAt": "2027-03-31T09:00:00Z",
+    "asked": {
+      "from": 55,
+      "to": 59
+    },
+    "rule": {
+      "version": "csl-electorate-v1",
+      "contributorWindowMonths": 3,
+      "windowFirst": "2026-11",
+      "windowLast": "2027-01",
+      "adminMinAgeMonths": 12,
+      "adminMinStars": 50,
+      "adminsPerOwner": 3,
+      "minimumAsked": 15
+    },
+    "closedAt": "2027-03-31T09:03:27Z",
+    "turnout": {
+      "state": "count",
+      "count": 41
+    },
+    "perQuestion": "published",
+    "questions": [
+      {
+        "no": 1,
+        "kind": "single",
+        "prompt": "How often should the board ask for advice?",
+        "required": true,
+        "options": [
+          {
+            "no": 1,
+            "label": "Every three months"
+          },
+          {
+            "no": 2,
+            "label": "Twice a year"
+          },
+          {
+            "no": 3,
+            "label": "Once a year"
+          }
+        ],
+        "counts": {
+          "state": "published",
+          "respondents": 41,
+          "noAnswer": null,
+          "options": [
+            {
+              "no": 1,
+              "count": 18
+            },
+            {
+              "no": 2,
+              "count": 15
+            },
+            {
+              "no": 3,
+              "count": 8
+            }
+          ]
+        }
+      },
+      {
+        "no": 2,
+        "kind": "multiple",
+        "prompt": "Where would you like a new vote to be announced?",
+        "required": true,
+        "options": [
+          {
+            "no": 1,
+            "label": "In the Voting tab"
+          },
+          {
+            "no": 2,
+            "label": "On the public site"
+          },
+          {
+            "no": 3,
+            "label": "In a project's own channels"
+          }
+        ],
+        "counts": {
+          "state": "published",
+          "respondents": 41,
+          "noAnswer": null,
+          "options": [
+            {
+              "no": 1,
+              "count": 30,
+              "notTicked": 11
+            },
+            {
+              "no": 2,
+              "count": 22,
+              "notTicked": 19
+            },
+            {
+              "no": 3,
+              "count": 9,
+              "notTicked": 32
+            }
+          ]
+        }
+      },
+      {
+        "no": 3,
+        "kind": "single",
+        "prompt": "Should a vote's summary say who drafted it?",
+        "required": false,
+        "options": [
+          {
+            "no": 1,
+            "label": "Yes"
+          },
+          {
+            "no": 2,
+            "label": "No"
+          }
+        ],
+        "counts": {
+          "state": "withheld"
+        }
+      },
+      {
+        "no": 4,
+        "kind": "text",
+        "prompt": "Is there anything else the board should hear?",
+        "required": false,
+        "options": [],
+        "counts": {
+          "state": "noCount"
+        }
+      }
+    ],
+    "repositories": {
+      "counting": 7,
+      "truncated": 1,
+      "associationOwn": 2,
+      "ownerUnrecorded": 0
+    },
+    "boardAnswer": {
+      "text": "Thank you to everyone who answered. The board will ask for advice twice a year, and will announce each vote in the Voting tab and on the public site.\nThe counts for question 3 were withheld, so the board decided it without them: a summary will not name who drafted it.",
+      "date": "2027-04-01",
+      "reference": "BR-2027-04-01"
+    }
+  }
+}

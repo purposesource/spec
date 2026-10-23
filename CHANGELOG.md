@@ -92,6 +92,11 @@ more, each with its own section below: `jwks.v1.json`, the key set `/jwks.json` 
 self-contained file equal to the API description's `Jwks` component; and `key-incidents.v1.json`, the list a key's
 compromise publishes at `/ct/incident-{date}.json` — thirty-eight schemas in all.
 
+The advisory votes' publication (2026-10-23; ops decision D143, platform migration 0098, PS-1777) adds two more, each with
+its own section below: `consultation-index.v1.json`, the list of every vote the board has opened with the header of its
+newest published version and no figure of any kind; and `consultation.v1.json`, one vote's newest published version, the
+document as the platform stored it with its SHA-256 and the hash of the version it replaced — forty schemas in all.
+
 ### Contracts published beyond the initially-scoped ten
 
 Seven schemas were added because another repository's acceptance test names a schema
@@ -3903,6 +3908,65 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   `check:contributor-page`'s own reading of the rule; every string equals the one the texts' claim check passed.
 - A `lint` member, never drawn, carries this repository's and the website's copy-lint allow markers on the line of each
   paragraph that names the predecessor.
+
+## consultation-index.v1.json
+
+### 1.0.0 — unreleased (2026-10-23; ops decision D143; platform migration 0098, PS-1777) — pre-release
+
+- New, **pre-release**: the index of the board's advisory votes, at `/consultations/index.json`. One entry per vote that
+  has a published version, newest opening first: its id, title and audience, whether it is a sample, its open period, and
+  the newest version's number, `kind`, instant and SHA-256, with `closedAt` on a result or an answer and `withdrawnAt` on a
+  withdrawal. The vote's document is `/consultations/{consultationId}.json` (`consultation.v1`), whose `sha256` is the one
+  listed.
+- NO FIGURE OF ANY KIND: no count of people, no turnout, no result. Every figure derived from who was asked is in the
+  vote's own document, which carries the provisional label where it applies (FS06-020), so nothing here is derived from a
+  contribution count.
+- Regenerated whenever a vote publishes a version. Rendered by `jobs.index-build` from `consultation_publications`; a
+  plane that read the table and found no vote publishes it with `consultations` empty
+  (`consultation-index.v1.empty.example.json`, a production plane before the first vote), and a plane that does not carry
+  the family publishes no `/consultations/` path at all. The edge does not route it in v1: the site reads it from the
+  plane at build time and mirrors it under `/artifacts/consultations/`.
+- `source` is required and admits `sample`, `fixture` and `platform` only; a `platform` index lists no sample vote.
+- Examples: `consultation-index.v1.example.json` (a fixture plane: an open sample vote, a withdrawn one and an answered one,
+  each entry's hash that of its document in the `consultation.v1` examples where one exists) and
+  `consultation-index.v1.empty.example.json`. `check:consultations` (new) holds them to what the schema cannot state (each
+  vote once, the order, each entry against its document, `generatedAt` after every publication).
+
+## consultation.v1.json
+
+### 1.0.0 — unreleased (2026-10-23; ops decision D143 items 9 to 11; platform migration 0098, PS-1777) — pre-release
+
+- New, **pre-release**: one advisory vote's newest published version, at `/consultations/{consultationId}.json`. The
+  platform's api computes each version of a vote's public document once, at the act that publishes it (the opening, the
+  close, the board's answer, a withdrawal of an open vote), with the small-count rule already applied, and stores it
+  numbered and chained by SHA-256 in `consultation_publications`, append-only for every role. `jobs.index-build` publishes
+  the newest version as `document`, the stored JSON value unchanged, with `publishedAt`, `sha256` (of `document`'s RFC 8785
+  form) and `supersedesSha256` (the version it replaced; null on version 1). A version is never changed once published.
+- THE FOUR KINDS. `announcement` (version 1: the questions, whom the vote asks, the people asked as a range of five, the
+  open period, the board's resolution and the rule with the numbers it used); `result` (the close's turnout, whether counts
+  per question are published, each question's counts in their published form, the contributors' repository figures, and
+  `boardAnswer` null while the board's answer is pending, with no due date); `answer` (the result again with the board's
+  answer, its date and minutes reference); `withdrawal` (the frozen facts and the board's reference for withdrawing a vote
+  that was open). Each kind admits exactly its members, and every later version repeats version 1's frozen facts.
+- THE SMALL-COUNT RULE IS IN THE CONTRACT (ops decision D143 item 11): the people asked only as a range of five
+  (`from` a multiple of 5); a turnout `fewerThan5`, `almostAll` or a number of at least 5; counts per question only beside a
+  numeric turnout of at least 10, and with `fewerThan10` or `almostAll` none; a question's counts all published or all
+  withheld; a written-answer question no count, ever; every published count at least 5, and a question's respondents at
+  least 10. The pairings the rule cannot produce (a turnout under 5 beside counts, `almostAll` beside a number) are refused.
+- WHAT IS NEVER IN IT: no person, no list of who was asked, no ballot, no written answer, no cut by group, repository or
+  signal, and for project admins neither the list of projects that qualified nor any count per project; every object is
+  closed. `sample` is true exactly where the board reference starts `SAMPLE-`, the rule's admin numbers and minimum are
+  null there and only there, and a `platform` document carries no sample vote. `algoVersion` is `PP-v0` and `provisional`
+  true exactly where the vote asks people who contribute (FS06-020); `advisory` is always true.
+- What JSON Schema cannot state is in the description: the hash, `asked.to` = `asked.from` + 4, the numbering, each
+  published count naming every option once in order, the counts' sums, an optional question's "no answer", and version 1's
+  facts repeated. The platform's renderer refuses a version that fails any of them and withholds every `/consultations/`
+  path of the run instead (its scoped refusal), so the plane keeps what it last published there.
+- Examples: `consultation.v1.example.json` (an answered vote that asked both groups: two questions published, one withheld,
+  one written-answer question), `consultation.v1.announcement.example.json` and `consultation.v1.result.example.json` (the
+  same vote's versions 1 and 2, chained) and `consultation.v1.withdrawal.example.json` (an admins vote withdrawn while
+  open). `check:consultations` (new) holds them to what the schema cannot state, the chain and the hashes included, and
+  proves the contract still refuses what must never be published and admits what a real vote holds.
 
 ## openapi/edge-public.v1.yaml
 

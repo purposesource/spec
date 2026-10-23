@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/consultation-index.v1.json",
+  "title": "Advisory votes index — /consultations/index.json",
+  "description": "Every advisory vote the Association's board has opened, newest opening first, each with the header of its newest published version: its id, title and audience, whether it is a sample, its open period, what its newest version publishes, and that version's number, instant and SHA-256. The vote's full document is one file away, at `/consultations/{consultationId}.json` on the same plane (`consultation.v1`), and its `sha256` is the value listed here for the same version.\n\nNO FIGURE OF ANY KIND. The index carries no count of people, no turnout and no result: every figure derived from who was asked is in the vote's own document, which carries the provisional label where it applies (FS06-020). So nothing here is derived from a contribution count, and nothing here can be subtracted from anything else.\n\nWHAT THE NEWEST VERSION SAYS, read from `kind`: `announcement` — the vote is open and takes answers until `closesAt` (once that instant has passed, the close runs on its own, normally within minutes, and publishes the result); `result` — the vote closed at `closedAt` and the board's answer is pending; `answer` — the board has answered; `withdrawal` — the vote was withdrawn at `withdrawnAt` while it was open, and nothing was counted. A vote that was never opened is in no published document. A vote stays in the index whatever became of it: a withdrawal keeps its line, with that kind.\n\nREGENERATED, NOT WRITTEN ONCE. It is rendered again whenever a vote publishes a version, and its `generatedAt` moves with every publication. A plane that read the platform's votes and found none publishes it with `consultations` empty; a plane that does not carry the family (the curated registry's, a sample plane) publishes no `/consultations/` path at all.\n\nWHAT A READER CHECKS, stated here because JSON Schema cannot relate two documents or two entries: each `consultationId` is listed once; the entries are ordered by `openedAt`, newest first, and two opened in the same second by `consultationId`; each entry's `version`, `kind`, `publishedAt` and `sha256` are those of the vote's document at `/consultations/{consultationId}.json`, and its `title`, `audience`, `sample`, `openedAt` and `closesAt` that document's own; `closedAt` is the document's `closedAt`, and `withdrawnAt` its `withdrawal.at`; and `generatedAt` is never earlier than any `publishedAt`.\n\nPRE-RELEASE. Nothing outside the build depends on this contract yet, so it changes in place inside its v1 until the public launch (versioning policy rule 5).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (producer: `jobs.index-build`, from `consultation_publications`, platform migration 0098). Pre-release: published on the dev plane from the first index-build run after its renderer ships; not routed by the edge in v1.",
+    "artifactPath": "/consultations/index.json — regenerated; read from the plane at build time and mirrored by the site under /artifacts/consultations/; not served by the edge in v1",
+    "authoritative": true,
+    "producer": "`jobs.index-build` (P-M3), from every stored version of every vote, beside each vote's own document (`consultation.v1`)",
+    "consumers": [
+      "the public results page, /voting, which lists every vote with its state",
+      "anyone following the board's advisory votes, who reads each vote's document from here"
+    ],
+    "fsRefs": [
+      "FS-00 §1 (public surfaces read published artifacts only)",
+      "FS-00 §6.2 (the artifact plane)",
+      "ops decision D143 (advisory votes)",
+      "platform migration 0098 (`consultation_publications`)"
+    ],
+    "vsRefs": ["VS-05"],
+    "changelog": "CHANGELOG.md#consultation-indexv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "source", "consultations"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": {
+      "$ref": "#/$defs/instant",
+      "description": "The plane's envelope instant (FS-00 §6.2): derived from the rows the build read, never from a clock. Every listed version's publication instant is among those rows, so it is never earlier than any `publishedAt` here."
+    },
+    "source": {
+      "enum": ["sample", "fixture", "platform"],
+      "description": "Which plane produced this document, in the envelope's vocabulary (FS-00 §6.2), exactly as on `consultation.v1`: `platform` is `jobs.index-build` in `PSN_ENV=prod`, `fixture` every other environment, `sample` a sample plane. A `platform` index never lists a sample vote."
+    },
+    "consultations": {
+      "type": "array",
+      "description": "Every vote with a published version, newest `openedAt` first, each once. Empty until the first vote opens.",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "source": { "const": "platform" } }, "required": ["source"] },
+      "then": { "properties": { "consultations": { "items": { "properties": { "sample": { "const": false } } } } } }
+    }
+  ],
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["consultationId", "title", "audience", "sample", "openedAt", "closesAt", "version", "kind", "publishedAt", "sha256"],
+      "description": "One vote and its newest published version. `closedAt` is present exactly when `kind` is `result` or `answer`, and `withdrawnAt` exactly when it is `withdrawal`.",
+      "properties": {
+        "consultationId": {
+          "type": "string",
+          "pattern": "^csl_[0-9a-hjkmnp-tv-z]{26}$",
+          "description": "The vote's id: `csl_` and a lowercase ULID. Its document is `/consultations/{consultationId}.json`."
+        },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120, "description": "The vote's title, as frozen at the opening." },
+        "audience": {
+          "enum": ["contributors", "admins", "both"],
+          "description": "Whom the vote asks: people who contribute to a registered project, people who run one, or both."
+        },
+        "sample": {
+          "type": "boolean",
+          "description": "True for a vote taken on the test environment to try voting out; every surface that shows it marks it SAMPLE. Never true on a `platform` index."
+        },
+        "openedAt": { "$ref": "#/$defs/instant", "description": "When the vote opened." },
+        "closesAt": { "$ref": "#/$defs/instant", "description": "When it stops, or stopped, taking answers." },
+        "closedAt": { "$ref": "#/$defs/instant", "description": "When the close ran; on a `result` or an `answer` only." },
+        "withdrawnAt": { "$ref": "#/$defs/instant", "description": "When the vote was withdrawn; on a `withdrawal` only." },
+        "version": { "type": "integer", "minimum": 1, "description": "The newest published version's number." },
+        "kind": {
+          "enum": ["announcement", "result", "answer", "withdrawal"],
+          "description": "What the newest version publishes: see the contract's description."
+        },
+        "publishedAt": { "$ref": "#/$defs/instant", "description": "When the act that published the newest version ran." },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "The SHA-256 of the newest version's document in its RFC 8785 canonical form: the vote document's own `sha256`."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "enum": ["result", "answer"] } }, "required": ["kind"] },
+          "then": { "required": ["closedAt"] },
+          "else": { "not": { "required": ["closedAt"] } }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "withdrawal" } }, "required": ["kind"] },
+          "then": { "required": ["withdrawnAt"] },
+          "else": { "not": { "required": ["withdrawnAt"] } }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "announcement" } }, "required": ["kind"] },
+          "then": { "properties": { "version": { "const": 1 } } },
+          "else": { "properties": { "version": { "minimum": 2 } } }
+        }
+      ]
+    },
+    "instant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "description": "A UTC instant to the second, FS-00 §6.1's one spelling."
+    }
+  }
+}

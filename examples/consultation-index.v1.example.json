@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-04-05T08:00:00Z",
+  "source": "fixture",
+  "consultations": [
+    {
+      "consultationId": "csl_01mcg5w1yz8e2t4kq9r6hvd3ba",
+      "title": "Which guide should we write next?",
+      "audience": "contributors",
+      "sample": true,
+      "openedAt": "2027-04-05T08:00:00Z",
+      "closesAt": "2027-04-12T08:00:00Z",
+      "version": 1,
+      "kind": "announcement",
+      "publishedAt": "2027-04-05T08:00:00Z",
+      "sha256": "38c3c9f9b5fe11e573f4ff27758db0670725092b960a15e807b273ce1b03c915"
+    },
+    {
+      "consultationId": "csl_01mb2r8dqhv6xc0s3kfnj7aw5p",
+      "title": "Should projects show the board's answer?",
+      "audience": "admins",
+      "sample": false,
+      "openedAt": "2027-03-05T12:00:00Z",
+      "closesAt": "2027-04-04T12:00:00Z",
+      "withdrawnAt": "2027-03-12T14:00:00Z",
+      "version": 2,
+      "kind": "withdrawal",
+      "publishedAt": "2027-03-12T14:00:00Z",
+      "sha256": "f31961ea0c08ac7f247c49bf8e8d00cafac1c081a9d11dc43ad4adeac42357c1"
+    },
+    {
+      "consultationId": "csl_01mbx3q5tcz0d7r9fqkgw2he4n",
+      "title": "How often should the board ask for advice?",
+      "audience": "both",
+      "sample": false,
+      "openedAt": "2027-03-01T09:00:00Z",
+      "closesAt": "2027-03-31T09:00:00Z",
+      "closedAt": "2027-03-31T09:03:27Z",
+      "version": 3,
+      "kind": "answer",
+      "publishedAt": "2027-04-02T10:11:12Z",
+      "sha256": "58cc9ebb9c559b3ada54880d7f43446f5b144e468d8ab5fb4093c6656a9c21c1"
+    }
+  ]
+}

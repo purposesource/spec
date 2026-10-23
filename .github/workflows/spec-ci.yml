@@ -109,6 +109,13 @@ jobs:
         # is proved able to fail first (the check's planted documents).
         run: npm run check:fees-account-statement
 
+      - name: The advisory votes' examples keep their hashes, chain and counts, and the contracts refuse what must never be published
+        # PS-1777 (ops decision D143): consultation.v1's examples hash to their documents, chain version to version and keep
+        # the small-count rule's arithmetic; the index agrees with them; both contracts refuse a person, a written answer, the
+        # admins' project list, a count under 5 and a sample vote on the production plane. Each rule is proved able to fail
+        # first (the check's planted documents).
+        run: npm run check:consultations
+
       - name: The key set is one contract in two places, its verdict is published whole, and it refuses what a verifier refuses
         # PS-2080 (the go-live backlog's GLB:1067): `schemas/jwks.v1.json` and the `Jwks` component of the API description
         # stay equal keyword for keyword, `getJwks` names every code of `x-psn.keyVerdict` and no other, each `typ` is dated
