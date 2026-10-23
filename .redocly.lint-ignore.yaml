@@ -1,0 +1,14 @@
+# This file instructs Redocly's linter to ignore the rules contained for specific parts of your API.
+# See https://redocly.com/docs/cli/ for more information.
+#
+# ONE PROBLEM, AND REDOCLY'S, NOT THE SCHEMA'S. `getFeesAccountStatement` answers
+# `fees-account-statement.v1`, whose personnel rule is `if: { class: personnel } then: false` (a line classed
+# `personnel` is refused; its description says why). JSON Schema 2020-12 admits a boolean wherever a schema is
+# admitted, and OpenAPI 3.1's schema object is that dialect, but Redocly's `struct` rule types `then` as an object
+# only, so it reports the boolean as the wrong type. The schema stays as written (the statement's design of 2026-10-21
+# chose the boolean form), and `struct` stays on everywhere else: only this one pointer is ignored.
+# The schema gates (`check:schemas`, `check:fees-account-statement`) compile the same keyword with a conformant
+# 2020-12 validator.
+schemas/fees-account-statement.v1.json:
+  struct:
+    - '#/$defs/line/allOf/1/then'

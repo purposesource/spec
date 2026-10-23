@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.16.0
+  version: 1.17.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -49,7 +49,9 @@ info:
       both answer `404`. The designations summary route is P-M3 as well, for the same
       producer: a month no index-build run rendered answers `404`. The two Recipient List
       routes are P-M3 for the same producer: both answer `404` until its first run writes
-      the index, and a version no run has written answers `404` after that. The three
+      the index, and a version no run has written answers `404` after that. The fees-account
+      statement route is P-M3 for the same producer: a month whose statement no run has
+      written answers `404`. The three
       contributor-page routes are P-M3 too: nothing is published under them until a
       person publishes a page, and production publishes none
       until its publishing switch is on, so until then each answers as for a page that does
@@ -162,6 +164,8 @@ tags:
     description: "The Recipient List: each version two stewards released, written once, and the index of what became of each and of every immediate removal."
   - name: designations
     description: "Designations in summary: the projects' and, behind a floor, the contributors' designations for each month (advisory; routes money only after the fairness review, D27)."
+  - name: fees-account
+    description: "The statement of the fees account: for each locked month, every line the bank booked on it, with its class, and nothing that identifies a payer or a natural person."
   - name: badges
     description: README badges — the shields.io endpoint body, and the SVG badges the edge draws for a repository, its README cards included, and for a certificate.
   - name: cards
@@ -3176,6 +3180,109 @@ paths:
                         education: 30
                         environment: 50
                       association: 20
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/fees-account/{month}.json:
+    get:
+      operationId: getFeesAccountStatement
+      summary: The statement of the fees account for one locked month
+      description: |
+        The published statement of the fees account for one locked month (statutes Art. 12
+        para. 1 and Art. 20 para. 1): one row per line the bank booked on the fees account in
+        that month, in booking-date order, with its booking and value date, its direction, the
+        bank's reversal indicator, its amount and currency, the class the Association's records
+        give it, the bank's own reference and, on a transfer of the Association's own, that
+        transfer's end-to-end identifier, so a published transfer is matched to its bank line by
+        anyone holding both. The bank's booked statement governs the records it restates.
+
+        One document per locked month in which the bank booked at least one line on the fees
+        account, unless a line of that month is classed `personnel`, which withholds the month.
+        An open month, a locked month with no booked line, a month before the account was
+        opened and a withheld month have no document and answer `404`. Version 1 publishes no
+        balance yet, and the opening and closing balances join it before the first published
+        month with a bank line: until then the production plane publishes no month's
+        statement, and every month answers `404` there.
+
+        Regenerated, not written once, and stable: a locked month's document changes only when
+        the bank delivers a line booked in that month after the lock, or when a line that had no
+        class at the lock takes its first class, which takes effect in the first open month
+        (`effectMonth`). Its `generatedAt` is the document's own, the latest of `lockedAt` and
+        the instants at which the lines it lists and the classes it shows were recorded, so it
+        renders the same bytes on every later run until then, and its `ETag` and
+        `Last-Modified` move only then. A published statement never shrinks.
+
+        It identifies no payer and no natural person: no counterparty, remittance or return
+        detail, no bank file, no steward and no steward's reason is published, an end-to-end
+        identifier only on the Association's own transfers and only in its own form, and every
+        object is closed, so no member can carry one. The schema states every rule in full.
+
+        Cached 300 s, like the designations summary: a month asked for before its statement is
+        written is not held as `404` for longer than that.
+      tags: [fees-account]
+      x-psn-phase: P-M3
+      parameters:
+        - name: month
+          in: path
+          required: true
+          description: The locked month whose booked lines the statement lists, `YYYY-MM`.
+          schema:
+            type: string
+            pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$'
+          example: 2027-08
+      responses:
+        '200':
+          description: The month's statement. Cached 300 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/fees-account-statement.v1.json'
+              examples:
+                lateLine:
+                  summary: A month with two lines the bank delivered after the lock, one classed then and one with no class yet (sample plane)
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-09-03T07:41:12Z'
+                    source: sample
+                    month: 2027-08
+                    lockedAt: '2027-09-01T05:00:00Z'
+                    lines:
+                      - bookingDate: '2027-08-02'
+                        valueDate: '2027-08-02'
+                        direction: debit
+                        reversal: false
+                        amountMinor: 245000
+                        currency: CHF
+                        class: transfer-out
+                        bankReference: STMT-2027-08-0102
+                        endToEndId: psn-202707-5gj7km2ps4tv
+                      - bookingDate: '2027-08-05'
+                        valueDate: '2027-08-05'
+                        direction: credit
+                        reversal: false
+                        amountMinor: 301220
+                        currency: CHF
+                        class: payout-credit
+                        bankReference: STMT-2027-08-0140
+                      - bookingDate: '2027-08-31'
+                        valueDate: '2027-08-31'
+                        direction: credit
+                        reversal: false
+                        amountMinor: 87410
+                        currency: CHF
+                        class: payout-credit
+                        effectMonth: 2027-09
+                        bankReference: STMT-2027-08-0399
+                      - bookingDate: '2027-08-31'
+                        direction: debit
+                        reversal: false
+                        amountMinor: 30
+                        currency: CHF
+                        bankReference: STMT-2027-08-0400
         '404':
           $ref: '#/components/responses/NotFound'
         '429':

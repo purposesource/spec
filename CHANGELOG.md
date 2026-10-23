@@ -4655,6 +4655,32 @@ which kind of change each entry was.
 - The description does not gate the website's tests, so the order of pushes does not matter for
   them. `check:openapi-examples` validates the same 70 examples.
 
+### 1.17.0 — unreleased (2026-10-24; `fees-account-statement.v1` 1.0.0, FS-00 §6.2's dated note of 2026-10-22)
+
+- Additive, a minor bump like 1.4.0: one new GET operation serves the artifact `fees-account-statement.v1` 1.0.0
+  describes, and nothing that existed moved. `getFeesAccountStatement` at `/v1/fees-account/{month}.json` answers
+  `fees-account-statement.v1`. The plane path is `/fees-account/{YYYY-MM}.json`, outside `ledger/`, as the designations
+  summary's is; FS-00 §6.2's note of 2026-10-22 adopted it and named this route, and the platform's index build writes it,
+  with its purge naming the edge path.
+- `x-psn-phase: P-M3`, and the phase list in `info.description` says so: the producer is the platform's index build, and a
+  month whose statement no run has written answers `404`. A new tag, `fees-account`, because the statement is neither the
+  ledger nor the allocation key.
+- Cached 300 s, the designations summary's class: a locked month's document is regenerated in two cases (a line the bank
+  delivers after the lock, a first class after the lock), and a `404` read before a month's first statement is not held
+  for longer than that.
+- The description says what the schema says and nothing more: one document per locked month with a booked line, a month
+  holding a `personnel` line withheld, the two cases that change a document, `generatedAt` as the document's own instant,
+  never shrinking, and nothing that identifies a payer or a natural person. It also says what the schema's "publishes no
+  balance yet" means for this route: the balances join before the first published month with a bank line, so until then
+  the production plane publishes no month's statement and every month answers `404` there.
+- Errors: `404` for a month with no document, `429`, and `503`, as the designations summary's.
+- The one example, `lateLine`, is `examples/fees-account-statement.v1.late-line.example.json`, copied member for member:
+  `check:openapi-examples` validates 71 examples (70 before).
+- `.redocly.lint-ignore.yaml` (new) ignores one problem, at one pointer: Redocly's `struct` rule on the schema's
+  personnel rule, `then: false` (`#/$defs/line/allOf/1/then`), which `lint:openapi` reaches now that a route references
+  the schema. JSON Schema 2020-12, OpenAPI 3.1's dialect, admits a boolean schema there, and Redocly types `then` as an
+  object only. The schema is unchanged, `struct` stays on everywhere else, and the file says why.
+
 ## coverage/cov-v1.ts
 
 The published coverage function, versioned together with its vectors (`coverage/vectors.json`)
