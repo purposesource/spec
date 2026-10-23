@@ -1100,8 +1100,10 @@ paths:
         that tombstone (`certificate-record.v1`), whatever the certificate's type, a contributor's,
         a steward's or a waiver's. A company's paid certificate (`supporter`) revoked under the same
         class is no erasure: commerce revokes it so when its payment is refunded in full or an upheld
-        chargeback takes it back, and its badge reads it as revoked, as its verify page does
-        ("Revoked on {date} ({class})").
+        chargeback takes it back, so its badge never answers that tombstone. Its verify page reads it
+        as revoked ("Revoked on {date} ({class})"), and its badge answers as a revoked certificate of
+        its kind: a listed company's Entitlement says `{lane} Entitlement · revoked` (below), and every
+        other `supporter` certificate answers `404`, as it did before the revocation.
 
         **A badge never claims more than its verify page:** a contributor's certificate whose record
         carries no transparency-log position (`ct` null or absent, or without an integer `seq` and
