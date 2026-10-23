@@ -38,14 +38,14 @@
  *      `examples/claim-kit.v1.example.json` is `kits/kit-1.json`. Kit wording is claim language
  *      under the claim rules; an example that drifted from the real document is exactly the file
  *      somebody copies into a press release. (Same precedent as `category-menu.v1.example.json`,
- *      where the example IS the published artifact.) One further example shows a variant no kit
- *      carries yet: `examples/claim-kit.v1.contributor.example.json` is `kits/kit-1.json` with a
- *      contributor variant added and nothing else changed (1.2.0, ops decision D115, slice P05).
- *      Its words are a sample, the first note of each of its two word sets says so in the document
- *      itself (1.3.0, ops decision D181: the contributor words and the volunteer words), and rules
- *      3 to 6 hold over it as over a kit.
- *   8. THE CONTRIBUTOR VARIANT'S SHAPE IS PROVED BOTH WAYS over that sample. A contributor share
- *      template is admitted, in either word set, and so is a sponsor variant beside the contributor's. A face missing one of the renderer's words, with a word of its own, an
+ *      where the example IS the published artifact.) Until 2026-10-23 a further example,
+ *      `examples/claim-kit.v1.contributor.example.json`, showed the contributor variant with sample
+ *      words, because no kit carried it; kit-1 carries it since (ops decision D181, PS-2006), so that
+ *      example is gone and a published kit's note never opens "SAMPLE — ": a kit's words are its words.
+ *   8. THE CONTRIBUTOR VARIANT'S SHAPE IS PROVED BOTH WAYS over every kit that carries the variant
+ *      (kit-1 since 2026-10-23; a gate over no such kit is refused, since it would prove nothing). A
+ *      contributor share template is admitted, in either word set, and so is a sponsor variant beside
+ *      the contributor's. A face missing one of the renderer's words, with a word of its own, an
  *      empty word, a placeholder its word is not filled with, a money line without its figure or a
  *      share line without its share is refused; so are a contributor variant without a face, without
  *      its volunteer words, for another class too or with a badge, a volunteer word set without a
@@ -61,7 +61,6 @@
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { isDeepStrictEqual } from 'node:util';
 
 import { ROOT, EXAMPLE_DIR, config, createValidatorWithAllSchemas, fail } from './lib/spec.mjs';
 
@@ -70,10 +69,7 @@ const KIT_DIR = join(ROOT, 'kits');
 /** Each example, and the published kit it must equal byte for byte. */
 const EXAMPLE_PAIRS = [['claim-kit.v1.example.json', 'kit-1.json']];
 
-/** Each further example: the published kit it adds one variant to, and that variant's key. */
-const SAMPLE_EXAMPLES = [['claim-kit.v1.contributor.example.json', 'kit-1.json', 'contributor']];
-
-/** How a sample variant's first note opens: the document's own word that its words are not published. */
+/** How a sample's note opened (1.2.0 to 1.3.0's further example): words that are not published. A published kit never says it. */
 const SAMPLE_MARK = 'SAMPLE — ';
 
 /** The website's currency lint, verbatim (website/scripts/check-copy.mjs CURRENCY_RE). */
@@ -130,7 +126,7 @@ function claimsOf(kit) {
  *
  * Returns problems rather than exiting, so the self-test below can drive it over documents
  * that are meant to fail. `file` is the kit's file name, which its identifier and address derive
- * from; `where` names the file read, which for a further example is not the kit's own.
+ * from; `where` names the file read in a message.
  */
 function kitProblems(file, text, kit, where = `kits/${file}`) {
   const found = [];
@@ -180,6 +176,19 @@ function kitProblems(file, text, kit, where = `kits/${file}`) {
       `${where}: verify must be ${JSON.stringify(cfg.verifyStatement)} (found ${JSON.stringify(kit?.verify)}) — ` +
         'the document states the one verification sentence it requires at the end of every claim',
     );
+  }
+
+  for (const [name, variant] of Object.entries(kit?.variants ?? {})) {
+    for (const [at, set] of [[`variants.${name}`, variant], [`variants.${name}.volunteer`, variant?.volunteer]]) {
+      (Array.isArray(set?.permittedNotes) ? set.permittedNotes : []).forEach((note, index) => {
+        if (typeof note === 'string' && note.startsWith(SAMPLE_MARK)) {
+          found.push(
+            `${where}: ${at}.permittedNotes[${index}] opens ${JSON.stringify(SAMPLE_MARK)}. A kit publishes its words as ` +
+              'its words: sample wording belongs in no kit, and a certificate embeds the whole document.',
+          );
+        }
+      });
+    }
   }
   const pledge = kit?.pledge?.text;
   if (typeof pledge === 'string' && pledge.length > 0) {
@@ -267,22 +276,23 @@ for (const [exampleFile, kitFile] of EXAMPLE_PAIRS) {
   }
 }
 
-/* ------------------------------------ the further example: its published kit plus one variant */
+/* ------------------------------------------ the contributor variant's shape, over the kits */
 
 /**
  * Rule 8: the contributor variant's shape (claim-kit.v1 1.2.0; its volunteer word set and share line,
- * 1.3.0), proved both ways over the sample.
+ * 1.3.0), proved both ways over a published kit that carries the variant (kit-1 since 2026-10-23,
+ * ops decision D181).
  *
- * Every case is the sample with one thing changed, after the sample itself is shown to validate, so
- * a refusal tests the rule and not a broken sample. A refusal counts only when the validator names
- * the member and the keyword it is about: a document refused for another reason proves nothing here.
+ * Every case is the kit with one thing changed, after the kit itself is shown to validate, so a
+ * refusal tests the rule and not a broken kit. A refusal counts only when the validator names the
+ * member and the keyword it is about: a document refused for another reason proves nothing here.
  */
-function contributorShapeProblems(sample, validate) {
+function contributorShapeProblems(kit, validate, where) {
   const errorsOf = (doc) => (validate(doc) ? [] : [...(validate.errors ?? [])]);
-  const first = errorsOf(sample)[0];
+  const first = errorsOf(kit)[0];
   if (first) {
     return {
-      found: [`the contributor sample does not validate, so no refusal over it would prove anything — ${first.instancePath} ${first.message}`],
+      found: [`${where} does not validate, so no refusal over its contributor variant would prove anything — ${first.instancePath} ${first.message}`],
       admitted: 0,
       refused: 0,
     };
@@ -296,11 +306,11 @@ function contributorShapeProblems(sample, validate) {
     templates: [],
     badge: null,
     prohibited: ['we support charity'],
-    binding: sample.variants.supporter.binding,
+    binding: kit.variants.supporter.binding,
   };
-  /** The sample with one thing changed: `change(variants, contributor)`. */
+  /** The kit with one thing changed: `change(variants, contributor)`. */
   const changed = (change) => {
-    const doc = structuredClone(sample);
+    const doc = structuredClone(kit);
     change(doc.variants, doc.variants.contributor);
     return doc;
   };
@@ -351,84 +361,42 @@ function contributorShapeProblems(sample, validate) {
   const found = [];
   for (const [what, doc] of admitted) {
     const error = errorsOf(doc)[0];
-    if (error) found.push(`contributor shape: ${what} was refused — ${error.instancePath} ${error.message}`);
+    if (error) found.push(`${where}: contributor shape: ${what} was refused — ${error.instancePath} ${error.message}`);
   }
   for (const [what, path, keyword, change] of refused) {
     const errors = errorsOf(changed(change));
     if (errors.length === 0) {
-      found.push(`contributor shape: ${what} was admitted — the rule is inert`);
+      found.push(`${where}: contributor shape: ${what} was admitted — the rule is inert`);
     } else if (!errors.some((error) => error.instancePath === path && error.keyword === keyword)) {
-      found.push(`contributor shape: ${what} was refused, but not by \`${keyword}\` at ${path} — ${errors[0].instancePath} ${errors[0].message}`);
+      found.push(`${where}: contributor shape: ${what} was refused, but not by \`${keyword}\` at ${path} — ${errors[0].instancePath} ${errors[0].message}`);
     }
   }
   return { found, admitted: admitted.length, refused: refused.length };
 }
 
-const shape = { admitted: 0, refused: 0 };
+const shape = { admitted: 0, refused: 0, kits: 0 };
 
-for (const [exampleFile, kitFile, variantKey] of SAMPLE_EXAMPLES) {
-  const where = `examples/${exampleFile}`;
-  const examplePath = join(EXAMPLE_DIR, exampleFile);
-  if (!existsSync(examplePath)) {
-    problems.push(`${where} is missing. It shows the ${variantKey} variant, which no kit carries yet, in kits/${kitFile}'s document.`);
-    continue;
-  }
-  if (!texts.has(kitFile)) {
-    problems.push(`${where} adds a variant to kits/${kitFile}, which does not exist. Known kits: ${files.join(', ') || '(none)'}.`);
-    continue;
-  }
-  const text = readFileSync(examplePath, 'utf8');
-  let sample;
+for (const file of files) {
+  let kit;
   try {
-    sample = JSON.parse(text);
-  } catch (error) {
-    problems.push(`${where}: is not valid JSON — ${error.message}`);
-    continue;
+    kit = JSON.parse(texts.get(file));
+  } catch {
+    continue; // reported above
   }
-  const kit = JSON.parse(texts.get(kitFile));
-  const { [variantKey]: variant, ...others } = sample?.variants ?? {};
-  if (kit?.variants?.[variantKey] !== undefined) {
-    problems.push(
-      `kits/${kitFile} carries a ${variantKey} variant now, so ${where} has served its purpose: remove it and its row ` +
-        'here, and prove rule 8 over the kit itself.',
-    );
-    continue;
-  }
-  if (variant === undefined) {
-    problems.push(`${where} carries no ${variantKey} variant, and showing that variant is the only reason it exists.`);
-    continue;
-  }
-  if (!isDeepStrictEqual({ ...sample, variants: others }, kit)) {
-    problems.push(
-      `${where} differs from kits/${kitFile} outside its ${variantKey} variant. It is that kit with one variant added and ` +
-        "nothing else changed: a kit's words edited in an example are the drifted copy somebody quotes.",
-    );
-  }
-  const note = Array.isArray(variant?.permittedNotes) ? variant.permittedNotes[0] : undefined;
-  if (typeof note !== 'string' || !note.startsWith(SAMPLE_MARK)) {
-    problems.push(
-      `${where}: the ${variantKey} variant's first note must open ${JSON.stringify(SAMPLE_MARK)}. Its words are a sample, ` +
-        'not published wording, and the document has to say so itself: it is read without this gate.',
-    );
-  }
-  // A word set of the variant is read on its own (the renderer prints one set), so its own first note says so too (1.3.0).
-  if (variant?.volunteer !== undefined) {
-    const setNote = Array.isArray(variant.volunteer?.permittedNotes) ? variant.volunteer.permittedNotes[0] : undefined;
-    if (typeof setNote !== 'string' || !setNote.startsWith(SAMPLE_MARK)) {
-      problems.push(
-        `${where}: the ${variantKey} variant's volunteer word set's first note must open ${JSON.stringify(SAMPLE_MARK)}, as the ` +
-          "variant's own does: a certificate prints one word set, and each is read without this gate.",
-      );
-    }
-  }
-  problems.push(...kitProblems(kitFile, text, sample, where));
-  const validate = validators.get(sample?.schemaVersion);
-  if (variantKey === 'contributor' && validate) {
-    const result = contributorShapeProblems(sample, validate);
-    problems.push(...result.found);
-    shape.admitted += result.admitted;
-    shape.refused += result.refused;
-  }
+  const validate = validators.get(kit?.schemaVersion);
+  if (kit?.variants?.contributor === undefined || !validate) continue;
+  const result = contributorShapeProblems(kit, validate, `kits/${file}`);
+  problems.push(...result.found);
+  shape.admitted += result.admitted;
+  shape.refused += result.refused;
+  shape.kits += 1;
+}
+
+if (shape.kits === 0) {
+  problems.push(
+    'no kit carries a contributor variant, so rule 8 proves nothing. kit-1 carries it since 2026-10-23 (ops decision ' +
+      'D181): a contributor certificate prints its words from the kit, and a kit without them leaves the renderer none.',
+  );
 }
 
 /* ------------------------------------------------------------------------- the self-test */
@@ -485,6 +453,9 @@ function selfTest() {
     ['kit-9.json', changed((kit) => { kit.variants.contributor = volunteerSet({ lines: [{ id: 'holder', use: 'base', text: '{login} volunteered on {projects}.' }] }); }), 'variants.contributor.volunteer.lines[0] (holder) must end with'],
     ['kit-9.json', changed((kit) => { kit.variants.contributor = volunteerSet({ templates: [{ id: 'post', channel: 'short-post', text: 'Happy to have volunteered on {projects}.' }] }); }), 'variants.contributor.volunteer.templates[0] (post) must end with'],
     ['kit-9.json', changed((kit) => { kit.verify = 'verify at purposesource.org'; }), 'verify must be'],
+    // A published kit carries no sample note, in a variant's notes or in a word set's (ops decision D181, PS-2006).
+    ['kit-9.json', changed((kit) => { kit.variants.supporter.permittedNotes = [`${SAMPLE_MARK}not published wording.`]; }), 'variants.supporter.permittedNotes[0] opens'],
+    ['kit-9.json', changed((kit) => { kit.variants.contributor = volunteerSet({ permittedNotes: ['A note.', `${SAMPLE_MARK}not published wording.`] }); }), 'variants.contributor.volunteer.permittedNotes[1] opens'],
   ];
 
   const found = [];
@@ -526,7 +497,6 @@ fail(
   problems,
   `${files.length} claim-language kit(s) validate against the shape their schemaVersion names, are addressed at ` +
     `${cfg.siteBaseUrl}/kits/, end every claim with ${JSON.stringify(cfg.verifyStatement)}, state the pledge once, ` +
-    `and carry no figure; each example is its published kit, ${SAMPLE_EXAMPLES.length} further example(s) add one ` +
-    'variant marked SAMPLE to a published kit and change nothing else, and the contributor variant\'s shape holds ' +
-    `${shape.refused} refusals and ${shape.admitted} admissions`,
+    "carry no figure and no sample note; each example is its published kit, and the contributor variant's shape holds " +
+    `${shape.refused} refusals and ${shape.admitted} admissions over ${shape.kits} kit(s) that carry it`,
 );

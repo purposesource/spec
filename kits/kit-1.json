@@ -171,6 +171,217 @@
         "any supporter or impact phrasing"
       ],
       "binding": "public claims about this certificate are governed by the enclosed claim-language kit"
+    },
+    "contributor": {
+      "appliesTo": [
+        "contributor.participation"
+      ],
+      "face": {
+        "classLabel": "Certificate for contributing to software that supports charities",
+        "headline": "Thank you for contributing",
+        "lead": "With thanks to",
+        "holderLine": "for contributing to the Purpose Source projects below",
+        "periodLine": "in {period}",
+        "statusOnlyLine": "With thanks to a contributor to the Purpose Source projects counted below, in {period}.",
+        "moneyLine": "{amount} of the Purpose Fees passed on to listed charities is attributed to this credit. None of it was paid to the holder.",
+        "shareLine": "For {period}, the holder's recorded choices left {share} of the amount attributed to this credit to the Association, through All categories. This records a choice, not a transfer of money.",
+        "more": "+ {n} more",
+        "projectOne": "1 project",
+        "projectMany": "{n} projects"
+      },
+      "lines": [
+        {
+          "id": "holder",
+          "use": "base",
+          "text": "I'm happy to have contributed in {period} to {projects}: Purpose Source software, which asks the larger companies that rely on it to give something back to charities. Where the money goes: purposesource.org/trust/money · verify only at purposesource.org/verify"
+        },
+        {
+          "id": "profile",
+          "use": "line",
+          "text": "My work on {projects}, Purpose Source software, is recorded for {period} by Purpose Source. verify only at purposesource.org/verify"
+        },
+        {
+          "id": "cv",
+          "use": "line",
+          "text": "Certificate for contributing to software that supports charities, Purpose Source, {period}: {projects}. verify only at purposesource.org/verify"
+        },
+        {
+          "id": "signature",
+          "use": "line",
+          "text": "Contributor to {projects} (Purpose Source software), {period}. verify only at purposesource.org/verify"
+        },
+        {
+          "id": "about",
+          "use": "line",
+          "text": "Purpose Source software asks the larger companies that rely on it to give something back to charities, and Purpose Source publishes where the money goes: purposesource.org/trust/money · verify only at purposesource.org/verify"
+        },
+        {
+          "id": "figure",
+          "use": "gated",
+          "text": "For {period}, my Purpose Source certificate attributes {amount} of the Purpose Fees passed on to listed charities to my credit. None of it was paid to me. verify only at purposesource.org/verify",
+          "gate": {
+            "kind": "figure-issued-after-disbursed-row",
+            "state": "closed"
+          }
+        }
+      ],
+      "permittedNotes": [
+        "For the person a contributor certificate names, about that certificate only, and only while it verifies as valid or expired: never once it is revoked or superseded. {projects} is some or all of the projects it credits, by the names the Purpose Source registry lists; {period} is the certificate's period as the certificate writes it.",
+        "The profile, CV and signature lines may each stand on their own, or follow the base line. You may add your certificate's own address, purposesource.org/verify/ followed by its id, just before the closing sentence of any line; offer no other address to check it at, and no shortened link.",
+        "Your choices among the categories, including leaving your part to the Purpose Source Association, are recorded choices. If you mention them, say that you recorded a choice; never that you gave, sent, directed or routed money.",
+        "Your certificate may state the share of the amount attributed to your credit that your recorded choices left to the Association through All categories. It records your choice, never money you gave or routed: if you mention it, quote the certificate's own sentence word for word, just before the closing sentence of the line you use.",
+        "The gated line, like the money line on the certificate itself, is for a figure your certificate states. The Association issues one only after the transfers it covers are published as disbursed rows of its ledger, and only above its published floor; until then no line and no certificate states a figure. Never state a figure you computed, estimated or rounded yourself.",
+        "This variant has no badge of its own. The certificate badge is drawn by Purpose Source from the live record: show it as published, unaltered and linked to your certificate's address.",
+        "If your certificate's public record does not show your name, a reader can match a claim to you only through the signed file, certificate.jws; you may give it to whoever wants to check.",
+        "These are the contributor words. Your certificate carries them because your answer in your account, when it was issued, was Paid or Prefer not to say, or there was no answer yet. They say nothing about pay. Do not use this certificate to call yourself a volunteer on these projects; if you volunteer, say so in your account, and your next certificate, or a replacement of this one, uses the volunteer words."
+      ],
+      "templates": [
+        {
+          "id": "linkedin",
+          "channel": "long-post",
+          "text": "I'm happy to have contributed in {period} to {projects}: Purpose Source software, which asks the larger companies that rely on it to give something back to charities. Thank you to everyone I worked with. Purpose Source publishes where the money goes: purposesource.org/trust/money · verify only at purposesource.org/verify"
+        },
+        {
+          "id": "short-post",
+          "channel": "short-post",
+          "text": "Happy to have contributed in {period} to {projects} (Purpose Source software). verify only at purposesource.org/verify"
+        }
+      ],
+      "badge": null,
+      "rules": [
+        {
+          "id": "never-paid",
+          "rule": "Never say or suggest that you, a project or any contributor was paid from Purpose Fees, or that your credit earned you money.",
+          "reason": "The statutes bar it (Art. 3 para. 1 item 2 and Art. 5 para. 2): contributors are never paid from Purpose Fees for a contribution."
+        },
+        {
+          "id": "recorded-choice-only",
+          "rule": "Speak of your choices among the categories only as recorded choices: never say that you gave, sent, directed or routed money, that a charity got money because of you, or that your choice was a donation or a gift.",
+          "reason": "Under the statutes (Art. 8 para. 4) a contributor's choice is advisory: it is recorded, published in aggregate and never binds the Association, which allocates under its published rule."
+        },
+        {
+          "id": "no-comparison",
+          "rule": "Never compare yourself with other contributors or say where you stand among them.",
+          "reason": "Purpose Source publishes no ranking of people and keeps each person's measure of credit private, so a comparison could not be checked and would invite gaming the credit."
+        },
+        {
+          "id": "facts-only",
+          "rule": "When you cite this certificate, claim only what it and its lines state: no claim that your own work does good or helps people, no other social-impact claim, and no green, climate or sustainability claim.",
+          "reason": "A claim made with this certificate borrows its trust, and the certificate proves credit and nothing more. Where you use it to market your work or services, Directive (EU) 2024/825 bans generic environmental claims and counts social characteristics among what a misleading claim can concern, and Swiss unfair-competition law forbids misleading statements."
+        },
+        {
+          "id": "not-an-endorsement",
+          "rule": "Never present the certificate as an endorsement, approval, rating or licence of you or your code by Purpose Source.",
+          "reason": "It records credit computed from a project's history; Purpose Source made no check of the quality of the work."
+        },
+        {
+          "id": "one-verification-address",
+          "rule": "Offer no place to check the certificate other than purposesource.org/verify and your certificate's own address under it.",
+          "reason": "One address is what makes a forged certificate or badge easy to spot."
+        },
+        {
+          "id": "pledge-words-only",
+          "rule": "Say where Purpose Fees go only by linking purposesource.org/trust/money or by quoting the Association's pledge exactly as written: never shorten, paraphrase or translate it.",
+          "reason": "The pledge is stated in one form only, with its capped costs beside it (statutes Art. 5 para. 5); a share of the fees taken out of its sentence says more than the pledge does."
+        },
+        {
+          "id": "give-back-with-money-line",
+          "rule": "Say that Purpose Source software asks the larger companies that rely on it to give something back only together with the link to where the money goes, purposesource.org/trust/money, as the lines do; never say that you or your work supports charities.",
+          "reason": "The give-back can be checked only against the published money record, and the certificate records your work, not a gift of yours. A charity claim about a person cannot be checked against that record, so it is the vague claim these rules exist to stop, as kit-1 keeps it out of an organisation's claims too."
+        },
+        {
+          "id": "words-of-your-certificate",
+          "rule": "Use the words of your own certificate: the volunteer words only with a certificate that prints them, and never call yourself a volunteer on these projects with a certificate that does not.",
+          "reason": "The volunteer words rest on the holder's own answer in their account, given before the certificate was issued, which Purpose Source does not check; a certificate issued without that answer uses the contributor words, and a claim may say no more than the certificate it cites."
+        }
+      ],
+      "prohibited": [
+        "saying that you, a project or a contributor was paid any part of the Purpose Fees",
+        "saying that you gave, sent, directed or routed money to a charity or a category",
+        "calling the Purpose Fee or your recorded choices a donation or a gift",
+        "comparing yourself with other contributors by points, position or share",
+        "calling yourself or your code certified, verified, approved or endorsed by Purpose Source",
+        "saying that you or your work supports charities",
+        "calling yourself a volunteer on these projects with a certificate that does not say so",
+        "any unquantified social-impact framing",
+        "any green, climate or sustainability claim",
+        "a restated, shortened or translated pledge",
+        "any verification address other than the one printed on the certificate"
+      ],
+      "binding": "public claims about this certificate are governed by the enclosed claim-language kit",
+      "volunteer": {
+        "face": {
+          "classLabel": "Certificate for volunteering on software that supports charities",
+          "headline": "Thank you for volunteering",
+          "lead": "With thanks to",
+          "holderLine": "for volunteering on the Purpose Source projects below",
+          "periodLine": "in {period}",
+          "statusOnlyLine": "With thanks to a volunteer on the Purpose Source projects counted below, in {period}.",
+          "moneyLine": "{amount} of the Purpose Fees passed on to listed charities is attributed to this credit. None of it was paid to the holder.",
+          "shareLine": "For {period}, the holder's recorded choices left {share} of the amount attributed to this credit to the Association, through All categories. This records a choice, not a transfer of money.",
+          "more": "+ {n} more",
+          "projectOne": "1 project",
+          "projectMany": "{n} projects"
+        },
+        "lines": [
+          {
+            "id": "holder",
+            "use": "base",
+            "text": "I'm happy to have volunteered in {period} on {projects}: Purpose Source software, which asks the larger companies that rely on it to give something back to charities. Where the money goes: purposesource.org/trust/money · verify only at purposesource.org/verify"
+          },
+          {
+            "id": "profile",
+            "use": "line",
+            "text": "My volunteer work on {projects}, Purpose Source software, is recorded for {period} by Purpose Source. verify only at purposesource.org/verify"
+          },
+          {
+            "id": "cv",
+            "use": "line",
+            "text": "Certificate for volunteering on software that supports charities, Purpose Source, {period}: {projects}. verify only at purposesource.org/verify"
+          },
+          {
+            "id": "signature",
+            "use": "line",
+            "text": "Volunteer contributor to {projects} (Purpose Source software), {period}. verify only at purposesource.org/verify"
+          },
+          {
+            "id": "about",
+            "use": "line",
+            "text": "Purpose Source software asks the larger companies that rely on it to give something back to charities, and Purpose Source publishes where the money goes: purposesource.org/trust/money · verify only at purposesource.org/verify"
+          },
+          {
+            "id": "figure",
+            "use": "gated",
+            "text": "For {period}, my Purpose Source certificate attributes {amount} of the Purpose Fees passed on to listed charities to my credit. None of it was paid to me. verify only at purposesource.org/verify",
+            "gate": {
+              "kind": "figure-issued-after-disbursed-row",
+              "state": "closed"
+            }
+          }
+        ],
+        "permittedNotes": [
+          "For the person a contributor certificate names, about that certificate only, and only while it verifies as valid or expired: never once it is revoked or superseded. {projects} is some or all of the projects it credits, by the names the Purpose Source registry lists; {period} is the certificate's period as the certificate writes it.",
+          "The profile, CV and signature lines may each stand on their own, or follow the base line. You may add your certificate's own address, purposesource.org/verify/ followed by its id, just before the closing sentence of any line; offer no other address to check it at, and no shortened link.",
+          "Your choices among the categories, including leaving your part to the Purpose Source Association, are recorded choices. If you mention them, say that you recorded a choice; never that you gave, sent, directed or routed money.",
+          "Your certificate may state the share of the amount attributed to your credit that your recorded choices left to the Association through All categories. It records your choice, never money you gave or routed: if you mention it, quote the certificate's own sentence word for word, just before the closing sentence of the line you use.",
+          "The gated line, like the money line on the certificate itself, is for a figure your certificate states. The Association issues one only after the transfers it covers are published as disbursed rows of its ledger, and only above its published floor; until then no line and no certificate states a figure. Never state a figure you computed, estimated or rounded yourself.",
+          "This variant has no badge of its own. The certificate badge is drawn by Purpose Source from the live record: show it as published, unaltered and linked to your certificate's address.",
+          "If your certificate's public record does not show your name, a reader can match a claim to you only through the signed file, certificate.jws; you may give it to whoever wants to check.",
+          "These are the volunteer words. Your certificate carries them because your answer in your account, when it was issued, was that you volunteer on these projects. Purpose Source does not check that answer: use these words only if nobody paid you for this work. If that changes, change your answer; your next certificate follows it."
+        ],
+        "templates": [
+          {
+            "id": "linkedin",
+            "channel": "long-post",
+            "text": "I'm happy to have volunteered in {period} on {projects}: Purpose Source software, which asks the larger companies that rely on it to give something back to charities. Thank you to everyone I worked with. Purpose Source publishes where the money goes: purposesource.org/trust/money · verify only at purposesource.org/verify"
+          },
+          {
+            "id": "short-post",
+            "channel": "short-post",
+            "text": "Happy to have volunteered in {period} on {projects} (Purpose Source software). verify only at purposesource.org/verify"
+          }
+        ]
+      }
     }
   },
   "translations": {},

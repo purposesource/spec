@@ -1518,6 +1518,25 @@ value inside `v1` is not additive (versioning policy 1).*
   The money-line case no longer spells the retired words. Its rule 4 (every claim ends with the
   verification sentence spelled from the configuration) reads the volunteer word set's lines and
   templates as well as the variant's own, and its self-test proves both able to fail.
+- *(Later on 2026-10-23, after the operator's yes to the final words; ops decision D181, PS-2006.)* KIT-1 TAKES
+  ITS CONTRIBUTOR VARIANT. `kits/kit-1.json` gains `variants.contributor`, after `statusOnly`, in the final words of
+  D181's word file (`design/contributor-publicity/P05-CONTRIBUTOR-KIT-WORDS-FINAL-2026-10-23.md`, sections 1 to 4):
+  the contributor words at the variant's top level and the volunteer words in `volunteer`, each with its eleven face
+  words (the share line included), six lines, eight notes and two templates; the nine named rules, the eleven
+  prohibitions and the binding statement are the variant's, shared by both sets; no badge. They are the words the
+  further example carried, without its two SAMPLE notes. Nothing else in the document moved: `supporter`,
+  `statusOnly`, the pledge and the header keep their bytes, and `publishedAt` stays null. SHA-256
+  `b7e68ad715464b5ee96579fe3dff3e4cdad7bbe3ed9d05bf3c602d3c597cef78` over its raw bytes (28,670 bytes, LF); the
+  state before it is `01e9b1995a48dd16f48e7db8f823467a13233206c604db64b2f037e57e35385e` (11,694 bytes).
+  `examples/claim-kit.v1.example.json` is the document byte for byte, as before, and the byte copies move with it:
+  the website's `src/data/kits/kit-1.json` (its kit test pins the SHA-256) and the render job's vendored copy in the
+  platform (`apps/render/vendor/website/src/data/kits/kit-1.json`, pinned in `apps/render/vendor/cert-design.lock.json`).
+- The further example `examples/claim-kit.v1.contributor.example.json` is deleted, as the entry above said it would
+  be. `check:kits` proves rule 8 (31 refusals, 3 admissions) over every kit that carries the variant, kit-1 now, and
+  refuses a run in which no kit carries one; it also refuses a kit any of whose notes, a word set's included, opens
+  "SAMPLE — ", and two self-test cases prove that rule able to fail. The schema's description and the `variants`
+  comment now say kit-1 carries the variant instead of naming the deleted example. No constraint moved, so the file
+  stays 1.3.0: an unreleased pre-release entry, completed in place.
 
 ## ct-segment.v1.json
 
