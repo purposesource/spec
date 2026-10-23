@@ -1535,6 +1535,20 @@ value inside `v1` is not additive (versioning policy 1).*
 - Nothing is mirrored: the platform's `packages/contracts` mirrors no key set, and the website's and the platform's
   gates read the component, whose members did not move.
 
+### 1.1.0 — unreleased (2026-10-22; FS08-104, the go-live backlog's GLB:1067: "a reference from each key"; PS-2080)
+
+- Additive: a compromised key names its incident lists. `psn:incidents` is the path of every `/ct/incident-{date}.json`
+  that names the key (`key-incidents.v1`), earliest first, read against the host that served the set (the API host and
+  the apex both serve `/ct/*`). Only a `compromised` key carries it (`dependentSchemas`), at least one path and each
+  once, and a compromised key may lack it until its first list is published. A list is final once published, so a later
+  finding adds a path and never changes one. A verifier that warns on a token signed before a compromised key's
+  `notAfter` can now point at the lists from the key itself.
+- `examples/jwks.v1.compromised.example.json` names its list. `check:jwks` holds each named path to an incident list
+  example that names the key, earliest first, holds the key's `notAfter` to those lists' exposure, and proves 22
+  refusals and 9 admissions on both copies (incident lists on an active, retired or test key, an absolute address, a
+  path outside the grammar, an empty or repeated list refused; a compromised key without a list yet, and with two,
+  admitted).
+
 ## key-incidents.v1.json
 
 ### 1.0.0 — unreleased (2026-10-22; FS08-104 and FS-08 §11's dated note of 2026-09-26; the go-live backlog's GLB:1067, PS-2080)
@@ -1557,6 +1571,11 @@ value inside `v1` is not additive (versioning policy 1).*
 - Examples: `key-incidents.v1.example.json` (the compromise `jwks.v1.compromised.example.json` shows, two forged entries)
   and `key-incidents.v1.none-found.example.json` (a fixture plane's incident whose enumeration found nothing).
   `check:jwks` holds both to their dating, order and exposure rules, and proves 12 refusals and 3 admissions.
+
+### 1.0.1 — unreleased (2026-10-22; PS-2080) — wording only
+
+- Patch: the description says that the key set names each list from the key it concerns (`jwks.v1` 1.1.0,
+  `psn:incidents`). No member moved.
 
 ## ledger-row.v1.json
 
@@ -4423,6 +4442,20 @@ which kind of change each entry was.
   (`tests/unit/jwks.test.mjs`) and its plane gate stay as they are; the platform validates its rendered set against the
   same component. One example is added to `getJwks`'s `200`, `afterCompromise`, and `check:openapi-examples` validates
   70 examples (69 before).
+
+### 1.16.0 — unreleased (2026-10-22; FS08-104, the go-live backlog's GLB:1067: "a reference from each key"; PS-2080)
+
+- Minor, additive: the `Jwks` component's key entry gains a tenth member, `psn:incidents`, on a compromised key only:
+  the paths of its incident lists, as `jwks.v1` 1.1.0 describes. `afterCompromise` names its list, and `getJwks`'s
+  verdict tells a reader warned about a compromised key's token to check the lists the key names. No operation, status
+  code, cache class or error code moved, and `check:openapi-examples` validates the same 70 examples.
+- **The website's key-set readers move with it.** Its tests hold the members a published entry may carry
+  (`src/lib/key-window.mjs` `PUBLISHED_KEY_MEMBERS`) to this component's key members (`tests/unit/jwks.test.mjs`), and
+  its build gate, its production edge and its live check refuse an entry carrying any other member. So that list gains
+  `psn:incidents` in the same step, right behind this file (with `COMMITTED_KEY_MEMBERS`, which
+  `tests/unit/key-window.test.mjs` holds to it), or the website's unit suite fails at its next run against this
+  repository's main. The platform's renderer emits no `psn:` member beyond the two until it renders incident lists
+  (triage row L2.6-40), and its tests validate the rendered set against this component unchanged.
 
 ## coverage/cov-v1.ts
 

@@ -24,18 +24,21 @@
  *                 the two key-set routes) names each kid once, closes each window after it opens,
  *                 carries sandbox keys exactly when it is marked `sandbox`, and holds one `active`
  *                 production key when it holds any; a compromised key has an incident list among
- *                 the examples, and its `notAfter` is not later than the exposure that list
- *                 declares. Every incident list is dated by its own instant (`date` is the UTC
+ *                 the examples, the lists it names (`psn:incidents`) are examples that name it,
+ *                 earliest first, and its `notAfter` is not later than the exposure those lists
+ *                 declare. Every incident list is dated by its own instant (`date` is the UTC
  *                 date of `generatedAt`), names each key once in kid order, closes each exposure
  *                 after it opens and no later than the list, and lists its forged entries once each
  *                 in log order; one example lists forged entries and one lists none. Each rule is
  *                 held to a planted document it must flag.
  *   REFUSALS      the key set (the schema file and the component alike) refuses a production key
  *                 without its standing, a key stating one member of the two, a retired or
- *                 compromised key whose window never closes, a status it does not define, and
- *                 the shapes no verifier resolves; it admits a test key stating neither, the
- *                 committed keys with no envelope, the honest empty set, and the withdrawn shape
- *                 the platform publishes. The incident list refuses a list with no plane label or
+ *                 compromised key whose window never closes, a status it does not define,
+ *                 incident lists on any key but a compromised one or named outside their path
+ *                 grammar, and the shapes no verifier resolves; it admits a test key stating
+ *                 neither, the committed keys with no envelope, the honest empty set, the
+ *                 withdrawn shape the platform publishes, and a compromised key whose first list
+ *                 is not published yet. The incident list refuses a list with no plane label or
  *                 the curated registry's, a sandbox key, a key without its exposure, a forged entry
  *                 carrying anything but its position and hash, and a member it does not define.
  *
@@ -233,11 +236,31 @@ function incidentProblems(doc, at) {
   return found;
 }
 
-/** A compromised key's incident list among the examples, and its window against that list's exposure. */
+/**
+ * A compromised key's incident lists among the examples, and its window against their exposure. A key
+ * that names its lists (`psn:incidents`) is held to exactly those: each path is an example's, earliest
+ * first, and each of those lists names the key. A key that names none yet is held to the lists that
+ * name its kid.
+ */
 function compromiseProblems(doc, at, lists) {
   const found = [];
+  const listAt = (path) => lists.find(([, list]) => `/ct/incident-${list.date}.json` === path)?.[1];
   for (const key of (doc?.keys ?? []).filter((entry) => entry['psn:status'] === 'compromised')) {
-    const exposures = lists.flatMap(([, list]) => list.keys.filter((named) => named.kid === key.kid).map((named) => named.exposure));
+    const paths = key['psn:incidents'];
+    let named;
+    if (Array.isArray(paths)) {
+      if (JSON.stringify(paths) !== JSON.stringify([...paths].sort())) found.push(`${at}: ${key.kid} names its incident lists out of date order`);
+      named = [];
+      for (const path of paths) {
+        const list = listAt(path);
+        if (!list) found.push(`${at}: ${key.kid} names ${path}, which no key-incidents.v1 example is`);
+        else if (!list.keys.some((entry) => entry.kid === key.kid)) found.push(`${at}: ${key.kid} names ${path}, which does not name the key`);
+        else named.push(list);
+      }
+    } else {
+      named = lists.map(([, list]) => list).filter((list) => list.keys.some((entry) => entry.kid === key.kid));
+    }
+    const exposures = named.flatMap((list) => list.keys.filter((entry) => entry.kid === key.kid).map((entry) => entry.exposure));
     if (exposures.length === 0) {
       found.push(`${at}: ${key.kid} is compromised, and no incident list among the examples names it`);
       continue;
@@ -284,7 +307,10 @@ const plantedFlags = [
   ['a sandbox key in a production set', 'is not marked sandbox', keySetProblems(edited(mainKeySet, (d) => { d.keys.push({ ...clone(d.keys[1]), kid: 'psn-sandbox-2027-1' }); }), 'planted')],
   ['a production key in the sandbox set', 'is marked sandbox', keySetProblems(edited(mainKeySet, (d) => { d.sandbox = true; }), 'planted')],
   ['a compromised key whose window outlasts its exposure', 'is later than the exposure', compromiseProblems(edited(compromisedKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:validityWindow'].notAfter = '2027-03-11T00:00:00Z'; }), 'planted', incidents)],
-  ['a compromised key no incident list names', 'no incident list among the examples names it', compromiseProblems(edited(compromisedKeySet, (d) => { const key = keyOf(d, 'psn-prod-2027-1'); key.kid = 'psn-prod-2027-9'; }), 'planted', incidents)],
+  ['a compromised key no incident list names', 'no incident list among the examples names it', compromiseProblems(edited(compromisedKeySet, (d) => { const key = keyOf(d, 'psn-prod-2027-1'); key.kid = 'psn-prod-2027-9'; delete key['psn:incidents']; }), 'planted', incidents)],
+  ['a key naming a list that does not name it', 'which does not name the key', compromiseProblems(edited(compromisedKeySet, (d) => { keyOf(d, 'psn-prod-2027-1').kid = 'psn-prod-2027-9'; }), 'planted', incidents)],
+  ['a key naming a list no example is', 'which no key-incidents.v1 example is', compromiseProblems(edited(compromisedKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:incidents'].push('/ct/incident-2027-03-15.json'); }), 'planted', incidents)],
+  ['a key naming its lists out of date order', 'out of date order', compromiseProblems(edited(compromisedKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:incidents'].unshift('/ct/incident-2027-05-20.json'); }), 'planted', incidents)],
   ['a list dated otherwise than its instant', 'is not the UTC date of generatedAt', incidentProblems(edited(mainIncident, (d) => { d.date = '2027-03-13'; }), 'planted')],
   ['an exposure that ends before it starts', 'not after it starts', incidentProblems(edited(mainIncident, (d) => { d.keys[0].exposure.until = d.keys[0].exposure.from; }), 'planted')],
   ['an exposure that ends after the list was recorded', 'after the list was recorded', incidentProblems(edited(mainIncident, (d) => { d.keys[0].exposure.until = '2027-03-14T16:00:00Z'; }), 'planted')],
@@ -317,6 +343,13 @@ const keySetMustRefuse = [
   ['alg: none on a key', edited(mainKeySet, (d) => { keyOf(d, 'psn-prod-2027-1').alg = 'none'; })],
   ['a member the document does not define', edited(mainKeySet, (d) => { d.alg = 'none'; })],
   ['no keys', edited(mainKeySet, (d) => { delete d.keys; })],
+  ['incident lists on an active key', edited(mainKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:incidents'] = ['/ct/incident-2027-03-14.json']; })],
+  ['incident lists on a retired key', edited(mainKeySet, (d) => { keyOf(d, 'psn-prod-2026-1')['psn:incidents'] = ['/ct/incident-2027-03-14.json']; })],
+  ['incident lists on a test key stating no status', edited(mainKeySet, (d) => { const key = keyOf(d, 'psn-prod-2027-1'); key.kid = 'psn-dev-2027-1'; delete key['psn:status']; delete key['psn:validityWindow']; key['psn:incidents'] = ['/ct/incident-2027-03-14.json']; })],
+  ['an incident list named by an absolute address', edited(compromisedKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:incidents'] = ['https://api.purposesource.org/ct/incident-2027-03-14.json']; })],
+  ['an incident list named outside its path grammar', edited(compromisedKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:incidents'] = ['/ct/incident-2027-03-14.jws']; })],
+  ['an empty list of incident lists', edited(compromisedKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:incidents'] = []; })],
+  ['an incident list named twice', edited(compromisedKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:incidents'].push('/ct/incident-2027-03-14.json'); })],
 ];
 const keySetMustAdmit = [
   ['a test key stating neither member', edited(mainKeySet, (d) => { const key = keyOf(d, 'psn-prod-2027-1'); key.kid = 'psn-dev-2027-1'; delete key['psn:status']; delete key['psn:validityWindow']; })],
@@ -326,6 +359,8 @@ const keySetMustAdmit = [
   ['an active key with a scheduled end', edited(mainKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:validityWindow'].notAfter = '2028-01-01T00:00:00Z'; })],
   ['a key published withdrawn, its window closing as it opens', edited(mainKeySet, (d) => { const w = keyOf(d, 'psn-prod-2026-1')['psn:validityWindow']; w.notAfter = w.notBefore; })],
   ['a compromised key whose window ended at its retirement', edited(compromisedKeySet, (d) => { const key = keyOf(d, 'psn-prod-2026-1'); key['psn:status'] = 'compromised'; })],
+  ['a compromised key whose first incident list is not published yet', edited(compromisedKeySet, (d) => { delete keyOf(d, 'psn-prod-2027-1')['psn:incidents']; })],
+  ['a compromised key naming two incident lists', edited(compromisedKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:incidents'].push('/ct/incident-2027-04-02.json'); })],
 ];
 for (const [label, validate] of keySetValidators) {
   for (const [what, doc] of keySetMustRefuse) {
