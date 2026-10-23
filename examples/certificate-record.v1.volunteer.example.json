@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2028-01-15T00:05:00Z",
+  "source": "sample",
+  "cid": "cert_01jk2m4p6r8t0v2x4z6b8d0f2j",
+  "status": "valid",
+  "typ": "contributor",
+  "variant": "participation",
+  "disclosure": "status-only",
+  "period": {
+    "validFrom": "2027-01-01",
+    "validUntil": "2027-12-31"
+  },
+  "issuedAt": "2028-01-15T00:00:00Z",
+  "kid": "psn-prod-2028-1",
+  "ct": {
+    "seq": 118301,
+    "segment": 11
+  },
+  "revocation": null,
+  "supersedes": null,
+  "supersededBy": null,
+  "jwsSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "volunteer": true
+}

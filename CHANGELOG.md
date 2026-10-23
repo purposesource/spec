@@ -1109,6 +1109,37 @@ value inside `v1` is not additive (versioning policy 1).*
   `examples/certificate.v1.contributor.example.json` with `purposePoints`, or with `percentileBand`,
   added.
 
+### 1.7.0 — unreleased (2026-10-23; ops decision D181)
+
+- Additive. A top-level `volunteer`, `{ "const": true }`, on contributor payloads only. D181 lets a
+  holder answer, in their account, whether they work on the projects as a volunteer, are paid for it,
+  or prefer not to say; each contributor certificate is signed in the words of the answer of its day:
+  the volunteer words of its kit's contributor variant ("Certificate for volunteering on software that
+  supports charities") when the answer was Volunteer, the contributor words ("Certificate for
+  contributing to software that supports charities") for every other answer and for no answer
+  (`claim-kit.v1.json` 1.3.0). The member is what the certificate signs about that choice, so the
+  words are fixed with the certificate and a verifier, the verify page and the renderer all read the
+  same fact.
+- ONE ENCODING OF THE CONTRIBUTOR WORDS: the member is absent. Paid, Prefer not to say and no answer
+  all give a payload without it, so a certificate issued without the answer has exactly the bytes
+  it had before 1.7.0, and `false` is refused. Paid is never signed.
+- What it states: the holder's own statement, which Purpose Source does not check. It says nothing
+  about money: no contributor is paid from Purpose Fees, whatever the answer (D122). It is signed
+  once and never changes; a certificate in the other words is a new certificate that `supersedes`
+  the old one (CERT-046).
+- One new rule: a payload that carries `volunteer` has `typ: contributor`. It constrains only the
+  new member.
+- Wording on an existing member. `categoryVotes` said which category funds the contributor
+  "directed", in the words D181 item 3 retires on contributor certificates; it now says the member
+  states the holder's recorded designations, never money the holder received, gave or directed.
+  No constraint moved. `fsRefs` gain D181.
+- Every payload valid under 1.6.0 still validates and means the same, and
+  `examples/certificate.v1.contributor.example.json` keeps its bytes. The new
+  `examples/certificate.v1.volunteer.example.json` is that payload with `"volunteer": true` (and its
+  own id). The schema refuses `volunteer: false`, a non-boolean value, and the member on a supporter
+  or a sponsor certificate; 1.6.0 refuses the member, so this version lands before any signer
+  writes it.
+
 ## certificate-record.v1.json
 
 ### 1.0.0 — unreleased
@@ -1199,6 +1230,29 @@ value inside `v1` is not additive (versioning policy 1).*
   `contributor-page.v1` relies on it: an anonymous page lists a person's status-only certificates,
   and their records must not name the projects. No constraint moved (`scope` was and stays
   optional), and every record valid under 1.3.0 is valid and means the same.
+
+### 1.4.0 — unreleased (2026-10-23; ops decision D181)
+
+- Additive. A top-level `volunteer`, `{ "const": true }`, copied from the signed payload's member
+  (`certificate.v1.json` 1.7.0): present exactly when the certificate carries it, on a contributor
+  record and on nothing else (a new `allOf` rule ties it to `typ: contributor` and constrains only
+  the new member). It tells the verify page that the certificate is a certificate for volunteering,
+  so the page names the certificate as its own face does; one certificate with two names would read
+  as a forgery.
+- ON FULL AND STATUS-ONLY RECORDS ALIKE. Every contributor certificate starts private and is drawn
+  status-only (D160), so a volunteer who keeps their certificate private would otherwise never see
+  its name verified. On a status-only record the member identifies nobody: the record carries no
+  `sub` and, for a person, no `scope` (1.3.1), and it is unlisted. The holder's screen and the
+  privacy notice say that it becomes public with the record.
+- It is the holder's own statement, which Purpose Source does not check, and it says nothing about
+  money. It is dropped on an erasure tombstone with the subject fields (CERT-045). `false` is
+  refused: absence means the contributor words, as on the payload. `fsRefs` gain D181.
+- Every record valid under 1.3.1 still validates and means the same, and both existing examples keep
+  their bytes. The new `examples/certificate-record.v1.volunteer.example.json` is a person's
+  status-only contributor record with `"volunteer": true`, for the payload of
+  `examples/certificate.v1.volunteer.example.json`; its `jwsSha256` is a placeholder. The schema
+  refuses `volunteer: false` and the member on a supporter record, and admits it on a full
+  contributor record.
 
 ## certificate-policy.v1.json
 
@@ -1420,6 +1474,48 @@ value inside `v1` is not additive (versioning policy 1).*
   face, for another class too, with a badge, with a line outside the closed set or without the
   sentence; a face on each of the other three variants; `{login}` or `{projects}` in a supporter
   line or template, a status-only line or a sponsor line).
+
+### 1.3.0 — unreleased (2026-10-23; ops decision D181) — pre-release
+
+- **Pre-release** change under policy 5, a minor bump. For every published document it is
+  additive: no kit carries a contributor variant, so `kits/kit-1.json` and its example keep their
+  bytes (SHA-256 `01e9b1995a48dd16f48e7db8f823467a13233206c604db64b2f037e57e35385e`) and stay valid.
+  It tightens what a contributor variant must carry, which only the further example below has, and
+  that example moves in the same step.
+- TWO WORD SETS (D181 item 1). A contributor certificate is signed in volunteer or contributor
+  words, by the holder's own answer in their account at issuance (`certificate.v1.json` 1.7.0,
+  `volunteer`). The variant's own `face`, `lines`, `permittedNotes` and `templates` are the
+  contributor words; the new member `volunteer` (`$defs.wordSet`) holds the volunteer words in the
+  same four members and the same shape: a face with every word, one `base` line, lines and
+  templates that end with the verification sentence. `appliesTo`, `badge`, `rules`, `prohibited`
+  and `binding` stay the variant's and hold for both sets, so a word set carries none of them. The
+  contributor variant requires `volunteer`; `supporter`, `statusOnly` and `sponsor` refuse it, as
+  they refuse a face.
+- THE SHARE SENTENCE (D181 item 3). `$defs.face` gains `shareLine`, required, in both sets: printed
+  only when the certificate signs `associationSharePpm` above 0 (`certificate.v1.json` 1.4.0), on the
+  full and on the status-only face, never on a share card or a badge. It must name `{share}`, the
+  signed share written as a percentage, and may name `{period}`; no other brace. It states the
+  holder's recorded choice, never money given or routed.
+- Wording. The money line's description no longer says the holder "helped direct" the figure, words
+  D181 item 3 retires on contributor certificates: the figure is the part of the Purpose Fees passed
+  on to listed charities that is attributed to the holder's credit, none of it paid to the holder.
+  The description's rule (6), the face's description, the `variants` comment, `consumers` (the
+  renderer prints the word set the certificate's `volunteer` names) and `fsRefs` (D181) say the
+  same. No other constraint moved.
+- `examples/claim-kit.v1.contributor.example.json` stays kit-1 with the contributor variant added
+  and nothing else changed. Its variant now carries the words proposed for kit-1 in D181's final
+  word file (the contributor words, the volunteer words, the share line, nine named rules and eleven
+  prohibitions) instead of the renderer's test words, and the first note of each word set opens
+  "SAMPLE — not published wording". kit-1 takes the variant only when its words are approved; the
+  example is then deleted and rule 8 is proved over kit-1 itself, as `check:kits` already asks.
+- `check:kits` holds the volunteer word set's first note to the SAMPLE mark too, and rule 8 now
+  holds 31 refusals and 3 admissions, each refusal by the member and the keyword it is about. New:
+  a volunteer share template is admitted; refused are a face without the share line, a share line
+  without `{share}` or naming `{amount}`, a contributor variant without its volunteer words, a
+  volunteer face without the share line, a volunteer status-only sentence naming `{login}`, a
+  volunteer word set with a member of its own, without its base line, or with a line that does not
+  end with the verification sentence, and a volunteer word set on each of the other three variants.
+  The money-line case no longer spells the retired words.
 
 ## ct-segment.v1.json
 

@@ -40,15 +40,18 @@
  *      where the example IS the published artifact.) One further example shows a variant no kit
  *      carries yet: `examples/claim-kit.v1.contributor.example.json` is `kits/kit-1.json` with a
  *      contributor variant added and nothing else changed (1.2.0, ops decision D115, slice P05).
- *      Its words are a sample, the variant's first note says so in the document itself, and rules
+ *      Its words are a sample, the first note of each of its two word sets says so in the document
+ *      itself (1.3.0, ops decision D181: the contributor words and the volunteer words), and rules
  *      3 to 6 hold over it as over a kit.
  *   8. THE CONTRIBUTOR VARIANT'S SHAPE IS PROVED BOTH WAYS over that sample. A contributor share
- *      template is admitted, and so is a sponsor variant beside the contributor's. A face missing one of the renderer's words, with a word of its own, an
- *      empty word, a placeholder its word is not filled with, or a money line without its figure is
- *      refused; so are a contributor variant without a face, for another class too or with a
- *      badge, a face on any other variant, and `{login}` or `{projects}` in another variant's lines
- *      or templates. Each refusal must come from the member it is about: a document refused for
- *      some other reason proves nothing.
+ *      template is admitted, in either word set, and so is a sponsor variant beside the contributor's. A face missing one of the renderer's words, with a word of its own, an
+ *      empty word, a placeholder its word is not filled with, a money line without its figure or a
+ *      share line without its share is refused; so are a contributor variant without a face, without
+ *      its volunteer words, for another class too or with a badge, a volunteer word set without a
+ *      share line, with a member of its own, without its base line or with a line that does not end
+ *      with the verification sentence, a face or a volunteer word set on any other variant, and
+ *      `{login}` or `{projects}` in another variant's lines or templates. Each refusal must come from
+ *      the member it is about: a document refused for some other reason proves nothing.
  *
  * The document rules (2 to 6) are proved able to fail: the self-test at the end runs each of them
  * against a document that breaks it, so a rule that stopped matching cannot sit here looking green.
@@ -263,7 +266,8 @@ for (const [exampleFile, kitFile] of EXAMPLE_PAIRS) {
 /* ------------------------------------ the further example: its published kit plus one variant */
 
 /**
- * Rule 8: the contributor variant's shape (claim-kit.v1 1.2.0), proved both ways over the sample.
+ * Rule 8: the contributor variant's shape (claim-kit.v1 1.2.0; its volunteer word set and share line,
+ * 1.3.0), proved both ways over the sample.
  *
  * Every case is the sample with one thing changed, after the sample itself is shown to validate, so
  * a refusal tests the rule and not a broken sample. A refusal counts only when the validator names
@@ -301,6 +305,9 @@ function contributorShapeProblems(sample, validate) {
     ['a contributor share template naming {login} and {projects}', changed((v, c) => {
       c.templates = [{ id: 'post', channel: 'short-post', text: `{login} is a credited contributor to {projects}. ${verify}` }];
     })],
+    ['a volunteer share template naming {login} and {projects}', changed((v, c) => {
+      c.volunteer.templates = [{ id: 'post', channel: 'short-post', text: `{login} volunteered on {projects}. ${verify}` }];
+    })],
     ['a sponsor variant beside the contributor one', changed((v) => { v.sponsor = structuredClone(sponsor); })],
   ];
   const refused = [
@@ -309,8 +316,17 @@ function contributorShapeProblems(sample, validate) {
     ['an empty face word', '/variants/contributor/face/lead', 'minLength', (v, c) => { c.face.lead = ''; }],
     ['a placeholder in a word filled with none', '/variants/contributor/face/headline', 'pattern', (v, c) => { c.face.headline = 'Credited in {period}'; }],
     ['a placeholder its word is not filled with', '/variants/contributor/face/projectMany', 'pattern', (v, c) => { c.face.projectMany = '{count} projects'; }],
-    ['a money line without its figure', '/variants/contributor/face/moneyLine', 'pattern', (v, c) => { c.face.moneyLine = 'Helped direct Purpose Fees in {period}'; }],
+    ['a money line without its figure', '/variants/contributor/face/moneyLine', 'pattern', (v, c) => { c.face.moneyLine = 'Purpose Fees passed on to listed charities in {period}'; }],
+    ['a face without the share line', '/variants/contributor/face', 'required', (v, c) => { delete c.face.shareLine; }],
+    ['a share line without its share', '/variants/contributor/face/shareLine', 'pattern', (v, c) => { c.face.shareLine = 'For {period}, the holder recorded a choice.'; }],
+    ['a share line naming a placeholder it is not filled with', '/variants/contributor/face/shareLine', 'pattern', (v, c) => { c.face.shareLine = '{share} of {amount} was left to the Association.'; }],
     ['a contributor variant without a face', '/variants/contributor', 'required', (v, c) => { delete c.face; }],
+    ['a contributor variant without its volunteer words', '/variants/contributor', 'required', (v, c) => { delete c.volunteer; }],
+    ['a volunteer face without the share line', '/variants/contributor/volunteer/face', 'required', (v, c) => { delete c.volunteer.face.shareLine; }],
+    ['a volunteer status-only sentence naming the holder', '/variants/contributor/volunteer/face/statusOnlyLine', 'pattern', (v, c) => { c.volunteer.face.statusOnlyLine = 'With thanks to {login}, in {period}.'; }],
+    ['a volunteer word set with a member of its own', '/variants/contributor/volunteer', 'additionalProperties', (v, c) => { c.volunteer.badge = null; }],
+    ['a volunteer word set without its base line', '/variants/contributor/volunteer/lines', 'contains', (v, c) => { c.volunteer.lines = c.volunteer.lines.filter((line) => line.use !== 'base'); }],
+    ['a volunteer line without the verification sentence', '/variants/contributor/volunteer/lines/0/text', 'pattern', (v, c) => { c.volunteer.lines[0].text = '{login} volunteered on {projects}.'; }],
     ['a contributor variant for another class too', '/variants/contributor/appliesTo', 'const', (v, c) => { c.appliesTo.push('steward.registration'); }],
     ['a contributor variant with a badge', '/variants/contributor/badge', 'const', (v, c) => { c.badge = structuredClone(v.statusOnly.badge); }],
     ['a contributor variant with no prohibition', '/variants/contributor/prohibited', 'minItems', (v, c) => { c.prohibited = []; }],
@@ -319,6 +335,9 @@ function contributorShapeProblems(sample, validate) {
     ['a face on the supporter variant', '/variants/supporter/face', 'false schema', (v, c) => { v.supporter.face = structuredClone(c.face); }],
     ['a face on the status-only variant', '/variants/statusOnly/face', 'false schema', (v, c) => { v.statusOnly.face = structuredClone(c.face); }],
     ['a face on a sponsor variant', '/variants/sponsor/face', 'false schema', (v, c) => { v.sponsor = { ...structuredClone(sponsor), face: structuredClone(c.face) }; }],
+    ['volunteer words on the supporter variant', '/variants/supporter/volunteer', 'false schema', (v, c) => { v.supporter.volunteer = structuredClone(c.volunteer); }],
+    ['volunteer words on the status-only variant', '/variants/statusOnly/volunteer', 'false schema', (v, c) => { v.statusOnly.volunteer = structuredClone(c.volunteer); }],
+    ['volunteer words on a sponsor variant', '/variants/sponsor/volunteer', 'false schema', (v, c) => { v.sponsor = { ...structuredClone(sponsor), volunteer: structuredClone(c.volunteer) }; }],
     ['{login} in a supporter line', '/variants/supporter/lines/0/text', 'not', (v) => { v.supporter.lines[0].text = `{login} holds a Purpose Source {lane} Entitlement for {period}. ${verify}`; }],
     ['{projects} in a supporter template', '/variants/supporter/templates/0/text', 'not', (v) => { v.supporter.templates[0].text = `{organisation} covers {projects}. ${verify}`; }],
     ['{login} in a status-only line', '/variants/statusOnly/lines/0/text', 'not', (v) => { v.statusOnly.lines[0].text = `{login} is covered; coverage status: {status}. ${verify}`; }],
@@ -387,6 +406,16 @@ for (const [exampleFile, kitFile, variantKey] of SAMPLE_EXAMPLES) {
       `${where}: the ${variantKey} variant's first note must open ${JSON.stringify(SAMPLE_MARK)}. Its words are a sample, ` +
         'not published wording, and the document has to say so itself: it is read without this gate.',
     );
+  }
+  // A word set of the variant is read on its own (the renderer prints one set), so its own first note says so too (1.3.0).
+  if (variant?.volunteer !== undefined) {
+    const setNote = Array.isArray(variant.volunteer?.permittedNotes) ? variant.volunteer.permittedNotes[0] : undefined;
+    if (typeof setNote !== 'string' || !setNote.startsWith(SAMPLE_MARK)) {
+      problems.push(
+        `${where}: the ${variantKey} variant's volunteer word set's first note must open ${JSON.stringify(SAMPLE_MARK)}, as the ` +
+          "variant's own does: a certificate prints one word set, and each is read without this gate.",
+      );
+    }
   }
   problems.push(...kitProblems(kitFile, text, sample, where));
   const validate = validators.get(sample?.schemaVersion);

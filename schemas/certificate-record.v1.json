@@ -4,13 +4,13 @@
   "title": "Certificate verify record — /certs/{cert_id}.json",
   "description": "The public verify record for one certificate, regenerated on issue and on every status change (FS08-060). This shape is BYTE-AUTHORITATIVE: the public verify route is a passthrough and no consumer may rename or reshape a field — same names (`cid`, `typ`, `variant`), structured `scope`, `band` with no currency prefix (FS08-060a). The record never contains more subject data than the certificate itself displays (CERT-026), individual-subject records are unlisted (unguessable ULID, excluded from every index and sitemap, served `X-Robots-Tag: noindex`, CERT-060), and the route reads this artifact only — never a database (FS08-061).\n\n`ct: null` means signed-but-not-yet-logged, and the verify page renders UNVERIFIED (CERT-030). Clients can independently re-derive inclusion from the published log segments. Erasure leaves a tombstone: `status: \"revoked\"` with the subject fields removed, hash-only log entries retained (CERT-045/031).",
   "x-psn": {
-    "specVersion": "1.3.1",
+    "specVersion": "1.4.0",
     "phase": "P-M2",
     "artifactPath": "/certs/{cert_id}.json",
     "authoritative": true,
     "producer": "index-build (P-M2: operator script + PR, VS-27)",
     "consumers": ["edge verify route (FS-10 §6)", "web verify page (VS-25, WEB-090)"],
-    "fsRefs": ["FS-00 §6.2", "FS-08 §7.1 (FS08-060, FS08-060a)", "FS-10 §6 (FS10-040…FS10-042)", "CERT-024…CERT-045"],
+    "fsRefs": ["FS-00 §6.2", "FS-08 §7.1 (FS08-060, FS08-060a)", "FS-10 §6 (FS10-040…FS10-042)", "CERT-024…CERT-045", "D181"],
     "vsRefs": ["VS-04", "VS-25", "VS-27"],
     "changelog": "CHANGELOG.md#certificate-recordv1json"
   },
@@ -94,7 +94,11 @@
       "description": "The compact JWS — the certificate itself. Present so a client can validate the signature offline against a JWKS copy without a second fetch (CERT-025)."
     },
     "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "The Entitlement term this certificate attests, for a payment certificate (D44). The term id is already public on the ledger rows and the signed entitlement record; carrying it here is what lets the covered-organisations list name each term’s certificate without decoding a token." },
-    "jwsSha256": { "$ref": "#/$defs/sha256", "description": "Lowercase-hex SHA-256 of the compact JWS, the value the transparency log entry carries (FS08-050). Required on a `status-only` record; optional elsewhere." }
+    "jwsSha256": { "$ref": "#/$defs/sha256", "description": "Lowercase-hex SHA-256 of the compact JWS, the value the transparency log entry carries (FS08-050). Required on a `status-only` record; optional elsewhere." },
+    "volunteer": {
+      "const": true,
+      "description": "The signed payload's `volunteer` member (`certificate.v1.json` 1.7.0, ops decision D181), copied from it: present exactly when the certificate carries it, on a contributor record and on nothing else. It says the certificate is a certificate for volunteering and carries the volunteer words of its kit, so the verify page names the certificate as its own face does. It is on a full and on a status-only record alike: on a status-only record it names nobody, because that record carries no `sub` and, for a person, no `scope`. It is the holder's own statement, which Purpose Source does not check, and it says nothing about money. It is dropped on an erasure tombstone, with the subject fields (CERT-045). `false` is refused: absence means the contributor words, as on the payload. Added in 1.4.0."
+    }
   },
   "allOf": [
     {
@@ -111,6 +115,11 @@
       "$comment": "D44: a sponsor is never unlisted (statutes Art. 6b(3): undisclosed support is prohibited).",
       "if": { "properties": { "variant": { "const": "sponsor" } }, "required": ["variant"] },
       "then": { "not": { "properties": { "disclosure": { "const": "status-only" } }, "required": ["disclosure"] } }
+    },
+    {
+      "$comment": "D181: the volunteer member is a contributor certificate's, copied from its signed payload (1.4.0). The rule constrains only the new member.",
+      "if": { "required": ["volunteer"] },
+      "then": { "properties": { "typ": { "const": "contributor" } }, "required": ["typ"] }
     }
   ],
   "$defs": {
