@@ -12,12 +12,14 @@
  *
  *   ONE VERSION (`examples/consultation.v1*.example.json`)
  *     hash       `sha256` is the SHA-256 of `document`'s RFC 8785 form;
- *     band       `asked.to` is `asked.from` + 4, and a numeric turnout is no more than `asked.to`;
+ *     band       `asked.to` is `asked.from` + 4, and a numeric turnout is no more than `asked.to` − 5;
  *     numbering  questions run 1, 2, 3… in order, and so do each question's options;
  *     counts     a published count names every option of its question once, in order; a
  *                single-choice question's counts sum to `respondents`; a tick-any option's `count`
- *                and `notTicked` sum to `respondents`; an optional question's `noAnswer` is the
- *                numeric turnout less its `respondents`;
+ *                and `notTicked` sum to `respondents`, and the options' counts together exceed
+ *                `respondents` by at least 5 (the ticks beyond one per respondent); a required
+ *                question's `respondents` is the numeric turnout, and an optional question's
+ *                `noAnswer` is the numeric turnout less its `respondents`;
  *     time       `openedAt` is before `closesAt`, `closedAt` is not before `closesAt`, a withdrawal
  *                is not before `openedAt`, and `generatedAt` is not before `publishedAt`.
  *
@@ -35,7 +37,8 @@
  *     dated      `generatedAt` is not before any entry's `publishedAt`.
  *
  *   THE RFC 8785 FORM ITSELF is self-tested on fixed vectors, and EVERY RULE ABOVE IS PROVED ABLE
- *   TO FAIL on a planted document before the examples are judged.
+ *   TO FAIL on a planted document before the examples are judged; the rules that hold a count a
+ *   reader works out to 5 are proved to stop at 5, on a document planted at that edge.
  *
  *   REFUSALS. Each contract still refuses, by its own keywords, what must never be published: the
  *   admins' list of qualifying projects or any member that could carry a person or a written
@@ -103,7 +106,12 @@ function versionProblems(file) {
   const d = file.document;
   if (sha256(d) !== file.sha256) out.push(`sha256 ${file.sha256} is not the SHA-256 of the document's RFC 8785 form (${sha256(d)})`);
   if (d.asked.to !== d.asked.from + 4) out.push(`asked runs from ${d.asked.from} to ${d.asked.to}, not a range of five`);
-  if (d.turnout?.state === 'count' && d.turnout.count > d.asked.to) out.push(`the turnout ${d.turnout.count} is more than the ${d.asked.to} the people asked can be`);
+  if (d.turnout?.state === 'count' && d.turnout.count > d.asked.to) {
+    out.push(`the turnout ${d.turnout.count} is more than the ${d.asked.to} the people asked can be`);
+  } else if (d.turnout?.state === 'count' && d.turnout.count > d.asked.to - 5) {
+    // A number only where at least 5 of those asked did not answer: above `asked.to` − 5, a reader works out that fewer did not.
+    out.push(`the turnout ${d.turnout.count} leaves fewer than 5 of the ${d.asked.from} to ${d.asked.to} people asked who did not answer, and the turnout is a number only when at least 5 did not`);
+  }
   d.questions.forEach((q, i) => {
     if (q.no !== i + 1) out.push(`question ${i + 1} is numbered ${q.no}`);
     q.options.forEach((o, j) => {
@@ -121,6 +129,16 @@ function versionProblems(file) {
       for (const o of c.options) {
         if (o.count + o.notTicked !== c.respondents) out.push(`question ${q.no}'s option ${o.no}: ${o.count} ticked and ${o.notTicked} not ticked are not its ${c.respondents} respondents`);
       }
+      // Everyone who answers it ticks at least one choice, so the ticks beyond one per respondent are a count a reader works
+      // out (over two choices, those who ticked both), held to 5 like every count shown (D143's dated note of 2026-10-19).
+      const ticks = sum(c.options.map((o) => o.count));
+      if (ticks - c.respondents < 5) {
+        out.push(`question ${q.no}'s choices are ticked ${ticks} times by its ${c.respondents} respondents: fewer than 5 ticks beyond one per respondent, a count a reader works out`);
+      }
+    }
+    // Every answer answers a required question (a ballot that leaves one out is refused), so its respondents are the turnout.
+    if (q.required && d.turnout?.state === 'count' && c.respondents !== d.turnout.count) {
+      out.push(`question ${q.no} is required, and its ${c.respondents} respondents are not the turnout ${d.turnout.count}: every answer answers a required question`);
     }
     if (!q.required && d.turnout?.state === 'count' && c.noAnswer !== d.turnout.count - c.respondents) {
       out.push(`question ${q.no}'s "no answer" ${c.noAnswer} is not the turnout ${d.turnout.count} less its ${c.respondents} respondents`);
@@ -186,10 +204,16 @@ const documents = new Map(versions.map(({ file }) => [`${file.document.consultat
 const main = readJson(join(EXAMPLE_DIR, 'consultation.v1.example.json'));
 const clone = (value) => structuredClone(value);
 let plantsJudged = 0;
+let edgesJudged = 0;
 /** A planted document must make its rule report: a rule that passes it could pass anything. */
 function mustFail(rule, found) {
   plantsJudged += 1;
   if (found.length === 0) problems.push(`self-test: the ${rule} rule passes a document planted to break it`);
+}
+/** A document planted at a rule's edge must pass every rule: a rule that refuses it holds more than the description says. */
+function mustPass(rule, found) {
+  edgesJudged += 1;
+  if (found.length !== 0) problems.push(`self-test: the ${rule} rule refuses a document planted at its edge (${found[0]})`);
 }
 /** The main example with `edit` applied to a copy, its hash recomputed unless the edit is to the hash. */
 function planted(edit, { rehash = true } = {}) {
@@ -198,20 +222,54 @@ function planted(edit, { rehash = true } = {}) {
   if (rehash) file.sha256 = sha256(file.document);
   return file;
 }
+/** The main example answered by `n`, not 41: each of its two required questions answered by all of them, its sums kept. */
+function answeredBy(file, n) {
+  const [single, tickAny] = file.document.questions;
+  file.document.turnout.count = n;
+  single.counts.respondents = n;
+  single.counts.options[2].count = n - single.counts.options[0].count - single.counts.options[1].count;
+  tickAny.counts.respondents = n;
+  for (const o of tickAny.counts.options) o.notTicked = n - o.count;
+}
+/** The main example's tick-any question, its 41 respondents ticking its three choices `counts` times, its sums kept. */
+function ticked(file, counts) {
+  const q = file.document.questions[1];
+  q.counts.options = counts.map((count, i) => ({ no: i + 1, count, notTicked: q.counts.respondents - count }));
+}
 const PLANTS = [
   ['hash', planted((f) => { f.sha256 = '0'.repeat(64); }, { rehash: false })],
   ['band', planted((f) => { f.document.asked.to = f.document.asked.from + 5; })],
   ['band (turnout)', planted((f) => { f.document.asked = { from: 35, to: 39 }; })],
+  // 55 answered of 55 to 59 asked, so at most 4 did not: the smallest such count. Both required questions are answered by
+  // the 55, so this rule alone refuses it (a turnout of 59 beside 41 respondents would break theirs too); 54 is its edge.
+  ['band (fewer than 5 not answering)', planted((f) => answeredBy(f, 55))],
   ['numbering', planted((f) => { f.document.questions[1].no = 3; })],
   ['numbering (options)', planted((f) => { f.document.questions[0].options[2].no = 4; f.document.questions[0].counts.options[2].no = 4; })],
   ['counts (names)', planted((f) => { f.document.questions[0].counts.options.reverse(); })],
   ['counts (single sum)', planted((f) => { f.document.questions[0].counts.options[0].count += 1; })],
   ['counts (tick-any sum)', planted((f) => { f.document.questions[1].counts.options[1].notTicked += 1; })],
+  // A turnout of 44 beside 41 respondents to each required question: 3 would have left one out.
+  ['counts (required respondents)', planted((f) => { f.document.turnout.count = 44; })],
+  // D143's dated note of 2026-10-19: 20 respondents tick 12 and 9 of two choices, every count shown is 5 or more, and 1 ticked both.
+  ['counts (ticks beyond one, two choices)', planted((f) => {
+    const q = f.document.questions[2];
+    q.kind = 'multiple';
+    q.counts = { state: 'published', respondents: 20, noAnswer: 21, options: [{ no: 1, count: 12, notTicked: 8 }, { no: 2, count: 9, notTicked: 11 }] };
+  })],
+  // 41 respondents tick 20, 16 and 9 of three choices: 4 ticks beyond one per respondent; 5 is its edge.
+  ['counts (ticks beyond one, three choices)', planted((f) => ticked(f, [20, 16, 9]))],
   ['time (open period)', planted((f) => { f.document.closesAt = f.document.openedAt; })],
   ['time (close)', planted((f) => { f.document.closedAt = '2027-03-31T08:59:59Z'; })],
   ['time (generatedAt)', planted((f) => { f.generatedAt = '2027-04-02T10:11:11Z'; })],
 ];
 for (const [rule, file] of PLANTS) mustFail(rule, versionProblems(file));
+// The counts a reader works out are held to 5, and to no more: 54 of 55 to 59 answering leaves 5 who did not, and 46 ticks
+// by 41 respondents leave 5 beyond one each. One more answer, or one tick fewer, is a plant above.
+const EDGES = [
+  ['band (fewer than 5 not answering)', planted((f) => answeredBy(f, 54))],
+  ['counts (ticks beyond one)', planted((f) => ticked(f, [20, 17, 9]))],
+];
+for (const [rule, file] of EDGES) mustPass(rule, versionProblems(file));
 // An optional question's "no answer", on a plant of its own: the main example's only published questions are required.
 {
   const file = clone(main);
@@ -409,6 +467,7 @@ if (!indexSchema(empty) || empty.consultations.length !== 0) problems.push('cons
 fail(
   problems,
   `${versions.length} consultation.v1 and ${indexFiles.length} consultation-index.v1 examples keep their rules (${pairs} chained pairs, ` +
-    `${checkedEntries} index entries checked against their documents); ${plantsJudged} planted documents each fail their rule; ` +
+    `${checkedEntries} index entries checked against their documents); ${plantsJudged} planted documents each fail their rule, ` +
+    `and ${edgesJudged} planted at a rule's edge pass every rule; ` +
     `${REFUSED.length + INDEX_REFUSED.length} refusals and ${ADMITTED.length + 1} admissions hold`,
 );

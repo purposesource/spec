@@ -3959,6 +3959,25 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 
 ## consultation.v1.json
 
+### 1.1.0 — unreleased (2026-10-24; ops decision D143 item 11 and its dated note of 2026-10-19; PS-2300) — **pre-release** change under versioning policy 5
+
+- **Pre-release (versioning rule 5).** The description's reader checks gain three counts a reader can work out, each a
+  count under 5 that the small-count rule never publishes, so a document that breaks one is no longer one this contract
+  describes. No keyword moves: every document the schema admitted it still admits, and the examples keep their bytes. The
+  platform's api never stored such a document: its own small-count rule already holds all three.
+- A numeric turnout is no more than `asked.to` − 5, where it was no more than `asked.to`. The turnout is a number only
+  when at least 5 of those asked did not answer, so a larger number tells a reader that fewer than 5 did not: a turnout of
+  59 of 55 to 59 says that everyone asked answered. The turnout's own description states the same bound.
+- A required question's `respondents` is the numeric turnout. Every answer answers a required question, so with a
+  turnout of 44, a required question answered by 41 tells a reader that 3 left it out.
+- A tick-any question's options' counts together exceed its `respondents` by at least 5. Everyone who answers it ticks at
+  least one choice, so the excess is the ticks beyond one per respondent, a count a reader works out; over two choices it
+  is those who ticked both. With 20 respondents ticking 12 and 9, every count shown is 5 or more and 1 ticked both (ops
+  decision D143's dated note of 2026-10-19). The small-count rule's paragraph now says that a question publishes its
+  counts only when every count a reader can work out from them is at least 5 too.
+- `check:consultations` holds the examples to the three and proves each able to fail on a planted document that breaks
+  it alone. The platform's renderer refuses to publish a version that breaks any of them, as it refuses the other checks.
+
 ### 1.0.0 — unreleased (2026-10-23; ops decision D143 items 9 to 11; platform migration 0098, PS-1777) — pre-release
 
 - New, **pre-release**: one advisory vote's newest published version, at `/consultations/{consultationId}.json`. The
