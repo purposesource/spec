@@ -1,0 +1,9 @@
+entId,lane,repoNodeId,repoNameWithOwner,status,pendingSubstate,termStart,termEnd,graceEndsAt,autoRenew,scheduleVersion,band,sandbox
+ent_01jyc4h8r2m6p9t3w5x7z0b2d4,project,R_kgDOSMPL0003,example-maintainers/cell-renderer,pending,awaiting-payment,,,,true,v1,1-5B,false
+ent_01jyc5n2v7q1s4w8y0c3e6g9j2,pass,,,lapsed,,,,,false,v1,1-5B,false
+ent_01jyc6t5x9b3d7f1h4k8m2p5r8,project,R_kgDOSMPL0004,,revoked,,,,,false,v1,1-5B,false
+ent_01jw2a3b4c5d6e7f8g9h0j1k2m,project,R_kgDOSMPL0005,example-maintainers/sheet-diff,suspended,,2027-09-01,2028-09-01,,true,v1,1-5B,false
+ent_01jtz8x6v4s2q0n8k6h4f2d0b8,project,R_kgDOSMPL0001,example-maintainers/formula-engine,active,,2027-06-01,2028-06-01,,true,v1,1-5B,false
+ent_01jpk3m5n7q9s1t3v5w7x9y1z3,pass,,,active,,2027-03-15,2028-03-15,,true,v1,1-5B,false
+ent_01jd5f7h9k1m3n5p7q9r1s3t5v,project,R_kgDOSMPL0002,example-maintainers/pivot-tables,grace,,2026-11-20,2027-11-20,2027-12-20,true,v1,500M-1B,false
+ent_01jbx2z4c6e8g0j2m4p6r8t0w2,project,MDEwOlJlcG9zaXRvcnkxMjM0NTY3ODk=,example-maintainers/legacy-charts,lapsed,,2026-11-02,2027-11-02,2027-12-02,false,v1,500M-1B,false

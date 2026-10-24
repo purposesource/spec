@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/purpose-licenses.v1.json",
+  "title": "Compliance export — one line of purpose-licenses.csv",
+  "description": "One line of `purpose-licenses.csv`, the compliance export of FS-04 FS04-067 (URS APP-061, TRN-043): the Entitlements an organisation holds and has held, and the repository each one covers, as a file the organisation downloads from its own dashboard (`GET /v1/orgs/{co_id}/exports/purpose-licenses.csv`, behind its session) for an internal register or an auditor's request. The file is never published. It is a register extract and not a proof of coverage: the proof is the organisation's signed entitlement record (`entitlement-record.v1`, `/entitlements/{co_ulid}.jws`), and the coverage answer, which this file does not carry. FS04-067's other file, the SBOM-compatible listing (`/exports/sbom`), is not this one and has no contract here yet.\n\nTHE ROWS ARE THE LICENCES PAGE'S. One line per Entitlement of the organisation: every one its Licences page lists, which is what `GET /v1/orgs/{co_id}/entitlements` answers (FS04-073), a purchase not yet completed included, so no two lines share an `entId`. They come in the page's order: the Entitlements with no term first, then by `termStart`, latest first, and by `entId`, ascending, where those are equal. The columns are that list's members of the same names, its `term` block flattened into `termStart` and `termEnd`. An organisation with no Entitlement gets the header line alone. The file carries no amount, price, invoice, transaction, payer, person or coverage answer: the list it restates carries none (FS04-073, FS04-086).\n\nTHE FILE. Text in UTF-8 in which every character is ASCII, with no byte-order mark: the header line first, naming the columns in the order `x-psn.csvHeader` gives, then one line per row. Every line, the header included, ends with a line feed, and no line is blank. Fields are separated by commas and never quoted: no value this contract admits holds a comma, a double quote, a carriage return or a line feed, and none begins with `=`, `+`, `-` or `@`, so no spreadsheet reads a field as a formula. An empty field is a value the row does not have. Read a line with any RFC 4180 reader that keys each field by its header name: that record, every field as the text the file holds, is what this schema validates. The file names no instant of its own, so two downloads made while the records stand still are the same bytes.\n\nWHAT A ROW COVERS. A `project` row covers the one repository it names (`repoNodeId`; ops decision D42). A `pass` row names none: a Pass covers any work under the licence, registered or not (ops decisions D48 item 5 and D82 item 10). A `portfolio` row names none either: a Portfolio covers the registered repositories of one owner, the lane is not sold yet (FS05-004 dates its pipeline P-M4), and the Licences page names no owner for it. Of a `grace` or `lapsed` row that has a term, every part of the software made public on or before its `termEnd`, the recorded end of the paid term, stays covered permanently (D12 as read by ops decision D50; COM-044): a lapse is no reason to remove what was public by then. A row whose `sandbox` is `true` is a test-mode Entitlement, and nothing about it is a real transaction (FS04-004, FS04-069).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M4 (FS-04 FS04-067; P-M2-VALIDATION-SUBSET item 20 dates the file P-M4). Nothing is served under this contract yet: the api route that serves the file and the exports screen's download are a later change.",
+    "artifactPath": "(never published) one line of `GET /v1/orgs/{co_id}/exports/purpose-licenses.csv`, the file an organisation downloads from its own dashboard, behind its session",
+    "authoritative": false,
+    "producer": "the api (`GET /v1/orgs/{co_id}/exports/purpose-licenses.csv`, a later change), from the rows `GET /v1/orgs/{co_id}/entitlements` answers (FS04-073), the list the organisation's Licences page reads",
+    "consumers": [
+      "the organisation's own compliance register, and its auditors (FS04-067, URS APP-061)",
+      "the exports screen at `/org/{co_id}/exports`, which offers the download once the route exists"
+    ],
+    "fsRefs": [
+      "FS-04 §6 FS04-067",
+      "FS-04 §6 FS04-073 and its dated notes of 2026-09-20 and 2026-10-16",
+      "FS-04 FS04-024",
+      "URS APP-061",
+      "URS TRN-043",
+      "COM-042",
+      "COM-044",
+      "D12 as read by ops decision D50",
+      "ops decisions D42, D48 item 5 and D82 item 10"
+    ],
+    "vsRefs": ["VS-05"],
+    "csvHeader": [
+      "entId",
+      "lane",
+      "repoNodeId",
+      "repoNameWithOwner",
+      "status",
+      "pendingSubstate",
+      "termStart",
+      "termEnd",
+      "graceEndsAt",
+      "autoRenew",
+      "scheduleVersion",
+      "band",
+      "sandbox"
+    ],
+    "changelog": "CHANGELOG.md#purpose-licensesv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "entId",
+    "lane",
+    "repoNodeId",
+    "repoNameWithOwner",
+    "status",
+    "pendingSubstate",
+    "termStart",
+    "termEnd",
+    "graceEndsAt",
+    "autoRenew",
+    "scheduleVersion",
+    "band",
+    "sandbox"
+  ],
+  "properties": {
+    "entId": {
+      "type": "string",
+      "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$",
+      "description": "The Entitlement's id, as FS04-073's list and the signed entitlement record carry it. One line per Entitlement: no two lines of a file share it."
+    },
+    "lane": {
+      "type": "string",
+      "enum": ["project", "portfolio", "pass"],
+      "description": "What was bought: `project` (a Project licence, which covers one repository), `pass` (a Pass) or `portfolio` (a Portfolio, not sold yet). The lanes the platform's record admits. The `donation` lane of `entitlement-record.v1` is not among them: the direct donation route was dropped before it opened and no Donation Entitlement is issued (ops decisions D91 item 3 and D93 item 1)."
+    },
+    "repoNodeId": {
+      "type": "string",
+      "anyOf": [
+        { "$ref": "#/$defs/none" },
+        { "pattern": "^(?:[A-Za-z0-9][A-Za-z0-9_-]{3,127}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$" }
+      ],
+      "description": "The GitHub node id of the repository a `project` row covers, in either form GitHub has issued (the current `R_` form, or the legacy base64 form beginning `MDEwOlJlcG9zaXRvcnk`); it is the key every act and the coverage question use (FS02-017). Empty on a `pass` and a `portfolio` row, which name no repository. It never begins with `-`, `_`, `+` or `=`, which no repository's id does."
+    },
+    "repoNameWithOwner": {
+      "type": "string",
+      "anyOf": [
+        { "$ref": "#/$defs/none" },
+        { "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}/[A-Za-z0-9._-]{1,100}$" }
+      ],
+      "description": "The repository's `owner/name` as the registry lists it when the file is made (FS04-073's dated note of 2026-10-16), beside its id so that a reader need not look it up. A finding aid only: `repoNodeId` is the key, and a renamed repository keeps its id. Empty where the row names no repository, and where the registry holds no row for the id."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "active", "grace", "lapsed", "suspended", "revoked"],
+      "description": "The Entitlement's state in the dashboard's words (FS04-024; FS04-073's `status`): `pending`, a purchase not completed yet (`pendingSubstate` says how far it has got); `active`, the term is running; `grace`, the term ended with no settled renewal and its grace window runs, to `graceEndsAt` (COM-042); `lapsed`, the term and any grace window have ended, or an invoice lapsed unpaid before any term started; `suspended`, a chargeback is pending (COM-024); `revoked`, refunded or a chargeback upheld, void from the start. These are not the published record's statuses: `entitlement-record.v1` publishes `active`, `suspended` and `void`, and a reader derives grace and lapse from its dates."
+    },
+    "pendingSubstate": {
+      "type": "string",
+      "anyOf": [
+        { "$ref": "#/$defs/none" },
+        { "enum": ["awaiting-payment", "provisional", "held", "gift-pending"] }
+      ],
+      "description": "How far a `pending` purchase has got, as the buyer is shown it (FS05-050): `awaiting-payment`, the card checkout is not paid yet; `provisional`, an invoice is issued and not paid yet; `held`, the purchase is under review, one word for every kind of hold (FS05-035); `gift-pending`, a gift awaiting its recipient. Empty on every other status, and on a `pending` row that records none."
+    },
+    "termStart": {
+      "type": "string",
+      "anyOf": [{ "$ref": "#/$defs/none" }, { "$ref": "#/$defs/day" }],
+      "description": "The first day of the paid term, `YYYY-MM-DD` (FS04-073's `term.start`). Empty exactly when `termEnd` is: a term is both of its dates or none. A row with no term is `pending`, `revoked` (a refund ended a held purchase before any term started) or `lapsed` (an invoice lapsed unpaid before any term started); every `active`, `grace` and `suspended` row has one."
+    },
+    "termEnd": {
+      "type": "string",
+      "anyOf": [{ "$ref": "#/$defs/none" }, { "$ref": "#/$defs/day" }],
+      "description": "The recorded end of the paid term, `YYYY-MM-DD` (FS04-073's `term.end`). Of a `grace` or `lapsed` row, every part of the software made public on or before this day stays covered permanently (D12 as read by ops decision D50). Empty exactly when `termStart` is."
+    },
+    "graceEndsAt": {
+      "type": "string",
+      "anyOf": [{ "$ref": "#/$defs/none" }, { "$ref": "#/$defs/day" }],
+      "description": "The last day of the term's grace window, `YYYY-MM-DD`, where the record holds one (FS04-073's `graceEndsAt`): a term that ends with no settled renewal has 30 days of grace (COM-042). Empty where none is recorded."
+    },
+    "autoRenew": {
+      "type": "string",
+      "enum": ["true", "false"],
+      "description": "`true` where the record says the term renews at its end, and `false` where it says it does not (FS04-063's cancel turns it off)."
+    },
+    "scheduleVersion": {
+      "type": "string",
+      "anyOf": [
+        { "$ref": "#/$defs/none" },
+        { "pattern": "^v[0-9]+(\\.[0-9]+)?$" }
+      ],
+      "description": "The version of the published Schedule the term was priced under (`v1`), never a figure (ops decision D11). Empty on a row that records none."
+    },
+    "band": {
+      "type": "string",
+      "anyOf": [
+        { "$ref": "#/$defs/none" },
+        { "pattern": "^[0-9A-Za-z][0-9A-Za-z+-]{0,31}$" }
+      ],
+      "description": "The size band the organisation self-certified for the term, as the published Schedule writes its token (`10-50M`): no currency and no price. Empty on a row that records none."
+    },
+    "sandbox": {
+      "type": "string",
+      "enum": ["true", "false"],
+      "description": "`true` on a test-mode Entitlement of a sandbox rail: nothing about it is a real transaction, and it never enters a production registry, ledger or certificate log (FS04-069). `false` on every other row."
+    }
+  },
+  "allOf": [
+    {
+      "description": "A Project licence names the repository it covers.",
+      "if": { "properties": { "lane": { "const": "project" } }, "required": ["lane"] },
+      "then": { "properties": { "repoNodeId": { "not": { "$ref": "#/$defs/none" } } } }
+    },
+    {
+      "description": "A Pass and a Portfolio name no repository.",
+      "if": { "properties": { "lane": { "enum": ["pass", "portfolio"] } }, "required": ["lane"] },
+      "then": { "properties": { "repoNodeId": { "$ref": "#/$defs/none" } } }
+    },
+    {
+      "description": "No name without its id: the id is the key and the name a finding aid.",
+      "if": { "properties": { "repoNodeId": { "$ref": "#/$defs/none" } }, "required": ["repoNodeId"] },
+      "then": { "properties": { "repoNameWithOwner": { "$ref": "#/$defs/none" } } }
+    },
+    {
+      "description": "A sub-state belongs to a `pending` row only.",
+      "if": { "properties": { "status": { "not": { "const": "pending" } } }, "required": ["status"] },
+      "then": { "properties": { "pendingSubstate": { "$ref": "#/$defs/none" } } }
+    },
+    {
+      "description": "A term is both of its dates or none.",
+      "if": { "properties": { "termStart": { "$ref": "#/$defs/none" } }, "required": ["termStart"] },
+      "then": { "properties": { "termEnd": { "$ref": "#/$defs/none" } } },
+      "else": { "properties": { "termEnd": { "not": { "$ref": "#/$defs/none" } } } }
+    },
+    {
+      "description": "An `active`, `grace` or `suspended` row has a term.",
+      "if": { "properties": { "status": { "enum": ["active", "grace", "suspended"] } }, "required": ["status"] },
+      "then": { "properties": { "termStart": { "not": { "$ref": "#/$defs/none" } } } }
+    }
+  ],
+  "$defs": {
+    "none": { "const": "", "description": "An empty field: a value the row does not have." },
+    "day": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
+      "description": "A calendar day, `YYYY-MM-DD`, as the platform's record writes it. The pattern holds the form for a validator that takes `format` as an annotation, as draft 2020-12 does by default; `format` adds the calendar (no 30 February) where it is asserted."
+    }
+  }
+}
