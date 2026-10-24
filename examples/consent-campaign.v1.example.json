@@ -1,0 +1,132 @@
+{
+  "id": "cmp_01jb3m8k2q9r7t5v3x1z0c4d6f",
+  "repoNodeId": "R_kgDOExamp1e",
+  "nameWithOwner": "example-org/example-tool",
+  "mode": "required",
+  "state": "open",
+  "stateAt": "2026-10-24T19:05:12Z",
+  "inboundSpdx": "GPL-3.0",
+  "startedAt": "2026-10-24T18:41:03Z",
+  "analysis": {
+    "headSha": "4f2c9e1b7a6d3c0e8f5b2a9d6c3e0f7b4a1d8c5e",
+    "branch": "main",
+    "commits": 412,
+    "contributors": 5,
+    "lines": "approximate",
+    "analyzedAt": "2026-10-24T19:05:12Z"
+  },
+  "deferred": null,
+  "ended": null,
+  "counts": {
+    "pending": 3,
+    "approved": 0,
+    "declined": 0,
+    "unreachable": 1,
+    "excluded": 1
+  },
+  "records": [
+    {
+      "id": "cons_01jb3n2a4c6e8g0j2m4p6r8t0v",
+      "contributor": {
+        "kind": "account",
+        "nodeId": "U_kgDOAbCdEf",
+        "login": "example-maintainer"
+      },
+      "commits": 301,
+      "linesAdded": 48210,
+      "linesDeleted": 19034,
+      "scope": {
+        "first": "0a1b2c3d4e5f60718293a4b5c6d7e8f901234567",
+        "last": "4f2c9e1b7a6d3c0e8f5b2a9d6c3e0f7b4a1d8c5e"
+      },
+      "state": "pending",
+      "stateReason": null,
+      "stateAt": "2026-10-24T19:05:12Z"
+    },
+    {
+      "id": "cons_01jb3n2a4c6e8g0j2m4p6r8t0w",
+      "contributor": {
+        "kind": "account",
+        "nodeId": "U_kgDOGhIjKl",
+        "login": "second-contributor"
+      },
+      "commits": 87,
+      "linesAdded": 6120,
+      "linesDeleted": 2318,
+      "scope": {
+        "first": "1b2c3d4e5f60718293a4b5c6d7e8f9012345678a",
+        "last": "2c3d4e5f60718293a4b5c6d7e8f9012345678ab1"
+      },
+      "state": "pending",
+      "stateReason": null,
+      "stateAt": "2026-10-24T19:05:12Z"
+    },
+    {
+      "id": "cons_01jb3n2a4c6e8g0j2m4p6r8t0x",
+      "contributor": {
+        "kind": "withheld"
+      },
+      "commits": 14,
+      "linesAdded": 903,
+      "linesDeleted": 77,
+      "scope": {
+        "first": "3d4e5f60718293a4b5c6d7e8f9012345678ab1c2",
+        "last": "4e5f60718293a4b5c6d7e8f9012345678ab1c2d3"
+      },
+      "state": "pending",
+      "stateReason": null,
+      "stateAt": "2026-10-24T19:05:12Z"
+    },
+    {
+      "id": "cons_01jb3n2a4c6e8g0j2m4p6r8t0y",
+      "contributor": {
+        "kind": "commit-identity",
+        "name": "J. Example"
+      },
+      "commits": 9,
+      "linesAdded": null,
+      "linesDeleted": null,
+      "scope": {
+        "first": "5f60718293a4b5c6d7e8f9012345678ab1c2d3e4",
+        "last": "60718293a4b5c6d7e8f9012345678ab1c2d3e4f5"
+      },
+      "state": "unreachable",
+      "stateReason": "no-github-account",
+      "stateAt": "2026-10-24T19:05:12Z"
+    },
+    {
+      "id": "cons_01jb3n2a4c6e8g0j2m4p6r8t0z",
+      "contributor": {
+        "kind": "account",
+        "nodeId": "BOT_kgDOMnOpQr",
+        "login": "example-updater[bot]"
+      },
+      "commits": 1,
+      "linesAdded": 12,
+      "linesDeleted": 12,
+      "scope": {
+        "first": "718293a4b5c6d7e8f9012345678ab1c2d3e4f506",
+        "last": "718293a4b5c6d7e8f9012345678ab1c2d3e4f506"
+      },
+      "state": "excluded",
+      "stateReason": "bot",
+      "stateAt": "2026-10-24T19:05:12Z"
+    }
+  ],
+  "steps": [
+    {
+      "kind": "started",
+      "from": null,
+      "to": "analyzing",
+      "by": "administrator",
+      "at": "2026-10-24T18:41:03Z"
+    },
+    {
+      "kind": "analysis-completed",
+      "from": "analyzing",
+      "to": "open",
+      "by": "system",
+      "at": "2026-10-24T19:05:12Z"
+    }
+  ]
+}

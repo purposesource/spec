@@ -4012,6 +4012,28 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   open). `check:consultations` (new) holds them to what the schema cannot state, the chain and the hashes included, and
   proves the contract still refuses what must never be published and admits what a real vote holds.
 
+## consent-campaign.v1.json
+
+### 1.0.0 — unreleased (2026-10-24; ops decision D24, FS-09 §6's consent engine, slice 1; platform migration 0109, PS-2051) — pre-release
+
+- New, **pre-release**: a repository's relicensing-consent campaign as its administrators read it, from the api's
+  `GET` and `POST /v1/admin/repos/{repoNodeId}/consent-campaign`. NEVER PUBLISHED: the api answers it to the repository's
+  administrators alone, checked live against GitHub at each read, and it is the shape of their own record. The campaign
+  (`required` for a copyleft licence, `goodwill` for a permissive one), its state, the licence it relicenses from, the
+  analysis its inventory comes from (the head commit every page was pinned to, the commit and contributor counts, and what
+  the line figures are), a deferral over 50,000 commits, why the analysis ended it, the records counted by state, one
+  consent record per contributor, and the steps taken.
+- WHO A RECORD NAMES, in four forms: a GitHub `account` (node id and login), a `commit-identity` GitHub ties to no account
+  (the name the commits give, never the address or a hash of it), an `erased` account, and a contributor `withheld` because
+  they objected to taking part, whose state, scope and figures stay and whose identity never shows.
+- A record's state and its reason go together (`excluded` with `bot`, `unreachable` with `no-github-account` and only for a
+  commit identity, the others with none), and an identity no GitHub sign-in can answer for is never `pending`, `approved` or
+  `declined`. Every object is closed.
+- What JSON Schema cannot state is in the description: the counts are the records counted by state, `analysis.contributors`
+  is the number of records, the steps are in order from `started`.
+- Example: `consent-campaign.v1.example.json`, an open campaign of a GPL-3.0 repository: two accounts and one withheld
+  contributor pending, a commit identity unreachable, a bot excluded.
+
 ## openapi/edge-public.v1.yaml
 
 The API description's own section. It is not a schema file, so the per-schema rules above

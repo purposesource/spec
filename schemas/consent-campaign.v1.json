@@ -1,0 +1,557 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/consent-campaign.v1.json",
+  "title": "consent campaign — a repository's relicensing-consent campaign, as its administrators read it",
+  "description": "One repository's relicensing-consent campaign (the consent engine, ops decision D24): its mode and state, the analysis of the repository's history, and one consent record per contributor that analysis found. A repository whose code carries a copyleft licence can relicense its FUTURE releases to the Purpose Source License only with the approval of every contributor of that code, or after the code of those who did not approve is removed or rewritten; the campaign is how its administrators collect those approvals. Nothing in the engine contacts anyone, and nothing is posted on the repository by the platform: its administrators post the tracking issue themselves (a later version of this document carries the text the platform prepares for it).\n\nIT IS NEVER PUBLISHED. The api answers it only to the repository's administrators, checked live against GitHub at each read (`GET /v1/admin/repos/{repoNodeId}/consent-campaign`), and it is the shape of their own export of the record. Named lists of contributors appear nowhere public: the public progress of a campaign, when it is published, is aggregate. Its schema is published because the administrator's record is theirs, to read with their own tools, and because the dashboard and the api build against it.\n\nWHO IS LISTED. A commit author GitHub ties to an account is that account (`contributor.kind` `account`: its node id and its login as GitHub gave it at the analysis), whatever name the commits carry; a commit author GitHub ties to no account is a `commit-identity`, shown by the name the commits give, and grouped by a hash of the commit's address that this document never carries (no address, and no hash of one, is ever in it). An account erased at its owner's request is `erased` (its record keeps its state, scope and figures, and names nobody). A contributor who objected to taking part is `withheld`: their record keeps its state, scope and figures, so the administrators see that the code needs an answer, and never who.\n\nTHE STATES. A campaign: `draft`, `analyzing` (waiting for or under its history analysis), `open` (its inventory listed; accepting decisions), `frozen` (a rewrite of the history was detected; the analysis runs again), `completed` (every contributor whose code counts has approved), and the two that end it, `converted` (relicensed; nothing changes again) and `abandoned`. A record: `pending` (an account that has not decided), `approved`, `declined`, `unreachable` (a commit identity no GitHub sign-in can answer for: its code needs removing or rewriting) and `excluded` (a bot). A campaign analysed but over 50,000 commits is `deferred`: it stays `analyzing` and no analysis reads it until the clone-based path exists.\n\nTHE FIGURES. `commits` is counted on the analysed history, exactly. `linesAdded` and `linesDeleted` are GitHub's own statistics, approximate, and null where GitHub gave no figure; `analysis.lines` says which: `approximate`, `not-computed` (GitHub had not computed them when the analysis ran) or `not-counted` (GitHub counts no lines for a history of 10,000 commits or more). `scope` is the contributor's oldest and newest commit on the analysed history, the range a decision is scoped to.\n\nWHAT JSON SCHEMA CANNOT STATE, and a reader checks: `counts` are the records counted by state; `analysis.contributors` is the number of records; `steps` are in the order they were taken, the first `started`; a record's `scope.first` is no later in the history than its `scope.last`.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3, after the launch (the consent engine's first slice). Never published at any phase: the api answers it to the repository's administrators alone.",
+    "artifactPath": "(never published) the api's answer to `GET` and `POST /v1/admin/repos/{repoNodeId}/consent-campaign`, `campaign`, for the repository's administrators, checked live against GitHub",
+    "authoritative": true,
+    "producer": "the api (`Consent/ConsentEndpoints.cs`), from the campaign, its consent records and its steps (platform migration 0109), which jobs.consent-analysis writes from the repository's history",
+    "consumers": [
+      "the repository's administrators, and their tools",
+      "the dashboard's consent tab"
+    ],
+    "fsRefs": [
+      "D24 (the relicensing-consent engine)",
+      "FS09-060, FS09-061, FS09-062, FS09-064 (the scope), FS09-068 (the administrator's record)",
+      "GH-045, GH-046, GH-048, GH-049, GH-050, GH-069, GH-070",
+      "FS09-105 (the right to object honoured on every read)",
+      "the operator's answer of 2026-10-18: the engine only prepares the tracking issue's text, and the administrator posts it"
+    ],
+    "vsRefs": [
+      "VS-05"
+    ],
+    "changelog": "CHANGELOG.md#consent-campaignv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "repoNodeId",
+    "nameWithOwner",
+    "mode",
+    "state",
+    "stateAt",
+    "inboundSpdx",
+    "startedAt",
+    "analysis",
+    "deferred",
+    "ended",
+    "counts",
+    "records",
+    "steps"
+  ],
+  "properties": {
+    "id": {
+      "description": "The campaign's id: `cmp_` and a lower-case ULID.",
+      "type": "string",
+      "pattern": "^cmp_[0-9a-hjkmnp-tv-z]{26}$"
+    },
+    "repoNodeId": {
+      "description": "The repository's GitHub node id, in either of GitHub's forms.",
+      "type": "string",
+      "pattern": "^(R_[A-Za-z0-9_-]{6,118}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$"
+    },
+    "nameWithOwner": {
+      "description": "The repository's `owner/name` as GitHub gave it when the campaign started: a label. The campaign follows the repository by its node id.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9-]{0,38}/[A-Za-z0-9._-]{1,100}$"
+    },
+    "mode": {
+      "description": "`required`: a copyleft licence, the only path to relicensing. `goodwill`: a permissive licence, optional (its sublicensing grant already allows relicensing).",
+      "enum": [
+        "required",
+        "goodwill"
+      ]
+    },
+    "state": {
+      "$ref": "#/$defs/campaignState"
+    },
+    "stateAt": {
+      "description": "When the campaign entered its current state.",
+      "$ref": "#/$defs/instant"
+    },
+    "inboundSpdx": {
+      "description": "The licence the campaign relicenses from, as GitHub's SPDX identifier when the campaign started. An analysis that finds the repository under another licence ends the campaign.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9.+-]{0,63}$"
+    },
+    "startedAt": {
+      "description": "When an administrator started the campaign.",
+      "$ref": "#/$defs/instant"
+    },
+    "analysis": {
+      "description": "The analysis the inventory comes from, or null before one completed.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "headSha",
+            "branch",
+            "commits",
+            "contributors",
+            "lines",
+            "analyzedAt"
+          ],
+          "properties": {
+            "headSha": {
+              "description": "The commit the history was read at: every page of the listing was pinned to it.",
+              "$ref": "#/$defs/sha"
+            },
+            "branch": {
+              "description": "The default branch it was the head of.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "commits": {
+              "description": "How many commits the analysed history holds.",
+              "type": "integer",
+              "minimum": 0
+            },
+            "contributors": {
+              "description": "How many contributors it lists: the number of records.",
+              "type": "integer",
+              "minimum": 0
+            },
+            "lines": {
+              "description": "What the records' line figures are: GitHub's statistics (`approximate`), absent because GitHub had not computed them (`not-computed`), or absent because GitHub counts no lines for a history of 10,000 commits or more (`not-counted`).",
+              "enum": [
+                "approximate",
+                "not-computed",
+                "not-counted"
+              ]
+            },
+            "analyzedAt": {
+              "$ref": "#/$defs/instant"
+            }
+          }
+        }
+      ]
+    },
+    "deferred": {
+      "description": "A history over 50,000 commits, which no analysis reads until the clone-based path exists: what it was measured on and when; null otherwise.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "headSha",
+            "branch",
+            "commits",
+            "at"
+          ],
+          "properties": {
+            "headSha": {
+              "$ref": "#/$defs/sha"
+            },
+            "branch": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "commits": {
+              "type": "integer",
+              "minimum": 50001
+            },
+            "at": {
+              "$ref": "#/$defs/instant"
+            }
+          }
+        }
+      ]
+    },
+    "ended": {
+      "description": "Why and when the analysis ended the campaign (`abandoned`): the repository is gone, private, archived or empty, or no longer under the licence it was started for. Null otherwise.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "reason",
+            "at"
+          ],
+          "properties": {
+            "reason": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "repository-gone",
+                "repository-private",
+                "repository-archived",
+                "repository-empty",
+                "licence-changed",
+                "node-id-unreadable",
+                null
+              ]
+            },
+            "at": {
+              "$ref": "#/$defs/instant"
+            }
+          }
+        }
+      ]
+    },
+    "counts": {
+      "description": "The records counted by state.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pending",
+        "approved",
+        "declined",
+        "unreachable",
+        "excluded"
+      ],
+      "properties": {
+        "pending": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "approved": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "declined": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unreachable": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "excluded": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "records": {
+      "description": "One consent record per contributor of the inventory, most commits first.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/record"
+      }
+    },
+    "steps": {
+      "description": "Every step of the campaign, in the order taken. Who took it is a kind, never an id.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    }
+  },
+  "$defs": {
+    "instant": {
+      "description": "A UTC instant, RFC 3339.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "sha": {
+      "description": "A git commit id: forty lower-case hexadecimal characters.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "campaignState": {
+      "enum": [
+        "draft",
+        "analyzing",
+        "open",
+        "frozen",
+        "completed",
+        "converted",
+        "abandoned"
+      ]
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "contributor",
+        "commits",
+        "linesAdded",
+        "linesDeleted",
+        "scope",
+        "state",
+        "stateReason",
+        "stateAt"
+      ],
+      "properties": {
+        "id": {
+          "description": "The record's id: `cons_` and a lower-case ULID.",
+          "type": "string",
+          "pattern": "^cons_[0-9a-hjkmnp-tv-z]{26}$"
+        },
+        "contributor": {
+          "$ref": "#/$defs/contributor"
+        },
+        "commits": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "linesAdded": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "linesDeleted": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "scope": {
+          "description": "The contributor's oldest (`first`) and newest (`last`) commit on the analysed history.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "first",
+            "last"
+          ],
+          "properties": {
+            "first": {
+              "$ref": "#/$defs/sha"
+            },
+            "last": {
+              "$ref": "#/$defs/sha"
+            }
+          }
+        },
+        "state": {
+          "enum": [
+            "pending",
+            "approved",
+            "declined",
+            "unreachable",
+            "excluded"
+          ]
+        },
+        "stateReason": {
+          "description": "Why a record is `excluded` (`bot`) or `unreachable` (`no-github-account`); null for any other state.",
+          "enum": [
+            "bot",
+            "no-github-account",
+            null
+          ]
+        },
+        "stateAt": {
+          "$ref": "#/$defs/instant"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "excluded"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "stateReason": {
+                "const": "bot"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "unreachable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "stateReason": {
+                "const": "no-github-account"
+              },
+              "contributor": {
+                "properties": {
+                  "kind": {
+                    "const": "commit-identity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "enum": [
+                  "pending",
+                  "approved",
+                  "declined"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "stateReason": {
+                "const": null
+              },
+              "contributor": {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "account",
+                      "erased",
+                      "withheld"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "contributor": {
+      "description": "Who a record names, in one of four forms. Never an address, a hash of one, or an account id of the platform's.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "nodeId",
+            "login"
+          ],
+          "properties": {
+            "kind": {
+              "const": "account"
+            },
+            "nodeId": {
+              "description": "The GitHub account's node id.",
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_=+/-]{3,160}$"
+            },
+            "login": {
+              "description": "Its login as GitHub gave it at the analysis.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[^\\s]+$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "name"
+          ],
+          "properties": {
+            "kind": {
+              "const": "commit-identity"
+            },
+            "name": {
+              "description": "The author name the commits give, or null where they give none.",
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 200
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "description": "An account erased at its owner's request: the record names nobody.",
+              "const": "erased"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "description": "A contributor who objected to taking part (the right to object): who is never shown.",
+              "const": "withheld"
+            }
+          }
+        }
+      ]
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "from",
+        "to",
+        "by",
+        "at"
+      ],
+      "properties": {
+        "kind": {
+          "description": "`started` (an administrator started the campaign), `analysis-deferred`, `analysis-completed`, `abandoned`.",
+          "enum": [
+            "started",
+            "analysis-deferred",
+            "analysis-completed",
+            "abandoned"
+          ]
+        },
+        "from": {
+          "description": "The state before the step; null for `started`.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/campaignState"
+            }
+          ]
+        },
+        "to": {
+          "$ref": "#/$defs/campaignState"
+        },
+        "by": {
+          "description": "Who took the step: an `administrator` of the repository, or the `system` (the history analysis).",
+          "enum": [
+            "administrator",
+            "system"
+          ]
+        },
+        "at": {
+          "$ref": "#/$defs/instant"
+        }
+      }
+    }
+  }
+}
