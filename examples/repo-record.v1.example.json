@@ -64,5 +64,13 @@
     "name": "Widget Engine",
     "summary": "A deterministic layout engine for very large widget trees.",
     "topics": ["rust", "layout"]
+  },
+  "attribution": {
+    "algoVersion": "PP-v0",
+    "provisional": true,
+    "month": "2027-04",
+    "truncated": false,
+    "contributorCount": 41,
+    "algorithmNotesUrl": "https://purposesource.org/trust/algorithms"
   }
 }

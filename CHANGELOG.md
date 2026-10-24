@@ -735,6 +735,29 @@ creating one.
   version "and `cov-v1` before it": the coverage function folded back into `cov-v1`
   (`coverage/cov-v1.ts` 1.2.0). No constraint moved.
 
+### 1.8.0 — unreleased (2026-10-24; FS-06 FS06-020 and FS06-074, ops decision D121 item 1; PS-1925) — pre-release
+
+- Additive. Optional `attribution`: the project's Purpose Points summary for the newest LOCKED month
+  whose chosen snapshot of the repository is complete — `algoVersion`, `provisional`, `month`,
+  `truncated` and `algorithmNotesUrl`, required, and `contributorCount`. A month counts only once it
+  is locked; a month whose chosen snapshot is empty is skipped for the one before it. Absent where
+  no locked month was measured.
+- **The label is data** (FS06-020): `provisional` is required, and a PP-v0 summary that carries
+  `provisional: false` is refused (`if`/`then` on `algoVersion`, whose pattern `^PP-v0([^0-9]|$)`
+  takes in a corrected PP-v0 version under FS06-072, such as `PP-v0-r2`, and not `PP-v1.0`, `PP-v10`
+  or `PP-v01`). `truncated` carries FS06-018's flag, and a surface rendering a truncated summary adds
+  the fixed sentence the description quotes.
+- **The floor.** `contributorCount` has `minimum: 5` (D121 item 1's floor for contributor figures):
+  below it the member is absent, and a document below the floor that carried it is refused.
+- Aggregate only: the object is closed and names no contributor, login, node id or per-person figure
+  (GH-071).
+- FS06-074's `snapshotSha` and `unclaimedMicroShares` are not members: PP-v0 records no snapshot SHA,
+  and it has no unmapped or excluded share, so nothing is unclaimed to aggregate. They join
+  additively when PP-v1 writes them.
+- `stats.contributorsClaimed` is described: a sample plane's fictional figure, which no real plane
+  writes; the record's figure is `attribution.contributorCount`.
+- The example carries a PP-v0 summary of April 2027 crediting 41 contributors.
+
 ## designations-summary.v1.json
 
 ### 1.0.0 — unreleased (2026-10-08; ops decisions D117 §6 and D121 item 1, statutes Art. 8(4), Calculation Rules Nr. 25 and Nr. 26)
@@ -3193,6 +3216,32 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   is not removed (policy 1); the pre-launch rule that holds it `null` stays and binds only a
   document that still carries it. `deprecated` is the 2020-12 annotation and constrains nothing.
 - The example no longer carries `detectedUnclaimed`.
+
+### 1.3.0 — unreleased (2026-10-24; FS-10 FS10-080, FS-06 FS06-020, ops decision D121 item 1; PS-1925) — pre-release
+
+- `contributorsClaimed` gets a meaning: the distinct contributors credited with a share above zero by
+  the Purpose Points snapshots of the newest locked month in which a repository's chosen snapshot is
+  complete, each person once. No contributor claim exists, so the "claim flow" the description waited
+  for never comes; the name stays. Every document a real plane published before this version carries
+  `null`, so no published value changes meaning, and the type and its `minimum` are unchanged.
+- **The floor, kept whole.** Published only when it is at least 5 (D121 item 1's floor for contributor
+  figures) and, where a repository counted in the month is below that floor, the people whom only such
+  repositories credit number at least 5 and fewer than 4 times those repositories:
+  `designations-summary.v1`'s condition (2), read for people. Otherwise, and wherever nothing is
+  measured and in `pre-launch`, the member is null; a month with exactly one repository below the
+  floor publishes no count. Without the second condition, subtracting the records' published counts
+  from this one could show a repository's count below 5.
+- Additive. Optional `contributorsAttribution` — `algoVersion`, `provisional`, `month` and
+  `algorithmNotesUrl`, all required — the count's label as data (FS06-020), present exactly when the
+  count is a number on a real plane. A new `allOf` entry refuses it beside a null or absent count and
+  refuses a count below 5 beside it; a PP-v0 basis (a corrected PP-v0 version under FS06-072, such as
+  `PP-v0-r2`, included: `algoVersion`'s pattern `^PP-v0([^0-9]|$)`) that carries `provisional: false`
+  is refused. A second new `allOf` entry requires the basis beside a count on a plane labelled
+  `platform` or `fixture`. A count without a basis is not refused on a `sample` plane, whose fictional
+  count predates the basis, nor where `source` is absent or `registry-v0`.
+- The top description's sentence on the P-M2 null is kept and dated, with the new meaning beside it.
+- A further example, `stats.v1.post-first-franc.example.json`, shows every figure real, the count of
+  57 contributors of July 2027 included. The main example is unchanged.
 
 ## publish-log.v1.json
 
