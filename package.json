@@ -9,7 +9,7 @@
     "node": ">=22.18"
   },
   "scripts": {
-    "test": "npm run check:no-records && npm run check:no-successor && npm run check:schemas && npm run check:examples && npm run check:kits && npm run check:menu && npm run check:recipient-lists && npm run check:allocation-keys && npm run check:designations && npm run check:fees-account-statement && npm run check:consultations && npm run check:jwks && npm run check:links && npm run check:contributor-page && npm run check:vectors && npm run check:module && npm run check:copy && npm run check:types && npm run test:coverage && npm run lint:openapi && npm run check:openapi-examples",
+    "test": "npm run check:no-records && npm run check:no-successor && npm run check:schemas && npm run check:examples && npm run check:kits && npm run check:menu && npm run check:recipient-lists && npm run check:allocation-keys && npm run check:designations && npm run check:fees-account-statement && npm run check:purpose-licenses && npm run check:consultations && npm run check:jwks && npm run check:links && npm run check:contributor-page && npm run check:vectors && npm run check:module && npm run check:copy && npm run check:types && npm run test:coverage && npm run lint:openapi && npm run check:openapi-examples",
     "check:schemas": "node scripts/check-schemas.mjs",
     "check:module": "node scripts/check-coverage-module.mjs",
     "check:examples": "node scripts/check-examples.mjs",
@@ -19,6 +19,7 @@
     "check:allocation-keys": "node scripts/check-allocation-keys.mjs",
     "check:designations": "node scripts/check-designations.mjs",
     "check:fees-account-statement": "node scripts/check-fees-account-statement.mjs",
+    "check:purpose-licenses": "node scripts/check-purpose-licenses.mjs",
     "check:consultations": "node scripts/check-consultations.mjs",
     "check:jwks": "node scripts/check-jwks.mjs",
     "check:links": "node scripts/check-link-rules.mjs",

@@ -97,6 +97,10 @@ its own section below: `consultation-index.v1.json`, the list of every vote the 
 newest published version and no figure of any kind; and `consultation.v1.json`, one vote's newest published version, the
 document as the platform stored it with its SHA-256 and the hash of the version it replaced — forty schemas in all.
 
+The compliance export (2026-10-24; FS-04 FS04-067, URS APP-061) adds one more, with its own section below:
+`purpose-licenses.v1.json`, one line of `purpose-licenses.csv`, the file an organisation downloads from its own dashboard
+with one line per Entitlement its Licences page lists, never published — forty-one schemas in all.
+
 ### Contracts published beyond the initially-scoped ten
 
 Seven schemas were added because another repository's acceptance test names a schema
@@ -995,6 +999,67 @@ value inside `v1` is not additive (versioning policy 1).*
   att-1, which carries the card att-4 carried (D102 item 2; D103 item 3), and its optional
   public-listing statement keeps the number 7. The description now cites "att-1 step 7". No
   member, type, example or count changes.
+
+## purpose-licenses.v1.json
+
+### 1.0.0 — unreleased (2026-10-24; FS-04 FS04-067, URS APP-061 and TRN-043)
+
+- New. The columns of `purpose-licenses.csv`, the compliance export FS04-067 names: `GET
+  /v1/orgs/{co_id}/exports/purpose-licenses.csv`, a file an organisation downloads from its own
+  dashboard, behind its session, for an internal register or an auditor's request. FS04-067 makes
+  the file "schema-stable (published in spec)", and no schema fixed its columns until now, which is
+  why the exports screen offers no download. The file is never published, and the route that serves
+  it, with the screen's download, is a later change: nothing is served under this contract yet.
+  FS04-067's other file, the SBOM-compatible listing, has no contract here yet.
+- ONE LINE PER ENTITLEMENT, THE LICENCES PAGE'S. The rows are every Entitlement the organisation's
+  Licences page lists, which is what `GET /v1/orgs/{co_id}/entitlements` answers (FS04-073), a
+  purchase not yet completed included, in the page's order: those with no term first, then by term
+  start, latest first, then by `entId`. The thirteen columns are that list's members of the same
+  names, its `term` block flattened: `entId`, `lane`, `repoNodeId`, `repoNameWithOwner`, `status`,
+  `pendingSubstate`, `termStart`, `termEnd`, `graceEndsAt`, `autoRenew`, `scheduleVersion`, `band`
+  and `sandbox`. `x-psn.csvHeader` names them in their order; they are the schema's properties in
+  the same order, all required.
+- NOTHING ELSE FITS ON A LINE. The list the file restates carries no amount (FS04-073, FS04-086), and
+  neither does the file: no price, invoice, transaction, payer, person or coverage answer, and a line
+  holds the header's columns and nothing else. Three members of the list are not columns:
+  `weightClass`, a pricing input; `vestingSnapshotUrl`, an address of the api; and
+  `openRenewalInvoice`, a financial document's ids, which only some roles are shown.
+- THE FILE'S FORM. ASCII text with no byte-order mark, the header line first and every line ending
+  with a line feed, as in the ledger's CSV twin; comma-separated and never quoted, because no
+  admitted value holds a comma, a double quote or a line break; and no value begins with `=`, `+`,
+  `-` or `@`, so no spreadsheet reads a field as a formula. An empty field is a value the row does
+  not have, and an organisation with no Entitlement gets the header line alone. The file names no
+  instant of its own, so two downloads made while the records stand still are the same bytes.
+- THE SCHEMA DESCRIBES ONE LINE, as the record an RFC 4180 reader makes of it when it keys each field
+  by its header name, every field as text. Each column states its form: the Entitlement id;
+  `project`, `portfolio` or `pass`, the lanes the platform's record admits, without the retired
+  `donation`; a repository id in either form GitHub has issued; `owner/name`; the dashboard's six
+  statuses, which are not the published record's three; the four sub-states a buyer is shown, never
+  the two stored holds; `YYYY-MM-DD` days; `true` or `false`; the Schedule's version and band
+  tokens. Six rules join the columns: a Project names its repository, a Pass and a Portfolio name
+  none, no name without its id, a sub-state only on a `pending` row, a term is both of its dates or
+  none, and an `active`, `grace` or `suspended` row has a term.
+- WHAT A ROW COVERS is in the description: a Project its one repository, a Pass any work under the
+  licence, a Portfolio the registered repositories of one owner (not sold yet, and the Licences page
+  names no owner for it). Of a `grace` or `lapsed` row that has a term, every part of the software
+  made public on or before `termEnd` stays covered permanently (D12 as read by ops decision D50):
+  the words the dashboard's lapse states carry (COM-044), so that a compliance reader does not
+  remediate what stays covered.
+- `x-psn.authoritative` is `false`: the file restates the platform's records, and the proof of
+  coverage is the organisation's signed entitlement record and the coverage answer.
+- Examples: `purpose-licenses.v1.example.csv` (an organisation's eight Entitlements: a card checkout
+  awaiting payment, an invoiced Pass whose invoice lapsed unpaid, a held purchase refunded before
+  its term, a suspended, two active, a grace and a lapsed term, the last with a repository's legacy
+  id) and `purpose-licenses.v1.empty.example.csv` (an organisation with nothing to list).
+  `check:examples` reads a CSV example from this version on: its first line must be the header the
+  schema names, and every other line validates as a row (`scripts/lib/csv.mjs`).
+- `check:purpose-licenses` (new) holds the header to the schema's properties, the examples to what
+  the schema cannot state (the file's form, one line per Entitlement, the page's order), each of
+  those rules to a planted file it must flag, and proves the contract refuses what a line must never
+  hold (64 refusals, an amount, a payer, a coverage answer, the `donation` lane, the stored holds and
+  a formula's first character among them) and admits what a real Licences page holds (17
+  admissions). Each holds where `format` is asserted and where it is an annotation, as draft 2020-12
+  has it by default, so a day's form rests on its pattern; only 30 February needs `format`.
 
 ## certificate.v1.json
 

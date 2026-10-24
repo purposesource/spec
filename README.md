@@ -17,7 +17,7 @@ a procurement reviewer can consume all of it the way they consume a static file.
 
 | Directory | Contents |
 |---|---|
-| `schemas/` | 38 JSON Schemas (draft 2020-12): one per published artifact class, and `contributor-page-settings.v1` for a person's private page settings, which are never published. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
+| `schemas/` | 41 JSON Schemas (draft 2020-12): one per published artifact class, `contributor-page-settings.v1` for a person's private page settings, which are never published, and `purpose-licenses.v1` for one line of an organisation's own compliance export, which is never published either. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v1.ts`, the published coverage function, with its vectors (`vectors.json`) and its test suite. Zero dependencies. |
 | `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in four cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json`, `link-platforms.v1.example.json` and `contributor-page-about.v1.example.json` (our versioned words for the contributor page's about block), the example IS the published document, byte for byte. Beside them, eight golden files the implementations run: `link-rules.v1.golden.json` (the contributor page's link cases, hostile ones included), `contributor-page-contrast.v1.golden.json` (the page's theme table: the colour presets, print rows, status chips and covers with their WCAG figures, read as data by both implementations), `contributor-page-accent.v1.golden.json` (the accent guard's vectors), `contributor-page-ground.v1.golden.json` (the ground guard's vectors, every preset's palette and the builder's document themes), `contributor-page-preview.v1.golden.json` (worked preview-hash vectors), `contributor-page-alias.v1.golden.json` (worked login-address MACs under a published test key) `contributor-page-build.v1.golden.json` (the builder's vectors for keeping a hidden login off the repository list, for the about block it writes, and for the cards' choices it resolves) and `contributor-page-about.v1.golden.json` (the about block's proof sentence, invite and whole blocks, composed from a page's sections). |
@@ -41,7 +41,9 @@ they must; every example allocation key hashes to the approved text it carries, 
 weights give over the List version it names, and the key index agrees with it; every published
 designation makes 100 and derives its slug list, every contributors' summary keeps the floor of
 5 and the published rounding, every monthly summary's totals make 100 per designation, and the
-two designation contracts refuse what would name a person or breach the floor; the contributor
+two designation contracts refuse what would name a person or breach the floor; the compliance
+export's examples keep the file's form, one line per Entitlement and the Licences page's order, and
+its contract refuses what a line must never hold; the contributor
 page's link table keeps its rules and gives every golden link answer; the page contracts meet the
 theme table's contrast figures, recompute the accent guard's cases and their preview hashes, carry no points, money or GitHub id, and refuse
 what the design rules out; the coverage
@@ -63,6 +65,8 @@ npm run check:allocation-keys   # example keys hash to their approved text and d
                                 #   weights over the List; the key index agrees
 npm run check:designations      # designations make 100 and derive their slug list; the contributors'
                                 #   summary keeps the floor of 5 and the rounding; monthly totals; refusals
+npm run check:purpose-licenses  # the compliance export: the header is the schema's columns; the file's
+                                #   form, one line per Entitlement, the page's order; refusals
 npm run check:links             # the contributor page's link table keeps its rules; every golden
                                 #   link case gets its recorded answer from the table's steps
 npm run check:contributor-page  # theme table and accent guard, preview-hash and alias-MAC vectors, the builder's
@@ -105,6 +109,7 @@ needs a toolchain is not really published.
 | `waiver.v1.json` | `/waivers/{node_id}.json`, `/waivers/all.json` | first public version (honest empty state) |
 | `entitlement-record.v1.json` | decoded payload of `/entitlements/{co_ulid}.jws` | first public version |
 | `covered-organisations.v1.json` | `/entitlements/covered-organisations.json` — one line per organisation holding an Entitlement term, named only where it asked to be (ops decision D44) | first public version |
+| `purpose-licenses.v1.json` | never published: one line of `purpose-licenses.csv`, the compliance export an organisation downloads from its own dashboard (`GET /v1/orgs/{co_id}/exports/purpose-licenses.csv`) — one line per Entitlement its Licences page lists (FS-04 FS04-067); the example is a CSV file | P-M4 (never published) |
 | `certificate.v1.json` | the certificate JWS payload profile | first public version |
 | `certificate-record.v1.json` | `/certs/{cert_id}.json` | first public version |
 | `certificate-policy.v1.json` | `/certs/policy/latest.json` | first public version |
@@ -154,6 +159,13 @@ attempt's number after it. It never carries a counterparty's name or account, re
 return details, anything a steward wrote or a single personnel payment, so nothing in it identifies a
 payer or a natural person: a personnel cost is published as one line per function, never by name,
 and a month holding a personnel payment is withheld rather than published line by line.
+
+The `purpose-licenses.v1` row (2026-10-24; FS-04 FS04-067) fixes the columns of the compliance export
+an organisation downloads from its own dashboard for its register or its auditors: one line per
+Entitlement its Licences page lists, in the page's order, with the columns of the same names and no
+amount, invoice, payer, person or coverage answer. The file is never published. Its schema describes
+one line, as the record a CSV reader makes of it, and names the header in `x-psn.csvHeader`; the file
+is a register extract, and the proof of coverage stays the signed entitlement record.
 
 The `recipient-list.v1` and `recipient-lists.v1` rows (FS-00 §6.2's dated note of 2026-10-01)
 publish the Recipient List the way the allocation key is published: each released version is
