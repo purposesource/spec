@@ -3793,6 +3793,35 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 
 ## contributor-page.v1.json
 
+### 1.6.0 — unreleased (2026-10-26; a certificate's period by its months, the orchestrator's answer of 2026-10-21T20:26Z) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump, optional: every document written under 1.5.x stays valid, and a
+  renderer before 1.6.0 ignores the new member, as it ignores every unknown member, and names the period by its years. A
+  certificate item (`certificatesSection.items[]`), and only a certificate item, may carry `months`, `{from, to}`, right
+  after `years`: both required, each `YYYY-MM`, `from` the month of the record's `period.validFrom` and `to` the month of its
+  `period.validUntil` (`certificate-record.v1`). By their years alone a month's certificate and the year's read alike
+  ("2026"); the months tell them apart.
+- The one builder writes it on every certificate item from now on, and a reader of an item without it, built before, names
+  the period by its years, as before. `from` is no later than `to`, and each lies in the year `years` names on its side:
+  check:contributor-page holds both, which a schema cannot. `years`, `$defs.years` and every other fact stay years only
+  (design §8.1: never a month of the monthly credit records). Every public record already states its period, status-only
+  records included, so the page names nothing its verify page does not.
+- THE WORDS (`certificatesSection`, THE PERIOD): a whole calendar year reads "2026"; one month "February 2026"; months within
+  one year "February–March 2026"; months across years "November 2026–January 2027". A period is always whole locked months, a
+  whole year or all-time, so no form names a day. The card's period and its status chip ("Verified: attests participation in
+  {period}") use them, and the verify page's verdict on a contributor's certificate uses the same words, from the record's own
+  `period`. WHAT IT NEVER CARRIES names this one member called `months`, and `status` says "{period}" where it said "{year}".
+- The page examples that list a certificate carry `months` (their documents are the builder's), one period per certificate:
+  the year's (`2026-01` to `2026-12`, "2026") in the named, `header`, `about-own` and `cards` examples, a month's in
+  `anonymous` and `own-ground` (`2026-09`) and in `cards` (`2027-01`), and part of a year in `about` (`2026-02` to `2026-03`).
+  So do PV-1, PV-2 and PV-4 to PV-6, recomputed; PV-3, PV-7 and PV-8 list no certificate and keep their bytes. The preview
+  golden (its 1.5.0). `check:contributor-page` holds on every page example and vector that each certificate item carries
+  `months`, in order and in its years, and that some vector carries a period that is not one whole calendar year; its `never`
+  rule admits this one member by its place and still refuses `months` anywhere else, or a refused name inside it; and it adds
+  9 refusals (a day, a thirteenth month, a month before 2026, a number, `from` alone, a member of their own, the period as
+  words, `months` on a project's row and in the summary) and 2 admissions (an item without `months`, a period across two
+  years), each proved able to fail.
+
 ### 1.5.0 — unreleased (2026-10-21; ops decision D165 item 3, the organisation's picture) — pre-release
 
 - **Pre-release** addition under policy 5, a minor bump, optional: every document written under 1.4.x stays valid, and a

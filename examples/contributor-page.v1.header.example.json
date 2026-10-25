@@ -49,6 +49,7 @@
           "typ": "contributor",
           "variant": "participation",
           "years": { "from": 2026, "to": 2026 },
+          "months": { "from": "2026-01", "to": "2026-12" },
           "status": "expired",
           "disclosure": "full",
           "repos": [

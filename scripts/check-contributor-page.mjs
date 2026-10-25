@@ -89,6 +89,11 @@
  *              between them the vectors give a copy named and one not drawn, the icon off, an answer missing, two owners,
  *              a login that moved, the person's own login, both sections at once, a folded case and a person's
  *              repository, whose owner's id no expected entry ever names.
+ *   months     1.6.0 (a certificate's period by its months; the orchestrator's answer of 2026-10-21T20:26Z): on every page
+ *              example and preview vector every certificate item carries `months`, as the one builder writes it on every
+ *              item, two `YYYY-MM` months with `from` no later than `to` and each in the year `years` names on its side (the
+ *              order and the years, which a schema cannot hold); and some vector carries a period that is not one whole
+ *              calendar year, so its hash pins the months the years cannot say.
  *   cards      1.3.0 (ops decision D165): `cards` is optional in both schemas and so is each member; the
  *              settings' `default` is its members' defaults, which are D165 item 3's (the owner's icon, an
  *              own repository by its name, another owner's as owner/name), and the document's members
@@ -99,7 +104,9 @@
  *              percentiles, scores, months, amounts or a person's GitHub id, and no published page
  *              example or vector carries a currency figure, a person's GitHub node id (the current
  *              `U_` form or the legacy base64 "04:User" form) or a GitHub picture address (design
- *              §8.7; the plan's correction 11; design correction 5).
+ *              §8.7; the plan's correction 11; design correction 5). One member alone is admitted by
+ *              its place, a certificate item's `months` (1.6.0): that certificate's own validity period,
+ *              which its public record states, never a month of the monthly credit records (design §8.1).
  *   defaults   the `defaults` settings example is the schema's `default` for every required member,
  *              so the document a new person starts from is the one the schema describes (status-only by
  *              default, the GitHub picture; design §2.4 and the D116 dated note of ~11:50Z), and it
@@ -146,7 +153,10 @@
  *              year, and a marker of a leave of its own. And 1.5.0's: an organisation's picture as an address,
  *              with a member of its own, as a bare string or with a malformed `h16`, and `organisation-pictures`
  *              kept current under the GitHub mark; and what it admits: `organisation-pictures` with no copy named
- *              yet, and a copy on an adopter item alone.
+ *              yet, and a copy on an adopter item alone. And 1.6.0's: a certificate's months with a day, a thirteenth
+ *              month, a month before 2026, a number for a month, `from` alone, a member of their own, the period as
+ *              words, and months on a project's row or in the summary; and what it admits: a certificate item without
+ *              `months` (built before 1.6.0), and a period across two years.
  *   goldens    every `examples/*.golden.json` is one a gate checks.
  *
  * Every rule is proved able to fail before the examples are trusted to pass.
@@ -1167,6 +1177,45 @@ function adopterYearsProblems(documents, vectors) {
   return found;
 }
 
+/* --------------------------------------------------------------------------- months */
+
+const CERTIFICATE_MONTH = /^([0-9]{4})-(?:0[1-9]|1[0-2])$/;
+
+/**
+ * 1.6.0 (a certificate's period by its months; the orchestrator's answer of 2026-10-21T20:26Z): on every page document, every
+ * certificate item carries `months`, as the one builder writes it on every item from 1.6.0 (the documents are the builder's):
+ * two `YYYY-MM` months, `from` no later than `to`, each in the year `years` names on its side (the order and the years, which a
+ * schema cannot hold). And some preview vector carries a period that is not one whole calendar year, so a hash pins the months
+ * the years cannot say.
+ */
+function monthsProblems(documents, vectors) {
+  const found = [];
+  const add = (message) => found.push(['months', message]);
+  for (const [where, doc] of documents) {
+    for (const item of (doc.sections ?? []).find((s) => s.id === 'certificates')?.items ?? []) {
+      if (!('months' in item)) {
+        add(`${where}: ${item.cid} carries no months; the one builder writes them on every certificate item from 1.6.0`);
+        continue;
+      }
+      const from = CERTIFICATE_MONTH.exec(item.months?.from ?? '');
+      const to = CERTIFICATE_MONTH.exec(item.months?.to ?? '');
+      if (!from || !to) {
+        add(`${where}: ${item.cid} carries months ${JSON.stringify(item.months)}, which are not two YYYY-MM months`);
+        continue;
+      }
+      if (item.months.from > item.months.to) add(`${where}: ${item.cid}'s period runs from ${item.months.from} back to ${item.months.to}`);
+      if (Number(from[1]) !== item.years?.from || Number(to[1]) !== item.years?.to) {
+        add(`${where}: ${item.cid}'s months ${item.months.from} to ${item.months.to} are not in its years ${item.years?.from} to ${item.years?.to}`);
+      }
+    }
+  }
+  const oneWholeYear = (m) => m.from.slice(0, 4) === m.to.slice(0, 4) && m.from.endsWith('-01') && m.to.endsWith('-12');
+  const months = (i) => typeof i.months?.from === 'string' && typeof i.months?.to === 'string';
+  const pinned = vectors.some((v) => ((v.document.sections ?? []).find((s) => s.id === 'certificates')?.items ?? []).some((i) => months(i) && !oneWholeYear(i.months)));
+  if (!pinned) add('no preview vector carries a period that is not one whole calendar year, so no hash pins the months the years cannot say');
+  return found;
+}
+
 /* ---------------------------------------------------------------------- organisations */
 
 const byLoginOrder = (a, b) => {
@@ -1542,12 +1591,23 @@ const CURRENCY = /\b(?:CHF|EUR|USD|GBP)\b|[$€£]\s?[0-9]|[0-9]\s?(?:CHF|EUR|US
 const PERSON_NODE_ID = /^(?:U_[A-Za-z0-9_-]+|MDQ6VXNlcj[A-Za-z0-9+/=]*)$/;
 const PICTURE_SOURCE = /githubusercontent\.com/i;
 
-function memberNames(node, out = []) {
-  if (Array.isArray(node)) for (const item of node) memberNames(item, out);
+/**
+ * 1.6.0 (a certificate's period by its months; the orchestrator's answer of 2026-10-21T20:26Z): the one member a page schema
+ * may name for months, by its place: a certificate item's `months`, that certificate's own validity period as its public record
+ * states it, never a month of the monthly credit records (design §8.1). Its own members are still read, and a member named
+ * for months anywhere else, in any of the three schemas, is refused as before.
+ */
+const ADMITTED_MEMBER = { page: '$defs/certificatesSection/properties/items/items/properties/months' };
+
+/** Every member a schema names, with its place: `[path, name]`. */
+function memberNames(node, path = [], out = []) {
+  if (Array.isArray(node)) node.forEach((item, i) => memberNames(item, [...path, i], out));
   else if (node && typeof node === 'object') {
     for (const [key, value] of Object.entries(node)) {
-      if ((key === 'properties' || key === 'patternProperties') && value && typeof value === 'object') out.push(...Object.keys(value));
-      memberNames(value, out);
+      if ((key === 'properties' || key === 'patternProperties') && value && typeof value === 'object') {
+        for (const name of Object.keys(value)) out.push([[...path, key, name].join('/'), name]);
+      }
+      memberNames(value, [...path, key], out);
     }
   }
   return out;
@@ -1562,8 +1622,8 @@ function strings(node, out = []) {
 function neverProblems(schemaSet, documents) {
   const found = [];
   for (const [name, schema] of Object.entries(schemaSet)) {
-    for (const member of memberNames(schema).filter((m) => BANNED_MEMBER.test(m))) {
-      found.push(['never', `the ${name} schema has a member named ${member}: no page carries points, shares, ranks, months, amounts or a person's GitHub id (design §8.7)`]);
+    for (const [path, member] of memberNames(schema).filter(([path, m]) => BANNED_MEMBER.test(m) && path !== ADMITTED_MEMBER[name])) {
+      found.push(['never', `the ${name} schema has a member named ${member} (${path}): no page carries points, shares, ranks, months, amounts or a person's GitHub id (design §8.7)`]);
     }
   }
   for (const [where, document] of documents) {
@@ -1801,8 +1861,21 @@ const REFUSALS = [
   ['organisationPage', "an organisation's picture with an upper-case h16", (d) => { sectionOf(d, 'adopter').items[0].picture = { h16: '9B2E4C6A8D0F1E3A' }; }],
   ['organisationPage', "an organisation's picture with no h16", (d) => { orgGroup(d).picture = {}; }],
   ['organisationPage', "an organisation's picture naming its owner's node id", (d) => { orgGroup(d).picture.ownerNodeId = 'O_kgDOSMPL0101'; }],
-  ['organisationPage', 'organisation-pictures kept current under the GitHub mark', (d) => { d.cards.icon = 'github'; }]
+  ['organisationPage', 'organisation-pictures kept current under the GitHub mark', (d) => { d.cards.icon = 'github'; }],
+  // 1.6.0 (a certificate's period by its months; the orchestrator's answer of 2026-10-21T20:26Z).
+  ['page', "a day in a certificate's months", (d) => { certificateOf(d).months = { from: '2026-01-15', to: '2026-12' }; }],
+  ['page', 'a thirteenth month', (d) => { certificateOf(d).months = { from: '2026-01', to: '2026-13' }; }],
+  ['page', 'a month before 2026', (d) => { certificateOf(d).months = { from: '2025-12', to: '2026-12' }; }],
+  ['page', 'a number for a month', (d) => { certificateOf(d).months = { from: '2026-01', to: 202612 }; }],
+  ['page', "a certificate's months without their end", (d) => { certificateOf(d).months = { from: '2026-01' }; }],
+  ['page', "a member of their own in a certificate's months", (d) => { certificateOf(d).months = { from: '2026-01', to: '2026-12', kind: 'year' }; }],
+  ['page', 'the period as words', (d) => { certificateOf(d).months = 'January–December 2026'; }],
+  ['page', "months on a project's row", (d) => { sectionOf(d, 'repositories').groups[0].repos[0].months = { from: '2026-01', to: '2027-12' }; }],
+  ['page', 'months in the summary', (d) => { sectionOf(d, 'summary').months = { from: '2026-01', to: '2027-02' }; }]
 ];
+
+/** The named example's certificate item (1.6.0's cases). */
+const certificateOf = (d) => sectionOf(d, 'certificates').items[0];
 
 /** The organisation-pictures example's group that names an organisation's copy. */
 const orgGroup = (d) => sectionOf(d, 'repositories').groups.find((g) => 'picture' in g);
@@ -1868,7 +1941,10 @@ const ADMITS = [
   // 1.5.0 (ops decision D165 item 3).
   ['organisationPage', 'organisation-pictures with no copy named yet', (d) => { delete orgGroup(d).picture; for (const i of sectionOf(d, 'adopter').items) delete i.picture; }],
   ['organisationPage', "an organisation's copy on an adopter item alone", (d) => { delete orgGroup(d).picture; }],
-  ['organisationPage', 'organisation-pictures with no cards member (the owner\'s icon by default)', (d) => { delete d.cards; }]
+  ['organisationPage', 'organisation-pictures with no cards member (the owner\'s icon by default)', (d) => { delete d.cards; }],
+  // 1.6.0 (a certificate's period by its months).
+  ['page', 'a certificate item without months (a document built before 1.6.0)', (d) => { delete certificateOf(d).months; }],
+  ['page', 'a period across two years', (d) => { const c = certificateOf(d); c.years = { from: 2026, to: 2027 }; c.months = { from: '2026-11', to: '2027-01' }; }]
 ];
 
 const CONTRACT = {
@@ -1991,6 +2067,21 @@ function allProblems(state) {
       ],
       state.preview.vectors
     ),
+    ...monthsProblems(
+      [
+        ['examples/contributor-page.v1.example.json', state.page],
+        ['examples/contributor-page.v1.anonymous.example.json', state.anonymous],
+        ['examples/contributor-page.v1.header.example.json', state.header],
+        ['examples/contributor-page.v1.own-ground.example.json', state.ownGround],
+        ['examples/contributor-page.v1.about.example.json', state.aboutPage],
+        ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
+        ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
+        ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
+        ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
+        ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
+      ],
+      state.preview.vectors
+    ),
     ...refusalProblems(state, state.refusals ?? REFUSALS),
     ...admitsProblems(state, state.admits ?? ADMITS),
     ...goldenFilesProblems(state.goldenFiles)
@@ -2093,6 +2184,17 @@ const SELF_TEST = [
   ['never', (s) => { s.schemas.page.$defs.summarySection.properties.rank = { type: 'integer' }; }],
   ['never', (s) => { s.anonymous.identity.bio = 'Paid CHF 120 to get here'; }],
   ['never', (s) => { s.anonymous.identity.bio = 'MDQ6VXNlcjEyMzQ1Njc='; }],
+  ['never', (s) => { s.schemas.page.$defs.summarySection.properties.months = { type: 'object' }; }],
+  ['never', (s) => { s.schemas.settings.properties.months = { type: 'object' }; }],
+  ['never', (s) => { s.schemas.page.$defs.certificatesSection.properties.items.items.properties.months.properties.points = { type: 'integer' }; }],
+  ['never', (s) => { s.schemas.page.$defs.certificatesSection.properties.items.items.properties.month = { type: 'string' }; }],
+  ['months', (s) => { delete certificateOf(s.page).months; }],
+  ['months', (s) => { certificateOf(s.anonymous).months.from = '2026-10'; }],
+  ['months', (s) => { certificateOf(s.page).months.to = '2027-01'; }],
+  ['months', (s) => { certificateOf(s.cardsPage).months = { from: '2027-01' }; }],
+  ['months', (s) => { for (const v of s.preview.vectors) for (const x of v.document.sections) if (x.id === 'certificates') for (const i of x.items) i.months = { from: `${i.years.from}-01`, to: `${i.years.to}-12` }; }],
+  ['admits', (s) => { s.admits = [['page', "a day in a certificate's months", (d) => { certificateOf(d).months = { from: '2026-01-15', to: '2026-12' }; }]]; }],
+  ['refusals', (s) => { s.refusals = [['page', 'a period across two years', (d) => { const c = certificateOf(d); c.years = { from: 2026, to: 2027 }; c.months = { from: '2026-11', to: '2027-01' }; }]]; }],
   ['defaults', (s) => { s.defaults.address = 'login'; }],
   ['defaults', (s) => { s.defaults.linksPlacement = 'section'; }],
   ['defaults', (s) => { delete s.defaults.about; }],
@@ -2158,6 +2260,7 @@ fail(
     `${state.build.cards.length} write the cards' choices resolved, ${state.build.adopter.length} list the licence adopter's repositories with their years, ` +
     `${state.build.organisations.length} judge whose organisation picture a page may name, ` +
     `${state.aboutTexts.versions.length} version(s) of our about texts hold their recorded digests, ${state.aboutGolden.sentences.length} about sentences and ${state.aboutGolden.blocks.length} blocks recompute, ` +
+    'every certificate item names its period by its months, in order and in its years, ' +
     'no page member or example carries points, money or a GitHub id, ' +
     `the defaults are the schema's, ${REFUSALS.length} refusals and ${ADMITS.length} admissions hold, and every rule was proved able to fail`,
 );
