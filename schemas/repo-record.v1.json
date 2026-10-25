@@ -4,7 +4,7 @@
   "title": "Repo record — /registry/repo/{node_id}.json",
   "description": "The published per-repository record: one of the three inputs to the coverage function (`cov-v1`; FS-10 §4.2) and the data behind the public project page (WEB-080). Published for every registered repository, whether or not its admins have claimed it, in state `registered`, and for `suspended`, `quit` and `delisted` ones (ops decision D82 item 1); a record published before D82 carries `verified` where one published since carries `registered`. *(Amended 2026-09-30, D82 and its dated note (d) of 2026-09-29: it said \"Published for repositories in state `verified`, `suspended`, `quit` or `delisted`; `detected` repositories appear in aggregate counts only (FS02-062, GH-014).\")* A delisted or quit repository still HAS a record and still computes coverage — entitlements and vesting stand (D12) — and `state` is what the answer reports as `basis.repoState` (FS-10 §4.3 step 1), a `verified` record reported as `registered`. A repository with no record is answered only for an organisation holding a Pass inside its term, with `basis.repoState` `no-record` (ops decisions D48 item 5 and D82 item 10). At P-M2 the `stats` block is deliberately ABSENT: Purpose-Points and charity figures do not exist before the first disbursed ledger row, and publishing a zero would be theatre (VS-18, NEV-017).",
   "x-psn": {
-    "specVersion": "1.7.1",
+    "specVersion": "1.8.0",
     "phase": "P-M2",
     "artifactPath": "/registry/repo/{node_id}.json",
     "authoritative": true,
@@ -179,12 +179,51 @@
         "topics": { "type": "array", "maxItems": 12, "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,31}$" } }
       }
     },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algoVersion", "provisional", "month", "truncated", "algorithmNotesUrl"],
+      "description": "The project's Purpose Points summary (FS-06 FS06-020 and FS06-074), as measured: for the newest month that is LOCKED and whose chosen Purpose Points snapshot of this repository is complete, the snapshot's algorithm, its provisional label, the month, whether GitHub's statistics were truncated, and how many contributors it credits. A month's snapshot is chosen by the published precedence of algorithms (PP-v0 today); one whose chosen snapshot is empty publishes nothing, and neither does a month that is not locked yet. Absent when no locked month of this repository was measured, which says nothing about its contributors. Aggregate only: no contributor, login, node id or per-person figure is published here, and no member can carry one; a person's own figure is shown to that person alone (GH-071). `algoVersion` and `provisional` are the label FS06-020 makes data, so no page can show the summary without it: every figure derived from a PP-v0 snapshot is provisional until PP-v1 replaces PP-v0 (FS06-021). *(Added 1.8.0, 2026-10-24, pre-release. FS06-074's `snapshotSha` and `unclaimedMicroShares` are PP-v1's: PP-v0 records no snapshot SHA, and it has no unmapped or excluded share, so nothing is unclaimed to aggregate. They join additively when PP-v1 writes them.)*",
+      "properties": {
+        "algoVersion": {
+          "type": "string",
+          "pattern": "^PP-v[0-9][0-9A-Za-z.-]*$",
+          "maxLength": 32,
+          "description": "The algorithm the snapshot was computed under (FS06-016: `PP-v0` for the provisional version computed from GitHub's contributor statistics)."
+        },
+        "provisional": {
+          "type": "boolean",
+          "description": "The provisional label as data (FS06-020): `true` for every summary of a PP-v0 snapshot (a corrected PP-v0 version under FS06-072, such as `PP-v0-r2`, included), and a document that says otherwise is refused. A surface rendering the summary shows the label beside it."
+        },
+        "month": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+          "description": "`YYYY-MM`: the locked month the snapshot measured, which may be earlier than the record's own month: a month counts only once it is locked, and a repository's newest month whose chosen snapshot is empty is skipped for the one before it."
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "Whether GitHub's statistics listed exactly 100 contributors, the most it lists, so contributors outside its top 100 hold no share and are not counted (FS06-018). A surface rendering a truncated summary shows, beside the provisional label, the fixed sentence \"this provisional snapshot covers the repository's top 100 contributors only.\""
+        },
+        "contributorCount": {
+          "type": "integer",
+          "minimum": 5,
+          "description": "How many contributors the snapshot credits with a share above zero: under PP-v0 one per person. Present only from 5 (ops decision D121 item 1's floor for contributor figures); below it the member is absent. Fixed for its month once published: a locked month's snapshot never changes."
+        },
+        "algorithmNotesUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "The published algorithm notes: the rule, its disclosed weaknesses and the sunset commitment (FS06-016, FS06-018, FS06-021)."
+        }
+      },
+      "if": { "properties": { "algoVersion": { "pattern": "^PP-v0([^0-9]|$)" } }, "required": ["algoVersion"] },
+      "then": { "properties": { "provisional": { "const": true } } }
+    },
     "stats": {
       "type": "object",
       "additionalProperties": false,
       "description": "P-M3+ ONLY. Absent at P-M2 by design: no Purpose-Points figures, no charity figures, no zero-CHF theatre before the first disbursed ledger row (VS-18, NEV-017, D21). Every money figure that ever appears here is ledger-derived and deep-linked.",
       "properties": {
-        "contributorsClaimed": { "type": ["integer", "null"], "minimum": 0 },
+        "contributorsClaimed": { "type": ["integer", "null"], "minimum": 0, "description": "A sample plane's fictional figure: no real plane writes it, and the record's contributor figure is `attribution.contributorCount`, from 5. *(Described 1.8.0, 2026-10-24, pre-release; the member had no description.)*" },
         "coverageCount": { "type": ["integer", "null"], "minimum": 0, "description": "Number of organisations currently answering yes for this repository." },
         "purposePoints": {
           "type": "object",
