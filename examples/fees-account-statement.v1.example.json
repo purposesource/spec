@@ -4,6 +4,10 @@
   "source": "fixture",
   "month": "2027-07",
   "lockedAt": "2027-08-02T05:00:00Z",
+  "currency": "CHF",
+  "openingBalanceMinor": 1250000,
+  "closingBalanceMinor": 1474637,
+  "accountOpenedOn": "2027-05-17",
   "lines": [
     {
       "bookingDate": "2027-07-01",

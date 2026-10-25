@@ -83,9 +83,10 @@ more, with its own section below: `designations-summary.v1.json`, the registry-w
 the projects' designations and, from 5 designators, of the contributors' — thirty-four schemas in all.
 
 The fees account's published statement (2026-10-21; statutes Art. 12 para. 1 and Art. 20 para. 1) adds one more,
-with its own section below: `fees-account-statement.v1.json`, one locked month's booked lines of the fees account with
-their classes and nothing that identifies a payer or a natural person — thirty-six schemas in all, the thirty-fifth
-being `contributor-page-about.v1.json` (2026-10-16), whose section is below and which these paragraphs had not counted.
+with its own section below: `fees-account-statement.v1.json`, one locked month's balances and booked lines of the fees
+account with their classes and nothing that identifies a payer or a natural person — thirty-six schemas in all, the
+thirty-fifth being `contributor-page-about.v1.json` (2026-10-16), whose section is below and which these paragraphs had
+not counted.
 
 The signing key set and its incident lists (2026-10-22; FS-08 §11 and its dated note of 2026-09-26, PS-2080) add two
 more, each with its own section below: `jwks.v1.json`, the key set `/jwks.json` and `/sandbox/jwks.json` publish, as one
@@ -2572,21 +2573,35 @@ reasoning: no month export has ever been published with a row in it.
 ### 1.0.0 — unreleased (2026-10-21; statutes Art. 12 para. 1 and Art. 20 para. 1; the payout design's §11.2)
 
 - New. The published statement of the fees account for one locked month, at `/fees-account/{YYYY-MM}.json` (the month in
-  the path, outside `ledger/`, as the designations summary's `/designations/{YYYY-MM}.json`): every line the bank booked
-  on the fees account in the month, one row each, in booking-date order. The statutes make this statement the proof of the
+  the path, outside `ledger/`, as the designations summary's `/designations/{YYYY-MM}.json`): the account's opening and
+  closing balances for the month, and every line the bank booked on the fees account in the month, one row each, in
+  booking-date order, leading from the one balance to the other. The statutes make this statement the proof of the
   money rules: every allocation and every transfer is reconcilable against it (Art. 12 para. 1), without a profession
   (Art. 20 para. 1). FS-00 §6.2's dated note that adopts the path lands with this version and records the departures
   below.
 - `x-psn.authoritative` is `false`, as for the other contracts something else governs (`recipient-list.v1`'s annex, for
   one): the bank's booked statement governs the records this document restates, and where the two disagree the bank's
   statement governs.
-- One document per locked month in which the bank booked a line on the account: an open month has none, and neither has
-  a locked month with no booked line, a month before the account was opened or a month withheld for a personnel line
-  (below). Rendered by `jobs.index-build` from the first run after the lock, from the fees account's lines and their
-  classes (platform migration 0094), through a platform migration of its own: a view that gives `indexbuild_ro` ten
-  columns of each booked line, the end-to-end identifier only where it has the Association's own form, and a
-  column-scoped read of the classes. Neither reaches a column that can name a counterparty, nor who classed a line and
-  why.
+- One document per locked month from the account's opening month (`accountOpenedOn`), so that an absent document can be
+  told from a month without movement: a month in which the bank booked nothing has a document with no line (`lines` may
+  be empty) and two equal balances. An open month has none, and neither has a month before the account was opened or a
+  withheld month: one holding a personnel line (below), one whose balances the Association's records do not hold yet, or
+  one whose lines do not lead from its opening balance to its closing balance, each with an alarm. A month withheld
+  after its statement was published keeps that document as published, and the digest and count of the batches its
+  producer appends keep it too, so a withdrawal moves no public number. Rendered by `jobs.index-build` from the first run
+  after the lock at which the month's balances are recorded, and never before the month's ledger export is published,
+  from the fees account's lines and their classes (platform migration 0094) and the month balances the payout pass
+  records (platform migration 0111), through migrations of their own: a view that gives `indexbuild_ro` ten columns of
+  each booked line, the end-to-end identifier only where it has the Association's own form, a column-scoped read of the
+  classes, and a column-scoped read of the balances. None reaches a column that can name a counterparty, nor who
+  classed a line and why, nor the account's number or a bank file.
+- The balances: `openingBalanceMinor`, the balance at the start of the month's first day (or of `accountOpenedOn` in the
+  opening month), and `closingBalanceMinor`, at the end of its last day, in minor units of `currency`, negative for a
+  debit balance. Each is the figure the bank's booked statement states, a statement that starts the month's first day and
+  one that ends its last day, as the payout pass records it from its own parse of the account's statements for each
+  month it proves, never derived from the lines. The lines bridge the two (the opening balance, plus the credits, less
+  the debits, is the closing balance), every line is in the document's currency, and a month whose lines do not is not
+  published. `accountOpenedOn` is the day the account opened, as the month's own balances record states it.
 - Each line: `bookingDate`, `valueDate` where the bank gave one, `direction` (`credit` or `debit`), the bank's `reversal`
   indicator, `amountMinor` (always positive) and `currency` as the bank booked them; `class`, the line's current class in
   the Association's records (the nineteen of the payout design's §6); `bankReference`, the bank's own reference for the
@@ -2603,30 +2618,42 @@ reasoning: no month export has ever been published with a row in it.
   the person who holds it. The net monthly figure per function that would stand in for such lines is not part of this
   version, so a locked month holding a `personnel` line is withheld, with an alarm, rather than published. No such line
   exists while nobody is remunerated, as at founding (Art. 6f para. 5).
-- A published statement changes in two cases only: the bank delivers a line booked in the month after the month locked,
-  and the statement lists it; or a line that had no class when the month locked, delivered late or not, takes its first
-  class, and the statement shows it. That class takes effect in the first open month (`effectMonth`), and until then the
-  line carries no `class`. A locked month's lines and classes are otherwise append-only and final, so its statement is
-  stable.
+- A published statement changes in two cases only: the bank delivers after the lock a line booked in that month, or a
+  statement of that month that replaces a stored one, and the statement then lists the month's lines with the balances
+  its stored statements prove, once those balances bridge the lines (a locked month's balances change only after the
+  owner has removed by hand the stored file they were read from); or a line that had no class when the month locked,
+  delivered late or not, takes its first class, and the statement shows it. That class takes effect in the first open
+  month (`effectMonth`), and until then the line carries no `class`. A locked month's lines, classes and balances are
+  otherwise append-only and final, so its statement is stable.
 - A published statement never shrinks: a render that would list fewer lines, or carry an earlier `generatedAt`, keeps the
   published bytes and warns. So neither the owner's documented hand removal of a wrongly loaded bank file from the store
   nor the store's deletion of lines after their ten years withdraws a published line.
-- `generatedAt` is the latest of `lockedAt` and the instants at which the lines the statement lists and the classes it
-  shows were recorded, so either change moves it past `lockedAt`. It is the document's own instant and not the plane's,
-  a departure from `publish-log.v1`'s statement that every artifact of a batch carries the batch's `generatedAt`, as
-  `allocation-key.v1`'s and `recipient-list.v1`'s are; FS-00 §6.2's note adopting the path records it.
-- Version 1 publishes no balance yet. The opening and closing balances join it in place before the first published month
-  with a bank line, and with them a document for every locked month from the account's opening month, so that an absent
-  document can be told from a month without movement.
+- `generatedAt` is the latest of `lockedAt` and the instants at which the lines the statement lists, the classes it
+  shows and the month's balances were recorded, so either change moves it past `lockedAt`. It is the document's own
+  instant and not the plane's, a departure from `publish-log.v1`'s statement that every artifact of a batch carries the
+  batch's `generatedAt`, as `allocation-key.v1`'s and `recipient-list.v1`'s are; FS-00 §6.2's note adopting the path
+  records it.
 - `source` is required and admits `sample`, `fixture` and `platform` only: the curated registry never held a bank line.
 - Examples: `fees-account-statement.v1.example.json` (a fixture month: two payouts, three transfers, one returned and sent
   again as attempt 2, the transfer charges, the reserve retention, an invoice, a misdirected credit and its return,
-  interest and the account fee) and `fees-account-statement.v1.late-line.example.json` (a sample month whose statement
-  changed after its lock: a line classed for the next month, and a line with no class yet).
+  interest and the account fee), `fees-account-statement.v1.late-line.example.json` (a sample month whose statement
+  changed after its lock: a line classed for the next month, and a line with no class yet) and
+  `fees-account-statement.v1.no-movement.example.json` (a sample month without movement: the account's opening month,
+  no line, two equal balances).
 - `check:fees-account-statement` (new) holds the examples to what the schema cannot state (each line in the month, the
-  date order, an `effectMonth` after its booking month, `generatedAt` never before `lockedAt` and after it beside an
-  `effectMonth`), holds that dating rule to four planted documents, and proves the contract still refuses what must
-  never be published (29 refusals, a `personnel` line among them) and admits what a real month holds (8 admissions).
+  date order, the lines bridging the balances in the document's currency, the month not before the account's opening
+  month, an `effectMonth` after its booking month, `generatedAt` never before `lockedAt` and after it beside an
+  `effectMonth`), holds the dating rule to four planted documents and the balance rule to five, and proves the contract
+  still refuses what must never be published (34 refusals, a `personnel` line among them) and admits what a real month
+  holds (10 admissions).
+- *(Amended in place on 2026-10-25, because 1.0.0 is unreleased and no second version is created before the launch
+  (versioning rule 5; the orchestrator's change C on PS-1970: "Opening and closing balances join before the first
+  published month with a bank line, in 1.0.0 in place"), as their answer of 2026-10-24T21:31Z on PS-2299 settles it:
+  the four required members `currency`, `openingBalanceMinor`, `closingBalanceMinor` and `accountOpenedOn`, the
+  existence rule and `lines` admitting none, the bridge rule, the clause for a month withheld after its statement was
+  published, the first regeneration case's words and the phase line. As first written, version 1 published no balance
+  yet, and its documents were the locked months with a booked line; nothing had been published under it but the sample
+  plane's example month.)*
 
 ## recipient-list.v1.json
 
@@ -4913,11 +4940,13 @@ which kind of change each entry was.
 - Cached 300 s, the designations summary's class: a locked month's document is regenerated in two cases (a line the bank
   delivers after the lock, a first class after the lock), and a `404` read before a month's first statement is not held
   for longer than that.
-- The description says what the schema says and nothing more: one document per locked month with a booked line, a month
-  holding a `personnel` line withheld, the two cases that change a document, `generatedAt` as the document's own instant,
-  never shrinking, and nothing that identifies a payer or a natural person. It also says what the schema's "publishes no
-  balance yet" means for this route: the balances join before the first published month with a bank line, so until then
-  the production plane publishes no month's statement and every month answers `404` there.
+- The description says what the schema says and nothing more: the balances and the lines that bridge them, one document
+  per locked month from the account's opening month, a month without movement included, the withheld months and the
+  document a month withheld after its publication keeps, the two cases that change a document, `generatedAt` as the
+  document's own instant, never shrinking, and nothing that identifies a payer or a natural person. *(Amended in place
+  on 2026-10-25, 1.17.0 being unreleased, with `fees-account-statement.v1` 1.0.0's balances (PS-2299): as first written it
+  said one document per locked month with a booked line, and that until the balances joined the production plane
+  published no month's statement and every month answered `404` there. The `lateLine` example gained the four members.)*
 - Errors: `404` for a month with no document, `429`, and `503`, as the designations summary's.
 - The one example, `lateLine`, is `examples/fees-account-statement.v1.late-line.example.json`, copied member for member:
   `check:openapi-examples` validates 71 examples (70 before).

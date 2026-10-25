@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-06-01T05:00:00Z",
+  "source": "sample",
+  "month": "2027-05",
+  "lockedAt": "2027-06-01T05:00:00Z",
+  "currency": "CHF",
+  "openingBalanceMinor": 0,
+  "closingBalanceMinor": 0,
+  "accountOpenedOn": "2027-05-17",
+  "lines": []
+}

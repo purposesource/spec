@@ -3,15 +3,20 @@
  * Gate: the published statement of the fees account keeps the rules its contract promises, and
  * the contract still refuses what must never be published.
  *
- * `fees-account-statement.v1` publishes one locked month's booked lines of the fees account
- * (statutes Art. 12 para. 1, Art. 20 para. 1). JSON Schema can say that a member exists and has
- * the right shape; it cannot say that a line was booked in the document's month, that the lines
- * are in date order, or that a document's instant follows the lock. The description promises
- * those, so this gate holds the examples to them:
+ * `fees-account-statement.v1` publishes one locked month's balances and booked lines of the fees
+ * account (statutes Art. 12 para. 1, Art. 20 para. 1). JSON Schema can say that a member exists and
+ * has the right shape; it cannot say that a line was booked in the document's month, that the lines
+ * are in date order, that they lead from the opening balance to the closing one, or that a document's
+ * instant follows the lock. The description promises those, so this gate holds the examples to them:
  *
  *   THE STATEMENT (`examples/fees-account-statement.v1*.example.json`)
  *     month      every line's `bookingDate` is in `month`;
  *     order      the lines are in booking-date order, earliest first;
+ *     bridge     `openingBalanceMinor`, plus every `credit` line's `amountMinor`, less every `debit`
+ *                line's, is `closingBalanceMinor`, every line is in the document's `currency`, and the
+ *                month is not before `accountOpenedOn`'s (PS-2299). The examples show a month without
+ *                movement, whose two balances are equal, and the rule itself is held to five planted
+ *                documents, three it flags and two it passes;
  *     effect     an `effectMonth` is later than the line's booking month;
  *     dated      `generatedAt`, the latest of the lock's instant and the instants of the lines and
  *                classes the document shows, is never earlier than `lockedAt`, and is later when the
@@ -29,11 +34,12 @@
  *   line per function, never by name, so a month holding one is withheld), an end-to-end
  *   identifier on any line but the Association's own transfers or in any form but the
  *   Association's own (a payer's text, the 42-character form no bank carries, an attempt outside 2
- *   to 9), an `effectMonth` with no class, a balance (version 1 publishes none yet), a zero
- *   amount, ISO's direction codes in place of the words, a class off the list, the `registry-v0`
- *   label, and an empty month. It still admits what a real month holds: a line with no class yet,
- *   a transfer line whose entry carries no identifier of that form, the ninth attempt, a returned
- *   later attempt, a reversal, and a line with no value date or bank reference.
+ *   to 9), an `effectMonth` with no class, a document without either balance, its currency or the
+ *   day the account opened, a balance in anything but whole minor units, a zero amount, ISO's
+ *   direction codes in place of the words, a class off the list, and the `registry-v0` label. It
+ *   still admits what a real month holds: a line with no class yet, a transfer line whose entry
+ *   carries no identifier of that form, the ninth attempt, a returned later attempt, a reversal, a
+ *   line with no value date or bank reference, a debit balance, and a month without movement.
  *
  * Run: node scripts/check-fees-account-statement.mjs
  */
@@ -77,13 +83,36 @@ const datingProblems = (doc, at) => {
   return found;
 };
 
+/**
+ * The balance rule's findings for one document (PS-2299): the lines lead from `openingBalanceMinor`
+ * to `closingBalanceMinor` (credits added, debits taken away), every line is in the document's
+ * `currency`, and the month is not before the month of `accountOpenedOn`.
+ */
+const balanceProblems = (doc, at) => {
+  const found = [];
+  const net = doc.lines.reduce((sum, line) => sum + (line.direction === 'credit' ? line.amountMinor : -line.amountMinor), 0);
+  if (doc.openingBalanceMinor + net !== doc.closingBalanceMinor) {
+    found.push(`${at}: openingBalanceMinor ${doc.openingBalanceMinor} and the lines (${net}) give ${doc.openingBalanceMinor + net}, and closingBalanceMinor is ${doc.closingBalanceMinor}`);
+  }
+  doc.lines.forEach((line, index) => {
+    if (line.currency !== doc.currency) found.push(`${at}: lines[${index}] is in ${line.currency}, and the balances are in ${doc.currency}`);
+  });
+  if (monthOf(doc.accountOpenedOn) > doc.month) {
+    found.push(`${at}: the month ${doc.month} is before the account's opening month ${monthOf(doc.accountOpenedOn)}`);
+  }
+  return found;
+};
+
 let lines = 0;
 let classedLater = 0;
 let unclassed = 0;
 let atLock = 0;
+let withoutMovement = 0;
 for (const name of statementFiles) {
   const at = `examples/${name}`;
   const doc = readJson(join(EXAMPLE_DIR, name));
+  problems.push(...balanceProblems(doc, at));
+  if (doc.lines.length === 0) withoutMovement += 1;
   let previous = '';
   doc.lines.forEach((line, index) => {
     lines += 1;
@@ -104,6 +133,7 @@ if (statementFiles.length === 0) problems.push('no fees-account-statement.v1 exa
 if (classedLater === 0) problems.push('no fees-account-statement.v1 example shows a class taking effect after its booking month');
 if (unclassed === 0) problems.push('no fees-account-statement.v1 example lists a line with no class yet');
 if (atLock === 0) problems.push('no fees-account-statement.v1 example is dated at its lock');
+if (withoutMovement === 0) problems.push('no fees-account-statement.v1 example is a month without movement');
 
 /* ---------------------------------------------------------------- the main example, edited */
 
@@ -147,6 +177,25 @@ for (const [what, doc] of mustPass) {
   if (found.length > 0) problems.push(`the dating rule flags ${what} (${found[0]})`);
 }
 
+/* The balance rule, held to planted documents the same way: three it must flag, and two the store
+   produces that it must pass. */
+const balancesMustFlag = [
+  ['lines that do not lead from the opening balance to the closing one', withStatement((d) => { d.closingBalanceMinor += 1; })],
+  ['a line in another currency than the balances', withStatement((d) => { lineOf(d, 'invoice').currency = 'EUR'; })],
+  ['a month before the account\'s opening month', withStatement((d) => { d.accountOpenedOn = '2027-08-01'; })],
+];
+const balancesMustPass = [
+  ['a month without movement whose two balances are equal', withStatement((d) => { d.lines = []; d.closingBalanceMinor = d.openingBalanceMinor; })],
+  ['an account overdrawn all month', withStatement((d) => { d.openingBalanceMinor -= 2000000; d.closingBalanceMinor -= 2000000; })],
+];
+for (const [what, doc] of balancesMustFlag) {
+  if (balanceProblems(doc, 'planted').length === 0) problems.push(`the balance rule passes ${what}`);
+}
+for (const [what, doc] of balancesMustPass) {
+  const found = balanceProblems(doc, 'planted');
+  if (found.length > 0) problems.push(`the balance rule flags ${what} (${found[0]})`);
+}
+
 /* ------------------------------------------------------------------------------ refusals */
 
 const mustRefuse = [
@@ -167,8 +216,14 @@ const mustRefuse = [
   ['attempt 1 written as a suffix', withStatement((d) => { lineOf(d, 'transfer-out').endToEndId = 'psn-202706-7kq2m4vx9tra-1'; })],
   ['a tenth attempt', withStatement((d) => { lineOf(d, 'transfer-out').endToEndId = 'psn-202706-7kq2m4vx9tra-10'; })],
   ['an effectMonth with no class', withStatement((d) => { const line = lineOf(d, 'interest'); delete line.class; line.effectMonth = '2027-08'; })],
-  ['an opening balance', withStatement((d) => { d.openingBalanceMinor = 1000000; })],
-  ['a closing balance', withStatement((d) => { d.closingBalanceMinor = 1000000; })],
+  ['no opening balance', withStatement((d) => { delete d.openingBalanceMinor; })],
+  ['no closing balance', withStatement((d) => { delete d.closingBalanceMinor; })],
+  ['a balance in anything but whole minor units', withStatement((d) => { d.openingBalanceMinor = 12500.5; })],
+  ['a balance written as a string', withStatement((d) => { d.closingBalanceMinor = String(d.closingBalanceMinor); })],
+  ['no currency', withStatement((d) => { delete d.currency; })],
+  ['a currency not in ISO 4217\'s form', withStatement((d) => { d.currency = 'chf'; })],
+  ['no day the account opened', withStatement((d) => { delete d.accountOpenedOn; })],
+  ['a day the account opened that is no date', withStatement((d) => { d.accountOpenedOn = '17.05.2027'; })],
   ['a zero amount', withStatement((d) => { lineOf(d, 'interest').amountMinor = 0; })],
   ['a negative amount', withStatement((d) => { lineOf(d, 'bank-charge').amountMinor = -450; })],
   ['ISO\'s direction code in place of the word', withStatement((d) => { lineOf(d, 'payout-credit').direction = 'CRDT'; })],
@@ -177,7 +232,6 @@ const mustRefuse = [
   ['a bank reference with a line break', withStatement((d) => { lineOf(d, 'invoice').bankReference = 'STMT-2027-07\n0251'; })],
   ['a bank reference starting with a space', withStatement((d) => { lineOf(d, 'invoice').bankReference = ' STMT-2027-07-0251'; })],
   ['the source registry-v0', withStatement((d) => { d.source = 'registry-v0'; })],
-  ['a month with no line', withStatement((d) => { d.lines = []; })],
   ['no lock instant', withStatement((d) => { delete d.lockedAt; })],
 ];
 for (const [what, doc] of mustRefuse) {
@@ -193,6 +247,8 @@ const mustAdmit = [
   ['a line with no value date and no bank reference', withStatement((d) => { const line = lineOf(d, 'interest'); delete line.valueDate; delete line.bankReference; })],
   ['a line in another currency', withStatement((d) => { lineOf(d, 'invoice').currency = 'EUR'; })],
   ['a single line', withStatement((d) => { d.lines = d.lines.slice(0, 1); })],
+  ['a month without movement', withStatement((d) => { d.lines = []; d.closingBalanceMinor = d.openingBalanceMinor; })],
+  ['a debit balance', withStatement((d) => { d.openingBalanceMinor = -1250; d.closingBalanceMinor = -1250; })],
 ];
 for (const [what, doc] of mustAdmit) {
   if (!statementSchema(doc)) problems.push(`fees-account-statement.v1: refuses ${what} — ${JSON.stringify(statementSchema.errors?.[0] ?? {})}`);
@@ -200,8 +256,9 @@ for (const [what, doc] of mustAdmit) {
 
 fail(
   problems,
-  `fees-account statement: ${statementFiles.length} example(s) keep ${lines} line(s) in their month and in date order ` +
-    `(${classedLater} showing a class that takes effect after its booking month, ${unclassed} a line with no class yet, ` +
-    `${atLock} dated at its lock); the dating rule flags ${mustFlag.length} planted documents and passes ${mustPass.length}, ` +
-    `and ${mustRefuse.length} refusals and ${mustAdmit.length} admissions stand`,
+  `fees-account statement: ${statementFiles.length} example(s) keep ${lines} line(s) in their month and in date order, ` +
+    `bridging their balances (${classedLater} showing a class that takes effect after its booking month, ${unclassed} a line ` +
+    `with no class yet, ${atLock} dated at its lock, ${withoutMovement} without movement); the dating rule flags ` +
+    `${mustFlag.length} planted documents and passes ${mustPass.length}, the balance rule flags ${balancesMustFlag.length} ` +
+    `and passes ${balancesMustPass.length}, and ${mustRefuse.length} refusals and ${mustAdmit.length} admissions stand`,
 );

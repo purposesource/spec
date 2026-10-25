@@ -4,6 +4,10 @@
   "source": "sample",
   "month": "2027-08",
   "lockedAt": "2027-09-01T05:00:00Z",
+  "currency": "CHF",
+  "openingBalanceMinor": 1474637,
+  "closingBalanceMinor": 1618237,
+  "accountOpenedOn": "2027-05-17",
   "lines": [
     {
       "bookingDate": "2027-08-02",

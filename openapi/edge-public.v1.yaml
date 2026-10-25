@@ -165,7 +165,7 @@ tags:
   - name: designations
     description: "Designations in summary: the projects' and, behind a floor, the contributors' designations for each month (advisory; routes money only after the fairness review, D27)."
   - name: fees-account
-    description: "The statement of the fees account: for each locked month, every line the bank booked on it, with its class, and nothing that identifies a payer or a natural person."
+    description: "The statement of the fees account: for each locked month from the account's opening month, its opening and closing balances and every line the bank booked on it, with its class, and nothing that identifies a payer or a natural person."
   - name: badges
     description: README badges — the shields.io endpoint body, and the SVG badges the edge draws for a repository, its README cards included, and for a certificate.
   - name: cards
@@ -3228,28 +3228,35 @@ paths:
       summary: The statement of the fees account for one locked month
       description: |
         The published statement of the fees account for one locked month (statutes Art. 12
-        para. 1 and Art. 20 para. 1): one row per line the bank booked on the fees account in
-        that month, in booking-date order, with its booking and value date, its direction, the
-        bank's reversal indicator, its amount and currency, the class the Association's records
-        give it, the bank's own reference and, on a transfer of the Association's own, that
-        transfer's end-to-end identifier, so a published transfer is matched to its bank line by
-        anyone holding both. The bank's booked statement governs the records it restates.
+        para. 1 and Art. 20 para. 1): the account's opening and closing balance for the month,
+        and one row per line the bank booked on the fees account in that month, in booking-date
+        order, with its booking and value date, its direction, the bank's reversal indicator,
+        its amount and currency, the class the Association's records give it, the bank's own
+        reference and, on a transfer of the Association's own, that transfer's end-to-end
+        identifier, so a published transfer is matched to its bank line by anyone holding both.
+        The lines lead from the opening balance to the closing balance. The bank's booked
+        statement governs the records it restates.
 
-        One document per locked month in which the bank booked at least one line on the fees
-        account, unless a line of that month is classed `personnel`, which withholds the month.
-        An open month, a locked month with no booked line, a month before the account was
-        opened and a withheld month have no document and answer `404`. Version 1 publishes no
-        balance yet, and the opening and closing balances join it before the first published
-        month with a bank line: until then the production plane publishes no month's
-        statement, and every month answers `404` there.
+        One document per locked month from the account's opening month, so that an absent
+        document can be told from a month without movement: a month in which the bank booked
+        nothing has a document with no line and two equal balances. A month is withheld while
+        a line of it is classed `personnel`, while the Association's records do not hold its
+        balances, or while its lines do not lead from its opening balance to its closing
+        balance. An open month, a month before the account was opened and a withheld month have
+        no document and answer `404`, unless its statement was published before it was
+        withheld: that document stays as published.
 
-        Regenerated, not written once, and stable: a locked month's document changes only when
-        the bank delivers a line booked in that month after the lock, or when a line that had no
-        class at the lock takes its first class, which takes effect in the first open month
-        (`effectMonth`). Its `generatedAt` is the document's own, the latest of `lockedAt` and
-        the instants at which the lines it lists and the classes it shows were recorded, so it
-        renders the same bytes on every later run until then, and its `ETag` and
-        `Last-Modified` move only then. A published statement never shrinks.
+        Regenerated, not written once, and stable: a locked month's document changes in two
+        cases only. The bank delivers after the lock a line booked in that month, or a
+        statement of that month that replaces a stored one: the document then lists the
+        month's lines with the balances its stored statements prove, once those balances bridge
+        the lines. A locked month's balances change only after the owner has removed by hand the
+        stored file they were read from. Or a line that had no class at the lock takes its first
+        class, which takes effect in the first open month (`effectMonth`). Its `generatedAt` is
+        the document's own, the latest of `lockedAt` and the instants at which the lines it
+        lists, the classes it shows and the month's balances were recorded, so it renders the
+        same bytes on every later run until then, and its `ETag` and `Last-Modified` move only
+        then. A published statement never shrinks.
 
         It identifies no payer and no natural person: no counterparty, remittance or return
         detail, no bank file, no steward and no steward's reason is published, an end-to-end
@@ -3285,6 +3292,10 @@ paths:
                     source: sample
                     month: 2027-08
                     lockedAt: '2027-09-01T05:00:00Z'
+                    currency: CHF
+                    openingBalanceMinor: 1474637
+                    closingBalanceMinor: 1618237
+                    accountOpenedOn: '2027-05-17'
                     lines:
                       - bookingDate: '2027-08-02'
                         valueDate: '2027-08-02'
