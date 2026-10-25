@@ -17,7 +17,7 @@ a procurement reviewer can consume all of it the way they consume a static file.
 
 | Directory | Contents |
 |---|---|
-| `schemas/` | 38 JSON Schemas (draft 2020-12): one per published artifact class, and `contributor-page-settings.v1` for a person's private page settings, which are never published. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
+| `schemas/` | 41 JSON Schemas (draft 2020-12): one per published artifact class, `contributor-page-settings.v1` for a person's private page settings and `consent-campaign.v1` for a repository's consent campaign as its administrators read it, both never published. Each is self-contained: one download validates on its own — which is why a shared enum is copied into each schema that needs it and `check:menu` asserts the copies are identical. |
 | `openapi/` | `edge-public.v1.yaml` — every public read route, with realistic examples per response and a phase marker per operation. |
 | `coverage/` | `cov-v1.ts`, the published coverage function, with its vectors (`vectors.json`) and its test suite. Zero dependencies. |
 | `examples/` | One valid instance per schema. These are the fixtures the other repositories build against — and in four cases, `category-menu.v1.example.json`, `claim-kit.v1.example.json`, `link-platforms.v1.example.json` and `contributor-page-about.v1.example.json` (our versioned words for the contributor page's about block), the example IS the published document, byte for byte. Beside them, eight golden files the implementations run: `link-rules.v1.golden.json` (the contributor page's link cases, hostile ones included), `contributor-page-contrast.v1.golden.json` (the page's theme table: the colour presets, print rows, status chips and covers with their WCAG figures, read as data by both implementations), `contributor-page-accent.v1.golden.json` (the accent guard's vectors), `contributor-page-ground.v1.golden.json` (the ground guard's vectors, every preset's palette and the builder's document themes), `contributor-page-preview.v1.golden.json` (worked preview-hash vectors), `contributor-page-alias.v1.golden.json` (worked login-address MACs under a published test key) `contributor-page-build.v1.golden.json` (the builder's vectors for keeping a hidden login off the repository list, for the about block it writes, and for the cards' choices it resolves) and `contributor-page-about.v1.golden.json` (the about block's proof sentence, invite and whole blocks, composed from a page's sections). |
@@ -63,6 +63,12 @@ npm run check:allocation-keys   # example keys hash to their approved text and d
                                 #   weights over the List; the key index agrees
 npm run check:designations      # designations make 100 and derive their slug list; the contributors'
                                 #   summary keeps the floor of 5 and the rounding; monthly totals; refusals
+npm run check:fees-account-statement  # the fees account's statement: lines booked in its month, its rules,
+                                #   and the refusals of what must never be published
+npm run check:consultations     # the advisory votes' two contracts: the relations their descriptions
+                                #   promise, the floor of 5, and the refusals
+npm run check:jwks              # the key set's one contract in two places (schema, API description), its
+                                #   verdict whole, and what the key set and incident list refuse
 npm run check:links             # the contributor page's link table keeps its rules; every golden
                                 #   link case gets its recorded answer from the table's steps
 npm run check:contributor-page  # theme table and accent guard, preview-hash and alias-MAC vectors, the builder's
@@ -71,6 +77,7 @@ npm run check:contributor-page  # theme table and accent guard, preview-hash and
 npm run check:vectors           # vector inputs are valid artifacts; all eight answers covered
 npm run check:module            # coverage module: no imports, no clock, no I/O; prints its digest
 npm run check:copy              # claim rules and leak guards over published copy
+npm run check:no-records        # the private recording store never appears in this repository
 npm run check:no-successor      # no new later version of anything public before the launch (D136):
                                 #   no /vN address, {name}.vN contract, kit-N, att-N, cov-vN; allowlist
                                 #   and switch in scripts/no-successor-allowlist.json
@@ -124,11 +131,14 @@ needs a toolchain is not really published.
 | `allocation-keys.v1.json` | `/allocation-keys/index.json` — every released key, newest first, with its state (released, recorded, late or void) and its proven publication date | P-M3 producer |
 | `sponsorship-schedule.v1.json` | `/sponsors/schedule/{version}.json` — the published sponsorship tiers and terms, versioned, never edited once a sponsor has paid under a version (ops decision D44) | P-M2, `draft` until the board adopts it |
 | `sponsorship.v1.json` | `/sponsors.json` — the sponsor register: every settled sponsorship by name, tier, period, amount and use (ops decision D44) | P-M3 producer, v0 hand-maintained |
+| `consultation-index.v1.json` | `/consultations/index.json` — every advisory vote the board has opened, newest opening first, each with the header of its newest published version (id, title, audience, period, version, instant, SHA-256) and no figure of any kind (ops decision D143) | P-M3 producer (`jobs.index-build`, from platform migration 0098's `consultation_publications`) |
+| `consultation.v1.json` | `/consultations/{consultationId}.json` — one advisory vote's newest published version, byte for byte the document the platform stored at the act that published it, with the small-count rule already applied; advice only, the board decides (ops decision D143) | P-M3 producer (`jobs.index-build`, from platform migration 0098's `consultation_publications`) |
 | `badge.v1.json` | `/badge/{node_id}.json` (shields.io endpoint) | first public version |
 | `stats.v1.json` | `/stats.json` | first public version |
 | `publish-log.v1.json` | `/meta/publish-log.json` | first public version |
 | `change-event.v1.json` | one item of `/v1/changes` | later, demand-gated |
 | `contributor-page-settings.v1.json` | never published: a person's private page settings, held by the api as a draft and frozen as versions; its schema is here because the api, the editor and the builder build against it | P-M3 (never published) |
+| `consent-campaign.v1.json` | never published: one repository's relicensing-consent campaign as its administrators read it — its mode and state, the analysis of the repository's history, one consent record per contributor found (the consent engine, ops decision D24); nothing in the engine contacts anyone | lands with the consent engine's slice 1 (PS-2051; never published) |
 | `contributor-page.v1.json` | `/p/{pid}.json`, unlisted — the public document of one published contributor page, which the edge renders as HTML at `/p/{pid}`, `/u/{login}` or `/u/{login}/{pid}` (ops decision D116) | P-M3 producer |
 | `contributor-page-alias.v1.json` | `/u/k/{addressMac}.json`, unlisted — from a login address to a page, keyed by a keyed hash and never by the login | P-M3 producer |
 | `link-platforms.v1.json` | `examples/link-platforms.v1.example.json` — the pinned link table every contributor page link is checked against and rebuilt from; the example is the table, vendored by the platform and the edge | with the contributor page |
