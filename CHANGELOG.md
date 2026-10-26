@@ -97,6 +97,11 @@ its own section below: `consultation-index.v1.json`, the list of every vote the 
 newest published version and no figure of any kind; and `consultation.v1.json`, one vote's newest published version, the
 document as the platform stored it with its SHA-256 and the hash of the version it replaced — forty schemas in all.
 
+The vesting snapshot (2026-10-26; FS05-061, PS-1921) adds one more, with its own section below: `vesting-snapshot.v1.json`,
+the decoded payload of the signed record of one ended term that an organisation keeps, never published on the plane —
+forty-two schemas in all, the forty-first being `consent-campaign.v1.json` (2026-10-24), whose section is below and which
+these paragraphs had not counted.
+
 ### Contracts published beyond the initially-scoped ten
 
 Seven schemas were added because another repository's acceptance test names a schema
@@ -1656,6 +1661,13 @@ value inside `v1` is not additive (versioning policy 1).*
   a planted document it must flag.
 - Nothing is mirrored: the platform's `packages/contracts` mirrors no key set, and the website's and the platform's
   gates read the component, whose members did not move.
+
+### 1.1.0 — unreleased (2026-10-26; FS05-061, `vesting-snapshot.v1` 1.0.0, PS-1921)
+
+- Additive: `x-psn.keyVerdict.signingInstant` gains a fourth row, `psn-vesting+jws`, a vesting snapshot, dated by
+  `generatedAt` (`vesting-snapshot.v1`). A token of that `typ` was `typ_unknown` until now, because no contract fixed its
+  signing instant; the website's `key-window.mjs` dates it the same way from the same release. No schema keyword moved:
+  the key set validates exactly what it validated, and `check:jwks` still holds this file and the `Jwks` component equal.
 
 ## key-incidents.v1.json
 
@@ -4034,6 +4046,38 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 - Example: `consent-campaign.v1.example.json`, an open campaign of a GPL-3.0 repository: two accounts and one withheld
   contributor pending, a commit identity unreachable, a bot excluded.
 
+## vesting-snapshot.v1.json
+
+### 1.0.0 — unreleased (2026-10-26; FS-05 §7, FS05-061, as D49 and D50 amended it; platform PS-1921; the orchestrator's answers of 2026-10-25T13:22Z and 15:24Z) — pre-release
+
+- New, **pre-release**: FS05-061's vesting snapshot, the signed record of one ended term that an organisation keeps. The
+  file describes the DECODED PAYLOAD of a compact ES256 JWS with the protected header `{alg: ES256, kid, typ:
+  "psn-vesting+jws"}`: the short form of the media type, as RFC 7515 §4.1.9 allows and the signer writes it
+  (`PayloadFamily.VestingSnapshot`). NEVER PUBLISHED on the artifact plane and never logged: the api serves the token to
+  the holder organisation's members at `GET /v1/orgs/{coId}/entitlements/{entId}/vesting-snapshot/token`, as
+  `application/jose`.
+- Exactly the payload PS-1921 builds: the producer's eight members (`schemaVersion` 1, `entId`, `subject {coId,
+  legalName}`, `lane`, `scope`, `vestedWindows`, `rule`, `basis`) and the signer's two (`generatedAt`, `kid`), all ten
+  required and nothing else admitted, as the body check the producer and the signer share refuses any other member
+  (`VestingSnapshotBody`). The ids take `entitlement-record.v1`'s shapes; `rule` is a constant, D50's words as
+  `Vesting.RuleString` holds them; `basis` names one payment per window, each once.
+- `generatedAt` reads "When this record was signed": the second the signer signs at, in FS-00 §6.1's whole-second UTC
+  form, which its key-window gate judges before the key is used, and the instant a verifier judges the key at. It is
+  never the term's end, which the last window's `to` states (the 13:22Z answer: a term signed the day after it ended,
+  as FS05-061's example reads).
+- `scope` is `entitlement-record.v1`'s scope object, copied into `$defs` with its `githubNodeId` so the file validates
+  on its own (the 13:22Z answer, PS-1921's review item 3). The lane decides its kind (D42): a Project's is `project`, a
+  Portfolio's `portfolio`, a Pass's `network`.
+- What JSON Schema cannot state is in the description: the windows run in order of their ends, each `from` on or before
+  its `to`, and `basis` follows the windows' order.
+- Examples: `vesting-snapshot.v1.example.json`, FS05-061's own (a Project term from 2027-01-05 to 2028-01-04, signed at
+  `2028-01-05T00:00:00Z` under `psn-prod-2028-1`), with its `scope` as the scope object and its `rule` in D50's words; and
+  `vesting-snapshot.v1.renewed.example.json`, a Pass renewed once, whose record lists both terms the day after the second
+  ended, signed by the key active then.
+- Its signature profile makes it the fourth family the published verifiers date: `jwks.v1` 1.1.0 lists it in
+  `x-psn.keyVerdict.signingInstant`, and `edge-public.v1` 1.17.1's `getJwks` names its `typ`. Nothing is mirrored: the
+  platform's `packages/contracts` mirrors no snapshot, so no platform hash moves.
+
 ## openapi/edge-public.v1.yaml
 
 The API description's own section. It is not a schema file, so the per-schema rules above
@@ -4721,6 +4765,15 @@ which kind of change each entry was.
   personnel rule, `then: false` (`#/$defs/line/allOf/1/then`), which `lint:openapi` reaches now that a route references
   the schema. JSON Schema 2020-12, OpenAPI 3.1's dialect, admits a boolean schema there, and Redocly types `then` as an
   object only. The schema is unchanged, `struct` stays on everywhere else, and the file says why.
+
+### 1.17.1 — unreleased (2026-10-26; `vesting-snapshot.v1` 1.0.0, FS05-061, PS-1921)
+
+- Wording only; no operation, status code, cache class, error code, schema member or example moved. `getJwks`'s step 3
+  names the fourth family a reader holding only the token can date: `psn-vesting+jws`, a vesting snapshot, dated by
+  `generatedAt`, the second it was signed (`vesting-snapshot.v1`), written in the short form of the media type, as
+  RFC 7515 §4.1.9 allows and its signer writes it. Until now such a token was `typ_unknown`. `jwks.v1` 1.1.0 lists the
+  same row in `x-psn.keyVerdict`, and `check:jwks` holds the two to each other. `check:openapi-examples` validates the
+  same 71 examples.
 
 ## coverage/cov-v1.ts
 

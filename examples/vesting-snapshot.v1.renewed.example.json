@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a2f",
+  "subject": {"coId": "co_01jh0y4e1np5s9zb7t2x6v8a0d", "legalName": "Example Industries AG"},
+  "lane": "pass",
+  "scope": {"kind": "network"},
+  "vestedWindows": [
+    {"from": "2027-03-20", "to": "2028-03-19"},
+    {"from": "2028-03-20", "to": "2029-03-19"}
+  ],
+  "rule": "every part of the software within scope that was made available to the public on or before a window's term end (to) is vested permanently — the back catalogue at that date included; from records the paid term and never bounds vesting below",
+  "generatedAt": "2029-03-20T04:17:09Z",
+  "basis": ["txn_01hq3m8v6c2x9t4w7r5k0n1z8b", "txn_01jrd5t2w8k6m3q9x7c4v0h1s5"],
+  "kid": "psn-prod-2029-1"
+}

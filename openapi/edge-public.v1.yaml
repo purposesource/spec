@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.17.0
+  version: 1.17.1
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -588,11 +588,13 @@ paths:
            that family, as the coverage route dates an entitlement record. A reader that holds
            only the token goes by its protected header's `typ`: `application/psn-cert+jws` is a
            certificate, dated by `iat` (`certificate.v1`); `application/psn-ct-checkpoint+jws`
-           is a checkpoint, dated by `asOf` (`ct-checkpoint.v1`); and a token with no `typ` is
-           an entitlement record, dated by `generatedAt` (`entitlement-record.v1`, which fixes
-           no `typ`). Any other `typ` is `typ_unknown`: no contract says when such a token was
-           signed, so no window can be applied, the signature is not accepted, and nothing is
-           asserted about the token either way.
+           is a checkpoint, dated by `asOf` (`ct-checkpoint.v1`); `psn-vesting+jws` is a vesting
+           snapshot, dated by `generatedAt`, the second it was signed (`vesting-snapshot.v1`; the
+           short form of the media type, as RFC 7515 §4.1.9 allows and its signer writes it);
+           and a token with no `typ` is an entitlement record, dated by `generatedAt`
+           (`entitlement-record.v1`, which fixes no `typ`). Any other `typ` is `typ_unknown`: no
+           contract says when such a token was signed, so no window can be applied, the
+           signature is not accepted, and nothing is asserted about the token either way.
         4. The status decides the rest. `active` is accepted (`key_active`), and `retired`
            inside its window (`key_retired`). A `compromised` key refuses whatever is dated at
            or after its `notAfter` (`signed_after_compromise`) and accepts an earlier token

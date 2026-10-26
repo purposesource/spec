@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "entId": "ent_01j8p1378vxk4mzq2t6wr9c5ha",
+  "subject": {"coId": "co_01j8nzk2d4w7q9x3t5v6r8s0ae", "legalName": "Acme GmbH"},
+  "lane": "project",
+  "scope": {"kind": "project", "repos": ["R_kgDOGxYz12"]},
+  "vestedWindows": [{"from": "2027-01-05", "to": "2028-01-04"}],
+  "rule": "every part of the software within scope that was made available to the public on or before a window's term end (to) is vested permanently — the back catalogue at that date included; from records the paid term and never bounds vesting below",
+  "generatedAt": "2028-01-05T00:00:00Z",
+  "basis": ["txn_01h8bxqv9kq3ztw6rn5c2m4y7d"],
+  "kid": "psn-prod-2028-1"
+}

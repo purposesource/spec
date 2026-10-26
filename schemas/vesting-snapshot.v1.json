@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/vesting-snapshot.v1.json",
+  "title": "Vesting snapshot — the decoded JWS payload of one ended term's signed record",
+  "description": "FS05-061's vesting snapshot: the signed record of what an organisation's paid terms vested, which the organisation keeps. THIS schema describes the DECODED PAYLOAD of a compact ES256 JWS whose protected header is `{alg: ES256, kid, typ: \"psn-vesting+jws\"}`. That `typ` is the short form of the media type, which RFC 7515 §4.1.9 lets a producer write without `application/`, and it is the exact string the signer writes. The snapshot is a record, not a certificate (FS-00 §6.4's certificate profile is untouched). `hooks.signer` signs it with the same keys and key set as certificates, so a consumer MUST verify the signature against the published JWKS, judging the key at `generatedAt`, before trusting anything here.\n\nNEVER PUBLISHED ON THE ARTIFACT PLANE, AND NEVER LOGGED. The api serves the token's stored bytes exactly, as `application/jose`, to the members of the organisation that holds the entitlement (`GET /v1/orgs/{coId}/entitlements/{entId}/vesting-snapshot/token`). The dashboard's answer at `…/vesting-snapshot` says when one is offered. No transparency-log entry is written for it: `ct-segment.v1` admits no entry for this family.\n\nONE TERM'S RECORD. A snapshot records an entitlement's latest ENDED term, whose last day is the last window's `to`. A term's `to` is inside the term (FS10-121), so the term ends when the next UTC day begins, and its record is composed that day: by the daily `commerce-sweep`, on demand through the dashboard's route, or in a wind-down's bulk run (COM-017). All three compose the same bytes for the same facts. A term still running has no snapshot yet. The windows are every vested window up to that term's end, and `basis` names the payment that paid each. The stored body carries no clock: the signer adds `generatedAt`, the second it signs at, and `kid`, and signs the payload in RFC 8785 form.\n\nVESTING (D12 as amended; FS05-060; FS-05 §7's amendment of 2026-09-20, D49 and D50): every part of the software within scope that was made available to the public on or before a window's `to` is vested permanently, the back catalogue at that date included. `from` records the paid term and never bounds vesting below. `rule` says so in those words and no others.\n\nA SIGNATURE STATES THE PAYMENT FACTS AT ITS SECOND. No snapshot is composed for a sandbox entitlement, or while a chargeback notice of the entitlement is undecided. A later full refund of a term's payment (but not one recorded as the Association's own failure, D50), or an upheld chargeback of the full payment, voids that term's vesting under licence §9 whatever an earlier token says. The facts then compose other bytes, and the route stops offering the earlier token.\n\nWHAT JSON SCHEMA CANNOT STATE: each window's `from` is on or before its `to`; the windows run in order of their ends (equal ends in order of `from`); `basis` names one payment per window, in the windows' order, each the payment that paid that window; and the signer reads `generatedAt` from its own clock, never from the stored body.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (producer: `jobs.commerce`'s composer, signed by `hooks.signer`; platform PS-1921, its `vesting_snapshots` table). Nothing is produced under this contract yet: PS-1921 has not landed, and no snapshot reaches a holder on production before the production signer (D58). Never published at any phase: the api serves the token to the holder organisation's members alone.",
+    "artifactPath": "(never published) the decoded payload of the compact JWS that `GET /v1/orgs/{coId}/entitlements/{entId}/vesting-snapshot/token` serves as `application/jose`, to the organisation's members",
+    "authoritative": true,
+    "producer": "`jobs.commerce` (`Commerce/VestingSnapshots.cs`) composes the body at a term's end (the daily `commerce-sweep`, which a wind-down's bulk run repeats) and the api's route composes it on demand, through the same composer; `hooks.signer` (`Psn.Signing/VestingSnapshotSigning.cs`) checks it again, adds `generatedAt` and `kid`, and signs it",
+    "consumers": ["the holder organisation's members (the dashboard's download, FS05-073's cancellation dialog)", "the /verify page's offline paste box", "independent verifiers"],
+    "signature": { "alg": "ES256", "kidHeader": true, "typHeader": "psn-vesting+jws", "serialisation": "JWS compact", "canonicalisation": "RFC 8785 (JCS) before signing" },
+    "fsRefs": [
+      "FS-05 §7 (FS05-060, FS05-061, FS05-062) and its amendment of 2026-09-20 (D49, D50)",
+      "FS-00 §6.1 (whole-second UTC instants)",
+      "FS-08 FS08-050 (kid grammar) and its dated note after FS08-104 (a signer never stamps an instant outside its key's window)",
+      "FS10-121 (a term's last day is inside the term)",
+      "COM-015, COM-016, COM-017",
+      "D12, D42, D50, D58",
+      "RFC 7515 §4.1.9",
+      "the orchestrator's answers of 2026-10-25T13:22Z (the snapshot carries the second it is signed; a running term gets its record the day after it ends; `scope` is `entitlement-record.v1`'s scope object) and 15:24Z (PS-1921's review)"
+    ],
+    "vsRefs": ["VS-05"],
+    "changelog": "CHANGELOG.md#vesting-snapshotv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "entId", "subject", "lane", "scope", "vestedWindows", "rule", "basis", "generatedAt", "kid"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "The entitlement (one purchase) whose term this records, in `entitlement-record.v1`'s id shape." },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coId", "legalName"],
+      "description": "The organisation that holds the entitlement. Its legal name is here on purpose: the snapshot is the payer's own record of their own right, issued to them. It is not the hash chain, where ops decision D44 item 5(a) keeps a payer's name out.",
+      "properties": {
+        "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "Platform company ULID, in `entitlement-record.v1`'s id shape." },
+        "legalName": { "type": "string", "minLength": 1, "pattern": "\\S", "description": "The organisation's registered legal name when the record was composed, never blank. On the dev plane it starts with a sample prefix (D61 item 10), so a dev snapshot never names a real firm." }
+      }
+    },
+    "lane": {
+      "enum": ["pass", "project", "portfolio", "donation"],
+      "description": "Commercial lane, `entitlement-record.v1`'s enum. A Project term's scope is `project`, a Portfolio term's `portfolio` and a Pass term's `network` (D42); a donation term's scope is the record's to define."
+    },
+    "scope": { "$ref": "#/$defs/scope" },
+    "vestedWindows": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Every vested window up to the term this snapshot records: one per paid, settled, unreversed term, in order of their ends. The last window's `to` is that term's last day. A window whose term has not ended is never listed; the record that lists it is composed the day after it ends.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to"],
+        "properties": {
+          "from": { "type": "string", "format": "date", "description": "The paid term's first day: provenance, and never a lower bound on vesting (FS05-060)." },
+          "to": { "type": "string", "format": "date", "description": "The paid term's last day: every part of the software within scope made available to the public on or before it is vested permanently." }
+        }
+      }
+    },
+    "rule": {
+      "const": "every part of the software within scope that was made available to the public on or before a window's term end (to) is vested permanently — the back catalogue at that date included; from records the paid term and never bounds vesting below",
+      "description": "The vesting rule in D50's words, word for word (FS-05 §7's amendment of 2026-09-20, item 2). It speaks of the parts made public and never of versions: a snapshot that spoke of versions would tell a buyer their right attached to releases, a smaller right than the one they bought."
+    },
+    "basis": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "The payment that paid each window, in the windows' order: one per window, each named once (FS05-060: each window is the term one payment paid for). Each is the payment rail's transaction id, as Paddle issued it.",
+      "items": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "\\S" }
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "description": "When this record was signed: the second `hooks.signer` signed it at, in FS-00 §6.1's whole-second UTC form. The signer's key-window gate judged that second against the key's window and standing (`signing_keys`) before the key was used (FS-08: a signer never stamps an instant outside its key's window), and a verifier judges the key at it. It is never the term's end, which the last window's `to` states: a snapshot signed the day after its term ended carries that day's second (FS05-061's example). The signer adds it; the stored body never carries it."
+    },
+    "kid": { "$ref": "#/$defs/kid", "description": "Echo of the protected header's `kid`, for readers of the decoded payload alone: the key that signed the record. The signer adds it." }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "lane": { "const": "project" } }, "required": ["lane"] },
+      "then": { "properties": { "scope": { "properties": { "kind": { "const": "project" } } } } }
+    },
+    {
+      "if": { "properties": { "lane": { "const": "portfolio" } }, "required": ["lane"] },
+      "then": { "properties": { "scope": { "properties": { "kind": { "const": "portfolio" } } } } }
+    },
+    {
+      "if": { "properties": { "lane": { "const": "pass" } }, "required": ["lane"] },
+      "then": { "properties": { "scope": { "properties": { "kind": { "const": "network" } } } } }
+    }
+  ],
+  "$defs": {
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "description": "`entitlement-record.v1`'s scope object, copied here so this file validates on its own: the PAID COVERAGE of the term, never the usage declaration. `project` ⇒ `repos[]`, the repositories the term covers (exactly one for a Project bought under ops decision D42; the array bound of 50 is the shape's, not a purchasable quantity); `portfolio` ⇒ `org`, the owner node_id, covering every registered repository of that owner; `network` (Pass) ⇒ neither — a Pass covers every registered repository. The repositories a Pass buyer may name (D42 item 4) are private and never appear here. Sources: D16, COM-020, ENG-029, D42.",
+      "properties": {
+        "kind": { "enum": ["project", "portfolio", "network"] },
+        "repos": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/githubNodeId" }
+        },
+        "org": {
+          "$ref": "#/$defs/githubNodeId",
+          "description": "Owner-organisation node_id, compared against the repo record's `owner.orgId` (FS-10 §4.3 step 5c)."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "project" } }, "required": ["kind"] },
+          "then": { "required": ["repos"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "portfolio" } }, "required": ["kind"] },
+          "then": { "required": ["org"] }
+        }
+      ]
+    },
+    "githubNodeId": { "type": "string", "pattern": "^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$", "description": "A GitHub GraphQL node_id, in either of the two forms GitHub has issued: the opaque current form (a repository's is `R_`-prefixed) and the legacy base64 form, whose decoded value begins `010:Repository`. The same definition as `entitlement-record.v1`'s." },
+    "kid": { "type": "string", "pattern": "^psn-(dev|prod|sandbox)-[0-9]{4}-[0-9]+$", "description": "A signing key id in FS08-050's grammar, `psn-{keyEnv}-{yyyy}-{n}`." }
+  }
+}
