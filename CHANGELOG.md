@@ -882,6 +882,32 @@ creating one.
   `waiver.v1.recording.example.json`, shows `/waivers/all.json` with one recorded waiver, one
   waiver being recorded and one withdrawn before it was recorded.
 
+### 1.4.0 — unreleased (2026-10-26; ops decisions D65 items 1 and 5 and D66 item 3; ORC-37 Slice W1, triage row L2.3-03; PS-2009)
+
+- Additive. `beneficiary.display`, `masked` or `named`: whether the public entry names the
+  company or masks it. The administrators choose per waiver at the grant, masked by default; a
+  mask is lifted only with the company's documented agreement, and a published name is never
+  masked again (D66 item 3; platform migration 0106, whose column holds the same two values).
+- Additive, a loosening: a masked beneficiary carries neither `name` nor `domain`, so `name` is
+  no longer required when `display` is `masked`. A named beneficiary (`named`, or `display`
+  absent) still requires `name`, so every entry that validated still validates. Absent reads as
+  `named`, because every entry published before this member existed names its company; the
+  producer writes `display` on every entry from the slice that honours it (ORC-37 W4, PS-2012).
+- `coId` on a masked entry, decided by the orchestrator's word of 2026-10-21T20:26Z on L2.3-03
+  ("yes, but only for now"): it is kept, so `cov-v1` keeps matching a masked waiver on a
+  development plane, and its description states the limit. D65 item 5 bars the shared company id
+  on a masked public entry, because `/entitlements/{coId}.jws` (the verified domains) and
+  `covered-organisations` (the name, when listed) re-identify the company; so no masked waiver is
+  published on production while its entry carries `coId`. PS-2205 (after PS-1913 and W4) stops
+  writing it, and `coId`'s description and the masked `cov-v1` vector W1-01 change in place
+  (no second version before the launch, D136).
+- The rule applies to `recording[]` entries too: they share `$defs/beneficiary`.
+- The release gate stays where the records put it: no masked waiver on production before the
+  licence carries masking (licence §2 and §9) and the other conditions of D65 item 5 hold
+  (the triage's §7.2 gate names PS-2205 and PS-1913).
+- Example: the main example gains a masked, recorded waiver. `cov-v1` vectors W1-01 (a masked
+  waiver is matched by its company id) and W1-02 (a masked entry is not reached by a domain).
+
 ## entitlement-record.v1.json
 
 ### 1.0.0 — unreleased
@@ -4975,6 +5001,11 @@ serves the same digest). A waiver covers from its published `grantedAt`, the `ts
 `yes-via-waiver` (S1-02); one millisecond before `revokedAt` still `yes-via-waiver` (S1-03), at it
 `no` (S1-04). A waiver in `recording[]` covers nobody (S1-05), because the caller passes
 `waivers[]` alone. `vectors.json` keeps `specVersion` 1.2.0, the function's.*
+
+*Dated note, 2026-10-26 (ops decision D66 item 3; `waiver.v1` 1.4.0; PS-2009): two vectors join,
+W1-01 and W1-02, and the function does not change (it never reads `name`). A masked waiver carries
+no name and no domain and, for now, keeps its company id: it is matched by `coId` (W1-01) and never
+by a domain (W1-02). PS-2205 changes W1-01 in place when the id leaves a masked entry.*
 
 *Dated note, 2026-10-01 (ops decisions D91 item 3 and D93 item 1): `yes-via-donation` is retired and
 never returned, because no Donation Entitlement is issued. The module is not edited for it and its

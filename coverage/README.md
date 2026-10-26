@@ -129,6 +129,9 @@ which `/v1/meta` lists in full; keeping it is the smallest change.
   seconds, and a waiver still in `recording[]` covers nobody, because the caller passes
   `waivers[]` alone. The function needed no change for it. S1-01 to S1-05 pin it, one
   millisecond either side of `grantedAt` and `revokedAt`.
+- **A masked waiver carries no name and no domain** (D66 item 3; `waiver.v1` 1.4.0). For now
+  it keeps the company id, so it is matched by `coId` alone (W1-01) and never by a domain
+  (W1-02). The function never reads `name`, so it needed no change.
 - **A delisted or quit repository still computes.** Entitlements and vesting stand; the
   repository state travels in the basis, and the badge goes neutral independently.
 - **A work with no record is not a repository with an empty record.** It has no owner, so no

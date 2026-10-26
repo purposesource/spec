@@ -31,6 +31,21 @@
       "coolingEndsAt": "2027-02-13T00:00:00Z",
       "revokedAt": "2027-05-01T00:00:00Z",
       "grantedBy": "repo-admin"
+    },
+    {
+      "wvrId": "wvr_01jv8g2n5wy3b7hk1d6f0c2e5m",
+      "beneficiary": {
+        "display": "masked",
+        "coId": "co_01jv8g2n5wy3b7hk1d6f0c2e4m"
+      },
+      "grantedAt": "2027-05-20T09:15:00Z",
+      "coolingEndsAt": "2027-05-23T09:15:00Z",
+      "grantedBy": "repo-admin",
+      "record": {
+        "certId": "cert_01jv8g2p8zb6d0km4g9h3e5g8n",
+        "issueSeq": 57,
+        "recordSeq": 58
+      }
     }
   ]
 }

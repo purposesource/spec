@@ -109,7 +109,7 @@ needs a toolchain is not really published.
 | `registry-index-meta.v1.json` | `/registry/index/meta.json` | first public version |
 | `repo-record.v1.json` | `/registry/repo/{node_id}.json` | first public version |
 | `designations-summary.v1.json` | `/designations/{YYYY-MM}.json` — the designations in force for one month, in summary over all repositories: the projects' totals, and the contributors' from 5 designators, each with its count of designations (ops decisions D117 §6 and D121) | P-M3 producer |
-| `waiver.v1.json` | `/waivers/{node_id}.json`, `/waivers/all.json` — each waiver from the instant it is recorded (its `grantedAt` is its log `record` entry's `ts`, whole seconds), and the waivers being recorded in `recording[]`, which cover nobody (ops decision D68 item 8) | first public version (honest empty state) |
+| `waiver.v1.json` | `/waivers/{node_id}.json`, `/waivers/all.json` — each waiver from the instant it is recorded (its `grantedAt` is its log `record` entry's `ts`, whole seconds), and the waivers being recorded in `recording[]`, which cover nobody (ops decision D68 item 8); since 1.4.0 each beneficiary named or masked, masked by default, a masked one with no name and no domain (ops decision D66 item 3) | first public version (honest empty state) |
 | `entitlement-record.v1.json` | decoded payload of `/entitlements/{co_ulid}.jws` | first public version |
 | `covered-organisations.v1.json` | `/entitlements/covered-organisations.json` — one line per organisation holding an Entitlement term, named only where it asked to be (ops decision D44) | first public version |
 | `certificate.v1.json` | the certificate JWS payload profile | first public version |
