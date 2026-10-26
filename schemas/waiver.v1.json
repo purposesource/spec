@@ -4,13 +4,13 @@
   "title": "Waiver registry — /waivers/{node_id}.json and /waivers/all.json",
   "description": "The published waiver registry: one document per repository, plus a global `/waivers/all.json` whose entries each carry `repoNodeId`. The second of the three inputs to the coverage function (`cov-v1`; FS-10 §4.2); it reads none for a repository with no published record, since a waiver is published under a record's node id. Waivers are gratis and are granted only by a claimed admin from the platform dashboard (D14) — they can never enter the registry by pull request, which is why the P-M2 registry source has no waivers field at all (FS02-060). At P-M2 every document is the honest empty state `waivers: []`, and the project page says so in words rather than showing a zero (VS-18). `coolingEndsAt` (= grantedAt + 72 h, D14 as amended) is consumed by VESTING only (FS05-063): a waiver inside its cooling window is coverage-eligible exactly like any other, because cooling governs whether vesting attaches permanently, never today's coverage answer. Revocation is PROSPECTIVE: `revokedAt` in the past removes coverage from that instant onward while the certificate verify record still attests the historical window (CERT-042).\n\nA waiver covers from the instant it is RECORDED, not from the administrator's click (D68 item 8): its public entry and the log evidence for it (its certificate's `issue` entry in the transparency log) are published, and the registry then appends a `record` entry to the log (`ct-segment.v1` 1.4.0). That entry's `ts` is the waiver's `grantedAt`, and its 72 hours count from it. The decision instant is never published, and a click that never publishes covers nobody. A waiver whose evidence is public and which is not yet recorded is listed in `recording[]`, never in `waivers[]`, and covers nobody: the coverage function reads `waivers[]` alone. Every instant a waiver carries is whole UTC seconds, spelled `YYYY-MM-DDTHH:MM:SSZ`, so a reader with a millisecond clock and one with a finer clock give the same answer at every boundary.",
   "x-psn": {
-    "specVersion": "1.4.0",
+    "specVersion": "1.5.0",
     "phase": "P-M2 (honest empty state) · populated at P-M3",
     "artifactPath": "/waivers/{node_id}.json · /waivers/all.json",
     "authoritative": true,
     "producer": "index-build from platform waiver grants (FS-04 §4)",
     "consumers": ["cov-v1 (FS-10 §4.2 input 3)", "vesting generator (FS-05 §7)", "web project page waiver section", "edge passthrough (FS10-060)"],
-    "fsRefs": ["FS-00 §6.2", "FS-10 §4.2", "FS-05 §7 (FS05-063)", "D14", "D65 items 1 and 5", "D66 item 3", "D68 item 8", "D71 items 1 and 2", "CERT-042"],
+    "fsRefs": ["FS-00 §6.2", "FS-10 §4.2", "FS-05 §7 (FS05-063)", "D14", "D65 items 1 and 5", "D66 item 3", "D68 item 8", "D71 items 1 and 2", "CERT-042", "FS12-018", "FS-12 §9.8 step 3", "FS-00 §6.2 dated note of 2026-10-26 (under-review)"],
     "vsRefs": ["VS-04", "VS-18"],
     "changelog": "CHANGELOG.md#waiverv1json"
   },
@@ -55,7 +55,26 @@
         "revokedAt": { "type": ["string", "null"], "format": "date-time", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$", "description": "Prospective revocation instant: the `ts` of the waiver certificate's `revoke` entry in the transparency log (D71 item 1). Absent or null ⇒ live. A waiver gives permission from `grantedAt` and vests nothing before `coolingEndsAt`; one revoked INSIDE the cooling window vests nothing at all. Revocation never makes use permitted before it unlawful (Licence 1.0 §9). Whole UTC seconds." },
         "grantedBy": { "enum": ["repo-admin"], "description": "Only a claimed repository admin can grant a waiver (D14). Recorded so the artifact carries its own provenance; no other value is issuable." },
         "note": { "type": "string", "maxLength": 300, "description": "Optional public note from the granting admin. Repository-side content — escaped on render." },
-        "record": { "$ref": "#/$defs/record", "description": "Where the waiver stands in the transparency log, by ids and sequence numbers only. With `recordSeq`, the entry at `recordSeq` is of kind `record`, its `ref` is the `h` of the `issue` entry at `issueSeq`, and its `ts` equals `grantedAt`; a reader holding the log checks all three. Absent on an entry published before recording existed." }
+        "record": { "$ref": "#/$defs/record", "description": "Where the waiver stands in the transparency log, by ids and sequence numbers only. With `recordSeq`, the entry at `recordSeq` is of kind `record`, its `ref` is the `h` of the `issue` entry at `issueSeq`, and its `ts` equals `grantedAt`; a reader holding the log checks all three. Absent on an entry published before recording existed." },
+        "reviews": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/review" },
+          "contains": { "not": { "required": ["endedAt"] } },
+          "minContains": 0,
+          "maxContains": 1,
+          "description": "The waiver's `under-review` annotation (FS12-018; FS-12 §9.8 step 3; G7.8, G10.4; FS-00 §6.2's dated note of 2026-10-26). A steward opens a review on a waiver granted in the exposure window of an administrator-account takeover, or classed as probable compromise, ONLY once the waiver is past its cooling window (`coolingEndsAt`); a waiver still inside it is voided instead (FS12-019). Append-only and oldest first: each item is one review, `since` the instant it began. At most one item is open (it has no `endedAt`), and only the last item can be open. A forward record closes the open item by writing its `endedAt`; no item is ever removed or rewritten, and a later review appends a new item (annotation, never deletion, SEC-07). The annotation carries no free text, no reason and no actor. Absent until a steward opens the first review, so an entry never reviewed keeps the bytes it had. `cov-v1` and the vesting generator IGNORE it: a waiver under review covers and vests exactly as it would without it, and coverage changes only through `revokedAt`."
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["since"],
+      "description": "One review of a waiver: when it began and, once a forward record closed it, when it ended. Nothing else.",
+      "properties": {
+        "since": { "type": "string", "format": "date-time", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$", "description": "The instant the steward opened the review. Never earlier than the waiver's `coolingEndsAt`, and never earlier than the previous item's `endedAt`. Whole UTC seconds." },
+        "endedAt": { "type": "string", "format": "date-time", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$", "description": "The instant the forward record closed the review; never earlier than `since`. Absent while the review is open. Whole UTC seconds." }
       }
     },
     "recordingEntry": {

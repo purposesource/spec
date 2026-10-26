@@ -1,5 +1,5 @@
 {
-  "$comment": "Test vectors for cov-v1 (FS10-020), the published coverage function. Every input is a COMPLETE published artifact (scripts/check-vectors.mjs validates each `repos` fixture against repo-record.v1.json, each `company` against entitlement-record.v1.json and each `waivers` document against waiver.v1.json), and `expect` is asserted by DEEP EQUALITY against the whole outcome, so the wire shape is pinned here too. FS10-120(b) requires each of the eight answer values to be producible from fixtures; coverage/cov-v1.test.ts asserts that this file does so. VEC-01 to VEC-25 are the vectors of the function's first text (2026-09-17), with their ids, inputs and answers unchanged; since 2026-09-30 an answer reports a `verified` record as `registered` (D82's dated note (d)). The other 21 were added on 2026-09-30 for that date's three changes (ops decisions D48 item 5 and D82): (a) a Pass inside its term covers a work with no published record (`repo: null`, `repoNodeId` names the repository asked about, and nothing is published at registry/repo/{repoNodeId}.json; the answer reports `repoState: no-record`), and every other organisation gets `repo_not_registered`, expected as `{error, algoVersion, repo}`; (b) a registered repository its admins never claimed answers like any registered one; (c) the one public state. Until the public launch the vectors change in place with the function, each change dated in CHANGELOG.md (ops decision D136); from the launch they are appended, never edited. Since 2026-10-26 (ops decision D68 item 8; waiver.v1 1.3.0) the file also carries S1-01 to S1-05, the waiver recording instant: a waiver covers from its published grantedAt, the ts of its log record entry, whole seconds, and the vectors sit one millisecond either side of grantedAt and revokedAt (a millisecond clock and a whole-second instant give the same answer); a waiver in recording[] covers nobody. The function did not change for them: its bytes and its pinned digest are the same. W1-01 and W1-02 (ops decision D66 item 3; waiver.v1 1.4.0): a masked waiver carries no name and no domain and, for now, keeps the company id it is matched by; PS-2205 changes W1-01 in place when the id leaves a masked entry.",
+  "$comment": "Test vectors for cov-v1 (FS10-020), the published coverage function. Every input is a COMPLETE published artifact (scripts/check-vectors.mjs validates each `repos` fixture against repo-record.v1.json, each `company` against entitlement-record.v1.json and each `waivers` document against waiver.v1.json), and `expect` is asserted by DEEP EQUALITY against the whole outcome, so the wire shape is pinned here too. FS10-120(b) requires each of the eight answer values to be producible from fixtures; coverage/cov-v1.test.ts asserts that this file does so. VEC-01 to VEC-25 are the vectors of the function's first text (2026-09-17), with their ids, inputs and answers unchanged; since 2026-09-30 an answer reports a `verified` record as `registered` (D82's dated note (d)). The other 21 were added on 2026-09-30 for that date's three changes (ops decisions D48 item 5 and D82): (a) a Pass inside its term covers a work with no published record (`repo: null`, `repoNodeId` names the repository asked about, and nothing is published at registry/repo/{repoNodeId}.json; the answer reports `repoState: no-record`), and every other organisation gets `repo_not_registered`, expected as `{error, algoVersion, repo}`; (b) a registered repository its admins never claimed answers like any registered one; (c) the one public state. Until the public launch the vectors change in place with the function, each change dated in CHANGELOG.md (ops decision D136); from the launch they are appended, never edited. Since 2026-10-26 (ops decision D68 item 8; waiver.v1 1.3.0) the file also carries S1-01 to S1-05, the waiver recording instant: a waiver covers from its published grantedAt, the ts of its log record entry, whole seconds, and the vectors sit one millisecond either side of grantedAt and revokedAt (a millisecond clock and a whole-second instant give the same answer); a waiver in recording[] covers nobody. The function did not change for them: its bytes and its pinned digest are the same. W1-01 and W1-02 (ops decision D66 item 3; waiver.v1 1.4.0): a masked waiver carries no name and no domain and, for now, keeps the company id it is matched by; PS-2205 changes W1-01 in place when the id leaves a masked entry. UR-01 (FS-12 §9.8 step 3; waiver.v1 1.5.0): a waiver under review covers exactly as it would without the annotation, because coverage changes only through revokedAt.",
   "algoVersion": "cov-v1",
   "specVersion": "1.2.0",
   "repos": {
@@ -3063,6 +3063,77 @@
             "nodeId": "R_kgDOAbc123",
             "repoState": "registered"
           }
+        }
+      }
+    },
+    {
+      "id": "UR-01-a-waiver-under-review-still-covers",
+      "description": "A waiver a steward has put under review (FS-12 §9.8 step 3: an open review, after an earlier one ended) covers exactly as it would without the annotation. Coverage changes only through revokedAt; the reviews annotation is never read by the coverage function.",
+      "fsRef": "FS12-018; FS-12 §9.8 step 3; FS-10 §4.3 step 2 and step 6 (waiver.v1 1.5.0, reviews)",
+      "now": "2027-06-01T12:00:00Z",
+      "repo": "verified",
+      "company": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-04-01T00:00:00Z",
+        "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+        "domains": [],
+        "verification": "unverified",
+        "entitlements": []
+      },
+      "waivers": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-04-01T00:00:00Z",
+        "scope": "repo",
+        "nodeId": "R_kgDOAbc123",
+        "waivers": [
+          {
+            "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+            "beneficiary": {
+              "display": "named",
+              "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+              "name": "Kleinbetrieb GmbH"
+            },
+            "grantedAt": "2027-04-01T00:05:00Z",
+            "coolingEndsAt": "2027-04-04T00:05:00Z",
+            "grantedBy": "repo-admin",
+            "record": {
+              "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "issueSeq": 2,
+              "recordSeq": 3
+            },
+            "reviews": [
+              {
+                "since": "2027-04-20T08:30:00Z",
+                "endedAt": "2027-04-27T16:00:00Z"
+              },
+              {
+                "since": "2027-05-30T07:45:00Z"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "answer": "yes-via-waiver",
+        "basis": {
+          "algoVersion": "cov-v1",
+          "company": {
+            "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+            "verification": "unverified"
+          },
+          "repo": {
+            "nodeId": "R_kgDOAbc123",
+            "repoState": "registered"
+          },
+          "waiver": {
+            "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+            "grantedAt": "2027-04-01T00:05:00Z"
+          }
+        },
+        "proofRef": {
+          "type": "waiver-record",
+          "repoNodeId": "R_kgDOAbc123",
+          "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
         }
       }
     }

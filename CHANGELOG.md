@@ -908,6 +908,30 @@ creating one.
 - Example: the main example gains a masked, recorded waiver. `cov-v1` vectors W1-01 (a masked
   waiver is matched by its company id) and W1-02 (a masked entry is not reached by a domain).
 
+### 1.5.0 — unreleased (2026-10-26; FS12-018 and FS-12 §9.8 step 3, G7.8 and G10.4; FS-00 §6.2's dated amendment note of 2026-10-26; triage row L2.6-42, GLB:804; PS-2059)
+
+- Additive. An optional `reviews` on each `waivers[]` entry: the `under-review` annotation of
+  FS12-018 and FS-12 §9.8 step 3, the form the orchestrator's word of 2026-10-21T20:26Z on
+  PS-2059 gives it: `reviews: [ { since, endedAt? } ]`, append-only, oldest first, at most one
+  item open (no `endedAt`), whole-second instants as S1's, and no free text, reason or actor.
+- The rules: absent until a steward opens the first review, so an entry never reviewed keeps its
+  bytes; a review is opened only on a waiver past its cooling window (one still inside it is
+  voided instead, FS12-019); a forward record writes `endedAt` on the open item; items are never
+  removed or rewritten, and a later review appends a new item (annotation, never deletion,
+  SEC-07). The schema holds `minItems` 1, the closed item shape, the instant pattern and at most
+  one open item (`maxContains` 1); "only the last item can be open", "`since` not before
+  `coolingEndsAt` or the previous `endedAt`" and "`endedAt` not before `since`" are stated for
+  readers, because JSON Schema cannot compare instants.
+- `cov-v1` and the vesting generator ignore it: coverage changes only through `revokedAt`. Vector
+  UR-01 pins that a waiver under review still covers.
+- Not on `recording[]` entries: a waiver being recorded is not past its cooling window, which
+  starts only at recording.
+- The frozen contract moves by FS-00 §6.2's dated amendment note of 2026-10-26, as the ruling
+  requires (FS-00 §6: "changes require an FS-00 amendment note"); FS-12 §9.8's note of the same
+  date says step 3 now has its field. The steward's act that writes it is PS-2060.
+- Example: `waiver.v1.under-review.example.json`, a named, recorded waiver with one review ended
+  and one open.
+
 ## entitlement-record.v1.json
 
 ### 1.0.0 — unreleased
@@ -5006,6 +5030,10 @@ serves the same digest). A waiver covers from its published `grantedAt`, the `ts
 W1-01 and W1-02, and the function does not change (it never reads `name`). A masked waiver carries
 no name and no domain and, for now, keeps its company id: it is matched by `coId` (W1-01) and never
 by a domain (W1-02). PS-2205 changes W1-01 in place when the id leaves a masked entry.*
+
+*Dated note, 2026-10-26 (FS-12 §9.8 step 3; `waiver.v1` 1.5.0; PS-2059): one vector joins, UR-01, and
+the function does not change: a waiver under review covers exactly as it would without the
+annotation, because coverage changes only through `revokedAt`.*
 
 *Dated note, 2026-10-01 (ops decisions D91 item 3 and D93 item 1): `yes-via-donation` is retired and
 never returned, because no Donation Entitlement is issued. The module is not edited for it and its
