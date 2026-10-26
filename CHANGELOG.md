@@ -1669,6 +1669,37 @@ value inside `v1` is not additive (versioning policy 1).*
   signing instant; the website's `key-window.mjs` dates it the same way from the same release. No schema keyword moved:
   the key set validates exactly what it validated, and `check:jwks` still holds this file and the `Jwks` component equal.
 
+### 1.2.0 — unreleased (2026-10-26; ops decision D90 item 5, FS-00 §6.4's dated note of 2026-10-26; the go-live backlog's GLB:916, triage row L2.6-49, PS-2067)
+
+- Additive, under versioning policy rule 1: `psn:status` gains a fourth value, `pending`, a key published ahead of its
+  cut-over and entitled to sign at no instant (D90 item 5: "a published, not yet active signing-key state yes"). It is the
+  state RB-03's soak needs: the next key is published at least seven days before the cut-over, and until now the only
+  ways to publish it were a false `active` (two active production keys, against FS08-101) or no key at all. Every key
+  set valid before is valid still, and no other value's meaning moved.
+- **What `pending` means.** Its `notBefore` is the earliest instant the key may be brought into use, and its window
+  states no end (`notAfter` null or absent). The schema does not refuse a `notAfter` on a pending key, so the withdrawn
+  shape (a window closing as it opens) stays admitted for every status. FS08-101's one active production key does not
+  count a pending key. Its only onward step is `active`, at the cut-over, when its `notBefore` becomes the cut-over
+  instant: later than published if the cut-over ran late, never earlier, so an active key's window never covers a moment
+  it was pending. A key never becomes `pending` again, and a pending key that is not brought into use stays `pending`
+  for good.
+- **Who may rely on it: nobody, for a signature.** Nothing signed under a key the set calls `pending` is accepted,
+  whatever date the token claims. A token dated before its `notBefore` is step 3's `signed_before_window` (token class: a
+  window opens later, never earlier, so no later set makes it valid). Any other is the new code `key_pending`, in the
+  key-set class: the platform signs only under the active key (`KeyStanding.AssertMaySign`), so the one genuine token a
+  verifier can meet under a pending key is one judged against a set older than that key's cut-over, and the current set
+  settles it; both routes are purged on rotation. `x-psn.keyVerdict` gains the code (21 codes), and `getJwks` step 4
+  names it. A verifier written before this release reads `pending` as a status the set does not define
+  (`key_status_unknown`), which is the same class, so a pending key published before the verifiers learn the value is
+  refused by them in the same way, only in other words.
+- Example: `jwks.v1.pending.example.json`, a week before a scheduled cut-over: `psn-prod-2026-1` active,
+  `psn-prod-2027-1` pending from 2027-01-01. `check:jwks` requires an example holding a pending key, and proves 16
+  refusals (a status spelled `Pending` among them) and 10 admissions (a pending key with its window open, with no
+  `notAfter`, and published withdrawn) on both copies. `edge-public.v1` 1.18.0 changes the `Jwks` component the same way.
+- Nothing is mirrored. The platform validates its rendered set against the component, and its `KeyStanding.Statuses`,
+  `signing_keys`' CHECK (`0016`) and `0053`'s trigger still hold three values, so the platform renders no pending key until
+  its own change; the website's verifiers still read the value as unknown until theirs.
+
 ## key-incidents.v1.json
 
 ### 1.0.0 — unreleased (2026-10-22; FS08-104 and FS-08 §11's dated note of 2026-09-26; the go-live backlog's GLB:1067, PS-2080)
@@ -4774,6 +4805,20 @@ which kind of change each entry was.
   RFC 7515 §4.1.9 allows and its signer writes it. Until now such a token was `typ_unknown`. `jwks.v1` 1.1.0 lists the
   same row in `x-psn.keyVerdict`, and `check:jwks` holds the two to each other. `check:openapi-examples` validates the
   same 71 examples.
+
+### 1.18.0 — unreleased (2026-10-26; ops decision D90 item 5, FS-00 §6.4's dated note of 2026-10-26; GLB:916, PS-2067)
+
+- Additive, a minor bump: the `Jwks` component's `psn:status` enum gains `pending`, a key published ahead of its
+  cut-over and entitled to sign at no instant. No operation, status code, cache class, error code or schema member moved,
+  and every key set the component admitted it still admits. The component's description gains a paragraph saying what
+  the value means, and `psn:status`, `psn:validityWindow` and `notAfter` say how a pending key's window reads.
+- `getJwks` step 4: a `pending` key accepts nothing; a token under it that reaches the step is `key_pending`, in the
+  key-set class, because the platform signs only under the active key and the current set settles a token judged
+  against an older one. `jwks.v1` 1.2.0 publishes the code in `x-psn.keyVerdict`; `check:jwks` holds the two together.
+- One example is added to `getJwks`'s `200`, `rotationSoak`: a week before a scheduled cut-over, the next key published
+  and pending. `check:openapi-examples` validates 72 examples (71 before).
+- The website's tests read the component's members, constants, kid pattern and source enum, none of which moved; the
+  platform validates its rendered set against the component, and a wider enum refuses nothing it rendered.
 
 ## coverage/cov-v1.ts
 

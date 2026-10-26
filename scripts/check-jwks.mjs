@@ -34,8 +34,9 @@
  *                 without its standing, a key stating one member of the two, a retired or
  *                 compromised key whose window never closes, a status it does not define, and
  *                 the shapes no verifier resolves; it admits a test key stating neither, the
- *                 committed keys with no envelope, the honest empty set, and the withdrawn shape
- *                 the platform publishes. The incident list refuses a list with no plane label or
+ *                 committed keys with no envelope, the honest empty set, the withdrawn shape
+ *                 the platform publishes, and a pending key published ahead of its cut-over
+ *                 (its window open, or withdrawn). One example holds a pending key. The incident list refuses a list with no plane label or
  *                 the curated registry's, a sandbox key, a key without its exposure, a forged entry
  *                 carrying anything but its position and hash, and a member it does not define.
  *
@@ -258,11 +259,13 @@ for (const [at, doc] of incidents) problems.push(...incidentProblems(doc, at));
 if (keySets.length < 4) problems.push(`only ${keySets.length} key set examples were read — this gate would pass on too little`);
 if (!keySets.some(([, doc]) => (doc.keys ?? []).some((key) => key['psn:status'] === 'compromised'))) problems.push('no key set example holds a compromised key');
 if (!keySets.some(([, doc]) => (doc.keys ?? []).some((key) => !('psn:status' in key)))) problems.push('no key set example holds a test key stating neither member');
+if (!keySets.some(([, doc]) => (doc.keys ?? []).some((key) => key['psn:status'] === 'pending'))) problems.push('no key set example holds a pending key published ahead of its cut-over');
 if (!incidents.some(([, doc]) => doc.forged.length > 0)) problems.push('no key-incidents.v1 example lists a forged entry');
 if (!incidents.some(([, doc]) => doc.forged.length === 0)) problems.push('no key-incidents.v1 example shows an enumeration that found nothing');
 
 const mainKeySet = readJson(join(EXAMPLE_DIR, 'jwks.v1.example.json'));
 const compromisedKeySet = readJson(join(EXAMPLE_DIR, 'jwks.v1.compromised.example.json'));
+const pendingKeySet = readJson(join(EXAMPLE_DIR, 'jwks.v1.pending.example.json'));
 const mainIncident = readJson(join(EXAMPLE_DIR, 'key-incidents.v1.example.json'));
 const edited = (doc, edit) => {
   const copy = clone(doc);
@@ -311,6 +314,7 @@ const keySetMustRefuse = [
   ['a retired key whose window states no end', edited(mainKeySet, (d) => { delete keyOf(d, 'psn-prod-2026-1')['psn:validityWindow'].notAfter; })],
   ['a compromised key that does not say where acceptance ends', edited(compromisedKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:validityWindow'].notAfter = null; })],
   ['a status the set does not define', edited(mainKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:status'] = 'suspended'; })],
+  ['a status spelled otherwise than the set defines it', edited(pendingKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:status'] = 'Pending'; })],
   ['a window with no start', edited(mainKeySet, (d) => { delete keyOf(d, 'psn-prod-2027-1')['psn:validityWindow'].notBefore; })],
   ['a window end that is a date and no instant', edited(mainKeySet, (d) => { keyOf(d, 'psn-prod-2026-1')['psn:validityWindow'].notAfter = '2027-01-01'; })],
   ['a kid outside the grammar', edited(mainKeySet, (d) => { keyOf(d, 'psn-prod-2027-1').kid = 'PSN-PROD-2027-1'; })],
@@ -326,6 +330,9 @@ const keySetMustAdmit = [
   ['an active key with a scheduled end', edited(mainKeySet, (d) => { keyOf(d, 'psn-prod-2027-1')['psn:validityWindow'].notAfter = '2028-01-01T00:00:00Z'; })],
   ['a key published withdrawn, its window closing as it opens', edited(mainKeySet, (d) => { const w = keyOf(d, 'psn-prod-2026-1')['psn:validityWindow']; w.notAfter = w.notBefore; })],
   ['a compromised key whose window ended at its retirement', edited(compromisedKeySet, (d) => { const key = keyOf(d, 'psn-prod-2026-1'); key['psn:status'] = 'compromised'; })],
+  ['a pending key published ahead of its cut-over', clone(pendingKeySet)],
+  ['a pending key whose window states no end', edited(pendingKeySet, (d) => { delete keyOf(d, 'psn-prod-2027-1')['psn:validityWindow'].notAfter; })],
+  ['a pending key published withdrawn, its window closing as it opens', edited(pendingKeySet, (d) => { const w = keyOf(d, 'psn-prod-2027-1')['psn:validityWindow']; w.notAfter = w.notBefore; })],
 ];
 for (const [label, validate] of keySetValidators) {
   for (const [what, doc] of keySetMustRefuse) {

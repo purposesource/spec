@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.17.1
+  version: 1.18.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -596,7 +596,12 @@ paths:
            contract says when such a token was signed, so no window can be applied, the
            signature is not accepted, and nothing is asserted about the token either way.
         4. The status decides the rest. `active` is accepted (`key_active`), and `retired`
-           inside its window (`key_retired`). A `compromised` key refuses whatever is dated at
+           inside its window (`key_retired`). A `pending` key accepts nothing: a token under it
+           that reaches this step is `key_pending`, in the key-set class. The platform signs only under
+           the active key, so the one genuine token a verifier can meet under a key its set
+           calls pending is one judged against a set older than that key's cut-over; the
+           current set settles it, and this route is purged on rotation.
+           A `compromised` key refuses whatever is dated at
            or after its `notAfter` (`signed_after_compromise`) and accepts an earlier token
            WITH A WARNING (`key_compromised_before`): the date is the signer's own claim, and
            whoever holds a compromised key can backdate it, so the reader is told to check the
@@ -684,6 +689,34 @@ paths:
                         "psn:status": active
                         "psn:validityWindow":
                           notBefore: '2027-03-14T09:00:00Z'
+                          notAfter: null
+                rotationSoak:
+                  summary: A week before a scheduled cut-over, the next key published and pending
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2026-12-24T09:00:00Z'
+                    keys:
+                      - kty: EC
+                        crv: P-256
+                        x: MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4
+                        y: 4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM
+                        kid: psn-prod-2026-1
+                        use: sig
+                        alg: ES256
+                        "psn:status": active
+                        "psn:validityWindow":
+                          notBefore: '2026-01-01T00:00:00Z'
+                          notAfter: null
+                      - kty: EC
+                        crv: P-256
+                        x: f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU
+                        y: x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0
+                        kid: psn-prod-2027-1
+                        use: sig
+                        alg: ES256
+                        "psn:status": pending
+                        "psn:validityWindow":
+                          notBefore: '2027-01-01T00:00:00Z'
                           notAfter: null
         '429':
           $ref: '#/components/responses/RateLimited'
@@ -3791,6 +3824,18 @@ components:
         it is the shape in which the platform publishes a key WITHDRAWN when the standing its
         row states is one no verifier could accept.
 
+        **A pending key is published before it signs** (ops decision D90 item 5; FS-00 §6.4's
+        dated note of 2026-10-26). A scheduled rotation publishes the next key at least seven
+        days before its cut-over, so every reader holds it before anything is signed under
+        it. Until the cut-over it is `pending`: its `notBefore` is the earliest instant it may
+        be brought into use, and its window states no end. It is entitled to sign at no
+        instant, nothing signed under it is accepted while the set says `pending` (`getJwks`
+        step 4), and FS08-101's one active production key does not count it. Its only onward
+        step is `active`, at the cut-over, when its `notBefore` becomes the cut-over instant
+        (later than published if the cut-over ran late, never earlier), so an active key's
+        window never covers a moment it was pending. A key never becomes `pending` again, and
+        a pending key that is not brought into use stays `pending` for good.
+
         **The same contract as a file.** `schemas/jwks.v1.json` (1.15.0) is this component as
         one self-contained download, and `check:jwks` holds the two equal keyword for keyword.
         How a verifier judges a signature against the set is in `getJwks`.
@@ -3885,18 +3930,23 @@ components:
                 const: ES256
               "psn:status":
                 type: string
-                enum: [active, retired, compromised]
+                enum: [active, retired, compromised, pending]
                 description: |
                   `active`: the one production key new issuance uses (FS08-101). `retired`: a
                   rotation closed it, and what it signed inside its window keeps verifying
                   (CERT-022). `compromised`: someone else may have held it (CERT-023); its
-                  `notAfter` says from when nothing it signed is accepted.
+                  `notAfter` says from when nothing it signed is accepted. `pending`:
+                  published ahead of its cut-over and entitled to sign at no instant; nothing
+                  signed under it is accepted while the set says so, and its `notBefore` is the
+                  earliest instant it may become `active` (D90 item 5).
               "psn:validityWindow":
                 type: object
                 required: [notBefore]
                 description: |
                   When the key was entitled to sign: from `notBefore`, inclusive, to `notAfter`,
-                  exclusive, so at a rotation instant exactly one key is valid.
+                  exclusive, so at a rotation instant exactly one key is valid. A `pending`
+                  key's window entitles it to nothing: its `notBefore` is the earliest instant it
+                  may become `active`.
                 properties:
                   notBefore:
                     type: string
@@ -3906,7 +3956,7 @@ components:
                     format: date-time
                     description: |
                       The first instant the key may NOT have signed at; null, or absent, while
-                      the key is current. On a `compromised` key it is where acceptance ends:
+                      the key is current or pending. On a `compromised` key it is where acceptance ends:
                       the earlier of its retirement and the earliest moment someone else may
                       have held it, and it is never moved later. A key retired at R and found
                       compromised afterwards keeps R, or forgeries dated between the two would
