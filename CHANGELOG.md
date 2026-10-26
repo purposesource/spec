@@ -932,6 +932,18 @@ creating one.
 - Example: `waiver.v1.under-review.example.json`, a named, recorded waiver with one review ended
   and one open.
 
+### 1.5.1 — unreleased (2026-10-26; ops decisions D66 items 2 and 3 and D71 item 1; the recording-instant design §3.10; the skeptic's pass over PS-2082, PS-2009 and PS-2059)
+
+- Wording only; no constraint moved. `beneficiary.display` now says what D66 item 3 says first:
+  public naming needs the company's documented agreement, at the grant as well as when a mask is
+  lifted later (platform migration 0106 holds the same rule: nothing names a waiver without a row
+  of `waiver_mask_lifts`). It also keeps D66 item 2's one exception to "nobody else": a disclosure
+  the law requires.
+- `revokedAt`'s description says where an entry published before recording existed takes its
+  instant (the design's §3.10: the row's own value, floored to the second), as `grantedAt`'s
+  already did. On a recorded entry it stays the `ts` of the certificate's `revoke` entry
+  (D71 item 1).
+
 ## entitlement-record.v1.json
 
 ### 1.0.0 — unreleased
