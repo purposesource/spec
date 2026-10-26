@@ -4819,6 +4819,8 @@ which kind of change each entry was.
   and pending. `check:openapi-examples` validates 72 examples (71 before).
 - The website's tests read the component's members, constants, kid pattern and source enum, none of which moved; the
   platform validates its rendered set against the component, and a wider enum refuses nothing it rendered.
+- Wording: the component's description said `schemas/jwks.v1.json` "(1.15.0)", which read as that file's version (it is
+  1.2.0 now); it means the file has been this component since this description's 1.15.0, and now says so.
 
 ## coverage/cov-v1.ts
 

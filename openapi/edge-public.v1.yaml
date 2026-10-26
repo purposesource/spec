@@ -3836,7 +3836,7 @@ components:
         window never covers a moment it was pending. A key never becomes `pending` again, and
         a pending key that is not brought into use stays `pending` for good.
 
-        **The same contract as a file.** `schemas/jwks.v1.json` (1.15.0) is this component as
+        **The same contract as a file.** `schemas/jwks.v1.json` (since this description's 1.15.0) is this component as
         one self-contained download, and `check:jwks` holds the two equal keyword for keyword.
         How a verifier judges a signature against the set is in `getJwks`.
       properties:
