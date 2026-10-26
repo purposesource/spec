@@ -14,7 +14,7 @@
     "fsRefs": [
       "FS-05 §7 (FS05-060, FS05-061, FS05-062) and its amendment of 2026-09-20 (D49, D50)",
       "FS-00 §6.1 (whole-second UTC instants)",
-      "FS-08 FS08-050 (kid grammar) and its dated note after FS08-104 (a signer never stamps an instant outside its key's window)",
+      "FS-08 FS08-101 (the frozen `kid` scheme) and the dated note on FS08-102 and FS08-104 (a signer never stamps an instant outside its key's window)",
       "FS10-121 (a term's last day is inside the term)",
       "COM-015, COM-016, COM-017",
       "D12, D42, D50, D58",
@@ -125,6 +125,6 @@
       ]
     },
     "githubNodeId": { "type": "string", "pattern": "^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$", "description": "A GitHub GraphQL node_id, in either of the two forms GitHub has issued: the opaque current form (a repository's is `R_`-prefixed) and the legacy base64 form, whose decoded value begins `010:Repository`. The same definition as `entitlement-record.v1`'s." },
-    "kid": { "type": "string", "pattern": "^psn-(dev|prod|sandbox)-[0-9]{4}-[0-9]+$", "description": "A signing key id in FS08-050's grammar, `psn-{keyEnv}-{yyyy}-{n}`." }
+    "kid": { "type": "string", "pattern": "^psn-(dev|prod|sandbox)-[0-9]{4}-[0-9]+$", "description": "A signing key id in FS08-101's frozen scheme, `psn-{env}-{yyyy}-{n}`: the pattern `jwks.v1` holds every published key to." }
   }
 }
