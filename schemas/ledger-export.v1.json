@@ -4,8 +4,8 @@
   "title": "Monthly ledger export — /ledger/{YYYY}-{MM}.json",
   "description": "The published monthly ledger export (FS-07 §6.2). Immutable once written: regeneration may only re-emit byte-identical content for a locked month, and a divergence is an alert, not a fix (FS07-051). The `.csv` twin carries the same rows flat; the human ledger page generates from the same rows, and any divergence between page, JSON and CSV is a defect (VS-37, ENG-043/044).\n\nThe shadow section, when present, carries its label IN BAND so no downstream consumer can strip it accidentally: contributor votes are computed and NOT used for routing until the fairness-review gate opens (D27, FS07-052).\n\nDisplay law: pages generate exclusively from these rows; per-contributor money respects the published materiality floor; unclaimed shares appear in aggregate only; there are no leaderboards (FS07-052, D15).\n\nAt P-M2 there are no allocation rows and no `policy`/`totals` allocation figures — the export carries intake rows only, and before the first money moves the ledger page says 'no money has moved yet' in words rather than rendering a zero (FS07-100, VS-37).",
   "x-psn": {
-    "specVersion": "1.8.1",
-    "phase": "P-M2 (intake rows only); P-M3 locked months carry policy, batch and shadow (1.7.0)",
+    "specVersion": "1.9.0",
+    "phase": "P-M2 (intake rows only); P-M3 locked months carry policy, batch and shadow (1.7.0); a month on the credit-month key names its poolBasis and carries its close's payout rows (1.9.0)",
     "artifactPath": "/ledger/{YYYY}-{MM}.json (+ .csv twin)",
     "authoritative": true,
     "producer": "index-build (P-M2: index-build-lite CI, VS-04) from the committed monthly table",
@@ -56,12 +56,16 @@
         "costSupportSha256": { "$ref": "#/$defs/sha256", "description": "SHA-256 of the exact bytes of the month's `cost-support.v1` document that the lock read. Where that document is published beside the export, it is those bytes (FS07-051)." }
       }
     },
+    "poolBasis": {
+      "enum": ["settlement-month", "credit-month"],
+      "description": "Which rule the month's pool follows, so a reader knows which rows to add up (FS07-020; ops decision D60 item 2, adopted by D64 item 1; Calculation Rules Nr. 4). Added in 1.9.0. `credit-month`: the pool is the Purpose Fees of the payouts the month's close carries — each payout credited to the fees account in the month, and any payout credited earlier and found only after its own month's close, which the next close carries under that close's allocation key (ops decision D125 item 3). It is the sum of `assignedAmountMinor` over the month's `payout-assign` rows and of `amountMinor` over its `payout-setoff` rows, and the month's `cost-support.v1` document lists those payouts (`payouts[]`). The intake rows booked in such a month do not count in its pool: each counts once, through the `payout-assign` row of the close that carries its payout. Interest (`interest-in`) is passed on beside the pool and is never part of it (statutes Art. 6a(3)). `settlement-month`: the pool is the intake booked in the month, the rule every month followed before the credit-month key. A producer writes `credit-month` on every month from the first month on that key, open or locked. Absent: the month follows `settlement-month` — every month locked before the key existed, whose bytes never change (FS07-051), and every P-M2 file, which allocates nothing."
+    },
     "totals": {
       "type": "object",
       "additionalProperties": false,
       "description": "Month totals in minor units of `currency`. At P-M2 only `pool` is meaningful; the allocation totals arrive with the allocator at P-M3.",
       "properties": {
-        "pool": { "type": "integer" },
+        "pool": { "type": "integer", "description": "The month's pool, by the rule `poolBasis` names. On `credit-month`, written once the month is locked: the sum of `assignedAmountMinor` over its `payout-assign` rows and of `amountMinor` over its `payout-setoff` rows, which is the `purposeFeesNetMinor` of the month's `cost-support.v1` document; interest is never part of it. On `settlement-month`, or with no `poolBasis`: the intake booked in the month, net of its adjustments." },
         "chargedToFees": { "type": "integer", "description": "Sum of the month's `charged-to-fees` rows: direct invoices paid from the fees account and not settled by a listed supporter. Not a levy." },
         "reserveRetention": { "type": "integer", "minimum": 0, "description": "Sum of the month's `reserve-retention` rows, as a positive figure (ops decision D34 item 4). Zero is a published state: the rule applied and produced nothing." },
         "hardshipPay": { "type": "integer", "minimum": 0, "description": "STRUCK 2026-09-14 by the operator's override, written into the statutes set for adoption at the founding assembly of 1 October 2026; retained in the published contract so earlier documents keep validating, and never written again. Sum of the month's `hardship-pay` rows, as a positive figure (ops decision D34 item 3). Zero is a published state: no episode was active." },
@@ -72,7 +76,7 @@
     },
     "rows": {
       "type": "array",
-      "description": "The month's rows in canonical order. Row shape is the published ledger-row contract: `$defs.exportRow` is `ledger-row.v1`'s member set plus exactly one export-only member, `date`, so a complete hashed row validates here unchanged. To recompute `rowHash` per FS07-040 — `SHA-256(prevHash ∥ JCS(row minus prevHash/rowHash))` — drop the export-only `date` AS WELL AS `prevHash` and `rowHash`: the hash is defined over `ledger-row.v1`, which has no `date`, so `date` was never in the hashed body. With that one exclusion the chain re-walks from the export alone, which is what the published methodology's 're-walk the chain from genesis' promise requires. The schema itself requires only the subset every public consumer needs.",
+      "description": "The month's rows in canonical order. Row shape is the published ledger-row contract: `$defs.exportRow` is `ledger-row.v1`'s member set plus exactly one export-only member, `date`, so a complete hashed row validates here unchanged. To recompute `rowHash` per FS07-040 — `SHA-256(prevHash ∥ JCS(row minus prevHash/rowHash))` — drop the export-only `date` AS WELL AS `prevHash` and `rowHash`: the hash is defined over `ledger-row.v1`, which has no `date`, so `date` was never in the hashed body. With that one exclusion the chain re-walks from the export alone, which is what the published methodology's 're-walk the chain from genesis' promise requires. The schema itself requires only the subset every public consumer needs. The `.csv` twin's header row is `$defs.exportRow`'s members in their order here. A month whose export does not say `poolBasis` `credit-month` leaves out the five members 1.9.0 appended (`assignedLedId` to `movement`), which no row of such a month can carry, so a month published before them keeps its twin's bytes (FS07-051).",
       "items": { "$ref": "#/$defs/exportRow" }
     },
     "shadow": {
@@ -118,7 +122,7 @@
       "required": ["ledId", "seq", "type", "amountMinor", "rowHash"],
       "properties": {
         "ledId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
-        "month": { "$ref": "#/$defs/monthKey", "description": "The BOOKING month. For an allocation row, the month allocated. For an intake row, the Europe/Zurich month of its settlement while that month is open; when that month had already locked at the time the row was written, the first month after the lock frontier (statutes Art. 6a(4); FS07-042), and the settlement instant stays in `createdAt`. `(month, seq)` is unique." },
+        "month": { "$ref": "#/$defs/monthKey", "description": "The BOOKING month. For an allocation row, the month allocated. For an intake row, the Europe/Zurich month of its settlement while that month is open; when that month had already locked at the time the row was written, the first month after the lock frontier (statutes Art. 6a(4); FS07-042), and the settlement instant stays in `createdAt`. A `payout-assign`, `payout-setoff` or `interest-in` row is booked in the month whose close wrote it; the assigned intake row's own month is `assignedMonth`. `(month, seq)` is unique." },
         "seq": { "type": "integer", "minimum": 1 },
         "type": {
           "enum": [
@@ -127,9 +131,10 @@
             "charged-to-fees", "reserve-retention", "hardship-pay",
             "commons-alloc", "directed-alloc", "directed-to-commons", "repo-pool",
             "category-route", "category-agg", "rollforward-in", "rollforward-out",
-            "disburse", "month-note", "month-lock", "annotation"
+            "disburse", "month-note", "month-lock", "annotation",
+            "payout-assign", "payout-setoff", "interest-in"
           ],
-          "description": "The row type: the same enum as `ledger-row.v1`'s `type`, whose description governs every value. `topup-multiplier-in` is reserved: the voluntary multipliers were withdrawn before any sale (ops decision D44 item 7, 2026-09-15), so no ledger writes it; the value stays in the enum because a published enum value is never removed."
+          "description": "The row type: the same enum as `ledger-row.v1`'s `type`, whose description governs every value. `topup-multiplier-in` is reserved: the voluntary multipliers were withdrawn before any sale (ops decision D44 item 7, 2026-09-15), so no ledger writes it; the value stays in the enum because a published enum value is never removed. `payout-assign`, `payout-setoff` and `interest-in` joined in 1.9.0, with the credit-month key of `ledger-row.v1` 1.6.0 (`poolBasis`)."
         },
         "date": { "type": "string", "format": "date", "description": "The row's UTC date, rendered for this export and its CSV twin. EXPORT-ONLY, and the one member here that is not a `ledger-row.v1` key: it is therefore NOT inside the body `rowHash` is taken over, because FS07-040's hash is defined over the row contract, which has no such member. A reader recomputing `rowHash` from an export row drops `date` along with `prevHash` and `rowHash`; everything else in this object is a hashed row member." },
         "amountMinor": { "type": "integer" },
@@ -144,7 +149,7 @@
         "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
         "lane": { "enum": ["pass", "project", "portfolio", "donation"] },
-        "holdStatus": { "enum": ["open-M+1", "released", "not-applicable"], "description": "Allocation state of an intake row (COM-023, ENG-025 as amended by ops decisions D31 and D33): `open-M+1` while the row's `month` has not locked, `released` once it has. A state of the allocation data only, never of money: under the lock-before-sweep rule (D33 item 4) the allocation is computed at the lock, which comes before the transfer (statutes Art. 6a(4); D109 item 4), and each listed recipient's share is transferred directly within the deadline of statutes Art. 6a(4), counted from the credit of the month's earliest rail payout (D43 item 4: every payout has its own deadline). The token keeps its D31 name for contract stability. `not-applicable` is the third state, added 2026-09-08: a zero-amount narrative row (`annotation`, `month-note`, `month-lock`) carries no allocable money, so neither other value says anything true about it." },
+        "holdStatus": { "enum": ["open-M+1", "released", "not-applicable"], "description": "Allocation state of an intake row (COM-023, ENG-025 as amended by ops decisions D31 and D33): `open-M+1` while the row's `month` has not locked, `released` once it has. A state of the allocation data only, never of money: under the lock-before-sweep rule (D33 item 4) the allocation is computed at the lock, which comes before the transfer (statutes Art. 6a(4); D109 item 4), and each listed recipient's share is transferred directly no later than the deadline of statutes Art. 6a(4), `transferDueBy` per payout in the month's `cost-support.v1` document, the earliest of them where a close carries several payouts (D43 item 4: every payout has its own deadline, counted from its credit). The token keeps its D31 name for contract stability. `not-applicable` is the third state, added 2026-09-08: a zero-amount narrative row (`annotation`, `month-note`, `month-lock`) carries no allocable money, so neither other value says anything true about it." },
         "payerName": { "type": "string", "maxLength": 200, "description": "The literal `unnamed` on every row written from 2026-09-15 (ops decision D44 item 5(a)); a listed payer's name is joined from `covered-organisations.v1` at render time and never written into a row. A row written earlier may carry an opted-in name." },
         "scheduleVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$" },
         "ppSnapshotId": { "type": "string", "maxLength": 64 },
@@ -159,12 +164,20 @@
           "enum": ["project_default", "shadow", "contributor_active"],
           "description": "The canonical routing-mode enum in force when the row was written (ops decision D27 as amended at the fifth collision; URS MIL-014(e), GOV-038, ENG-032 — FS-07 and FS-04 use exactly these three names). Semantics in full on the published `ledger-row.v1` field of the same name: `project_default` does not compute the contributor tier, `shadow` computes it without applying it, and `contributor_active` engages only once both D27 activation conditions hold."
         },
-        "note": { "type": "string", "maxLength": 1000, "description": "Narrative text for `month-note` and `annotation` rows, and the fixed booked-forward sentence on an intake row whose settlement month had already locked when it was written (statutes Art. 6a(4); FS07-042). Annotation is the ONLY mechanism for after-the-fact context about a LOCKED month; the booked-forward note is not context about one, it states why a row carries the month it does." },
+        "note": { "type": "string", "maxLength": 1000, "description": "Narrative text for `month-note` and `annotation` rows, and the fixed booked-forward sentence on an intake row whose settlement month had already locked when it was written (statutes Art. 6a(4); FS07-042). Annotation is the ONLY mechanism for after-the-fact context about a LOCKED month; the booked-forward note is not context about one, it states why a row carries the month it does. On a `payout-assign` row, the sentence that names its payout and the day it was credited, and, for a payout found only after its own month's close, that the close carrying it allocates it under that close's key (Calculation Rules Nr. 4)." },
         "emittingJob": { "type": "string", "maxLength": 64, "description": "Which component wrote the row — e.g. `tools/record-purchases` at v0. Every row states its own provenance.", "examples": ["tools/record-purchases", "jobs.allocator"] },
         "createdAt": { "type": "string", "format": "date-time" },
         "monthDigest": { "$ref": "#/$defs/sha256" },
         "prevHash": { "$ref": "#/$defs/sha256OrGenesis" },
-        "rowHash": { "$ref": "#/$defs/sha256" }
+        "rowHash": { "$ref": "#/$defs/sha256" },
+        "assignedLedId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "`payout-assign` rows only: the intake row the close counts, as on `ledger-row.v1` (1.6.0). Each intake row is assigned once, across every month's export." },
+        "assignedMonth": { "$ref": "#/$defs/monthKey", "description": "`payout-assign` rows only: the assigned intake row's `month`, as on `ledger-row.v1` (1.6.0)." },
+        "assignedAmountMinor": { "type": "integer", "description": "`payout-assign` rows only: the assigned intake row's amount, with its sign, which the close counts in its pool while the row's own `amountMinor` stays 0; 0 on a covered row. As on `ledger-row.v1` (1.6.0)." },
+        "payoutRef": { "type": "string", "minLength": 1, "maxLength": 120, "description": "`payout-assign` and `payout-setoff` rows only: the payout's remittance reference, by which the month's rows group into the payouts of its `cost-support.v1` document (`payouts[]`). As on `ledger-row.v1` (1.6.0)." },
+        "movement": {
+          "enum": ["swift-fee", "retained-fee", "chargeback-fee", "credit", "rebate", "chargeback-warning", "chargeback-warning-reverse", "fee-return", "unexplained", "unitemised"],
+          "description": "`payout-setoff` rows only: what the payment rail took off or added to the payout. The same enum as `ledger-row.v1`'s `movement` (1.6.0), whose description governs every value."
+        }
       }
     },
     "monthKey": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" },
