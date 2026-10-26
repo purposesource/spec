@@ -29,6 +29,14 @@
       "kind": "issue",
       "ref": null,
       "ts": "2027-04-01T00:00:00Z"
+    },
+    {
+      "seq": 3,
+      "h": "d223b65257d75da16787affaac021783a5b5f309d71bff1e16f9540e48457d5d",
+      "typ": "license-status",
+      "kind": "record",
+      "ref": "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90",
+      "ts": "2027-04-01T00:05:00Z"
     }
   ]
 }

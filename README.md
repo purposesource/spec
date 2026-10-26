@@ -109,14 +109,14 @@ needs a toolchain is not really published.
 | `registry-index-meta.v1.json` | `/registry/index/meta.json` | first public version |
 | `repo-record.v1.json` | `/registry/repo/{node_id}.json` | first public version |
 | `designations-summary.v1.json` | `/designations/{YYYY-MM}.json` — the designations in force for one month, in summary over all repositories: the projects' totals, and the contributors' from 5 designators, each with its count of designations (ops decisions D117 §6 and D121) | P-M3 producer |
-| `waiver.v1.json` | `/waivers/{node_id}.json`, `/waivers/all.json` | first public version (honest empty state) |
+| `waiver.v1.json` | `/waivers/{node_id}.json`, `/waivers/all.json` — each waiver from the instant it is recorded (its `grantedAt` is its log `record` entry's `ts`, whole seconds), and the waivers being recorded in `recording[]`, which cover nobody (ops decision D68 item 8) | first public version (honest empty state) |
 | `entitlement-record.v1.json` | decoded payload of `/entitlements/{co_ulid}.jws` | first public version |
 | `covered-organisations.v1.json` | `/entitlements/covered-organisations.json` — one line per organisation holding an Entitlement term, named only where it asked to be (ops decision D44) | first public version |
 | `certificate.v1.json` | the certificate JWS payload profile | first public version |
 | `certificate-record.v1.json` | `/certs/{cert_id}.json` | first public version |
 | `certificate-policy.v1.json` | `/certs/policy/latest.json` | first public version |
 | `claim-kit.v1.json` | `kits/kit-{version}.json` here, published at `/kits/{version}.json` — the example is the published document; the shape of ops decision D44 since 1.1.0 (lines, templates, badge, pledge); since 1.2.0 an optional contributor variant with the words a contributor certificate prints, and since 1.3.0 in two word sets, the contributor words and the volunteer words that a certificate's `volunteer` member chooses (ops decision D181), each with a share sentence: kit-1 carries it since 2026-10-23 | first public version |
-| `ct-segment.v1.json` | `/ct/{n}.json`, `/ct/latest.json` | first public version |
+| `ct-segment.v1.json` | `/ct/{n}.json`, `/ct/latest.json` — since 1.4.0 the entry kind `record`, at most one per `issue` entry, whose `ts` is the instant a waiver starts to cover | first public version |
 | `ct-checkpoint.v1.json` | payload published at `/ct/checkpoint-latest.json` | first public version |
 | `jwks.v1.json` | `/jwks.json` and `/sandbox/jwks.json` — the signing key set, each key with its status (active, retired, compromised, or pending: published before its cut-over and accepted for nothing) and validity window; the API description's `Jwks` component as one file, with the verdict a verifier gives against it | first public version (the sandbox set with the sandbox tenant) |
 | `key-incidents.v1.json` | `/ct/incident-{date}.json` — the list a key's compromise publishes: the keys, their exposure windows and the log entries found forged | P-M3 producer, when a key is compromised |

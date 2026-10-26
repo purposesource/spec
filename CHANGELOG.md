@@ -839,6 +839,49 @@ creating one.
   version "and `cov-v1` before it": the coverage function folded back into `cov-v1`
   (`coverage/cov-v1.ts` 1.2.0). No constraint moved.
 
+### 1.3.0 — unreleased (2026-10-26; ops decisions D68 item 8 and D71 items 1 and 2; the recording-instant design, step S1; PS-2082) — **pre-release** change under versioning policy 5
+
+- **The recording instant.** A waiver covers from the instant it is recorded, not from the
+  administrator's click (D68 item 8): its public entry and its log evidence (its certificate's
+  `issue` entry) are published, and the registry then appends a `record` entry to the log
+  (`ct-segment.v1` 1.4.0). `grantedAt`'s description now says so: it is that entry's `ts`, and
+  the 72 hours count from it. The decision instant is never published. An entry published before
+  recording existed (a development plane's test grants only; a production plane holds none)
+  keeps the grant's own instant, floored to the second.
+- Additive. An optional `record` on each `waivers[]` entry, `{certId, issueSeq, recordSeq?}`: the
+  waiver's certificate and its place in the log, by ids and sequence numbers only. With
+  `recordSeq`, the entry there is the `record` entry whose `ref` is the `h` of the `issue` entry
+  at `issueSeq` and whose `ts` equals `grantedAt`; a reader holding the log checks all three.
+  `certId` is the route by which the company proves coverage with its own credential (D65 item 5).
+- Additive. An optional top-level `recording[]`, emitted only when non-empty: the waivers whose
+  evidence is public and which are not recorded yet, each `{wvrId, repoNodeId?, beneficiary,
+  grantedBy?, record: {certId, issueSeq}, withdrawnAt?}`, with no `grantedAt` and no
+  `coolingEndsAt`. An entry there covers nobody; the coverage function and the vesting generator
+  read `waivers[]` alone. A waiver withdrawn before it was recorded stays there with `withdrawnAt`
+  (its `revoke` entry's `ts`), as "withdrawn, never in force" (D71 item 2). A document with no
+  waiver being recorded keeps the bytes it had.
+- `revokedAt`'s description names its source: the `ts` of the certificate's `revoke` entry
+  (D71 item 1). No constraint moved for it.
+- **Pre-release, a tightening:** `grantedAt`, `coolingEndsAt`, `revokedAt` and `withdrawnAt` take
+  the pattern `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$`, whole UTC seconds. Every producer
+  already writes that form (the platform's `PlaneReader.Instant` and `GeneratedAtRule.Format`, the
+  website's index-build-lite and sample data, every example and vector here), so nothing
+  published stops validating. Why: with every stored and published instant a whole second, a
+  reader with a millisecond clock (the website, the edge) and one with a finer clock (the api)
+  give the same answer at every boundary (the design's §3.8); the `cov-v1` vectors S1-01 to
+  S1-04 pin it one millisecond either side.
+- The beneficiary is one `$defs/beneficiary`, shared by `waivers[]` and `recording[]`. Its
+  members and rules are unchanged.
+- The spec owner's two questions of the design (§8, questions 6 and 7) are answered by the
+  default the triage gave them (L2.6-64): an additive `record` kind and an additive `recording`
+  member. A consumer pinned to 1.2.x with `additionalProperties: false` refuses a document that
+  carries either; before the public launch nobody outside the build depends on that (policy 5),
+  and no producer emits either member until the design's step S5.
+- Examples: the main example's first waiver is recorded (`record` with `recordSeq` 3, the
+  `record` entry `ct-segment.v1.example.json` now carries); a further example,
+  `waiver.v1.recording.example.json`, shows `/waivers/all.json` with one recorded waiver, one
+  waiver being recorded and one withdrawn before it was recorded.
+
 ## entitlement-record.v1.json
 
 ### 1.0.0 — unreleased
@@ -1617,6 +1660,30 @@ value inside `v1` is not additive (versioning policy 1).*
   guard still refuses it. No second value was added — `dev` was considered and rejected
   for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
   2026-09-10, which authorises the P-M3 build.
+
+### 1.4.0 — unreleased (2026-10-26; ops decisions D68 item 8 and D71 item 1; the recording-instant design, step S1; PS-2082)
+
+- Additive. `$defs.entry.kind` gains `record`: the registry recorded the credential whose
+  `issue` entry `ref` names (its public entry and that `issue` entry were published), and the
+  entry's `ts` is that recording instant. Today only a waiver certificate (`license-status`,
+  variant `waiver`) is recorded; the waiver's published `grantedAt` equals this `ts`
+  (`waiver.v1` 1.3.0). A new kind rather than the `status` kind the log already had: the design
+  (§3.9, §8 question 6) keeps the recording readable from the log alone, and `license-status`
+  also carries other variants and later "recorded as … expired" statuses that a waiver-only
+  reading of `status` would collide with.
+- The rules, in the descriptions: `h` is computed as for `revoke` (the JCS text of the entry's
+  members other than `seq` and `h`, with `"kind":"record"`); `ref` is the `h` of an EARLIER
+  `issue` entry; a log holds at most one `record` entry per referenced entry. JSON Schema cannot
+  state the last two across entries, so a reader checks them; the schema itself refuses a
+  `record` entry whose `ref` is null.
+- `kind` gains a description of all four values; `revoke`'s says that for a waiver certificate
+  its `ts` is the waiver's revocation instant (D71 item 1).
+- A consumer pinned to 1.3.0 refuses a segment that carries a `record` entry (a closed enum
+  widened). Before the public launch nobody outside the build depends on that (policy 5), and no
+  producer appends one until the design's step S5.
+- `ct-segment.v1.example.json` gains entry 3, a `record` entry for entry 2 (`ts`
+  `2027-04-01T00:05:00Z`), whose `h` is the rule's (`d223b652…`); `waiver.v1.example.json`'s first
+  waiver is the waiver it records.
 
 ## ct-checkpoint.v1.json
 
@@ -4900,6 +4967,14 @@ version beside this file, and its pin never moves.
   and prints its digest; `check:vectors` validates the vector inputs and allows
   `repo_not_registered` only for a vector with no record whose node id is no fixture's;
   `test:coverage` runs the runner.
+
+*Dated note, 2026-10-26 (ops decision D68 item 8; `waiver.v1` 1.3.0; PS-2082): five vectors join,
+S1-01 to S1-05, and the function does not change (its bytes and its pin are the same, so the edge
+serves the same digest). A waiver covers from its published `grantedAt`, the `ts` of its log
+`record` entry in whole seconds: one millisecond before it the answer is `no` (S1-01), at it
+`yes-via-waiver` (S1-02); one millisecond before `revokedAt` still `yes-via-waiver` (S1-03), at it
+`no` (S1-04). A waiver in `recording[]` covers nobody (S1-05), because the caller passes
+`waivers[]` alone. `vectors.json` keeps `specVersion` 1.2.0, the function's.*
 
 *Dated note, 2026-10-01 (ops decisions D91 item 3 and D93 item 1): `yes-via-donation` is retired and
 never returned, because no Donation Entitlement is issued. The module is not edited for it and its

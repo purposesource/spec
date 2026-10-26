@@ -123,7 +123,12 @@ which `/v1/meta` lists in full; keeping it is the smallest change.
   dates in the signed record produce them. `now == periodEnd` is inside the term;
   `now == graceEnd` is inside grace; a millisecond later is `no`.
 - **The 72-hour waiver cooling window does not touch the answer.** It governs whether
-  vesting attaches permanently. The beneficiary is covered from the grant either way.
+  vesting attaches permanently. The beneficiary is covered from `grantedAt` either way.
+- **A waiver covers from the instant it is recorded** (D68 item 8; `waiver.v1` 1.3.0): its
+  published `grantedAt` is the `ts` of its `record` entry in the transparency log, in whole
+  seconds, and a waiver still in `recording[]` covers nobody, because the caller passes
+  `waivers[]` alone. The function needed no change for it. S1-01 to S1-05 pin it, one
+  millisecond either side of `grantedAt` and `revokedAt`.
 - **A delisted or quit repository still computes.** Entitlements and vesting stand; the
   repository state travels in the basis, and the badge goes neutral independently.
 - **A work with no record is not a repository with an empty record.** It has no owner, so no

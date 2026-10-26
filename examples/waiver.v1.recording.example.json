@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-06-01T05:00:00Z",
+  "scope": "all",
+  "waivers": [
+    {
+      "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+      "repoNodeId": "R_kgDOAbc123",
+      "beneficiary": {
+        "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+        "name": "Kleinbetrieb GmbH"
+      },
+      "grantedAt": "2027-04-01T00:05:00Z",
+      "coolingEndsAt": "2027-04-04T00:05:00Z",
+      "grantedBy": "repo-admin",
+      "record": {
+        "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+        "issueSeq": 2,
+        "recordSeq": 3
+      }
+    }
+  ],
+  "recording": [
+    {
+      "wvrId": "wvr_01jx3b7h4rs8w2ce0x5a9y1d4g",
+      "repoNodeId": "R_kgDOAbc123",
+      "beneficiary": {
+        "coId": "co_01jx3b7h4rs8w2ce0x5a9y1d3g",
+        "name": "Werkstatt Nord AG"
+      },
+      "grantedBy": "repo-admin",
+      "record": {
+        "certId": "cert_01jx3b7j1yr5n9sv3w7zc4e6hj",
+        "issueSeq": 41
+      }
+    },
+    {
+      "wvrId": "wvr_01jx3c0k7tv1z5fh3a8d2b4g7k",
+      "repoNodeId": "R_kgDOAbc123",
+      "beneficiary": {
+        "coId": "co_01jx3c0k7tv1z5fh3a8d2b4g6k",
+        "name": "Hafenlogistik GmbH"
+      },
+      "grantedBy": "repo-admin",
+      "record": {
+        "certId": "cert_01jx3c0m2zs6p0tw4x8ad5f7jk",
+        "issueSeq": 43
+      },
+      "withdrawnAt": "2027-06-01T04:10:00Z"
+    }
+  ]
+}

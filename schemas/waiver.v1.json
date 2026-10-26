@@ -2,15 +2,15 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://purposesource.org/spec/schemas/waiver.v1.json",
   "title": "Waiver registry — /waivers/{node_id}.json and /waivers/all.json",
-  "description": "The published waiver registry: one document per repository, plus a global `/waivers/all.json` whose entries each carry `repoNodeId`. The second of the three inputs to the coverage function (`cov-v1`; FS-10 §4.2); it reads none for a repository with no published record, since a waiver is published under a record's node id. Waivers are gratis and are granted only by a claimed admin from the platform dashboard (D14) — they can never enter the registry by pull request, which is why the P-M2 registry source has no waivers field at all (FS02-060). At P-M2 every document is the honest empty state `waivers: []`, and the project page says so in words rather than showing a zero (VS-18). `coolingEndsAt` (= grantedAt + 72 h, D14 as amended) is consumed by VESTING only (FS05-063): a waiver inside its cooling window is coverage-eligible exactly like any other, because cooling governs whether vesting attaches permanently, never today's coverage answer. Revocation is PROSPECTIVE: `revokedAt` in the past removes coverage from that instant onward while the certificate verify record still attests the historical window (CERT-042).",
+  "description": "The published waiver registry: one document per repository, plus a global `/waivers/all.json` whose entries each carry `repoNodeId`. The second of the three inputs to the coverage function (`cov-v1`; FS-10 §4.2); it reads none for a repository with no published record, since a waiver is published under a record's node id. Waivers are gratis and are granted only by a claimed admin from the platform dashboard (D14) — they can never enter the registry by pull request, which is why the P-M2 registry source has no waivers field at all (FS02-060). At P-M2 every document is the honest empty state `waivers: []`, and the project page says so in words rather than showing a zero (VS-18). `coolingEndsAt` (= grantedAt + 72 h, D14 as amended) is consumed by VESTING only (FS05-063): a waiver inside its cooling window is coverage-eligible exactly like any other, because cooling governs whether vesting attaches permanently, never today's coverage answer. Revocation is PROSPECTIVE: `revokedAt` in the past removes coverage from that instant onward while the certificate verify record still attests the historical window (CERT-042).\n\nA waiver covers from the instant it is RECORDED, not from the administrator's click (D68 item 8): its public entry and the log evidence for it (its certificate's `issue` entry in the transparency log) are published, and the registry then appends a `record` entry to the log (`ct-segment.v1` 1.4.0). That entry's `ts` is the waiver's `grantedAt`, and its 72 hours count from it. The decision instant is never published, and a click that never publishes covers nobody. A waiver whose evidence is public and which is not yet recorded is listed in `recording[]`, never in `waivers[]`, and covers nobody: the coverage function reads `waivers[]` alone. Every instant a waiver carries is whole UTC seconds, spelled `YYYY-MM-DDTHH:MM:SSZ`, so a reader with a millisecond clock and one with a finer clock give the same answer at every boundary.",
   "x-psn": {
-    "specVersion": "1.2.3",
+    "specVersion": "1.3.0",
     "phase": "P-M2 (honest empty state) · populated at P-M3",
     "artifactPath": "/waivers/{node_id}.json · /waivers/all.json",
     "authoritative": true,
     "producer": "index-build from platform waiver grants (FS-04 §4)",
     "consumers": ["cov-v1 (FS-10 §4.2 input 3)", "vesting generator (FS-05 §7)", "web project page waiver section", "edge passthrough (FS10-060)"],
-    "fsRefs": ["FS-00 §6.2", "FS-10 §4.2", "FS-05 §7 (FS05-063)", "D14", "CERT-042"],
+    "fsRefs": ["FS-00 §6.2", "FS-10 §4.2", "FS-05 §7 (FS05-063)", "D14", "D68 item 8", "D71 items 1 and 2", "CERT-042"],
     "vsRefs": ["VS-04", "VS-18"],
     "changelog": "CHANGELOG.md#waiverv1json"
   },
@@ -33,6 +33,12 @@
       "type": "array",
       "description": "Waiver grants. An empty array is a valid and expected state — it means no waiver exists, not that data is missing.",
       "items": { "$ref": "#/$defs/waiver" }
+    },
+    "recording": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Waivers being recorded: the waiver's certificate has its `issue` entry in the transparency log, and the registry has not yet appended the `record` entry that starts its coverage (D68 item 8). An entry here covers NOBODY, has no `grantedAt` and no `coolingEndsAt`, and is never read by the coverage function or the vesting generator. Once recorded, the waiver leaves this array and enters `waivers[]` with `grantedAt` = the `record` entry's `ts`. A waiver withdrawn before it was recorded stays here with `withdrawnAt`, as \"withdrawn, never in force\" (D71 item 2), and never enters `waivers[]`. A waiver with no log evidence is published nowhere. Emitted only when non-empty: absent means no waiver is being recorded, so a document with none keeps the bytes it had before this member existed.",
+      "items": { "$ref": "#/$defs/recordingEntry" }
     }
   },
   "$defs": {
@@ -43,22 +49,49 @@
       "properties": {
         "wvrId": { "type": "string", "pattern": "^wvr_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "Waiver ULID, lowercase Crockford, `wvr_` prefixed (FS-00 §6.1)." },
         "repoNodeId": { "$ref": "#/$defs/githubNodeId", "description": "Required in `/waivers/all.json`; redundant (and normally omitted) in a per-repository document." },
-        "beneficiary": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["name"],
-          "description": "Who the waiver covers. Every grant mints an UNVERIFIED `co_` stub plus a registry entry at grant time, so a beneficiary with no account and no verified domain still resolves by ULID (FS-10 §4.3 step 2 — the reachability rule). Name-only lookups are answered by this public artifact, never by cov-v1.",
-          "properties": {
-            "coId": { "$ref": "#/$defs/coId" },
-            "name": { "type": "string", "minLength": 1, "maxLength": 200 },
-            "domain": { "$ref": "#/$defs/domain", "description": "Matched by cov-v1 only against a company's VERIFIED domains." }
-          }
-        },
-        "grantedAt": { "type": "string", "format": "date-time", "description": "Coverage starts at this instant, cooling window notwithstanding." },
-        "coolingEndsAt": { "type": "string", "format": "date-time", "description": "grantedAt + 72 h (D14 as amended). Vesting-only input (FS05-063); cov-v1 ignores it." },
-        "revokedAt": { "type": ["string", "null"], "format": "date-time", "description": "Prospective revocation instant. Absent or null ⇒ live. A waiver gives permission from `grantedAt` and vests nothing before `coolingEndsAt`; one revoked INSIDE the cooling window vests nothing at all. Revocation never makes use permitted before it unlawful (Licence 1.0 §9)." },
+        "beneficiary": { "$ref": "#/$defs/beneficiary" },
+        "grantedAt": { "type": "string", "format": "date-time", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$", "description": "The instant the waiver was recorded: its entry and its log evidence published (D68 item 8). Coverage starts here, cooling window notwithstanding. On an entry with `record.recordSeq` it equals the `ts` of that `record` entry in the transparency log. An entry without `record.recordSeq` was published before recording existed (a development plane's test grants only; a production plane has none) and carries the grant's own instant, floored to the second. Whole UTC seconds." },
+        "coolingEndsAt": { "type": "string", "format": "date-time", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$", "description": "grantedAt + 72 h (D14 as amended). Vesting-only input (FS05-063); cov-v1 ignores it. Whole UTC seconds." },
+        "revokedAt": { "type": ["string", "null"], "format": "date-time", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$", "description": "Prospective revocation instant: the `ts` of the waiver certificate's `revoke` entry in the transparency log (D71 item 1). Absent or null ⇒ live. A waiver gives permission from `grantedAt` and vests nothing before `coolingEndsAt`; one revoked INSIDE the cooling window vests nothing at all. Revocation never makes use permitted before it unlawful (Licence 1.0 §9). Whole UTC seconds." },
         "grantedBy": { "enum": ["repo-admin"], "description": "Only a claimed repository admin can grant a waiver (D14). Recorded so the artifact carries its own provenance; no other value is issuable." },
-        "note": { "type": "string", "maxLength": 300, "description": "Optional public note from the granting admin. Repository-side content — escaped on render." }
+        "note": { "type": "string", "maxLength": 300, "description": "Optional public note from the granting admin. Repository-side content — escaped on render." },
+        "record": { "$ref": "#/$defs/record", "description": "Where the waiver stands in the transparency log, by ids and sequence numbers only. With `recordSeq`, the entry at `recordSeq` is of kind `record`, its `ref` is the `h` of the `issue` entry at `issueSeq`, and its `ts` equals `grantedAt`; a reader holding the log checks all three. Absent on an entry published before recording existed." }
+      }
+    },
+    "recordingEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wvrId", "beneficiary", "record"],
+      "description": "One waiver being recorded, or withdrawn before it was ever recorded. It has no `grantedAt`, no `coolingEndsAt` and no `revokedAt`: it was never in force.",
+      "properties": {
+        "wvrId": { "type": "string", "pattern": "^wvr_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "Waiver ULID, lowercase Crockford, `wvr_` prefixed (FS-00 §6.1). The same id the entry keeps in `waivers[]` once recorded." },
+        "repoNodeId": { "$ref": "#/$defs/githubNodeId", "description": "Required in `/waivers/all.json`; redundant (and normally omitted) in a per-repository document." },
+        "beneficiary": { "$ref": "#/$defs/beneficiary", "description": "Who the waiver will cover once recorded, published exactly as its `waivers[]` entry will publish it." },
+        "grantedBy": { "enum": ["repo-admin"], "description": "As on a `waivers[]` entry (D14)." },
+        "record": { "$ref": "#/$defs/record", "not": { "required": ["recordSeq"] }, "description": "The waiver certificate and its `issue` entry in the transparency log: the evidence that is public. No `recordSeq`: nothing is recorded yet." },
+        "withdrawnAt": { "type": "string", "format": "date-time", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$", "description": "Present once the waiver was withdrawn before it was recorded: the `ts` of its certificate's `revoke` entry (D71 items 1 and 2). The entry then reads \"withdrawn, never in force\" and stays listed. Whole UTC seconds." }
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["certId", "issueSeq"],
+      "description": "A waiver's place in the transparency log, by ids and sequence numbers only: no name, no subject, nothing the log itself does not already carry (D65; `ct-segment.v1`).",
+      "properties": {
+        "certId": { "type": "string", "pattern": "^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "The waiver's `license-status` certificate (variant `waiver`); its verify record is `/certs/{certId}.json`. The route by which the company proves coverage with its own credential: the SHA-256 of its JWS equals the `h` of the entry at `issueSeq`." },
+        "issueSeq": { "type": "integer", "minimum": 0, "description": "The global `seq` of that certificate's `issue` entry in the transparency log." },
+        "recordSeq": { "type": "integer", "minimum": 0, "description": "The global `seq` of the `record` entry that recorded the waiver. Its `ts` is the waiver's `grantedAt`. Present on every recorded waiver." }
+      }
+    },
+    "beneficiary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "description": "Who the waiver covers. Every grant mints an UNVERIFIED `co_` stub plus a registry entry at grant time, so a beneficiary with no account and no verified domain still resolves by ULID (FS-10 §4.3 step 2 — the reachability rule). Name-only lookups are answered by this public artifact, never by cov-v1. One shape for a `waivers[]` entry and a `recording[]` entry.",
+      "properties": {
+        "coId": { "$ref": "#/$defs/coId" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "domain": { "$ref": "#/$defs/domain", "description": "Matched by cov-v1 only against a company's VERIFIED domains." }
       }
     },
     "coId": { "type": "string", "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
