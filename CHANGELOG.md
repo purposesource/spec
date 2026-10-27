@@ -1393,6 +1393,15 @@ value inside `v1` is not additive (versioning policy 1).*
   refuses `volunteer: false` and the member on a supporter record, and admits it on a full
   contributor record.
 
+### 1.4.1 — unreleased (2026-10-27)
+
+- Description only. `disclosure`'s `status-only` names a third case: the record of a waiver's certificate
+  (`license-status`, variant `waiver`) whose waiver's public entry masks its company (`waiver.v1`
+  `beneficiary.display` `masked`), or that no waiver on record names (ops decision D66 item 3). Such a
+  record carries no `sub`, no `band` and no `jws`, and keeps its `scope`, as a company's status-only
+  record does. The schema already admitted it; every record valid under 1.4.0 validates and means the
+  same, and every example keeps its bytes. (PS-2012, ORC-37 Slice W4; the orchestrator's reading R3.)
+
 ## certificate-policy.v1.json
 
 ### 1.0.0 — unreleased
