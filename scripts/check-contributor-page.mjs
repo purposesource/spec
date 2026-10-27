@@ -156,7 +156,10 @@
  *              yet, and a copy on an adopter item alone. And 1.6.0's: a certificate's months with a day, a thirteenth
  *              month, a month before 2026, a number for a month, `from` alone, a member of their own, the period as
  *              words, and months on a project's row or in the summary; and what it admits: a certificate item without
- *              `months` (built before 1.6.0), and a period across two years.
+ *              `months` (built before 1.6.0), and a period across two years. And 1.7.0's: `successorNamed` beside a status
+ *              other than `superseded` (valid, expired, revoked), as a string or null, the successor's id in its place, and
+ *              the member on a project's row or in the summary; and what it admits: a superseded item without it (built
+ *              before 1.7.0), and with it true and false.
  *   goldens    every `examples/*.golden.json` is one a gate checks.
  *
  * Every rule is proved able to fail before the examples are trusted to pass.
@@ -1871,7 +1874,16 @@ const REFUSALS = [
   ['page', "a member of their own in a certificate's months", (d) => { certificateOf(d).months = { from: '2026-01', to: '2026-12', kind: 'year' }; }],
   ['page', 'the period as words', (d) => { certificateOf(d).months = 'January–December 2026'; }],
   ['page', "months on a project's row", (d) => { sectionOf(d, 'repositories').groups[0].repos[0].months = { from: '2026-01', to: '2027-12' }; }],
-  ['page', 'months in the summary', (d) => { sectionOf(d, 'summary').months = { from: '2026-01', to: '2027-02' }; }]
+  ['page', 'months in the summary', (d) => { sectionOf(d, 'summary').months = { from: '2026-01', to: '2027-02' }; }],
+  // 1.7.0 (a superseded certificate that names no successor; the orchestrator's decision of 2026-10-27 on the CW-47 B follow-up).
+  ['page', 'successorNamed beside a valid status', (d) => { const c = certificateOf(d); c.status = 'valid'; c.successorNamed = true; }],
+  ['page', 'successorNamed beside an expired status', (d) => { certificateOf(d).successorNamed = false; }],
+  ['page', 'successorNamed beside a revoked status', (d) => { const c = certificateOf(d); c.status = 'revoked'; c.successorNamed = false; }],
+  ['page', 'successorNamed as a string', (d) => { const c = certificateOf(d); c.status = 'superseded'; c.successorNamed = 'false'; }],
+  ['page', 'successorNamed as null', (d) => { const c = certificateOf(d); c.status = 'superseded'; c.successorNamed = null; }],
+  ['page', "the successor's id on a superseded item", (d) => { const c = certificateOf(d); c.status = 'superseded'; c.supersededBy = 'cert_01jk2m4p6r8t0v2x4z6b8d0f3j'; }],
+  ['page', "successorNamed on a project's row", (d) => { sectionOf(d, 'repositories').groups[0].repos[0].successorNamed = true; }],
+  ['page', 'successorNamed in the summary', (d) => { sectionOf(d, 'summary').successorNamed = false; }]
 ];
 
 /** The named example's certificate item (1.6.0's cases). */
@@ -1944,7 +1956,11 @@ const ADMITS = [
   ['organisationPage', 'organisation-pictures with no cards member (the owner\'s icon by default)', (d) => { delete d.cards; }],
   // 1.6.0 (a certificate's period by its months).
   ['page', 'a certificate item without months (a document built before 1.6.0)', (d) => { delete certificateOf(d).months; }],
-  ['page', 'a period across two years', (d) => { const c = certificateOf(d); c.years = { from: 2026, to: 2027 }; c.months = { from: '2026-11', to: '2027-01' }; }]
+  ['page', 'a period across two years', (d) => { const c = certificateOf(d); c.years = { from: 2026, to: 2027 }; c.months = { from: '2026-11', to: '2027-01' }; }],
+  // 1.7.0 (a superseded certificate that names no successor).
+  ['page', 'a superseded item without successorNamed (a document built before 1.7.0)', (d) => { certificateOf(d).status = 'superseded'; }],
+  ['page', 'a superseded item whose record names its successor', (d) => { const c = certificateOf(d); c.status = 'superseded'; c.successorNamed = true; }],
+  ['page', 'a superseded item whose record names none', (d) => { const c = certificateOf(d); c.status = 'superseded'; c.successorNamed = false; }]
 ];
 
 const CONTRACT = {
@@ -2195,6 +2211,8 @@ const SELF_TEST = [
   ['months', (s) => { for (const v of s.preview.vectors) for (const x of v.document.sections) if (x.id === 'certificates') for (const i of x.items) i.months = { from: `${i.years.from}-01`, to: `${i.years.to}-12` }; }],
   ['admits', (s) => { s.admits = [['page', "a day in a certificate's months", (d) => { certificateOf(d).months = { from: '2026-01-15', to: '2026-12' }; }]]; }],
   ['refusals', (s) => { s.refusals = [['page', 'a period across two years', (d) => { const c = certificateOf(d); c.years = { from: 2026, to: 2027 }; c.months = { from: '2026-11', to: '2027-01' }; }]]; }],
+  ['admits', (s) => { s.admits = [['page', 'successorNamed beside an expired status', (d) => { certificateOf(d).successorNamed = false; }]]; }],
+  ['refusals', (s) => { s.refusals = [['page', 'a superseded item whose record names none', (d) => { const c = certificateOf(d); c.status = 'superseded'; c.successorNamed = false; }]]; }],
   ['defaults', (s) => { s.defaults.address = 'login'; }],
   ['defaults', (s) => { s.defaults.linksPlacement = 'section'; }],
   ['defaults', (s) => { delete s.defaults.about; }],

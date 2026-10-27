@@ -4012,6 +4012,31 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 
 ## contributor-page.v1.json
 
+### 1.7.0 — unreleased (2026-10-27; a superseded certificate that names no successor, the orchestrator's decision of 2026-10-27 on the CW-47 B follow-up, its second item; platform `c38d22f7`) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump, optional: every document written under 1.6.x stays valid, and a
+  renderer before 1.7.0 ignores the new member, as it ignores every unknown member, and draws a superseded item as before. A
+  certificate item (`certificatesSection.items[]`) whose `status` is `superseded`, and no other, may carry `successorNamed`, a
+  boolean, right after `status`: whether its public record (`certs/{cid}.json`, `certificate-record.v1`) names the certificate
+  that replaced it in `supersededBy`. The schema refuses it beside any other status.
+- WHY. Since platform `c38d22f7` (CW-47 B) a superseded record leaves `supersededBy` out when the certificate that replaced it,
+  or a later one in its line, was withdrawn by its holder or has no public record of its own; its verify page then names no
+  successor and links nothing (website `3bdffa7`), and its badge says `replaced` (`badge.v1` 1.4.0). The page's chip still read
+  "Updated, see new" in that case, because the item carried nothing about a successor: a chip saying more than its verify page.
+- THE WORDS (`certificatesSection`, THE SUCCESSOR): `successorNamed` false draws the chip "Replaced", in the neutral tone of
+  "Updated, see new", with no link. True, or an item without the member (built before 1.7.0), draws "Updated, see new" as
+  before, "see new" opening the item's own verify page. With a successor named, no rendered byte moves.
+- The one builder writes it on every superseded item from 1.7.0, true or false, by the same reading of the certificate's line
+  of successors that decides the record's `supersededBy`, so the page and the record cannot disagree. It moves with the status
+  (`certificate-status` in `autoUpdated`, whose description now says so). It is a boolean, never an id: the page still names
+  no successor, as before.
+- No example and no preview vector moves: none lists a superseded certificate, and every one of them is a document the
+  platform's builder tests pin today, so the platform's tests stay green on either side of its builder change. The preview
+  hash covers the member as it covers every member (its reduction names it nowhere). `check:contributor-page` adds 8
+  refusals (the member beside `valid`, `expired` and `revoked`, as a string, as null, the successor's id in its place, and the
+  member on a project's row and in the summary) and 3 admissions (a superseded item without it, with it true and with it
+  false), each proved able to fail.
+
 ### 1.6.0 — unreleased (2026-10-26; a certificate's period by its months, the orchestrator's answer of 2026-10-21T20:26Z) — pre-release
 
 - **Pre-release** addition under policy 5, a minor bump, optional: every document written under 1.5.x stays valid, and a
