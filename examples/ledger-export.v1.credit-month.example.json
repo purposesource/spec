@@ -16,7 +16,7 @@
     "batchId": "bat_01kmk6k96qb489wd6rp6djeb3g",
     "inputsDigest": "fe2975fcf2e4b1567a03e0e303959a468e5f83dcfb1eb51db7695fda7db27a4e",
     "recipientListVersion": "v1",
-    "costSupportSha256": "724faf8674fdb44468a22b817cc9324495c42f7c12be583b34ea5a9171e0435b"
+    "costSupportSha256": "32de2f6d7617f9430b2c25fbbd0721a97a7dc88527e791c1937c8176b310068c"
   },
   "poolBasis": "credit-month",
   "totals": {
@@ -46,7 +46,7 @@
       "emittingJob": "jobs.commerce",
       "createdAt": "2027-11-12T10:41:00Z",
       "prevHash": "a0437310217708927780c63088b97b44f2c51ea8f5dd3586d4daa76507c2d3d3",
-      "rowHash": "f99b7d201b480d6585e5fcf4a16b91213157886f640edc9976f8a777da08d8ce"
+      "rowHash": "c12527ee0bba403176c26e6e484e8db966e7895be40079702453cb7711dcb779"
     },
     {
       "ledId": "led_01km186mka3g4napag1qprymtq",
@@ -66,8 +66,8 @@
       "note": "Settled by payout SAMPLE-REMIT-002711, credited 2027-11-04.",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "f99b7d201b480d6585e5fcf4a16b91213157886f640edc9976f8a777da08d8ce",
-      "rowHash": "1d36ff5cfea882fa4e34249f8ac07fd1dfd79b31ce38863cea2120779191877e",
+      "prevHash": "c12527ee0bba403176c26e6e484e8db966e7895be40079702453cb7711dcb779",
+      "rowHash": "6876441dfc204963ce3e648552de11ac7e9f6d1154412fa21ed829245b086465",
       "assignedLedId": "led_01knpb4q9wjcd7gah66fam23rd",
       "assignedMonth": "2027-10",
       "assignedAmountMinor": 36000,
@@ -90,8 +90,8 @@
       "note": "Settled by payout SAMPLE-REMIT-002711, credited 2027-11-04.",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "1d36ff5cfea882fa4e34249f8ac07fd1dfd79b31ce38863cea2120779191877e",
-      "rowHash": "76b1c4e3bd98e7d17ea20878a23e52f169aec2c0a7391153ffd004cbba00cf08",
+      "prevHash": "6876441dfc204963ce3e648552de11ac7e9f6d1154412fa21ed829245b086465",
+      "rowHash": "e7ef74beaebbea559b21af5d2f948b4367d25ff34a605ca9c7d8548b5933d86a",
       "assignedLedId": "led_01k38ppbvs3k63x74v9gkrzam7",
       "assignedMonth": "2027-10",
       "assignedAmountMinor": 54000,
@@ -115,8 +115,8 @@
       "note": "Settled by payout SAMPLE-REMIT-002711, credited 2027-11-04.",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "76b1c4e3bd98e7d17ea20878a23e52f169aec2c0a7391153ffd004cbba00cf08",
-      "rowHash": "b0337117135634fbc29013c503dcda507794a96f1fea361ef0894a1d29cf57e0",
+      "prevHash": "e7ef74beaebbea559b21af5d2f948b4367d25ff34a605ca9c7d8548b5933d86a",
+      "rowHash": "b3fecf4b4c5aeb8cf5872ace300f436486476ca7950785f4fa6c78452e38b368",
       "assignedLedId": "led_01knydvn8ab1rj34jvyamrh3jb",
       "assignedMonth": "2027-10",
       "assignedAmountMinor": -9000,
@@ -139,8 +139,8 @@
       "note": "The payment rail kept 500 of its fee on the refund of this purchase: the refund cost the payout 9500, and its intake row is 9000.",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "b0337117135634fbc29013c503dcda507794a96f1fea361ef0894a1d29cf57e0",
-      "rowHash": "a509b6e51be68539f8e5ec40b585914b2a65dc6df5140097a4cc6eea10cac727",
+      "prevHash": "b3fecf4b4c5aeb8cf5872ace300f436486476ca7950785f4fa6c78452e38b368",
+      "rowHash": "38b612d12e386c787ac7aa3632f8c735e10ce46d1d7ee55ba61a658dcc619fd3",
       "payoutRef": "SAMPLE-REMIT-002711",
       "movement": "retained-fee"
     },
@@ -157,8 +157,8 @@
       "note": "The payment rail's fee for transferring the payout. It belongs to no purchase, so it is shared over every payer of the close.",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "a509b6e51be68539f8e5ec40b585914b2a65dc6df5140097a4cc6eea10cac727",
-      "rowHash": "915756fa195a02171bc47470600b98abce99c364efd903ec45a6622ac9c1128c",
+      "prevHash": "38b612d12e386c787ac7aa3632f8c735e10ce46d1d7ee55ba61a658dcc619fd3",
+      "rowHash": "edd5a0c4f044ee35493be9ece0e3de76ad6e019b1cf1a7c13733fda4c5e155e7",
       "payoutRef": "SAMPLE-REMIT-002711",
       "movement": "swift-fee"
     },
@@ -180,8 +180,8 @@
       "note": "Settled by payout SAMPLE-REMIT-002710, credited 2027-10-04 (2027-10) and found only after 2027-10's close; carried by this close under its key (Calculation Rules Nr. 4).",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "915756fa195a02171bc47470600b98abce99c364efd903ec45a6622ac9c1128c",
-      "rowHash": "0b6d6fd405d62cceade9954ef57c7bd112fb3a8ea47c7a14192198ecd6f7cb2a",
+      "prevHash": "edd5a0c4f044ee35493be9ece0e3de76ad6e019b1cf1a7c13733fda4c5e155e7",
+      "rowHash": "27302790a8c04e711ff92632d9e956dbdb0854dfe445761a38df7fdf5ba286a3",
       "assignedLedId": "led_01krptzvyy1ry343g02ybfzhqy",
       "assignedMonth": "2027-09",
       "assignedAmountMinor": 27000,
@@ -200,8 +200,8 @@
       "note": "The payment rail's fee for transferring the payout. It belongs to no purchase, so it is shared over every payer of the close.",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "0b6d6fd405d62cceade9954ef57c7bd112fb3a8ea47c7a14192198ecd6f7cb2a",
-      "rowHash": "8d18ffec8cf266e9da7e92b1b64050f84bc954d3a365f5483bf9b3e43bbc7339",
+      "prevHash": "27302790a8c04e711ff92632d9e956dbdb0854dfe445761a38df7fdf5ba286a3",
+      "rowHash": "17818740682c6b9d653ba024317c308404a02966caeab934283541bc69f68bd7",
       "payoutRef": "SAMPLE-REMIT-002710",
       "movement": "swift-fee"
     },
@@ -218,8 +218,8 @@
       "note": "Interest credited to the fees account on 2027-11-30, passed on with this close without costs or reserve retention (statutes Art. 6a(3)).",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "8d18ffec8cf266e9da7e92b1b64050f84bc954d3a365f5483bf9b3e43bbc7339",
-      "rowHash": "cfe62b0fa93f14508d23b13242f30acf7a6c358cf210d2bc2ef280801e61e5b4"
+      "prevHash": "17818740682c6b9d653ba024317c308404a02966caeab934283541bc69f68bd7",
+      "rowHash": "bff4f8c9c45c8f1cf747412458f07ac1dd15fd48d07130270df5c2db3cfccf8b"
     },
     {
       "ledId": "led_01kcw1wwr31j99t136ggbafy8h",
@@ -233,8 +233,8 @@
       "note": "dns-hosting-cdn-edge-storage · INV-EDGE-2027-11-0001",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "cfe62b0fa93f14508d23b13242f30acf7a6c358cf210d2bc2ef280801e61e5b4",
-      "rowHash": "37588b13723af6c2943d00cefefd2d390f4a157234197085b118de64a72c5a9e"
+      "prevHash": "bff4f8c9c45c8f1cf747412458f07ac1dd15fd48d07130270df5c2db3cfccf8b",
+      "rowHash": "7829191f811bd8052e235ef34331a3389ad4fb1c6c87cb5c61cd7101a10e2a04"
     },
     {
       "ledId": "led_01khxaqs1nhf07r3yrt98ryr8f",
@@ -248,8 +248,8 @@
       "note": "Retained at 5% of each payout's Purpose Fees, rounded down: 3958 of SAMPLE-REMIT-002711's 79165 and 1283 of SAMPLE-REMIT-002710's 25665. The operations reserve is below its published target; interest is never retained.",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "37588b13723af6c2943d00cefefd2d390f4a157234197085b118de64a72c5a9e",
-      "rowHash": "7a298048fd330c9020a96ea2d2ac2abb5387a696aa066757aa1a5c7777db4eef"
+      "prevHash": "7829191f811bd8052e235ef34331a3389ad4fb1c6c87cb5c61cd7101a10e2a04",
+      "rowHash": "4aa2e6e57938237b8295d95583b1f152e06b1a5a657f61038d79a5490a723219"
     },
     {
       "ledId": "led_01k5342kc0rdn69328dcm7hhqw",
@@ -265,8 +265,8 @@
       "note": "psn-202711-rve04pdahejb",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "7a298048fd330c9020a96ea2d2ac2abb5387a696aa066757aa1a5c7777db4eef",
-      "rowHash": "5a177dbc8eeb88619e7ddf95c5496bafd1177ae1170374d4760ede2bf39c4ed3"
+      "prevHash": "4aa2e6e57938237b8295d95583b1f152e06b1a5a657f61038d79a5490a723219",
+      "rowHash": "f21601cdddbcf02b6bc18d2262ca2decff03a63643e495d592678099b3d6ecff"
     },
     {
       "ledId": "led_01k3gawtmwzb02ng0pb4sgtcmg",
@@ -282,8 +282,8 @@
       "note": "psn-202711-y1zt0zesjnx9",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "5a177dbc8eeb88619e7ddf95c5496bafd1177ae1170374d4760ede2bf39c4ed3",
-      "rowHash": "f6b3012e8c1698520a29ece3481dd350a39817184bc05da28054f3a25762f79f"
+      "prevHash": "f21601cdddbcf02b6bc18d2262ca2decff03a63643e495d592678099b3d6ecff",
+      "rowHash": "3a87dbfd340d4e5e3e8f96727ebb7e6ba1107b9ed53d379df72b687b7da8ae27"
     },
     {
       "ledId": "led_01k3f6s020mteybh5psmjew1pk",
@@ -299,8 +299,8 @@
       "note": "psn-202711-q0syghrz8ym4",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "f6b3012e8c1698520a29ece3481dd350a39817184bc05da28054f3a25762f79f",
-      "rowHash": "696d8bbfdb3952681b7a74e032c0bf29452d80827af2f4a2ee7990520d161270"
+      "prevHash": "3a87dbfd340d4e5e3e8f96727ebb7e6ba1107b9ed53d379df72b687b7da8ae27",
+      "rowHash": "4826fd1a02b2e78483c121e7b93aa10568d9247fa327352bcaca2ea658719244"
     },
     {
       "ledId": "led_01k466p4mydgk0m39tyaxenth8",
@@ -316,8 +316,8 @@
       "note": "psn-202711-cgyag0hmkcxb",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "696d8bbfdb3952681b7a74e032c0bf29452d80827af2f4a2ee7990520d161270",
-      "rowHash": "de605832a465e43ec2596b126f5515a2509e521b918b29bbd82240c02c3bd063"
+      "prevHash": "4826fd1a02b2e78483c121e7b93aa10568d9247fa327352bcaca2ea658719244",
+      "rowHash": "140b4ae0a0f0da382c2e9c72834141c72fbc70ac20f67844caca1a43ad7cd3e6"
     },
     {
       "ledId": "led_01k79t1hamj0e7xys54299rm3p",
@@ -331,13 +331,13 @@
       "note": "Month 2027-11 locked on the credit-month key under the SAMPLE allocation key in force for the month. Its close carried two payouts: SAMPLE-REMIT-002711, credited 2027-11-04, and SAMPLE-REMIT-002710, credited 2027-10-04 and found only after October's close.",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "monthDigest": "a8c7508e9d2c652c8f8122a959a47e9fc392b95ee05b3f60f09ce27f0e5eae4c",
-      "prevHash": "de605832a465e43ec2596b126f5515a2509e521b918b29bbd82240c02c3bd063",
-      "rowHash": "396a165be80642d6de9d77a5c37fcca01fa0a3d566d9e1f456810800b6e98ff2"
+      "monthDigest": "e4e265f881180e063747bd76c14114fc5e522131a3745963de4c11862dcb6170",
+      "prevHash": "140b4ae0a0f0da382c2e9c72834141c72fbc70ac20f67844caca1a43ad7cd3e6",
+      "rowHash": "ddcb49ae5f28c53150faf660177973c5160c8261fa167cd33ee9b91456864f67"
     }
   ],
-  "headHash": "396a165be80642d6de9d77a5c37fcca01fa0a3d566d9e1f456810800b6e98ff2",
+  "headHash": "ddcb49ae5f28c53150faf660177973c5160c8261fa167cd33ee9b91456864f67",
   "prevHeadHash": "a0437310217708927780c63088b97b44f2c51ea8f5dd3586d4daa76507c2d3d3",
-  "monthDigest": "a8c7508e9d2c652c8f8122a959a47e9fc392b95ee05b3f60f09ce27f0e5eae4c",
+  "monthDigest": "e4e265f881180e063747bd76c14114fc5e522131a3745963de4c11862dcb6170",
   "methodologyUrl": "https://purposesource.org/trust/ledger-methodology"
 }

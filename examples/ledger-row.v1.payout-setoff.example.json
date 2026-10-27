@@ -14,8 +14,8 @@
   "note": "The payment rail kept 500 of its fee on the refund of this purchase: the refund cost the payout 9500, and its intake row is 9000.",
   "emittingJob": "jobs.allocator",
   "createdAt": "2027-12-01T09:10:00Z",
-  "prevHash": "b0337117135634fbc29013c503dcda507794a96f1fea361ef0894a1d29cf57e0",
-  "rowHash": "a509b6e51be68539f8e5ec40b585914b2a65dc6df5140097a4cc6eea10cac727",
+  "prevHash": "b3fecf4b4c5aeb8cf5872ace300f436486476ca7950785f4fa6c78452e38b368",
+  "rowHash": "38b612d12e386c787ac7aa3632f8c735e10ce46d1d7ee55ba61a658dcc619fd3",
   "payoutRef": "SAMPLE-REMIT-002711",
   "movement": "retained-fee"
 }

@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "month": "2027-12",
+  "generatedAt": "2028-01-03T08:40:00Z",
+  "currency": "CHF",
+  "closed": true,
+  "financialYear": "2027",
+  "purposeFeesNetMinor": 61667,
+  "payouts": [
+    {
+      "payoutRef": "SAMPLE-REMIT-002712",
+      "creditedOn": "2027-12-03",
+      "creditMonth": "2027-12",
+      "closedLate": false,
+      "netMinor": 43667,
+      "setOffs": [
+        {
+          "movement": "swift-fee",
+          "amountMinor": -1333
+        }
+      ],
+      "deadlineDays": 60,
+      "transferDueBy": "2028-02-01",
+      "evidence": [
+        {
+          "kind": "rail-payout-statement",
+          "ref": "SAMPLE-REMIT-002712",
+          "label": "The payment rail's statement of the payout"
+        },
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2027-12-03-0005",
+          "label": "Its credit on the fees account"
+        }
+      ]
+    },
+    {
+      "payoutRef": "SAMPLE-REMIT-002711",
+      "fate": "released-hold",
+      "creditedOn": "2027-11-04",
+      "creditMonth": "2027-11",
+      "closedLate": true,
+      "heldInMonth": "2027-11",
+      "netMinor": 0,
+      "assignedMinor": 18000,
+      "heldMinor": -18000,
+      "deadlineDays": 60,
+      "transferDueBy": "2028-01-03",
+      "evidence": [
+        {
+          "kind": "rail-payout-statement",
+          "ref": "SAMPLE-REMIT-002711",
+          "label": "The payment rail's statement of the payout, published with November's close"
+        },
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2027-11-04-0007",
+          "label": "Its credit on the fees account, in November"
+        }
+      ]
+    }
+  ],
+  "directCosts": [
+    {
+      "invoiceRef": "INV-EDGE-2027-12-0001",
+      "class": "dns-hosting-cdn-edge-storage",
+      "description": "DNS, edge compute and object storage for the movement's own properties, on the movement's own account.",
+      "amountMinor": 2400,
+      "paidOn": "2027-12-08",
+      "supplier": {
+        "kind": "company",
+        "legalName": "SAMPLE — Edge Hosting Ltd"
+      },
+      "evidence": [
+        {
+          "kind": "invoice",
+          "ref": "INV-EDGE-2027-12-0001"
+        },
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2027-12-08-0004"
+        }
+      ]
+    }
+  ],
+  "directCostsTotalMinor": 2400,
+  "supporters": [],
+  "supportTotalMinor": 0,
+  "chargedToFeesMinor": 2400,
+  "yearRunningTotalMinor": 33200,
+  "capBps": 1500,
+  "reserveRetentionMinor": 3083,
+  "reserveRetentionNote": "Retained at 5% of the Purpose Fees this close counts of each payout, rounded down: 2183 of SAMPLE-REMIT-002712's 43667, and 900 of the 18000 released from SAMPLE-REMIT-002711's hold, which November's close did not count. The operations reserve is below its published target; above it nothing is retained.",
+  "passedOnMinor": 56184,
+  "transfers": [
+    {
+      "recipientId": "rcp_f5cc8xgz81c00nrve04pdahejb",
+      "category": "health",
+      "amountMinor": 14046,
+      "status": "scheduled",
+      "endToEndId": "psn-202712-rve04pdahejb",
+      "note": "The category's 28092 divides evenly between its two listed recipients. Due no later than 2028-02-01, the deadline of SAMPLE-REMIT-002712, the one payout this close carries. The 18000 released from SAMPLE-REMIT-002711's hold keeps that payout's own deadline, 2028-01-03, and never sets the close's: the transfer day, 3 January, meets it."
+    },
+    {
+      "recipientId": "rcp_tg8g3ps3smxzdpy1zt0zesjnx9",
+      "category": "health",
+      "amountMinor": 14046,
+      "status": "scheduled",
+      "endToEndId": "psn-202712-y1zt0zesjnx9"
+    },
+    {
+      "recipientId": "rcp_0svacmgratb4f4q0syghrz8ym4",
+      "category": "education",
+      "amountMinor": 14046,
+      "status": "scheduled",
+      "endToEndId": "psn-202712-q0syghrz8ym4"
+    },
+    {
+      "recipientId": "rcp_8jf9xfejcgadg7cgyag0hmkcxb",
+      "category": "education",
+      "amountMinor": 14046,
+      "status": "scheduled",
+      "endToEndId": "psn-202712-cgyag0hmkcxb"
+    }
+  ],
+  "reserve": {
+    "balanceMinor": 67541,
+    "targetMinor": 2700000,
+    "note": "The month opened at 62300. November's retention moved to the reserve account on November's transfer day, 1 December. This close's retention moves on its own transfer day, 3 January, and is listed in January's table.",
+    "movements": [
+      {
+        "amountMinor": 5241,
+        "kind": "retention-from-fees",
+        "date": "2027-12-01",
+        "note": "November's reserve retention, moved to the reserve account, which is not the fees account.",
+        "evidence": [
+          {
+            "kind": "reserve-movement",
+            "ref": "STMT-RES-2027-12-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "recipientListVersion": "v1",
+  "evidence": [
+    {
+      "kind": "rail-payout-statement",
+      "ref": "SAMPLE-REMIT-002712",
+      "label": "The rail payout statement of the payout credited in the month"
+    },
+    {
+      "kind": "rail-payout-statement",
+      "ref": "SAMPLE-REMIT-002711",
+      "label": "The rail payout statement of November's payout, whose held purchase this close assigns since its hold was released"
+    }
+  ],
+  "methodologyUrl": "https://purposesource.org/trust/money"
+}

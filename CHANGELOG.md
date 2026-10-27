@@ -2153,6 +2153,13 @@ row the new-file rule binds absolutely.
   assigned, once its hold is released, by the first close after the release, and that
   `payout-assign` row and the item's fee set-offs name the earlier payout. No member, type or
   rule moves.
+- *(2026-10-27: the released hold in the words that list a close's rows, and real digests in the
+  three further examples.)* Wording only. The file's description lists a close's rows for the
+  held items it releases too: one `payout-assign` per released item, and one `payout-setoff` per
+  fee the payment rail kept or charged on one. `holdStatus` says that a `released-hold` entry
+  never sets the deadline, as `cost-support.v1`'s `transfers` says it. The three further
+  examples are still rows of `ledger-export.v1`'s credit-month example less `date`, and their
+  hashes now recompute: only their `prevHash` and `rowHash` moved. No member, type or rule moves.
 
 ## ledger-export.v1.json
 
@@ -2479,6 +2486,21 @@ reasoning: no month export has ever been published with a row in it.
   account of the Association in October and was found after October's close); three set-offs; an
   interest credit; the charged line, the retention, four transfers and the lock. Its sums agree
   with `cost-support.v1`'s example of the same month.
+- *(2026-10-27: the key's rows tied to `poolBasis` by a rule, the released hold in the pool's
+  words, and real digests in the example.)*
+  - A document-level conditional (`allOf`): a month whose export does not say `poolBasis`
+    `credit-month` carries no `payout-assign`, `payout-setoff` or `interest-in` row and no row
+    with one of the five members. Until now only the descriptions said so. It narrows 1.9.0
+    before any producer writes such a row: no document already published carries one.
+  - Wording. `poolBasis` counts in a month's pool the held items its close releases, as
+    `cost-support.v1` 1.4.0's `released-hold` entry does, and an intake row counts through the
+    close that assigns it: the close that carries its payout or, for an item held there, the
+    first close after its release. `holdStatus` says that a `released-hold` entry never sets the
+    deadline.
+  - The credit-month example's digests are real. Each `rowHash` recomputes from its row and its
+    `prevHash`; `monthDigest` is taken over the month's rows less the lock row, as published;
+    `headHash` is the last row's; and `batch.costSupportSha256` is the SHA-256 of the bytes of
+    `cost-support.v1`'s credit-month example. Only hash values moved.
 
 ## ledger-chain.v1.json
 
@@ -2785,6 +2807,22 @@ reasoning: no month export has ever been published with a row in it.
     `heldMinor` and `transferDueBy` say so, and `transfers` says that a `released-hold` entry
     never sets the deadline. Every document valid before is valid now, and the four examples are
     unchanged.
+- *(2026-10-27: a released hold's two figures, and its example.)*
+  - The conditional's `then` requires `heldMinor` on a `released-hold` entry, which always
+    releases something, so "absent: 0" never describes it. Its value is not constrained: the
+    formula in its description is the check.
+  - It holds `bankDeductionMinor` to 0 there. The payout's credit, and any bank's charge on it,
+    is in `heldInMonth`'s document, and writing the charge again would count it twice in a
+    year's sum, as `netMinor` 0 already says of the payment.
+  - Both narrow 1.4.0 before any producer writes a `released-hold` entry. `fate`,
+    `heldMinor` and `bankDeductionMinor` say so.
+  - A further example, `examples/cost-support.v1.released-hold.example.json`: the close of
+    December 2027. Beside the payout credited in December it releases the 18000 that November's
+    close held on `SAMPLE-REMIT-002711`, as an entry of fate `released-hold`, so the check across
+    documents has a worked case: the entry's `heldInMonth` document, `cost-support.v1`'s
+    credit-month example, lists the payout, its `heldMinor` including the released items. The
+    released money keeps its payout's deadline, 3 January 2028, and the close's transfers are due
+    by 1 February 2028, the December payout's.
 
 ## fees-account-statement.v1.json
 
