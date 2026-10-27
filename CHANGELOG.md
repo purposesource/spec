@@ -1778,6 +1778,22 @@ value inside `v1` is not additive (versioning policy 1).*
 - Initial publication. The signed head commitment that makes retroactive tampering
   provable.
 
+### 1.0.1 — unreleased (2026-10-27; ops decision D71 item 4, the recording-instant design §3.13; PS-2007) — wording only
+
+- A patch under policy 3: the description said the checkpoint is published "monthly at P-M2 and
+  P-M3 (per publish batch from P-M4)". At P-M3 it is published monthly, and for each batch that
+  records a waiver. D71 item 4 makes a checkpoint per batch that adds a `record` entry
+  (`ct-segment.v1` 1.4.0) a readiness line before the first real waiver, and the platform's
+  `ct-publish` signs one, beside the month's, on the first run whose log holds a `record` entry past
+  the head every earlier checkpoint commits to: one checkpoint per run, covering every batch recorded
+  since the last (PS-2007, which merges after the recording-instant design's step S4, PS-2096). No
+  producer appends a `record` entry before the design's step S5, so no such checkpoint can be due
+  before then. Monthly only at P-M2, and per publish batch from P-M4, as before.
+- No member, constraint, pattern or example moved; `x-psn.phase` still names the phase the
+  checkpoint began in. The schema is not in the platform's schema manifest, so no pin moves, and the
+  website's schema gate validates the same bodies as before. `edge-public.v1` 1.19.0 says the same of
+  `/ct/checkpoint-latest.json`.
+
 ## jwks.v1.json
 
 ### 1.0.0 — unreleased (2026-10-22; FS-08 §11 and its dated note of 2026-09-26; the go-live backlog's GLB:1067, PS-2080)
@@ -3529,6 +3545,30 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   revocation at the subject's request is no erasure. No message names the organisation or states a
   band, an amount or a period.
 
+### 1.4.0 — unreleased (2026-10-27; the orchestrator's decision of 2026-10-27 on the CW-47 B follow-up; platform `c38d22f7`, website `3bdffa7`) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: a certificate badge gains one canonical message, and the descriptions
+  say so. No member, constraint or enum moved, and every body that validated still validates; the
+  message's `examples` gain `replaced`.
+- **A superseded certificate whose record names no successor says `replaced`**, coloured `#45505c`,
+  as `updated, see new` is. `certificate-record.v1` has never required `supersededBy`, and since
+  platform `c38d22f7` a superseded record leaves it out when the certificate that replaced it, or a
+  later one in its line, was withdrawn by its holder or has no public record. Its verify page then
+  says the record does not name the certificate that replaced it, and links nothing (website
+  `3bdffa7`), so `updated, see new` sent the reader to a certificate the page cannot show: a badge
+  saying more than its verify page. A `supersededBy` of null names no successor either, as the verify
+  page reads it (a certificate id, or none).
+- **With a successor, nothing moves:** a superseded certificate whose record names the certificate
+  that replaced it says `updated, see new`, as before. Which certificates have superseded words does
+  not move either: a contributor's logged certificate signed with a production key, shown in full or
+  status-only. A listed company's superseded Entitlement still has none and answers `404`, a
+  certificate signed with a non-production key says `test` off production, and one whose record
+  carries no log position says `not found`, whatever its status.
+- Until the website's edge draws the word (an outline of its own beside the edge vocabulary; website
+  PR #135, `2597b47`, pinned today's answer in the test to flip), the edge says `updated, see new` in
+  both cases. The schema admits both bodies, so the order of pushes does not matter for the website's
+  tests.
+
 ## stats.v1.json
 
 ### 1.0.0 — unreleased
@@ -5229,6 +5269,26 @@ which kind of change each entry was.
   platform validates its rendered set against the component, and a wider enum refuses nothing it rendered.
 - Wording: the component's description said `schemas/jwks.v1.json` "(1.15.0)", which read as that file's version (it is
   1.2.0 now); it means the file has been this component since this description's 1.15.0, and now says so.
+
+### 1.19.0 — unreleased (2026-10-27; the orchestrator's decision of 2026-10-27 on the CW-47 B follow-up, platform `c38d22f7`; ops decision D71 item 4, PS-2007) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: `getCertificateBadge` answers a superseded certificate whose record
+  names no successor with a word of its own, so a documented response changes. No operation, status
+  code of an operation, cache class, error code, schema member, enum value or example moved;
+  `badge.v1` 1.4.0 documents the message.
+- **`replaced`** for a superseded certificate whose record names no successor (`supersededBy` absent
+  or null: since platform `c38d22f7` the record leaves it out when the certificate that replaced it,
+  or a later one in its line, was withdrawn by its holder or has no public record), in the colour of
+  `updated, see new`. Its verify page links no successor (website `3bdffa7`), and `updated, see new`
+  would send the reader to one. A record that names its successor still says `updated, see new`, in
+  the same bytes.
+- **Wording, `getCtCheckpoint`:** "Published monthly" now reads "Published monthly, and for each batch
+  that records a waiver" (ops decision D71 item 4; the platform's `ct-publish` signs one checkpoint per
+  run for every batch recorded since the last, PS-2007). No status code, cache class or example moved;
+  `ct-checkpoint.v1` 1.0.1 says the same of the payload.
+- The website's tests read this file's status codes for the badge and card routes, which did not
+  move, and validate badge bodies against `badge.v1`, which admits both words, so the order of pushes
+  does not matter for them. `check:openapi-examples` validates the same 72 examples.
 
 ## coverage/cov-v1.ts
 

@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.18.0
+  version: 1.19.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -1124,9 +1124,12 @@ paths:
         card says nothing more than its flat badge does (ops decision D137 item 4). `{years}` is the
         period's year or its first and last year (`2025–2026`). Every card's last line is
         `Live status from purposesource.org`. A revoked certificate says `revoked` (a listed company's
-        Entitlement says it in the claim kit's words, below), a superseded one `updated, see new`, and
-        a certificate signed with a non-production key says `test` (served off production only). No
-        badge carries a name, a login, a project name, a figure or a point.
+        Entitlement says it in the claim kit's words, below), a superseded one `updated, see new` when
+        its record names the certificate that replaced it (`supersededBy`) and `replaced` when it names
+        none (`supersededBy` absent or null: the certificate that replaced it, or a later one in its
+        line, was withdrawn by its holder or has no public record, and its verify page links no
+        successor), and a certificate signed with a non-production key says `test` (served off
+        production only). No badge carries a name, a login, a project name, a figure or a point.
         The card of a certificate shown in full draws the certificate's rosette, a pattern from the
         token's public hash: it is decoration, and it proves nothing.
 
@@ -3421,8 +3424,9 @@ paths:
       summary: Latest signed transparency-log checkpoint
       description: |
         A signed commitment to the log's head, which is what makes retroactive tampering
-        provable rather than merely unlikely. Published monthly, signed with the same keys
-        as certificates, and mirrored into a public git repository that Software Heritage
+        provable rather than merely unlikely. Published monthly, and for each batch that
+        records a waiver (ops decision D71 item 4), signed with the same keys as
+        certificates, and mirrored into a public git repository that Software Heritage
         archives. The repository's commit dates are ours: the mirror's own workflow
         writes them, so they prove nothing about time. Software Heritage's visit date,
         the moment its archive fetched the repository, is the independent clock, and the
