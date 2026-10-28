@@ -10,6 +10,7 @@ that the model can be audited rather than believed.
 | `cov-v1.ts` | The function in force. Pure: zero dependencies, no I/O, no clock read. Its SHA-256 is pinned by `npm run check:module`. |
 | `vectors.json` | Its vectors — complete published artifacts in, exact outcome out: the first text's 25 and the 21 added on 2026-09-30. |
 | `cov-v1.test.ts` | Its runner, and the properties the vectors cannot state. |
+| `waiver-certificate-vectors.json` | The vectors of the second coverage route, `POST /v1/coverage/waiver-certificate`, which answers from a company's own waiver certificate. It runs no module of its own and leaves `cov-v1` unchanged; see below. |
 
 ## Run it
 
@@ -143,6 +144,23 @@ which `/v1/meta` lists in full; keeping it is the smallest change.
   anyone willing to assert somebody else's domain — see the anti-spoof vector.
 - **Ties are broken deterministically** (latest period end, then id). Two deployments
   handed the same artifacts must name the same entitlement in the basis.
+
+## Coverage from a waiver certificate
+
+A masked waiver's public entry names no company (D66 item 3), and, once PS-2205 lands, carries
+no company id either, so `cov-v1` cannot match it to an organisation. The company holds what
+ties the two together: the waiver's certificate. `POST /v1/coverage/waiver-certificate`
+(`openapi/edge-public.v1.yaml` 1.20.0, operation `postWaiverCertificateCoverage`) takes that
+certificate as its body, verifies it against the published keys, ties it to the waiver entry it
+names (`record.certId`, and the log's `issue` entry at `record.issueSeq`), and answers
+`yes-via-waiver` or `no` by `cov-v1`'s own test for a waiver in force. The answer names the
+certificate, the repository and the waiver, never the company.
+
+It is a separate route, not a change to this function: FS-00 §6.3 freezes `cov-v1`, and its
+dated note of 2026-10-28 records the decision. `waiver-certificate-vectors.json` holds the
+route's 37 vectors, over real certificates signed with the published fixture key
+`psn-dev-2026-1`; `npm run check:certificate-vectors` checks them, and the website's edge tests
+drive each one through the route.
 
 ## Phase
 

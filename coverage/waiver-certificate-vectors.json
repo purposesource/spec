@@ -1,0 +1,3839 @@
+{
+  "$comment": [
+    "Vectors for POST /v1/coverage/waiver-certificate (openapi/edge-public.v1.yaml 1.20.0; ops decision D65 item 5; FS-00 §6.3 dated note of 2026-10-28; PS-1913): coverage answered from the company's own waiver certificate. cov-v1 and its vectors are unchanged.",
+    "Every certificate is a real compact JWS signed with the committed fixture key psn-dev-2026-1, whose public half every key set below carries (its private half is the website repository's src/data/sample/keys/FIXTURE-DO-NOT-USE.preview-signing.jwk.json, committed on purpose: nothing it signs is a credential). `signed: false` marks the two tokens whose signature must NOT verify under it. The website writes this file (scripts/waiver-certificate-vectors.mjs); scripts/check-certificate-vectors.mjs here checks it: each fixture against its schema, each token's payload against certificate.v1.json, each signature against the key, each expected answer against the WaiverCertificateCoverageResponse component, and that no answer names the company.",
+    "A vector publishes `plane` and asks: `repo` names a fixture of `repos` published at registry/repo/{nodeId}.json, or null for none; `waivers` is the document at waivers/{nodeId}.json, or null for none; `ct` maps a segment number to the document at ct/{n}.json; `keySet` names the key set at jwks.json. `request` is the certificate named, in its compact form or its flattened JSON form (with any `extra` members), padded with spaces after the compact form to `padTo` bytes; or a literal `body`. `now` is the instant of the request. `expect` is the status and, for 200, the body without asOf, which is `now`; for a refusal, the error code."
+  ],
+  "route": "POST /v1/coverage/waiver-certificate",
+  "specVersion": "1.20.0",
+  "maxBodyBytes": 16384,
+  "repos": {
+    "registered": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "nodeId": "R_kgDOAbc123",
+      "owner": {
+        "login": "acme",
+        "orgId": "O_kgDOAcme001",
+        "type": "Organization"
+      },
+      "name": "widget-engine",
+      "defaultBranch": "main",
+      "state": "registered",
+      "stateChangedAt": "2027-03-14T00:00:00Z",
+      "weightClass": "standard",
+      "license": {
+        "id": "PurposeSource-1.0",
+        "version": "1.0",
+        "publishedAt": "2027-01-15",
+        "apacheConversionDate": "2031-01-15",
+        "adoptedAt": "2027-03-14",
+        "textSha256": "9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f"
+      },
+      "manifest": {
+        "present": false,
+        "rejections": []
+      },
+      "waivers": {
+        "count": 1,
+        "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json"
+      },
+      "badge": {
+        "url": "https://api.purposesource.org/badge/R_kgDOAbc123.json",
+        "state": "registered"
+      },
+      "links": {
+        "repository": "https://github.com/acme/widget-engine"
+      }
+    },
+    "verified": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "nodeId": "R_kgDOAbc123",
+      "owner": {
+        "login": "acme",
+        "orgId": "O_kgDOAcme001",
+        "type": "Organization"
+      },
+      "name": "widget-engine",
+      "defaultBranch": "main",
+      "state": "verified",
+      "stateChangedAt": "2027-03-14T00:00:00Z",
+      "weightClass": "standard",
+      "license": {
+        "id": "PurposeSource-1.0",
+        "version": "1.0",
+        "publishedAt": "2027-01-15",
+        "apacheConversionDate": "2031-01-15",
+        "adoptedAt": "2027-03-14",
+        "textSha256": "9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f9f2c1d4e5a6b7c8d9e0f1a2b3c4d5e6f"
+      },
+      "manifest": {
+        "present": false,
+        "rejections": []
+      },
+      "waivers": {
+        "count": 1,
+        "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json"
+      },
+      "badge": {
+        "url": "https://api.purposesource.org/badge/R_kgDOAbc123.json",
+        "state": "registered"
+      },
+      "links": {
+        "repository": "https://github.com/acme/widget-engine"
+      }
+    }
+  },
+  "keySets": {
+    "active": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "keys": [
+        {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "QGSfkBqYpIJYVGb6fBBQVBIpGJ48YbbqRmL5oYTwKxY",
+          "y": "GBweW6NlhR2OCK-pY89_8HEQxodXm2me66grGErd22g",
+          "kid": "psn-dev-2026-1",
+          "alg": "ES256",
+          "use": "sig",
+          "psn:status": "active",
+          "psn:validityWindow": {
+            "notBefore": "2026-01-01T00:00:00Z",
+            "notAfter": null
+          }
+        }
+      ]
+    },
+    "retired": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "keys": [
+        {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "QGSfkBqYpIJYVGb6fBBQVBIpGJ48YbbqRmL5oYTwKxY",
+          "y": "GBweW6NlhR2OCK-pY89_8HEQxodXm2me66grGErd22g",
+          "kid": "psn-dev-2026-1",
+          "alg": "ES256",
+          "use": "sig",
+          "psn:status": "retired",
+          "psn:validityWindow": {
+            "notBefore": "2026-01-01T00:00:00Z",
+            "notAfter": "2027-05-01T00:00:00Z"
+          }
+        }
+      ]
+    },
+    "pending": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "keys": [
+        {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "QGSfkBqYpIJYVGb6fBBQVBIpGJ48YbbqRmL5oYTwKxY",
+          "y": "GBweW6NlhR2OCK-pY89_8HEQxodXm2me66grGErd22g",
+          "kid": "psn-dev-2026-1",
+          "alg": "ES256",
+          "use": "sig",
+          "psn:status": "pending",
+          "psn:validityWindow": {
+            "notBefore": "2026-01-01T00:00:00Z",
+            "notAfter": null
+          }
+        }
+      ]
+    },
+    "compromisedEarly": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "keys": [
+        {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "QGSfkBqYpIJYVGb6fBBQVBIpGJ48YbbqRmL5oYTwKxY",
+          "y": "GBweW6NlhR2OCK-pY89_8HEQxodXm2me66grGErd22g",
+          "kid": "psn-dev-2026-1",
+          "alg": "ES256",
+          "use": "sig",
+          "psn:status": "compromised",
+          "psn:validityWindow": {
+            "notBefore": "2026-01-01T00:00:00Z",
+            "notAfter": "2027-03-01T00:00:00Z"
+          }
+        }
+      ]
+    },
+    "compromisedLate": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "keys": [
+        {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "QGSfkBqYpIJYVGb6fBBQVBIpGJ48YbbqRmL5oYTwKxY",
+          "y": "GBweW6NlhR2OCK-pY89_8HEQxodXm2me66grGErd22g",
+          "kid": "psn-dev-2026-1",
+          "alg": "ES256",
+          "use": "sig",
+          "psn:status": "compromised",
+          "psn:validityWindow": {
+            "notBefore": "2026-01-01T00:00:00Z",
+            "notAfter": "2027-05-01T00:00:00Z"
+          }
+        }
+      ]
+    },
+    "unmanaged": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "keys": [
+        {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "QGSfkBqYpIJYVGb6fBBQVBIpGJ48YbbqRmL5oYTwKxY",
+          "y": "GBweW6NlhR2OCK-pY89_8HEQxodXm2me66grGErd22g",
+          "kid": "psn-dev-2026-1",
+          "alg": "ES256",
+          "use": "sig"
+        }
+      ]
+    },
+    "otherKey": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "keys": [
+        {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "gqi4MsfhKN0RlSHbc00CeI90wLPNWrYpHHLZ7dJSnPA",
+          "y": "ukeuX6d1lGapKOGDUBupWknvF1AJw8LwKU52c0vvxv4",
+          "kid": "psn-dev-2026-2",
+          "alg": "ES256",
+          "use": "sig",
+          "psn:status": "active",
+          "psn:validityWindow": {
+            "notBefore": "2026-01-01T00:00:00Z",
+            "notAfter": null
+          }
+        }
+      ]
+    },
+    "ambiguous": {
+      "schemaVersion": 1,
+      "generatedAt": "2027-06-01T00:00:00Z",
+      "keys": [
+        {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "QGSfkBqYpIJYVGb6fBBQVBIpGJ48YbbqRmL5oYTwKxY",
+          "y": "GBweW6NlhR2OCK-pY89_8HEQxodXm2me66grGErd22g",
+          "kid": "psn-dev-2026-1",
+          "alg": "ES256",
+          "use": "sig",
+          "psn:status": "retired",
+          "psn:validityWindow": {
+            "notBefore": "2026-01-01T00:00:00Z",
+            "notAfter": "2026-06-01T00:00:00Z"
+          }
+        },
+        {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "QGSfkBqYpIJYVGb6fBBQVBIpGJ48YbbqRmL5oYTwKxY",
+          "y": "GBweW6NlhR2OCK-pY89_8HEQxodXm2me66grGErd22g",
+          "kid": "psn-dev-2026-1",
+          "alg": "ES256",
+          "use": "sig",
+          "psn:status": "active",
+          "psn:validityWindow": {
+            "notBefore": "2026-06-01T00:00:00Z",
+            "notAfter": null
+          }
+        }
+      ]
+    }
+  },
+  "certificates": {
+    "waiver": {
+      "jws": "eyJhbGciOiJFUzI1NiIsImN0eSI6ImFwcGxpY2F0aW9uL2pzb24iLCJraWQiOiJwc24tZGV2LTIwMjYtMSIsInR5cCI6ImFwcGxpY2F0aW9uL3Bzbi1jZXJ0K2p3cyJ9.eyJjaWQiOiJjZXJ0XzAxamsyYTZoMHdxNG04cnQydjZ5YjNkNWZnIiwiY2xhaW1LaXRWZXJzaW9uIjoia2l0LTEiLCJmYWN0UmVmcyI6eyJ3dnJJZCI6Ind2cl8wMWprMmE2ZzNxcjd2MWJkOXc0ejh4MGMzZiJ9LCJpYXQiOjE4MDY1Mzc2MDAsImlzcyI6Imh0dHBzOi8vYXBpLnB1cnBvc2Vzb3VyY2Uub3JnIiwicGVyaW9kIjp7InZhbGlkRnJvbSI6IjIwMjctMDQtMDEiLCJ2YWxpZFVudGlsIjoiOTk5OS0xMi0zMSJ9LCJzY29wZSI6eyJraW5kIjoicHJvamVjdCIsInJlcG9zIjpbIlJfa2dET0FiYzEyMyJdfSwic3ViIjoiS2xlaW5iZXRyaWViIEdtYkgiLCJzdWJJZCI6ImNvXzAxamsyYTZnM3FyN3YxYmQ5dzR6OHgwYzJmIiwic3ViamVjdEtpbmQiOiJjb21wYW55IiwidHlwIjoibGljZW5zZS1zdGF0dXMiLCJ2YXJpYW50Ijoid2FpdmVyIiwidmVyaWZ5IjoiaHR0cHM6Ly9wdXJwb3Nlc291cmNlLm9yZy92ZXJpZnkvY2VydF8wMWprMmE2aDB3cTRtOHJ0MnY2eWIzZDVmZyJ9.-w_gpqDXRus3XRoLUZpvW1_IZzLAK-gb4nKgB4UmjJI9WbXmqy8SPfONUJsGoZgs9ViDpNyzpny2S-Ci2Oh-KA",
+      "signed": true,
+      "why": "A waiver certificate as the platform issues one: no end date (OPEN-54 as ruled), signed at its issue."
+    },
+    "periodEnded": {
+      "jws": "eyJhbGciOiJFUzI1NiIsImN0eSI6ImFwcGxpY2F0aW9uL2pzb24iLCJraWQiOiJwc24tZGV2LTIwMjYtMSIsInR5cCI6ImFwcGxpY2F0aW9uL3Bzbi1jZXJ0K2p3cyJ9.eyJjaWQiOiJjZXJ0XzAxamsyYTZoMHdxNG04cnQydjZ5YjNkNWZoIiwiY2xhaW1LaXRWZXJzaW9uIjoia2l0LTEiLCJmYWN0UmVmcyI6eyJ3dnJJZCI6Ind2cl8wMWprMmE2ZzNxcjd2MWJkOXc0ejh4MGMzZyJ9LCJpYXQiOjE3NzUwMDE2MDAsImlzcyI6Imh0dHBzOi8vYXBpLnB1cnBvc2Vzb3VyY2Uub3JnIiwicGVyaW9kIjp7InZhbGlkRnJvbSI6IjIwMjYtMDQtMDEiLCJ2YWxpZFVudGlsIjoiMjAyNy0wMy0zMSJ9LCJzY29wZSI6eyJraW5kIjoicHJvamVjdCIsInJlcG9zIjpbIlJfa2dET0FiYzEyMyJdfSwic3ViIjoiS2xlaW5iZXRyaWViIEdtYkgiLCJzdWJJZCI6ImNvXzAxamsyYTZnM3FyN3YxYmQ5dzR6OHgwYzJmIiwic3ViamVjdEtpbmQiOiJjb21wYW55IiwidHlwIjoibGljZW5zZS1zdGF0dXMiLCJ2YXJpYW50Ijoid2FpdmVyIiwidmVyaWZ5IjoiaHR0cHM6Ly9wdXJwb3Nlc291cmNlLm9yZy92ZXJpZnkvY2VydF8wMWprMmE2aDB3cTRtOHJ0MnY2eWIzZDVmaCJ9.ngBpk2jHVBSAJeYxRLuE750_Mc_07heH69z8f2N7fBsc2ZZzRg8W5S1EttlJKHnB8wA2T-5IWdDr4_ryJYteIA",
+      "signed": true,
+      "why": "A waiver certificate whose own period ended on 2027-03-31; its waiver is still in force."
+    },
+    "issuedLate": {
+      "jws": "eyJhbGciOiJFUzI1NiIsImN0eSI6ImFwcGxpY2F0aW9uL2pzb24iLCJraWQiOiJwc24tZGV2LTIwMjYtMSIsInR5cCI6ImFwcGxpY2F0aW9uL3Bzbi1jZXJ0K2p3cyJ9.eyJjaWQiOiJjZXJ0XzAxamsyYTZoMHdxNG04cnQydjZ5YjNkNWZqIiwiY2xhaW1LaXRWZXJzaW9uIjoia2l0LTEiLCJmYWN0UmVmcyI6eyJ3dnJJZCI6Ind2cl8wMWprMmE2ZzNxcjd2MWJkOXc0ejh4MGMzaCJ9LCJpYXQiOjE4MDkyMTYwMDAsImlzcyI6Imh0dHBzOi8vYXBpLnB1cnBvc2Vzb3VyY2Uub3JnIiwicGVyaW9kIjp7InZhbGlkRnJvbSI6IjIwMjctMDUtMDIiLCJ2YWxpZFVudGlsIjoiOTk5OS0xMi0zMSJ9LCJzY29wZSI6eyJraW5kIjoicHJvamVjdCIsInJlcG9zIjpbIlJfa2dET0FiYzEyMyJdfSwic3ViIjoiS2xlaW5iZXRyaWViIEdtYkgiLCJzdWJJZCI6ImNvXzAxamsyYTZnM3FyN3YxYmQ5dzR6OHgwYzJmIiwic3ViamVjdEtpbmQiOiJjb21wYW55IiwidHlwIjoibGljZW5zZS1zdGF0dXMiLCJ2YXJpYW50Ijoid2FpdmVyIiwidmVyaWZ5IjoiaHR0cHM6Ly9wdXJwb3Nlc291cmNlLm9yZy92ZXJpZnkvY2VydF8wMWprMmE2aDB3cTRtOHJ0MnY2eWIzZDVmaiJ9.BLAgTRR3uV3ziF43h4KkvWAK4w6hBW25r-yMru22Nj77kYuHI4lm6eZLi0OIs5hkAvrjJYmzXLGwKidqJ04v5Q",
+      "signed": true,
+      "why": "A waiver certificate dated 2027-05-02, after the retired key set's window for its kid closed."
+    },
+    "supporter": {
+      "jws": "eyJhbGciOiJFUzI1NiIsImN0eSI6ImFwcGxpY2F0aW9uL2pzb24iLCJraWQiOiJwc24tZGV2LTIwMjYtMSIsInR5cCI6ImFwcGxpY2F0aW9uL3Bzbi1jZXJ0K2p3cyJ9.eyJhbW91bnRLaW5kIjoiZmVlLXBhaWQiLCJhbW91bnRNaW5vciI6NDAwMDAsImNpZCI6ImNlcnRfMDFqazJhNmgwd3E0bThydDJ2NnliM2Q1ZmsiLCJjbGFpbUtpdFZlcnNpb24iOiJraXQtMSIsImN1ciI6IlVTRCIsImZhY3RSZWZzIjp7ImVudElkIjoiZW50XzAxamsyYTZnM3FyN3YxYmQ5dzR6OHgwYzRmIn0sImlhdCI6MTgwNjUzNzYwMCwiaXNzIjoiaHR0cHM6Ly9hcGkucHVycG9zZXNvdXJjZS5vcmciLCJwZXJpb2QiOnsidmFsaWRGcm9tIjoiMjAyNy0wNC0wMSIsInZhbGlkVW50aWwiOiIyMDI4LTAzLTMxIn0sInNjaGVkdWxlVmVyc2lvbiI6InYxIiwic2NvcGUiOnsia2luZCI6InByb2plY3QiLCJyZXBvcyI6WyJSX2tnRE9BYmMxMjMiXX0sInN1YiI6IktsZWluYmV0cmllYiBHbWJIIiwic3ViSWQiOiJjb18wMWprMmE2ZzNxcjd2MWJkOXc0ejh4MGMyZiIsInN1YmplY3RLaW5kIjoiY29tcGFueSIsInR5cCI6InN1cHBvcnRlciIsInZhcmlhbnQiOiJlbnRpdGxlbWVudCIsInZlcmlmeSI6Imh0dHBzOi8vcHVycG9zZXNvdXJjZS5vcmcvdmVyaWZ5L2NlcnRfMDFqazJhNmgwd3E0bThydDJ2NnliM2Q1ZmsifQ.j7WjmLZDbzm84nTiEh-CuPos2zT1PINVS9ndhzCZTBEhjJ73P-502BgV8EJhgtUBmAXCvmrLJaD9M24G9ZhH6w",
+      "signed": true,
+      "why": "A supporter certificate, validly signed: not a waiver certificate."
+    },
+    "tampered": {
+      "jws": "eyJhbGciOiJFUzI1NiIsImN0eSI6ImFwcGxpY2F0aW9uL2pzb24iLCJraWQiOiJwc24tZGV2LTIwMjYtMSIsInR5cCI6ImFwcGxpY2F0aW9uL3Bzbi1jZXJ0K2p3cyJ9.eyJjaWQiOiJjZXJ0XzAxamsyYTZoMHdxNG04cnQydjZ5YjNkNWZnIiwidHlwIjoibGljZW5zZS1zdGF0dXMiLCJ2YXJpYW50Ijoid2FpdmVyIiwic3ViamVjdEtpbmQiOiJjb21wYW55Iiwic3ViIjoiU29tZW9uZSBFbHNlIEFHIiwic3ViSWQiOiJjb18wMWprMmE2ZzNxcjd2MWJkOXc0ejh4MGMyZyIsInNjb3BlIjp7ImtpbmQiOiJwcm9qZWN0IiwicmVwb3MiOlsiUl9rZ0RPQWJjMTIzIl19LCJwZXJpb2QiOnsidmFsaWRGcm9tIjoiMjAyNy0wNC0wMSIsInZhbGlkVW50aWwiOiI5OTk5LTEyLTMxIn0sImlhdCI6MTgwNjUzNzYwMCwiaXNzIjoiaHR0cHM6Ly9hcGkucHVycG9zZXNvdXJjZS5vcmciLCJjbGFpbUtpdFZlcnNpb24iOiJraXQtMSIsInZlcmlmeSI6Imh0dHBzOi8vcHVycG9zZXNvdXJjZS5vcmcvdmVyaWZ5L2NlcnRfMDFqazJhNmgwd3E0bThydDJ2NnliM2Q1ZmciLCJmYWN0UmVmcyI6eyJ3dnJJZCI6Ind2cl8wMWprMmE2ZzNxcjd2MWJkOXc0ejh4MGMzZiJ9fQ.-w_gpqDXRus3XRoLUZpvW1_IZzLAK-gb4nKgB4UmjJI9WbXmqy8SPfONUJsGoZgs9ViDpNyzpny2S-Ci2Oh-KA",
+      "signed": false,
+      "why": "The waiver certificate with its payload rewritten to another company and its signature kept."
+    },
+    "algNone": {
+      "jws": "eyJhbGciOiJub25lIiwia2lkIjoicHNuLWRldi0yMDI2LTEiLCJ0eXAiOiJhcHBsaWNhdGlvbi9wc24tY2VydCtqd3MiLCJjdHkiOiJhcHBsaWNhdGlvbi9qc29uIn0.eyJjaWQiOiJjZXJ0XzAxamsyYTZoMHdxNG04cnQydjZ5YjNkNWZnIiwiY2xhaW1LaXRWZXJzaW9uIjoia2l0LTEiLCJmYWN0UmVmcyI6eyJ3dnJJZCI6Ind2cl8wMWprMmE2ZzNxcjd2MWJkOXc0ejh4MGMzZiJ9LCJpYXQiOjE4MDY1Mzc2MDAsImlzcyI6Imh0dHBzOi8vYXBpLnB1cnBvc2Vzb3VyY2Uub3JnIiwicGVyaW9kIjp7InZhbGlkRnJvbSI6IjIwMjctMDQtMDEiLCJ2YWxpZFVudGlsIjoiOTk5OS0xMi0zMSJ9LCJzY29wZSI6eyJraW5kIjoicHJvamVjdCIsInJlcG9zIjpbIlJfa2dET0FiYzEyMyJdfSwic3ViIjoiS2xlaW5iZXRyaWViIEdtYkgiLCJzdWJJZCI6ImNvXzAxamsyYTZnM3FyN3YxYmQ5dzR6OHgwYzJmIiwic3ViamVjdEtpbmQiOiJjb21wYW55IiwidHlwIjoibGljZW5zZS1zdGF0dXMiLCJ2YXJpYW50Ijoid2FpdmVyIiwidmVyaWZ5IjoiaHR0cHM6Ly9wdXJwb3Nlc291cmNlLm9yZy92ZXJpZnkvY2VydF8wMWprMmE2aDB3cTRtOHJ0MnY2eWIzZDVmZyJ9.-w_gpqDXRus3XRoLUZpvW1_IZzLAK-gb4nKgB4UmjJI9WbXmqy8SPfONUJsGoZgs9ViDpNyzpny2S-Ci2Oh-KA",
+      "signed": false,
+      "why": "The waiver certificate under a header that names the algorithm `none`."
+    }
+  },
+  "vectors": [
+    {
+      "id": "WC-01-a-named-waiver-in-force-covers",
+      "description": "The certificate as issued, presented in its compact form, under the active key: its waiver is in force, so the answer is yes-via-waiver, tied to the certificate by the registry entry's record.certId and the log's issue entry.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-02-the-flattened-json-form-answers-the-same",
+      "description": "The same certificate in the flattened JSON serialisation (RFC 7515 §7.2.2): the same answer, and the same SHA-256, because the compact form it is rebuilt to is the certificate.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "flattened"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-03-a-masked-waiver-covers-and-the-answer-names-no-company",
+      "description": "A masked waiver (D66 item 3): its entry carries no name and no domain, and for now keeps the company id (waiver.v1 1.4.0). The answer is yes-via-waiver and names the certificate, the repository and the waiver, never the company.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; D66 item 3; waiver.v1 beneficiary.display",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "masked",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-04-a-masked-waiver-without-the-company-id-is-tied-by-its-record",
+      "description": "The masked entry PS-2205 publishes: no company id at all. It is tied to the certificate by record.certId and the log's issue entry alone, and covers. This is the route by which a masked waiver is covered once its entry stops carrying coId.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; the orchestrator's word of 2026-10-21 on L2.3-03 (PS-2205)",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "masked"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-05-a-certificate-whose-period-ended-still-names-its-waiver",
+      "description": "The certificate's own period ended on 2027-03-31, and its waiver was never revoked. The route does not read the period: expiry is non-destructive (CERT-041), the certificate still names its waiver, and the registry says the waiver covers now.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; CERT-041",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3g",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2026-04-01T00:05:00Z",
+              "coolingEndsAt": "2026-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fh",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "166fd145a5caea5e8c0347942cd61909055f5446eb0a7216d973b6028c01388c",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2026-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "2bb6ec007f60d06563e5973d99153f4733e6e8958ce7a5a129b2af0552cd4220",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "166fd145a5caea5e8c0347942cd61909055f5446eb0a7216d973b6028c01388c",
+                "ts": "2026-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "periodEnded",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fh",
+              "jwsSha256": "166fd145a5caea5e8c0347942cd61909055f5446eb0a7216d973b6028c01388c",
+              "kid": "psn-dev-2026-1"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3g",
+              "grantedAt": "2026-04-01T00:05:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3g"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-06-a-revoked-waiver-is-no",
+      "description": "The waiver was revoked on 2027-05-15 (its certificate's revoke entry). Revocation is prospective, and after it the answer is no, with the revocation instant.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; FS-10 §4.3 step 2; CERT-042; D71 item 1",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "revokedAt": "2027-05-15T00:00:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              },
+              {
+                "seq": 4,
+                "h": "c1f5df7fe9e0e4a8ed4ecfa4b77d9908cc53573d2178988996902f87b0a9a042",
+                "typ": "license-status",
+                "kind": "revoke",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-05-15T00:00:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "no",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "note": "the waiver was revoked",
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "revokedAt": "2027-05-15T00:00:00Z"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-07-one-millisecond-before-revocation-covers",
+      "description": "BOUNDARY: one millisecond before revokedAt the waiver is still in force. The answer names the coming revocation, which the public entry carries too.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; FS-10 §4.3 step 2 (cov-v1 vector S1-03)",
+      "now": "2027-05-14T23:59:59.999Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "revokedAt": "2027-05-15T00:00:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              },
+              {
+                "seq": 4,
+                "h": "c1f5df7fe9e0e4a8ed4ecfa4b77d9908cc53573d2178988996902f87b0a9a042",
+                "typ": "license-status",
+                "kind": "revoke",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-05-15T00:00:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "revokedAt": "2027-05-15T00:00:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-08-at-the-recording-instant-covers",
+      "description": "BOUNDARY (D68 item 8): a waiver covers from the instant it is recorded, its grantedAt.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; D68 item 8 (cov-v1 vector S1-02)",
+      "now": "2027-04-01T00:05:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-09-one-millisecond-before-the-recording-instant-is-no",
+      "description": "BOUNDARY (D68 item 8): one millisecond before grantedAt the waiver is not in force yet, although its certificate is already signed and logged.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; D68 item 8 (cov-v1 vector S1-01)",
+      "now": "2027-04-01T00:04:59.999Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "no",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "note": "the waiver is not in force yet",
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-10-a-waiver-being-recorded-is-no",
+      "description": "The waiver is in recording[]: its certificate has its issue entry and the registry has not recorded it yet, so it covers nobody (D68 item 8).",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; D68 item 8; waiver.v1 recording[]",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [],
+          "recording": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "no",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "note": "the waiver is being recorded",
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-11-a-waiver-withdrawn-before-it-was-recorded-is-no",
+      "description": "The waiver was withdrawn before it was recorded (D71 item 2): it stays listed in recording[] as withdrawn, never in force, and the answer is no with the withdrawal instant.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; D71 items 1 and 2",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [],
+          "recording": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2
+              },
+              "withdrawnAt": "2027-04-01T00:03:00Z"
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "c1f5df7fe9e0e4a8ed4ecfa4b77d9908cc53573d2178988996902f87b0a9a042",
+                "typ": "license-status",
+                "kind": "revoke",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:03:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "no",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "note": "the waiver was withdrawn before it was recorded",
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "withdrawnAt": "2027-04-01T00:03:00Z"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-12-a-waiver-the-repository-does-not-publish-is-no",
+      "description": "The repository's waiver document does not carry the waiver the certificate names (here: nothing is published at waivers/{nodeId}.json). The answer is no, as an absent waiver list is an empty one on /v1/coverage.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": null,
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "no",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "note": "no waiver with this id is published for this repository",
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-13-a-retired-key-inside-its-window-verifies",
+      "description": "The key is retired, and the certificate was signed inside its validity window: accepted (CERT-022), and the answer is the waiver's.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; FS08-102; CERT-022; src/lib/key-window.mjs key_retired",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "retired",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-14-signed-after-the-key-window-closed-is-refused",
+      "description": "The certificate says it was signed on 2027-05-02, after its key's window closed on 2027-05-01: the key could not have made it then, a token fault (signed_after_window).",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; FS08-102; src/lib/key-window.mjs signed_after_window",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "retired",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3h",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-05-02T00:05:00Z",
+              "coolingEndsAt": "2027-05-05T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fj",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "466fa74785edb447e6ffc54e8c45fb5d4a7ad917fc4491c70d08e1eabc444e0e",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-05-02T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "8686ab04f8983ab486ad458867dc7f5d6f9aa037a56adb117ebe66315062a116",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "466fa74785edb447e6ffc54e8c45fb5d4a7ad917fc4491c70d08e1eabc444e0e",
+                "ts": "2027-05-02T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "issuedLate",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 422,
+        "code": "certificate_invalid"
+      }
+    },
+    {
+      "id": "WC-15-a-pending-key-is-not-settled",
+      "description": "The key set marks the certificate's key pending (D90 item 5): nothing signed under it is accepted while the set says so, and the fault is the key set's, not the token's (key_pending).",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; D90 item 5; FS-00 §6.4 dated note of 2026-10-26",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "pending",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 409,
+        "code": "certificate_unverifiable"
+      }
+    },
+    {
+      "id": "WC-16-signed-after-the-compromise-is-refused",
+      "description": "The key is published compromised with its window ending 2027-03-01, and the certificate says it was signed on 2027-04-01: nothing the key signed from then on is accepted (signed_after_compromise).",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; FS08-104; src/lib/key-window.mjs signed_after_compromise",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "compromisedEarly",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 422,
+        "code": "certificate_invalid"
+      }
+    },
+    {
+      "id": "WC-17-signed-before-the-compromise-is-accepted-with-a-warning",
+      "description": "The key is published compromised with its window ending 2027-05-01, after the certificate's 2027-04-01: accepted (Licence 1.0 §9), and the answer says so in basis.certificate.keyWarning. The log's issue entry carries this certificate's hash, which is what shows it was issued then.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; FS08-104; Licence 1.0 §9; src/lib/key-window.mjs key_compromised_before",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "compromisedLate",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1",
+              "keyWarning": "key_compromised_before"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-18-a-kid-the-key-set-does-not-carry-is-refused",
+      "description": "The key set this deployment publishes has no key with the certificate's kid (kid_unknown): a token fault, and nothing is read from the plane.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; FS08-050",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "otherKey",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 422,
+        "code": "certificate_invalid"
+      }
+    },
+    {
+      "id": "WC-19-two-keys-under-one-kid-are-not-settled",
+      "description": "The key set carries two entries under the certificate's kid, so it does not say which key that is (kid_ambiguous): the key set's fault.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; src/lib/key-window.mjs kid_ambiguous",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "ambiguous",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 409,
+        "code": "certificate_unverifiable"
+      }
+    },
+    {
+      "id": "WC-20-a-rewritten-payload-is-refused",
+      "description": "The payload was rewritten to another company and the signature kept: the signature does not verify, which is reported as a forgery before anything else.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; FS08-050",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "tampered",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 422,
+        "code": "certificate_invalid"
+      }
+    },
+    {
+      "id": "WC-21-a-certificate-the-log-did-not-record-is-refused",
+      "description": "The registry entry names this certificate, but the log's issue entry at its issueSeq carries another hash: the certificate as presented is not the one the log recorded (CERT-030, the rogue-issuance detector).",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; CERT-030; waiver.v1 record.issueSeq",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "e7299f2ba625dca719b99439c10a11204a797f41f4761ea1159b7b9f6df7b52b",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "ce90d461752f89721e1bb3d5ce1c5b60497fe0aea39556088f7806609f42fa26",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "e7299f2ba625dca719b99439c10a11204a797f41f4761ea1159b7b9f6df7b52b",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 409,
+        "code": "cert_not_in_ct_log"
+      }
+    },
+    {
+      "id": "WC-22-an-entry-naming-another-certificate-is-no",
+      "description": "The registry entry for the waiver names another certificate in record.certId: the certificate presented is not the waiver's credential, and the answer is no.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; waiver.v1 record.certId",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fz",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "no",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "note": "the registry names another certificate for this waiver",
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-23-an-entry-naming-another-company-is-no",
+      "description": "The registry entry for the waiver names another company id than the certificate's subject: the answer is no, and it names neither company.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; waiver.v1 beneficiary.coId",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2g",
+                "name": "Someone Else AG"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "no",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "note": "the registry names another organisation for this waiver",
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-24-an-entry-published-before-recording-is-tied-by-its-company-id",
+      "description": "An entry published before recording existed carries no record (a development plane's test grants only; waiver.v1 1.3.0): it is tied to the certificate by its company id, the way cov-v1 matches a waiver, and covers.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; waiver.v1 record (absent before recording)",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin"
+            }
+          ]
+        },
+        "ct": {}
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-25-an-entry-with-neither-record-nor-company-id-is-no",
+      "description": "A masked entry with no record and no company id cannot be tied to any certificate, so the answer is no.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "masked"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin"
+            }
+          ]
+        },
+        "ct": {}
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "no",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "note": "the registry entry for this waiver cannot be tied to a certificate",
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-26-a-repository-with-no-record-is-not-registered",
+      "description": "Nothing is published at registry/repo/{nodeId}.json for the repository the certificate names. A waiver is published under a record's node id, so the question cannot be asked: repo_not_registered, as cov-v1 answers it about a waiver (V2-09).",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; cov-v1 vector V2-09",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": null,
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 404,
+        "code": "repo_not_registered"
+      }
+    },
+    {
+      "id": "WC-27-a-record-published-before-d82-reports-registered",
+      "description": "The repository's record still says verified, the token published before D82: the answer reports it as registered, as cov-v1 does.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; D82's dated note (d); cov-v1 vector V2-14",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "verified",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-28-a-waiver-under-review-still-covers",
+      "description": "An open review (FS-12 §9.8 step 3) annotates the entry and changes nothing: coverage changes only through revokedAt (cov-v1 vector UR-01).",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; FS-00 §6.2 dated note of 2026-10-26 (under-review)",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              },
+              "reviews": [
+                {
+                  "since": "2027-05-20T00:00:00Z"
+                }
+              ]
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-29-a-test-key-without-status-or-window-verifies",
+      "description": "The sample plane's key set publishes the fixture key with neither status nor window (key_test_unmanaged): accepted, as on the /verify page, because nothing a test key signs is a credential.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; src/lib/key-window.mjs key_test_unmanaged",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "unmanaged",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-30-a-body-of-exactly-the-limit-is-read",
+      "description": "BOUNDARY: the compact certificate followed by spaces to exactly 16384 bytes. The body is read, the white space around the compact form is ignored, and the answer is the certificate's.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact",
+        "padTo": 16384
+      },
+      "expect": {
+        "status": 200,
+        "body": {
+          "answer": "yes-via-waiver",
+          "basis": {
+            "certificate": {
+              "cid": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+              "jwsSha256": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+              "kid": "psn-dev-2026-1"
+            },
+            "repo": {
+              "nodeId": "R_kgDOAbc123",
+              "repoState": "registered"
+            },
+            "waiver": {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "grantedAt": "2027-04-01T00:05:00Z"
+            }
+          },
+          "proof": {
+            "type": "waiver-record",
+            "url": "https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
+          }
+        }
+      }
+    },
+    {
+      "id": "WC-31-a-body-over-the-limit-is-refused",
+      "description": "BOUNDARY: 16385 bytes. Refused as too large before it is read in full, whether or not it declares its length.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "compact",
+        "padTo": 16385
+      },
+      "expect": {
+        "status": 413,
+        "code": "payload_too_large"
+      }
+    },
+    {
+      "id": "WC-32-an-empty-body-is-malformed",
+      "description": "No body at all carries no certificate.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "body": ""
+      },
+      "expect": {
+        "status": 400,
+        "code": "malformed_certificate"
+      }
+    },
+    {
+      "id": "WC-33-two-segments-are-malformed",
+      "description": "A compact JWS has three segments; this has two.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "body": "eyJhbGciOiJFUzI1NiIsImN0eSI6ImFwcGxpY2F0aW9uL2pzb24iLCJraWQiOiJwc24tZGV2LTIwMjYtMSIsInR5cCI6ImFwcGxpY2F0aW9uL3Bzbi1jZXJ0K2p3cyJ9.eyJjaWQiOiJjZXJ0XzAxamsyYTZoMHdxNG04cnQydjZ5YjNkNWZnIiwiY2xhaW1LaXRWZXJzaW9uIjoia2l0LTEiLCJmYWN0UmVmcyI6eyJ3dnJJZCI6Ind2cl8wMWprMmE2ZzNxcjd2MWJkOXc0ejh4MGMzZiJ9LCJpYXQiOjE4MDY1Mzc2MDAsImlzcyI6Imh0dHBzOi8vYXBpLnB1cnBvc2Vzb3VyY2Uub3JnIiwicGVyaW9kIjp7InZhbGlkRnJvbSI6IjIwMjctMDQtMDEiLCJ2YWxpZFVudGlsIjoiOTk5OS0xMi0zMSJ9LCJzY29wZSI6eyJraW5kIjoicHJvamVjdCIsInJlcG9zIjpbIlJfa2dET0FiYzEyMyJdfSwic3ViIjoiS2xlaW5iZXRyaWViIEdtYkgiLCJzdWJJZCI6ImNvXzAxamsyYTZnM3FyN3YxYmQ5dzR6OHgwYzJmIiwic3ViamVjdEtpbmQiOiJjb21wYW55IiwidHlwIjoibGljZW5zZS1zdGF0dXMiLCJ2YXJpYW50Ijoid2FpdmVyIiwidmVyaWZ5IjoiaHR0cHM6Ly9wdXJwb3Nlc291cmNlLm9yZy92ZXJpZnkvY2VydF8wMWprMmE2aDB3cTRtOHJ0MnY2eWIzZDVmZyJ9"
+      },
+      "expect": {
+        "status": 400,
+        "code": "malformed_certificate"
+      }
+    },
+    {
+      "id": "WC-34-a-header-naming-none-is-malformed",
+      "description": "The header names the algorithm none: refused before any key is looked up, because the certificate profile is ES256 (FS08-050).",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; FS08-050",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "algNone",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 400,
+        "code": "malformed_certificate"
+      }
+    },
+    {
+      "id": "WC-35-a-supporter-certificate-is-malformed-here",
+      "description": "A validly signed supporter certificate is not a waiver certificate: this route reads license-status certificates of the variant waiver only.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; FS08-010",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "supporter",
+        "form": "compact"
+      },
+      "expect": {
+        "status": 400,
+        "code": "malformed_certificate"
+      }
+    },
+    {
+      "id": "WC-36-an-unprotected-header-is-malformed",
+      "description": "The flattened JSON form with an unprotected header member: everything the route judges must be signed, so the member is refused rather than ignored.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; RFC 7515 §7.2.2",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "certificate": "waiver",
+        "form": "flattened",
+        "extra": {
+          "header": {
+            "kid": "psn-dev-2026-1"
+          }
+        }
+      },
+      "expect": {
+        "status": 400,
+        "code": "malformed_certificate"
+      }
+    },
+    {
+      "id": "WC-37-the-general-json-form-is-malformed",
+      "description": "The general JSON serialisation (a signatures array) is not one of the two forms this route reads.",
+      "fsRef": "ops decision D65 item 5 (coverage from the company's own certificate); FS-00 §6.3 dated note of 2026-10-28; RFC 7515 §7.2.1",
+      "now": "2027-06-01T12:00:00Z",
+      "keySet": "active",
+      "plane": {
+        "repo": "registered",
+        "waivers": {
+          "schemaVersion": 1,
+          "generatedAt": "2027-06-01T00:00:00Z",
+          "source": "fixture",
+          "scope": "repo",
+          "nodeId": "R_kgDOAbc123",
+          "waivers": [
+            {
+              "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
+              "beneficiary": {
+                "display": "named",
+                "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f",
+                "name": "Kleinbetrieb GmbH"
+              },
+              "grantedAt": "2027-04-01T00:05:00Z",
+              "coolingEndsAt": "2027-04-04T00:05:00Z",
+              "grantedBy": "repo-admin",
+              "record": {
+                "certId": "cert_01jk2a6h0wq4m8rt2v6yb3d5fg",
+                "issueSeq": 2,
+                "recordSeq": 3
+              }
+            }
+          ]
+        },
+        "ct": {
+          "0": {
+            "schemaVersion": 1,
+            "segment": 0,
+            "startSeq": 0,
+            "prevSegmentSha256": null,
+            "generatedAt": "2027-06-01T06:00:00Z",
+            "closed": false,
+            "entries": [
+              {
+                "seq": 0,
+                "h": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "typ": "supporter",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-03-01T09:00:00Z"
+              },
+              {
+                "seq": 1,
+                "h": "2d26217db718560c138d6b63d164b8b9002df9f21d9ae39b516c454b3e581129",
+                "typ": "supporter",
+                "kind": "revoke",
+                "ref": "5c1a8f3e2d0b9c7a6e5d4f3b2a1908675c1a8f3e2d0b9c7a6e5d4f3b2a190867",
+                "ts": "2027-03-01T12:00:00Z"
+              },
+              {
+                "seq": 2,
+                "h": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "typ": "license-status",
+                "kind": "issue",
+                "ref": null,
+                "ts": "2027-04-01T00:00:00Z"
+              },
+              {
+                "seq": 3,
+                "h": "57bf59a0bec9e4c8d1de16be5e695d504f2a3b1a108377ca627a8876203927aa",
+                "typ": "license-status",
+                "kind": "record",
+                "ref": "9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4",
+                "ts": "2027-04-01T00:05:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "request": {
+        "body": "{\"payload\":\"eyJjaWQiOiJjZXJ0XzAxamsyYTZoMHdxNG04cnQydjZ5YjNkNWZnIiwiY2xhaW1LaXRWZXJzaW9uIjoia2l0LTEiLCJmYWN0UmVmcyI6eyJ3dnJJZCI6Ind2cl8wMWprMmE2ZzNxcjd2MWJkOXc0ejh4MGMzZiJ9LCJpYXQiOjE4MDY1Mzc2MDAsImlzcyI6Imh0dHBzOi8vYXBpLnB1cnBvc2Vzb3VyY2Uub3JnIiwicGVyaW9kIjp7InZhbGlkRnJvbSI6IjIwMjctMDQtMDEiLCJ2YWxpZFVudGlsIjoiOTk5OS0xMi0zMSJ9LCJzY29wZSI6eyJraW5kIjoicHJvamVjdCIsInJlcG9zIjpbIlJfa2dET0FiYzEyMyJdfSwic3ViIjoiS2xlaW5iZXRyaWViIEdtYkgiLCJzdWJJZCI6ImNvXzAxamsyYTZnM3FyN3YxYmQ5dzR6OHgwYzJmIiwic3ViamVjdEtpbmQiOiJjb21wYW55IiwidHlwIjoibGljZW5zZS1zdGF0dXMiLCJ2YXJpYW50Ijoid2FpdmVyIiwidmVyaWZ5IjoiaHR0cHM6Ly9wdXJwb3Nlc291cmNlLm9yZy92ZXJpZnkvY2VydF8wMWprMmE2aDB3cTRtOHJ0MnY2eWIzZDVmZyJ9\",\"signatures\":[{\"protected\":\"eyJhbGciOiJFUzI1NiIsImN0eSI6ImFwcGxpY2F0aW9uL2pzb24iLCJraWQiOiJwc24tZGV2LTIwMjYtMSIsInR5cCI6ImFwcGxpY2F0aW9uL3Bzbi1jZXJ0K2p3cyJ9\",\"signature\":\"-w_gpqDXRus3XRoLUZpvW1_IZzLAK-gb4nKgB4UmjJI9WbXmqy8SPfONUJsGoZgs9ViDpNyzpny2S-Ci2Oh-KA\"}]}"
+      },
+      "expect": {
+        "status": 400,
+        "code": "malformed_certificate"
+      }
+    }
+  ]
+}
