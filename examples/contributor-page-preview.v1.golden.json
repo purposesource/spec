@@ -5,9 +5,10 @@
     "1.3.0 (ops decision D165): the one builder writes `cards`, the cards' three choices resolved, on every document, so PV-1 to PV-5 carry the defaults right before `sections` and were recomputed with it (their documents are the builder's); PV-6 is examples/contributor-page.v1.cards.example.json, the GitHub mark on every card and every repository named alone.",
     "1.4.0 (ops decision D168 item 3): adopter items gain `since` and `until` (years). Both are optional and written only where the builder knows them, so PV-1 to PV-6 keep their bytes and their hashes (their facts carry no evidence date); PV-7 is examples/contributor-page.v1.adopter-years.example.json, with a dated item, a repository that left and an undated item.",
     "1.5.0 (ops decision D165 item 3, the organisation's picture): `autoUpdated` gains `organisation-pictures`, which the one builder writes from the settings alone (the cards' icon `owner`, and the projects section, or the adopter section with the login shown, switched on), so PV-1, PV-3 and PV-5 carry it and were recomputed with it (their documents are the builder's); PV-2, PV-4, PV-6 and PV-7 keep their bytes. The `picture` of a repository group and of an adopter item (an organisation's copy) leaves the preimage, step (4): PV-8 is examples/contributor-page.v1.organisation-pictures.example.json, an organisation's copy named on its group and on its adopter item, a person's group and the page owner's own beside it.",
-    "1.6.0 (a certificate's period by its months; the orchestrator's answer of 2026-10-21T20:26Z): a certificate item gains `months`, `{from, to}`, the months of its record's `period.validFrom` and `period.validUntil`, which the one builder writes on every item, so PV-1, PV-2 and PV-4 to PV-6 carry it right after `years` and were recomputed with it (their documents are the builder's): the year's certificate (`2026-01` to `2026-12`) in PV-1, PV-5 and PV-6, a month's in PV-2 (`2026-09`) and PV-6 (`2027-01`), and part of a year in PV-4 (`2026-02` to `2026-03`). PV-3, PV-7 and PV-8 list no certificate and keep their bytes."
+    "1.6.0 (a certificate's period by its months; the orchestrator's answer of 2026-10-21T20:26Z): a certificate item gains `months`, `{from, to}`, the months of its record's `period.validFrom` and `period.validUntil`, which the one builder writes on every item, so PV-1, PV-2 and PV-4 to PV-6 carry it right after `years` and were recomputed with it (their documents are the builder's): the year's certificate (`2026-01` to `2026-12`) in PV-1, PV-5 and PV-6, a month's in PV-2 (`2026-09`) and PV-6 (`2027-01`), and part of a year in PV-4 (`2026-02` to `2026-03`). PV-3, PV-7 and PV-8 list no certificate and keep their bytes.",
+    "1.8.0 (ops decision D186 items 1 and 2): `listings`, the view each kind of list opens in and whether visitors get the toggle, which the one builder writes only where an owner's choice differs from its default, so PV-1 to PV-8 keep their bytes and their hashes; PV-9 is examples/contributor-page.v1.listings.example.json, the cards page with the certificates as a list and the repositories as a matrix that visitors may switch."
   ],
-  "specVersion": "1.5.0",
+  "specVersion": "1.6.0",
   "vectors": [
     {
       "id": "PV-1",
@@ -2004,6 +2005,394 @@
       },
       "canonical": "{\"about\":{\"variant\":\"short\",\"version\":1},\"address\":\"mixed\",\"autoUpdated\":[\"summary\",\"repositories\",\"adopter\",\"registry-names\",\"login\",\"github-picture\",\"organisation-pictures\"],\"card\":{\"adopter\":true,\"links\":false,\"login\":true,\"name\":true,\"picture\":true,\"summary\":true},\"cards\":{\"icon\":\"owner\",\"otherNames\":\"owner/name\",\"ownNames\":\"name\"},\"cover\":{\"kind\":\"none\"},\"factsAsOf\":\"2027-02\",\"identity\":{\"displayName\":\"Alex Example\"},\"layout\":\"paper\",\"login\":\"example-contributor\",\"picture\":{\"kind\":\"github\"},\"pid\":\"q4w8e2r6t9y3z5x7\",\"schemaVersion\":1,\"search\":false,\"sections\":[{\"id\":\"summary\",\"organisations\":3,\"projects\":4,\"since\":2026},{\"groups\":[{\"owner\":\"example-contributor\",\"repos\":[{\"listing\":\"registered\",\"name\":\"csv-split\",\"nodeId\":\"R_kgDOSMPL0004\",\"years\":{\"from\":2027,\"to\":2027}}]},{\"owner\":\"example-org\",\"repos\":[{\"listing\":\"registered\",\"name\":\"ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\",\"years\":{\"from\":2026,\"to\":2027}},{\"listing\":\"registered\",\"name\":\"tax-tables\",\"nodeId\":\"R_kgDOSMPL0002\",\"years\":{\"from\":2027,\"to\":2027}}]},{\"owner\":\"sam-codes\",\"repos\":[{\"listing\":\"registered\",\"name\":\"dotfiles\",\"nodeId\":\"R_kgDOSMPL0013\",\"years\":{\"from\":2026,\"to\":2026}}]}],\"id\":\"repositories\"},{\"id\":\"adopter\",\"items\":[{\"evidence\":{\"kind\":\"merged-pr\",\"number\":42},\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\",\"since\":2026},{\"evidence\":{\"kind\":\"direct-commit\",\"oid\":\"a0e2126a4d92cd0cf93496ede3f10827e8fa1865\"},\"fullName\":\"example-contributor/csv-split\",\"nodeId\":\"R_kgDOSMPL0004\",\"since\":2027}]}],\"source\":\"fixture\",\"theme\":{\"preset\":\"purpose\"}}",
       "previewSha256": "b7a9e7c251d3797aa1d910d7c492ee7dfcdb90fb90883fe4726318e2aecc312e"
+    },
+    {
+      "id": "PV-9",
+      "note": "The listings page of examples/contributor-page.v1.listings.example.json (1.8.0; ops decision D186): `listings` carries only what differs from the defaults, the certificates' view `list` and the repositories' view `matrix` with the visitors' toggle, as the settings store it and the builder writes it; it is inside the preimage like every member, so a view or a toggle changed after the preview answers `page.preview_changed`.",
+      "document": {
+        "schemaVersion": 1,
+        "generatedAt": "2027-03-01T00:00:00Z",
+        "source": "fixture",
+        "pid": "d3f7h9k5m8p4q2wx",
+        "versionId": "pgv_d3f7h9k5m8p4q2wxd3f7h9k5m8",
+        "address": "mixed",
+        "search": false,
+        "login": "example-contributor",
+        "layout": "paper",
+        "theme": {
+          "preset": "purpose"
+        },
+        "picture": {
+          "kind": "github",
+          "h16": "5e6f7a8b9c0d1e2f",
+          "letters": "AE"
+        },
+        "cover": {
+          "kind": "none"
+        },
+        "identity": {
+          "displayName": "Alex Example"
+        },
+        "about": {
+          "variant": "short",
+          "version": 1
+        },
+        "listings": {
+          "certificates": {
+            "view": "list"
+          },
+          "repositories": {
+            "view": "matrix",
+            "visitorToggle": true
+          }
+        },
+        "cards": {
+          "icon": "github",
+          "ownNames": "name",
+          "otherNames": "name"
+        },
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 3,
+            "organisations": 3,
+            "since": 2026,
+            "certificates": 2
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-contributor",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0004",
+                    "name": "csv-split",
+                    "years": {
+                      "from": 2027,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  }
+                ]
+              },
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0001",
+                    "name": "ledger-tools",
+                    "years": {
+                      "from": 2026,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  }
+                ]
+              },
+              {
+                "owner": "other-org",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0003",
+                    "name": "invoice-kit",
+                    "years": {
+                      "from": 2026,
+                      "to": 2026
+                    },
+                    "listing": "no-longer-registered"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "nodeId": "R_kgDOSMPL0004",
+                "fullName": "example-contributor/csv-split",
+                "evidence": {
+                  "kind": "direct-commit",
+                  "oid": "a0e2126a4d92cd0cf93496ede3f10827e8fa1865"
+                }
+              },
+              {
+                "nodeId": "R_kgDOSMPL0001",
+                "fullName": "example-org/ledger-tools",
+                "evidence": {
+                  "kind": "merged-pr",
+                  "number": 42
+                }
+              }
+            ]
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "cid": "cert_01jt3v5x7z9b1d3f5h7k9m1p3r",
+                "typ": "contributor",
+                "variant": "participation",
+                "years": {
+                  "from": 2027,
+                  "to": 2027
+                },
+                "months": {
+                  "from": "2027-01",
+                  "to": "2027-01"
+                },
+                "status": "valid",
+                "disclosure": "full",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0004",
+                    "fullName": "example-contributor/csv-split"
+                  },
+                  {
+                    "nodeId": "R_kgDOSMPL0001",
+                    "fullName": "example-org/ledger-tools"
+                  }
+                ]
+              },
+              {
+                "cid": "cert_01jk2m4p6r8t0v2x4z6b8d0f2h",
+                "typ": "contributor",
+                "variant": "participation",
+                "years": {
+                  "from": 2026,
+                  "to": 2026
+                },
+                "months": {
+                  "from": "2026-01",
+                  "to": "2026-12"
+                },
+                "status": "expired",
+                "disclosure": "full",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0001",
+                    "fullName": "example-org/ledger-tools"
+                  },
+                  {
+                    "nodeId": "R_kgDOSMPL0003",
+                    "fullName": "other-org/invoice-kit"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "card": {
+          "picture": true,
+          "name": true,
+          "login": true,
+          "summary": true,
+          "adopter": true,
+          "links": false
+        },
+        "autoUpdated": [
+          "summary",
+          "repositories",
+          "adopter",
+          "certificate-status",
+          "registry-names",
+          "login",
+          "github-picture"
+        ],
+        "factsAsOf": "2027-02"
+      },
+      "preimage": {
+        "schemaVersion": 1,
+        "source": "fixture",
+        "pid": "d3f7h9k5m8p4q2wx",
+        "address": "mixed",
+        "search": false,
+        "login": "example-contributor",
+        "layout": "paper",
+        "theme": {
+          "preset": "purpose"
+        },
+        "picture": {
+          "kind": "github"
+        },
+        "cover": {
+          "kind": "none"
+        },
+        "identity": {
+          "displayName": "Alex Example"
+        },
+        "about": {
+          "variant": "short",
+          "version": 1
+        },
+        "listings": {
+          "certificates": {
+            "view": "list"
+          },
+          "repositories": {
+            "view": "matrix",
+            "visitorToggle": true
+          }
+        },
+        "cards": {
+          "icon": "github",
+          "ownNames": "name",
+          "otherNames": "name"
+        },
+        "sections": [
+          {
+            "id": "summary",
+            "projects": 3,
+            "organisations": 3,
+            "since": 2026,
+            "certificates": 2
+          },
+          {
+            "id": "repositories",
+            "groups": [
+              {
+                "owner": "example-contributor",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0004",
+                    "name": "csv-split",
+                    "years": {
+                      "from": 2027,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  }
+                ]
+              },
+              {
+                "owner": "example-org",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0001",
+                    "name": "ledger-tools",
+                    "years": {
+                      "from": 2026,
+                      "to": 2027
+                    },
+                    "listing": "registered"
+                  }
+                ]
+              },
+              {
+                "owner": "other-org",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0003",
+                    "name": "invoice-kit",
+                    "years": {
+                      "from": 2026,
+                      "to": 2026
+                    },
+                    "listing": "no-longer-registered"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "adopter",
+            "items": [
+              {
+                "nodeId": "R_kgDOSMPL0004",
+                "fullName": "example-contributor/csv-split",
+                "evidence": {
+                  "kind": "direct-commit",
+                  "oid": "a0e2126a4d92cd0cf93496ede3f10827e8fa1865"
+                }
+              },
+              {
+                "nodeId": "R_kgDOSMPL0001",
+                "fullName": "example-org/ledger-tools",
+                "evidence": {
+                  "kind": "merged-pr",
+                  "number": 42
+                }
+              }
+            ]
+          },
+          {
+            "id": "certificates",
+            "items": [
+              {
+                "cid": "cert_01jt3v5x7z9b1d3f5h7k9m1p3r",
+                "typ": "contributor",
+                "variant": "participation",
+                "years": {
+                  "from": 2027,
+                  "to": 2027
+                },
+                "months": {
+                  "from": "2027-01",
+                  "to": "2027-01"
+                },
+                "status": "valid",
+                "disclosure": "full",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0004",
+                    "fullName": "example-contributor/csv-split"
+                  },
+                  {
+                    "nodeId": "R_kgDOSMPL0001",
+                    "fullName": "example-org/ledger-tools"
+                  }
+                ]
+              },
+              {
+                "cid": "cert_01jk2m4p6r8t0v2x4z6b8d0f2h",
+                "typ": "contributor",
+                "variant": "participation",
+                "years": {
+                  "from": 2026,
+                  "to": 2026
+                },
+                "months": {
+                  "from": "2026-01",
+                  "to": "2026-12"
+                },
+                "status": "expired",
+                "disclosure": "full",
+                "repos": [
+                  {
+                    "nodeId": "R_kgDOSMPL0001",
+                    "fullName": "example-org/ledger-tools"
+                  },
+                  {
+                    "nodeId": "R_kgDOSMPL0003",
+                    "fullName": "other-org/invoice-kit"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "card": {
+          "picture": true,
+          "name": true,
+          "login": true,
+          "summary": true,
+          "adopter": true,
+          "links": false
+        },
+        "autoUpdated": [
+          "summary",
+          "repositories",
+          "adopter",
+          "certificate-status",
+          "registry-names",
+          "login",
+          "github-picture"
+        ],
+        "factsAsOf": "2027-02"
+      },
+      "canonical": "{\"about\":{\"variant\":\"short\",\"version\":1},\"address\":\"mixed\",\"autoUpdated\":[\"summary\",\"repositories\",\"adopter\",\"certificate-status\",\"registry-names\",\"login\",\"github-picture\"],\"card\":{\"adopter\":true,\"links\":false,\"login\":true,\"name\":true,\"picture\":true,\"summary\":true},\"cards\":{\"icon\":\"github\",\"otherNames\":\"name\",\"ownNames\":\"name\"},\"cover\":{\"kind\":\"none\"},\"factsAsOf\":\"2027-02\",\"identity\":{\"displayName\":\"Alex Example\"},\"layout\":\"paper\",\"listings\":{\"certificates\":{\"view\":\"list\"},\"repositories\":{\"view\":\"matrix\",\"visitorToggle\":true}},\"login\":\"example-contributor\",\"picture\":{\"kind\":\"github\"},\"pid\":\"d3f7h9k5m8p4q2wx\",\"schemaVersion\":1,\"search\":false,\"sections\":[{\"certificates\":2,\"id\":\"summary\",\"organisations\":3,\"projects\":3,\"since\":2026},{\"groups\":[{\"owner\":\"example-contributor\",\"repos\":[{\"listing\":\"registered\",\"name\":\"csv-split\",\"nodeId\":\"R_kgDOSMPL0004\",\"years\":{\"from\":2027,\"to\":2027}}]},{\"owner\":\"example-org\",\"repos\":[{\"listing\":\"registered\",\"name\":\"ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\",\"years\":{\"from\":2026,\"to\":2027}}]},{\"owner\":\"other-org\",\"repos\":[{\"listing\":\"no-longer-registered\",\"name\":\"invoice-kit\",\"nodeId\":\"R_kgDOSMPL0003\",\"years\":{\"from\":2026,\"to\":2026}}]}],\"id\":\"repositories\"},{\"id\":\"adopter\",\"items\":[{\"evidence\":{\"kind\":\"direct-commit\",\"oid\":\"a0e2126a4d92cd0cf93496ede3f10827e8fa1865\"},\"fullName\":\"example-contributor/csv-split\",\"nodeId\":\"R_kgDOSMPL0004\"},{\"evidence\":{\"kind\":\"merged-pr\",\"number\":42},\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"}]},{\"id\":\"certificates\",\"items\":[{\"cid\":\"cert_01jt3v5x7z9b1d3f5h7k9m1p3r\",\"disclosure\":\"full\",\"months\":{\"from\":\"2027-01\",\"to\":\"2027-01\"},\"repos\":[{\"fullName\":\"example-contributor/csv-split\",\"nodeId\":\"R_kgDOSMPL0004\"},{\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"}],\"status\":\"valid\",\"typ\":\"contributor\",\"variant\":\"participation\",\"years\":{\"from\":2027,\"to\":2027}},{\"cid\":\"cert_01jk2m4p6r8t0v2x4z6b8d0f2h\",\"disclosure\":\"full\",\"months\":{\"from\":\"2026-01\",\"to\":\"2026-12\"},\"repos\":[{\"fullName\":\"example-org/ledger-tools\",\"nodeId\":\"R_kgDOSMPL0001\"},{\"fullName\":\"other-org/invoice-kit\",\"nodeId\":\"R_kgDOSMPL0003\"}],\"status\":\"expired\",\"typ\":\"contributor\",\"variant\":\"participation\",\"years\":{\"from\":2026,\"to\":2026}}]}],\"source\":\"fixture\",\"theme\":{\"preset\":\"purpose\"}}",
+      "previewSha256": "531d88f0b796cc5a17874ab4e9b43294aef0ab12bf2bb6cd79d056cd7f9078ed"
     }
   ]
 }

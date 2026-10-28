@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "start": "named",
+  "layout": "paper",
+  "theme": { "preset": "purpose", "accent": null },
+  "picture": { "kind": "github" },
+  "cover": { "kind": "none" },
+  "identity": { "displayName": "Alex Example", "pronouns": null, "bio": null, "showLogin": true },
+  "about": { "on": true, "variant": "short", "ownText": null, "version": 1 },
+  "address": "mixed",
+  "search": false,
+  "sections": [
+    { "id": "summary", "on": true },
+    { "id": "repositories", "on": true },
+    { "id": "adopter", "on": true },
+    { "id": "certificates", "on": true },
+    { "id": "links", "on": false },
+    { "id": "sponsors", "on": false }
+  ],
+  "summary": { "projects": true, "organisations": true, "since": true, "certificates": true },
+  "certificates": { "mode": "all-eligible" },
+  "repositories": { "mode": "all", "hidden": [], "years": true },
+  "adopter": { "hidden": [] },
+  "cards": { "icon": "github", "otherNames": "name" },
+  "listings": { "certificates": { "view": "list" }, "repositories": { "view": "matrix", "visitorToggle": true } },
+  "links": [],
+  "website": null,
+  "sponsors": [],
+  "card": { "picture": true, "name": true, "login": true, "summary": true, "adopter": true, "links": false }
+}

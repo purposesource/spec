@@ -4052,7 +4052,57 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   answer for the repository says its owner is an organisation (the copy the render job makes at publish, never fetched by the
   page), and the tile otherwise; no other person's picture is drawn.
 
+### 1.5.0 — unreleased (2026-10-28; ops decision D186 items 1 and 2) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump. `listings`, `{certificates?: {view?, visitorToggle?}, repositories?:
+  {view?, visitorToggle?}}`, right after `cards`: the owner's four choices for the page's two kinds of list (D186 items 1 and 2,
+  the operator: "default certificate listing (matrix / list), matrix by default, default repo listing (matrix / list) list by
+  default, and for both: show or not the toggle to the user (both off by default)"). `view` is `matrix` or `list`, one list of
+  views for both listings; `visitorToggle` is "Show the matrix/list toggle to visitors". `certificates` is the certificates
+  section; `repositories` is the credited projects and the licence adopter's repositories together, the page's two lists of
+  repositories, so they always read alike (the operator named one repository listing).
+- DEFAULTS (D186): the certificates `matrix`, the repositories `list`, and both toggles off. Off, visitors see only the owner's
+  view and no toggle; on, they get the toggle as the page drew it since 1.3.0, starting on the owner's view. They hold until the
+  editor offers the four choices (D186 item 1).
+- LEFT OUT AT ITS DEFAULT, MEMBER BY MEMBER, as `cards` is: `listings`, each listing and each member are optional; the api writes
+  `listings` only when a value differs from its default, and then only those listings and members, so a document stored before
+  1.5.0 reads and serialises to the same bytes and keeps its `settings_sha256` (a published page stays "published"). An unknown
+  member or value is `page.settings_invalid` at its path. Not in `x-psn.alwaysWritten`: its absence means the defaults.
+- `cards`' description no longer says that a visitor may always switch a list to the other view: the view and the toggle are the
+  owner's (`listings`).
+- Example: `listings` (the cards settings with the certificates as a list and the repositories as a matrix that visitors may
+  switch), stored as the api stores it. The other examples keep their bytes. `check:contributor-page` holds both schemas' defaults
+  to D186's, the settings examples and the page examples to their stored and built forms, the build golden's vectors BL-1 to BL-7
+  to its own reading of the builder's rule, the two lists of views to agree, and 12 refusals and 6 admissions (both schemas), each
+  proved able to fail.
+
 ## contributor-page.v1.json
+
+### 1.8.0 — unreleased (2026-10-28; ops decision D186 items 1 and 2) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump, optional: every document written under 1.7.x stays valid. `listings`,
+  `{certificates?: {view?, visitorToggle?}, repositories?: {view?, visitorToggle?}}`, right before `cards`: the settings'
+  `listings` (`contributor-page-settings.v1` 1.5.0), the view each kind of list opens in (`matrix` or `list`) and whether
+  visitors get the matrix and list toggle. `certificates` governs the certificates section; `repositories` governs the credited
+  projects and the licence adopter's repositories alike.
+- WRITTEN ONLY WHERE IT DIFFERS, unlike `cards` and as 1.1.0's `linksPlacement`: the one builder writes `listings` only when one of
+  its four values differs from its default, and then only those listings and members, leaving out a value the settings state at
+  its default. So a page whose owner keeps the defaults, every earlier example and preview vector, and the platform's builder
+  tests keep their bytes and their hashes on either side of the builder's change; `page.preview_changed` never fires for a page
+  only because the platform learns the member.
+- ABSENT MEANS THE DEFAULTS AND NO TOGGLE (D186, the orchestrator's default): the certificates as a matrix, the repositories as a
+  list, and no toggle on either. A document built before 1.8.0 is drawn so: its three toggles go, and on a screen of 720 px and
+  wider its projects and licence repositories open as the list (a phone already drew every list as the list, ops decision D168
+  item 2). No fact, link or word moves.
+- HOW A LISTING IS DRAWN (`listings`' description, and a sentence in `cards`' and in each of the three sections'): `view` is the
+  view the list opens in; with `visitorToggle` false or absent the page draws that view alone, with no toggle and no input; with
+  it true the heading carries the page's quiet toggle, which starts on `view`, works without script, is reachable and visibly
+  focused by keyboard, and stores nothing. Below the page's phone width every list is the list with no toggle, whatever
+  `listings` says; the printed form draws no toggle and every list in one column.
+- Examples: `listings` (the cards page with the certificates as a list and the repositories as a matrix that visitors may
+  switch), and PV-9, its preview vector, so the hash pins the member. PV-1 to PV-8 and every other example keep their bytes. The
+  build golden (its 1.5.0) gains the vectors BL-1 to BL-7: no choice, each value other than its default, all four, and defaults
+  stated beside a choice and alone, which the builder leaves out. The preview golden is its 1.6.0.
 
 ### 1.7.0 — unreleased (2026-10-27; a superseded certificate that names no successor, the orchestrator's decision of 2026-10-27 on the CW-47 B follow-up, its second item; platform `c38d22f7`) — pre-release
 

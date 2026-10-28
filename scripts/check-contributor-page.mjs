@@ -100,6 +100,13 @@
  *              default alike; every page example and preview vector carries the member with its three
  *              members, as the builder writes it from 1.3.0; and a settings example stores it as the api
  *              does, each member left out at its default and the member itself when nothing is left.
+ *   listings   1.5.0 of the settings and 1.8.0 of the page (ops decision D186 items 1 and 2): `listings` is optional in
+ *              both schemas and so is every member; its defaults are D186's (the certificates as a matrix, the
+ *              repositories as a list, no toggle on either), the settings' `default`s say the same, and the document's
+ *              members default alike; a page example or preview vector carries it only as the builder writes it,
+ *              every member at its default left out and nothing empty, right before `cards`; a settings example
+ *              stores it as the api does; some preview vector carries it; and the build golden's `listings` vectors
+ *              are the gate's own reading of the builder's rule, every value and the defaults stated exercised.
  *   never      no member of the three page schemas is named for points, shares, bands, ranks,
  *              percentiles, scores, months, amounts or a person's GitHub id, and no published page
  *              example or vector carries a currency figure, a person's GitHub node id (the current
@@ -116,7 +123,7 @@
  *              default, `about.version` being the texts' `current`.
  *   agree      the closed lists the settings and the public document share are the same lists (1.1.0:
  *              the links' two places, the display parts and the palette ids among them; 1.3.0: the cards'
- *              icons and their two name forms).
+ *              icons and their two name forms; 1.8.0: the two listings' views, in both schemas and with each other).
  *   facts      in the page examples (1.1.0's further two among them), every link is its table template with its handle, and the
  *              summary's counts are the rows the page shows (design §8.1: a count never reveals a
  *              hidden row).
@@ -159,7 +166,10 @@
  *              `months` (built before 1.6.0), and a period across two years. And 1.7.0's: `successorNamed` beside a status
  *              other than `superseded` (valid, expired, revoked), as a string or null, the successor's id in its place, and
  *              the member on a project's row or in the summary; and what it admits: a superseded item without it (built
- *              before 1.7.0), and with it true and false.
+ *              before 1.7.0), and with it true and false. And 1.8.0's (ops decision D186): a third view, an upper-case
+ *              view, the toggle as a word or null, a listing of its own for the licence adopter or the links, an unknown
+ *              member of a listing, the viewer's own choice in the document, and `listings` as a list, a string or null;
+ *              and what it admits: no `listings` at all, one member alone, the defaults stated and every other value.
  *   goldens    every `examples/*.golden.json` is one a gate checks.
  *
  * Every rule is proved able to fail before the examples are trusted to pass.
@@ -224,6 +234,9 @@ const real = {
   adopterYearsPage: example('contributor-page.v1.adopter-years.example.json'),
   // 1.5.0's further example (ops decision D165 item 3): an organisation's picture on its group and its adopter item.
   organisationPage: example('contributor-page.v1.organisation-pictures.example.json'),
+  // 1.8.0's further examples (ops decision D186 items 1 and 2): the certificates as a list, the repositories as a matrix visitors may switch.
+  listingsPage: example('contributor-page.v1.listings.example.json'),
+  listingsSettings: example('contributor-page-settings.v1.listings.example.json'),
   settingsExamples: Object.fromEntries(
     readdirSync(EXAMPLE_DIR)
       .filter((name) => name.startsWith('contributor-page-settings.v1.') && name.endsWith('.example.json'))
@@ -1084,6 +1097,7 @@ function buildProblems(golden) {
   found.push(...buildCardsProblems(golden.cards ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   found.push(...buildAdopterProblems(golden.adopter ?? []).map((message) => ['adopter', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   found.push(...buildOrganisationsProblems(golden.organisations ?? []).map((message) => ['organisations', `examples/contributor-page-build.v1.golden.json: ${message}`]));
+  found.push(...buildListingsProblems(golden.listings ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   return found;
 }
 
@@ -1393,6 +1407,7 @@ function cardsProblems(state) {
     ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
     ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
     ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
+    ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
     ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
   ];
   for (const [where, doc] of documents) {
@@ -1408,6 +1423,135 @@ function cardsProblems(state) {
     if (Object.keys(stored).length === 0) add(`examples/${name}: an empty cards is stored; the api leaves the member out`);
     for (const [m, value] of Object.entries(stored)) if (value === defaults[m]) add(`examples/${name}: cards.${m} is stored at its default; the api leaves it out`);
   }
+  return found;
+}
+
+/* ------------------------------------------------------------------------- listings */
+
+/** D186 items 1 and 2's defaults: the certificates as a matrix, the repositories as a list, and no toggle for visitors on either. */
+const LISTINGS_DEFAULTS = { certificates: { view: 'matrix', visitorToggle: false }, repositories: { view: 'list', visitorToggle: false } };
+/** The two views, the same list for both listings and in both schemas. */
+const LISTING_VIEWS = ['matrix', 'list'];
+
+/** A schema's listings defaults as its members state them: `{listing: {member: default}}`. */
+function listingDefaults(schema) {
+  const listings = schema.properties.listings?.properties ?? {};
+  return Object.fromEntries(
+    Object.entries(listings).map(([name, listing]) => [name, Object.fromEntries(Object.entries(listing.properties ?? {}).map(([m, member]) => [m, member.default]))])
+  );
+}
+
+/**
+ * The gate's own reading of the builder's listings rule (1.8.0; contributor-page.v1 `listings`), not the builder: every member the
+ * settings schema names, written only where the settings' value differs from its default; a listing with nothing left is left out,
+ * and so is the member itself (null).
+ */
+function buildListings(input, settingsSchema) {
+  if (input === null || input === undefined) return null;
+  const out = {};
+  for (const [name, members] of Object.entries(listingDefaults(settingsSchema))) {
+    const chosen = {};
+    for (const [m, fallback] of Object.entries(members)) if (input[name] && Object.hasOwn(input[name], m) && input[name][m] !== fallback) chosen[m] = input[name][m];
+    if (Object.keys(chosen).length > 0) out[name] = chosen;
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
+
+const validatePageListings = ajv.getSchema(`${cfg.schemaBaseUrl}/${PAGE}#/properties/listings`);
+const validateSettingsListings = ajv.getSchema(`${cfg.schemaBaseUrl}/${SETTINGS}#/properties/listings`);
+
+function buildListingsProblems(vectors) {
+  const found = [];
+  if (vectors.length === 0) found.push('no listings vector — the listings rule would pass vacuously');
+  const settingsSchema = schemaJson(SETTINGS);
+  const defaults = listingDefaults(settingsSchema);
+  const exercised = { none: false, defaultLeftOut: false, nothingLeft: false };
+  for (const [name, members] of Object.entries(defaults)) {
+    for (const [m, fallback] of Object.entries(members)) {
+      const values = settingsSchema.properties.listings.properties[name].properties[m].enum ?? [true, false];
+      for (const value of values) if (value !== fallback) exercised[`${name}.${m} ${value}`] = false;
+    }
+  }
+  for (const v of vectors) {
+    const input = v.input.listings;
+    const got = buildListings(input, settingsSchema);
+    if (JSON.stringify(sortDeep(got)) !== JSON.stringify(sortDeep(v.expect.listings))) found.push(`${v.id}: expects ${JSON.stringify(v.expect.listings)}, the rule gives ${JSON.stringify(got)}`);
+    if (input !== null && !validateSettingsListings(input)) found.push(`${v.id}: the input is not a valid settings listings member (${ajv.errorsText(validateSettingsListings.errors)})`);
+    if (v.expect.listings !== null && !validatePageListings(v.expect.listings)) found.push(`${v.id}: the expected member is not a valid document listings member (${ajv.errorsText(validatePageListings.errors)})`);
+    if (input === null) exercised.none = true;
+    else if (v.expect.listings === null) exercised.nothingLeft = true;
+    for (const [name, members] of Object.entries(input ?? {})) {
+      for (const [m, value] of Object.entries(members)) {
+        if (value === defaults[name]?.[m]) exercised.defaultLeftOut = true;
+        else exercised[`${name}.${m} ${value}`] = true;
+      }
+    }
+  }
+  for (const [what, done] of Object.entries(exercised)) if (!done) found.push(`no listings vector exercises ${what}`);
+  return found;
+}
+
+/**
+ * 1.5.0 of the settings and 1.8.0 of the page (ops decision D186 items 1 and 2): `listings` is optional in both schemas, every
+ * member optional, the defaults D186's in both; the one builder writes it only where a value differs from its default, so a page
+ * example or preview vector (each the builder's) carries no member at its default and nothing empty, right before `cards`; a
+ * settings example stores it as the api does; and some preview vector carries it, so its hash pins the member.
+ */
+function listingsProblems(state) {
+  const found = [];
+  const add = (message) => found.push(['listings', message]);
+  const s = state.schemas.settings;
+  const p = state.schemas.page;
+  const sl = s.properties.listings;
+  const pl = p.properties.listings;
+  if (!sl || !pl) {
+    add('a schema has no `listings` member');
+    return found;
+  }
+  const defaults = listingDefaults(s);
+  if (JSON.stringify(sortDeep(defaults)) !== JSON.stringify(sortDeep(LISTINGS_DEFAULTS))) add(`the settings' listings defaults are ${JSON.stringify(defaults)}, D186's are ${JSON.stringify(LISTINGS_DEFAULTS)}`);
+  if (JSON.stringify(sortDeep(sl.default ?? null)) !== JSON.stringify(sortDeep(defaults))) add(`the settings' listings default is ${JSON.stringify(sl.default)}, its members' defaults are ${JSON.stringify(defaults)}`);
+  for (const [name, members] of Object.entries(defaults)) {
+    if (JSON.stringify(sortDeep(sl.properties[name].default ?? null)) !== JSON.stringify(sortDeep(members))) add(`the settings' listings.${name} default is ${JSON.stringify(sl.properties[name].default)}, its members' defaults are ${JSON.stringify(members)}`);
+  }
+  if (JSON.stringify(sortDeep(listingDefaults(p))) !== JSON.stringify(sortDeep(defaults))) add(`the document's listings defaults are ${JSON.stringify(listingDefaults(p))}, the settings' ${JSON.stringify(defaults)}`);
+  for (const name of Object.keys(LISTINGS_DEFAULTS)) {
+    const views = sl.properties[name]?.properties?.view?.enum ?? [];
+    if (views.join(',') !== LISTING_VIEWS.join(',')) add(`the settings' listings.${name} views are [${views}], D186's [${LISTING_VIEWS}]`);
+  }
+  const requiredSomewhere = [sl, pl, ...Object.values(sl.properties ?? {}), ...Object.values(pl.properties ?? {})].some((node) => (node.required ?? []).length > 0);
+  if (requiredSomewhere) add('a listings member is required; every one is optional, absent meaning its default');
+  if ((s.required ?? []).includes('listings') || (p.required ?? []).includes('listings')) add('listings is required; it is optional, so a document from before it stays valid');
+  if ((s['x-psn']?.alwaysWritten ?? []).includes('listings')) add('listings is always written; the api leaves it out at its default');
+  const documents = [
+    ['examples/contributor-page.v1.example.json', state.page],
+    ['examples/contributor-page.v1.anonymous.example.json', state.anonymous],
+    ['examples/contributor-page.v1.header.example.json', state.header],
+    ['examples/contributor-page.v1.own-ground.example.json', state.ownGround],
+    ['examples/contributor-page.v1.about.example.json', state.aboutPage],
+    ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
+    ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
+    ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
+    ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
+    ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
+    ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
+  ];
+  /** A stored or built listings member holds no value at its default and nothing empty. */
+  const storedForm = (where, listings, who) => {
+    if (Object.keys(listings ?? {}).length === 0) add(`${where}: an empty listings is written; ${who} leaves the member out`);
+    for (const [name, members] of Object.entries(listings ?? {})) {
+      if (Object.keys(members ?? {}).length === 0) add(`${where}: an empty listings.${name} is written; ${who} leaves it out`);
+      for (const [m, value] of Object.entries(members ?? {})) if (value === defaults[name]?.[m]) add(`${where}: listings.${name}.${m} is written at its default; ${who} leaves it out`);
+    }
+  };
+  for (const [where, doc] of documents) {
+    if (!('listings' in doc)) continue;
+    storedForm(where, doc.listings, 'the builder');
+    const order = Object.keys(doc);
+    if (order.indexOf('listings') + 1 !== order.indexOf('cards')) add(`${where}: listings is not written right before cards, where the builder writes it`);
+  }
+  if (!state.preview.vectors.some((v) => 'listings' in v.document)) add('no preview vector carries listings');
+  for (const [name, settings] of Object.entries(state.settingsExamples)) if ('listings' in settings) storedForm(`examples/${name}`, settings.listings, 'the api');
   return found;
 }
 
@@ -1713,7 +1857,10 @@ function agreeProblems(settingsSchema, pageSchema) {
     ['card icon', s.properties.cards?.properties.icon.enum, p.properties.cards?.properties.icon.enum],
     ['own name form', s.properties.cards?.properties.ownNames.enum, p.properties.cards?.properties.ownNames.enum],
     ['other name form', s.properties.cards?.properties.otherNames.enum, p.properties.cards?.properties.otherNames.enum],
-    ['name forms of own and other', s.properties.cards?.properties.ownNames.enum, s.properties.cards?.properties.otherNames.enum]
+    ['name forms of own and other', s.properties.cards?.properties.ownNames.enum, s.properties.cards?.properties.otherNames.enum],
+    ['certificates view', s.properties.listings?.properties.certificates.properties.view.enum, p.properties.listings?.properties.certificates.properties.view.enum],
+    ['repositories view', s.properties.listings?.properties.repositories.properties.view.enum, p.properties.listings?.properties.repositories.properties.view.enum],
+    ['views of certificates and repositories', s.properties.listings?.properties.certificates.properties.view.enum, s.properties.listings?.properties.repositories.properties.view.enum]
   ];
   for (const [what, a, b] of pairs) {
     if ((a ?? []).join(',') !== (b ?? []).join(',')) found.push(['agree', `the ${what} lists differ: settings [${a}], page [${b}]`]);
@@ -1883,7 +2030,20 @@ const REFUSALS = [
   ['page', 'successorNamed as null', (d) => { const c = certificateOf(d); c.status = 'superseded'; c.successorNamed = null; }],
   ['page', "the successor's id on a superseded item", (d) => { const c = certificateOf(d); c.status = 'superseded'; c.supersededBy = 'cert_01jk2m4p6r8t0v2x4z6b8d0f3j'; }],
   ['page', "successorNamed on a project's row", (d) => { sectionOf(d, 'repositories').groups[0].repos[0].successorNamed = true; }],
-  ['page', 'successorNamed in the summary', (d) => { sectionOf(d, 'summary').successorNamed = false; }]
+  ['page', 'successorNamed in the summary', (d) => { sectionOf(d, 'summary').successorNamed = false; }],
+  // 1.8.0 of the page, 1.5.0 of the settings (ops decision D186 items 1 and 2).
+  ['listingsSettings', 'a third view', (d) => { d.listings = { certificates: { view: 'grid' } }; }],
+  ['listingsSettings', 'an upper-case view', (d) => { d.listings = { repositories: { view: 'Matrix' } }; }],
+  ['listingsSettings', 'the toggle as a word', (d) => { d.listings = { repositories: { visitorToggle: 'on' } }; }],
+  ['listingsSettings', "a listing of its own for the licence adopter (it shares the repositories')", (d) => { d.listings = { ...d.listings, adopter: { view: 'list' } }; }],
+  ['listingsSettings', 'an unknown member of a listing', (d) => { d.listings = { certificates: { view: 'list', default: 'list' } }; }],
+  ['listingsSettings', 'listings as a list', (d) => { d.listings = ['matrix']; }],
+  ['listingsSettings', 'listings as null', (d) => { d.listings = null; }],
+  ['listingsPage', 'a third view', (d) => { d.listings = { repositories: { view: 'cards' } }; }],
+  ['listingsPage', 'the toggle as null', (d) => { d.listings = { repositories: { visitorToggle: null } }; }],
+  ['listingsPage', "the viewer's own choice stored in the document", (d) => { d.listings = { certificates: { visitorView: 'matrix' } }; }],
+  ['listingsPage', 'a listing for the links', (d) => { d.listings = { ...d.listings, links: { view: 'list' } }; }],
+  ['listingsPage', 'listings as a string', (d) => { d.listings = 'list'; }]
 ];
 
 /** The named example's certificate item (1.6.0's cases). */
@@ -1960,7 +2120,14 @@ const ADMITS = [
   // 1.7.0 (a superseded certificate that names no successor).
   ['page', 'a superseded item without successorNamed (a document built before 1.7.0)', (d) => { certificateOf(d).status = 'superseded'; }],
   ['page', 'a superseded item whose record names its successor', (d) => { const c = certificateOf(d); c.status = 'superseded'; c.successorNamed = true; }],
-  ['page', 'a superseded item whose record names none', (d) => { const c = certificateOf(d); c.status = 'superseded'; c.successorNamed = false; }]
+  ['page', 'a superseded item whose record names none', (d) => { const c = certificateOf(d); c.status = 'superseded'; c.successorNamed = false; }],
+  // 1.8.0 of the page, 1.5.0 of the settings (ops decision D186 items 1 and 2).
+  ['listingsSettings', 'no listings at all (stored before 1.5.0, or every choice at its default)', (d) => { delete d.listings; }],
+  ['listingsSettings', 'one listing member alone', (d) => { d.listings = { repositories: { visitorToggle: true } }; }],
+  ['listingsSettings', 'the listing defaults stated', (d) => { d.listings = structuredClone(LISTINGS_DEFAULTS); }],
+  ['listingsPage', 'no listings at all (a document built before 1.8.0)', (d) => { delete d.listings; }],
+  ['listingsPage', 'one listing member alone', (d) => { d.listings = { certificates: { visitorToggle: true } }; }],
+  ['listingsPage', 'every listing value other than its default', (d) => { d.listings = { certificates: { view: 'list', visitorToggle: true }, repositories: { view: 'matrix', visitorToggle: true } }; }]
 ];
 
 const CONTRACT = {
@@ -1973,6 +2140,8 @@ const CONTRACT = {
   cardsSettings: 'contributor-page-settings.v1',
   adopterYearsPage: 'contributor-page.v1',
   organisationPage: 'contributor-page.v1',
+  listingsPage: 'contributor-page.v1',
+  listingsSettings: 'contributor-page-settings.v1',
   alias: 'contributor-page-alias.v1'
 };
 
@@ -1980,7 +2149,8 @@ function refusalProblems(docs, refusals) {
   const found = [];
   const validators = {
     page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage, adopterYearsPage: validatePage,
-    organisationPage: validatePage, settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings, alias: validateAlias
+    organisationPage: validatePage, listingsPage: validatePage, settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings,
+    listingsSettings: validateSettings, alias: validateAlias
   };
   for (const [base, what, breakIt] of refusals) {
     const copy = structuredClone(docs[base]);
@@ -1994,7 +2164,8 @@ function admitsProblems(docs, admits) {
   const found = [];
   const validators = {
     page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage, adopterYearsPage: validatePage,
-    organisationPage: validatePage, settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings
+    organisationPage: validatePage, listingsPage: validatePage, settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings,
+    listingsSettings: validateSettings
   };
   for (const [base, what, change] of admits) {
     const copy = structuredClone(docs[base]);
@@ -2036,6 +2207,7 @@ function allProblems(state) {
       ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
       ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
       ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
+      ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
       [`examples/${ABOUT_FILE}`, state.aboutTexts],
       [`examples/${ABOUT_GOLDEN}`, state.aboutGolden]
     ]),
@@ -2050,9 +2222,11 @@ function allProblems(state) {
       ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
       ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
       ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
-      ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage]
+      ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
+      ['examples/contributor-page.v1.listings.example.json', state.listingsPage]
     ]),
     ...cardsProblems(state),
+    ...listingsProblems(state),
     ...adopterYearsProblems(
       [
         ['examples/contributor-page.v1.example.json', state.page],
@@ -2064,6 +2238,7 @@ function allProblems(state) {
         ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
         ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
         ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
+        ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
         ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
       ],
       state.preview.vectors
@@ -2079,6 +2254,7 @@ function allProblems(state) {
         ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
         ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
         ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
+        ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
         ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
       ],
       state.preview.vectors
@@ -2094,6 +2270,7 @@ function allProblems(state) {
         ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
         ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
         ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
+        ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
         ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
       ],
       state.preview.vectors
@@ -2235,6 +2412,32 @@ const SELF_TEST = [
   ['facts', (s) => { sectionOf(s.page, 'summary').projects = 4; }],
   ['facts', (s) => { sectionOf(s.header, 'links').items[1].url = 'https://mastodon.social/@alex'; }],
   ['refusals', (s) => { s.refusals = [['page', 'an unchanged page', () => {}]]; }],
+  // 1.8.0 of the page, 1.5.0 of the settings (ops decision D186 items 1 and 2).
+  ['listings', (s) => { s.schemas.settings.properties.listings.properties.repositories.properties.view.default = 'matrix'; }],
+  ['listings', (s) => { s.schemas.page.properties.listings.properties.certificates.properties.visitorToggle.default = true; }],
+  ['listings', (s) => { s.schemas.settings.properties.listings.default.certificates.view = 'list'; }],
+  ['listings', (s) => { s.schemas.settings.properties.listings.properties.repositories.default.visitorToggle = true; }],
+  ['listings', (s) => { s.schemas.page.required = [...s.schemas.page.required, 'listings']; }],
+  ['listings', (s) => { s.schemas.settings.properties.listings.properties.certificates.required = ['view']; }],
+  ['listings', (s) => { s.schemas.settings['x-psn'].alwaysWritten = [...s.schemas.settings['x-psn'].alwaysWritten, 'listings']; }],
+  ['listings', (s) => { s.listingsPage.listings.certificates.visitorToggle = false; }],
+  ['listings', (s) => { s.listingsPage.listings = {}; }],
+  ['listings', (s) => { s.preview.vectors.find((v) => v.id === 'PV-9').document.listings.certificates = {}; }],
+  ['listings', (s) => { const { listings, ...rest } = s.listingsPage; s.listingsPage = { ...rest, listings }; }],
+  ['listings', (s) => { s.settingsExamples['contributor-page-settings.v1.listings.example.json'].listings.repositories.view = 'list'; }],
+  ['listings', (s) => { for (const v of s.preview.vectors) delete v.document.listings; }],
+  ['build', (s) => { s.build.listings.find((v) => v.id === 'BL-6').expect.listings.certificates = { view: 'matrix' }; }],
+  ['build', (s) => { s.build.listings.find((v) => v.id === 'BL-1').expect.listings = { repositories: { view: 'list' } }; }],
+  ['build', (s) => { s.build.listings = s.build.listings.filter((v) => v.input.listings !== null); }],
+  ['build', (s) => { s.build.listings = s.build.listings.filter((v) => v.input.listings?.repositories?.view !== 'matrix'); }],
+  ['build', (s) => { s.build.listings = s.build.listings.filter((v) => !['BL-6', 'BL-7'].includes(v.id)); }],
+  ['build', (s) => { s.build.listings = []; }],
+  ['agree', (s) => { s.schemas.page.properties.listings.properties.repositories.properties.view.enum = ['list', 'matrix']; }],
+  ['agree', (s) => { s.schemas.settings.properties.listings.properties.certificates.properties.view.enum = ['matrix', 'list', 'grid']; }],
+  ['defaults', (s) => { s.defaults.listings = { certificates: { view: 'list' } }; }],
+  ['admits', (s) => { s.admits = [['listingsSettings', 'a third view', (d) => { d.listings = { certificates: { view: 'grid' } }; }]]; }],
+  ['refusals', (s) => { s.refusals = [['listingsPage', 'the listings page unchanged', () => {}]]; }],
+  ['refusals', (s) => { s.refusals = [['listingsSettings', 'the listings settings unchanged', () => {}]]; }],
   ['goldens', (s) => { s.goldenFiles = [...s.goldenFiles, 'unchecked.v1.golden.json']; }]
 ];
 
@@ -2276,7 +2479,7 @@ fail(
     `${state.preview.vectors.length} preview vectors recompute, ${state.aliasGolden.vectors.length} alias MAC vectors recompute, ` +
     `${state.build.vectors.length} builder vectors keep a hidden login off the repository list, ${state.build.about.length} write the about block, ` +
     `${state.build.cards.length} write the cards' choices resolved, ${state.build.adopter.length} list the licence adopter's repositories with their years, ` +
-    `${state.build.organisations.length} judge whose organisation picture a page may name, ` +
+    `${state.build.organisations.length} judge whose organisation picture a page may name, ${state.build.listings.length} write the listings' choices that differ from D186's defaults, ` +
     `${state.aboutTexts.versions.length} version(s) of our about texts hold their recorded digests, ${state.aboutGolden.sentences.length} about sentences and ${state.aboutGolden.blocks.length} blocks recompute, ` +
     'every certificate item names its period by its months, in order and in its years, ' +
     'no page member or example carries points, money or a GitHub id, ' +

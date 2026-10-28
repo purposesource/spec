@@ -6,9 +6,10 @@
     "`about` (1.2.0; ops decision D163): vectors of the one builder's about block, for the rules the public document cannot show alone: what it writes for the settings' `about` (schemas/contributor-page-settings.v1.json `about`) into the document's `about` (schemas/contributor-page.v1.json `about`). `input.about` is the settings' member; `input.textRules` is the text rules' answer to `ownText` at this build (`accepted` or `refused`; null where there are no words), which the builder asks Psn.PageSafety and this file states, as `credited` states the facts. `expect.about` is the document's member, or null when none is written. The tick off writes nothing; `own` with no words, or with words the rules now refuse, is written as `short`; the version is the settings' own, never stamped by the builder.",
     "`cards` (1.3.0; ops decision D165): vectors of the one builder's cards member: what it writes for the settings' `cards` (schemas/contributor-page-settings.v1.json `cards`, stored with each member left out at its default and the member itself left out when all three are) into the document's `cards` (schemas/contributor-page.v1.json `cards`). `input.cards` is the settings' member, or null where the settings carry none (stored before 1.3.0, or every choice at its default); `expect.cards` is the document's member, which the builder writes on every document with all three members resolved. Which repository is the person's own is the renderer's reading of the document (its `login`), not the builder's.",
     "`adopter` (1.4.0; ops decision D168 item 3): vectors of the one builder's licence adopter section, for the rules the public document cannot show alone: which repositories are listed and which years each item carries (schemas/contributor-page.v1.json `adopterSection`). `input.facts` are the builder's adopter facts in observed order, each with its repository's registry name, its evidence (`number` for `merged-pr`, `oid` for `direct-commit`, null where it has none), `registered` (the registry lists the repository at this build), `since` (the UTC year of the evidence's own date, null where none is stored) and `until` (the UTC year of the registry's recorded quit, which the callers pass for a repository that quit; null otherwise); `input.hidden` is the settings' `adopter.hidden`. `expect.adopter` is the section, or null when it has nothing to show. A registered repository is listed with `since` where it is known; one that left (not registered, with `until`) is listed only with both years, `since` no later than `until`; every other repository drops out.",
-    "`organisations` (1.5.0; ops decision D165 item 3, the organisation's picture): vectors of the one builder's judgment of which logins on a page are an organisation's, for the rule the public document cannot show: an organisation's copy (schemas/contributor-page.v1.json `$defs.organisationPicture`) is named only where GitHub's own answer, stored per repository, says so. `input.login` is the person's current GitHub login; `input.icon` the cards' icon, resolved; `input.shown` every repository the document shows, by the login it shows it under, the projects' groups first and then the licence adopter's items, each in its own order; `input.answers` the stored answers by repository (`ownerNodeId`, GitHub's node id of the owner; `ownerType`, GitHub's own `__typename`; `ownerLogin`, an organisation's login as GitHub answered, null for a user); `input.drawn` the organisations' copies the render job holds, by the owner's node id, each its `h16`. `expect.organisations` lists, in login order without regard to case, each login judged an organisation's, spelt as the page first shows it, with its owner's node id and the `h16` the document names on its every group and item, or null where no copy is drawn yet (the request side asks for it; the document names none). A login is an organisation's only while the cards' icon is `owner`, it is not the person's own, and every repository shown under it has an answer, each an `Organization`, all one owner, each under that login (compared without regard to case). Anything else draws the tile: a person's repository, an answer not yet read, two owners, a login that moved."
+    "`organisations` (1.5.0; ops decision D165 item 3, the organisation's picture): vectors of the one builder's judgment of which logins on a page are an organisation's, for the rule the public document cannot show: an organisation's copy (schemas/contributor-page.v1.json `$defs.organisationPicture`) is named only where GitHub's own answer, stored per repository, says so. `input.login` is the person's current GitHub login; `input.icon` the cards' icon, resolved; `input.shown` every repository the document shows, by the login it shows it under, the projects' groups first and then the licence adopter's items, each in its own order; `input.answers` the stored answers by repository (`ownerNodeId`, GitHub's node id of the owner; `ownerType`, GitHub's own `__typename`; `ownerLogin`, an organisation's login as GitHub answered, null for a user); `input.drawn` the organisations' copies the render job holds, by the owner's node id, each its `h16`. `expect.organisations` lists, in login order without regard to case, each login judged an organisation's, spelt as the page first shows it, with its owner's node id and the `h16` the document names on its every group and item, or null where no copy is drawn yet (the request side asks for it; the document names none). A login is an organisation's only while the cards' icon is `owner`, it is not the person's own, and every repository shown under it has an answer, each an `Organization`, all one owner, each under that login (compared without regard to case). Anything else draws the tile: a person's repository, an answer not yet read, two owners, a login that moved.",
+    "`listings` (1.5.0; ops decision D186 items 1 and 2): vectors of the one builder's listings member: what it writes for the settings' `listings` (schemas/contributor-page-settings.v1.json `listings`, stored with every member at its default left out, and a listing, or the member itself, left out when nothing is left) into the document's `listings` (schemas/contributor-page.v1.json `listings`). `input.listings` is the settings' member, or null where the settings carry none (stored before 1.5.0, or every choice at its default); `expect.listings` is the document's member, or null when none is written. Unlike `cards`, the builder writes only what differs from the defaults (the certificates `matrix`, the repositories `list`, no toggle on either), member by member, and leaves out a value the settings state at its default, so a page at the defaults carries no member and keeps its bytes. The renderer reads an absent member as its default."
   ],
-  "specVersion": "1.4.0",
+  "specVersion": "1.5.0",
   "vectors": [
     {
       "id": "BV-1",
@@ -1212,6 +1213,147 @@
             "h16": "9b2e4c6a8d0f1e3a"
           }
         ]
+      }
+    }
+  ],
+  "listings": [
+    {
+      "id": "BL-1",
+      "note": "No `listings` in the settings (stored before 1.5.0, or every choice at its default): the builder writes none, and the page draws the certificates as a matrix and the repositories as a list, with no toggle.",
+      "input": {
+        "listings": null
+      },
+      "expect": {
+        "listings": null
+      }
+    },
+    {
+      "id": "BL-2",
+      "note": "The certificates as a list, nothing else chosen: only that member is written.",
+      "input": {
+        "listings": {
+          "certificates": {
+            "view": "list"
+          }
+        }
+      },
+      "expect": {
+        "listings": {
+          "certificates": {
+            "view": "list"
+          }
+        }
+      }
+    },
+    {
+      "id": "BL-3",
+      "note": "The repositories' toggle alone: they open as the list, their default, and visitors may switch them.",
+      "input": {
+        "listings": {
+          "repositories": {
+            "visitorToggle": true
+          }
+        }
+      },
+      "expect": {
+        "listings": {
+          "repositories": {
+            "visitorToggle": true
+          }
+        }
+      }
+    },
+    {
+      "id": "BL-4",
+      "note": "The certificates' toggle and the repositories as a matrix: one member of each listing.",
+      "input": {
+        "listings": {
+          "certificates": {
+            "visitorToggle": true
+          },
+          "repositories": {
+            "view": "matrix"
+          }
+        }
+      },
+      "expect": {
+        "listings": {
+          "certificates": {
+            "visitorToggle": true
+          },
+          "repositories": {
+            "view": "matrix"
+          }
+        }
+      }
+    },
+    {
+      "id": "BL-5",
+      "note": "All four values other than their defaults: written as they are.",
+      "input": {
+        "listings": {
+          "certificates": {
+            "view": "list",
+            "visitorToggle": true
+          },
+          "repositories": {
+            "view": "matrix",
+            "visitorToggle": true
+          }
+        }
+      },
+      "expect": {
+        "listings": {
+          "certificates": {
+            "view": "list",
+            "visitorToggle": true
+          },
+          "repositories": {
+            "view": "matrix",
+            "visitorToggle": true
+          }
+        }
+      }
+    },
+    {
+      "id": "BL-6",
+      "note": "Defaults stated beside a choice (an input form the api never stores, since it leaves defaults out): the builder leaves each default out, and the certificates' listing with it.",
+      "input": {
+        "listings": {
+          "certificates": {
+            "view": "matrix",
+            "visitorToggle": false
+          },
+          "repositories": {
+            "view": "list",
+            "visitorToggle": true
+          }
+        }
+      },
+      "expect": {
+        "listings": {
+          "repositories": {
+            "visitorToggle": true
+          }
+        }
+      }
+    },
+    {
+      "id": "BL-7",
+      "note": "Every value stated at its default: nothing is left, so no member is written, as for BL-1.",
+      "input": {
+        "listings": {
+          "certificates": {
+            "view": "matrix"
+          },
+          "repositories": {
+            "view": "list",
+            "visitorToggle": false
+          }
+        }
+      },
+      "expect": {
+        "listings": null
       }
     }
   ]
