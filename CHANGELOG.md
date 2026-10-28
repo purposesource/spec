@@ -5419,7 +5419,7 @@ which kind of change each entry was.
 ### 1.20.0 — unreleased (2026-10-28; ops decision D65 item 5, FS-00 §6.3's dated note of 2026-10-28; GO-LIVE list 3 item 1.4, L3-10, PS-1913)
 
 - Additive, a minor bump: one operation, `postWaiverCertificateCoverage`, at
-  `POST /v1/coverage/waiver-certificate`, with two components, four error codes and eight
+  `POST /v1/coverage/waiver-certificate`, with two components, four error codes and nine
   examples. No other operation, status code, cache class, schema member or example moved, and
   `getCoverage`, `postCoverage`, `CoverageResponse` and `cov-v1` are unchanged.
 - **Why.** D65 item 5 asks, before the first masked waiver, that "the coverage check works from
@@ -5440,6 +5440,16 @@ which kind of change each entry was.
   carries one); and `cov-v1`'s test for a waiver in force (FS-10 §4.3 step 2). The
   certificate's own `period` is not read (CERT-041), nor is the company's entitlement record:
   the answer is the waiver's.
+- **The log** is read at `ct/{n}.json`, and at `ct/latest.json` when that copy does not reach
+  `record.issueSeq`: the open segment grows in place at its number, and a copy of it can
+  predate an entry the waiver document already names. A log that, as read, does not reach the
+  entry yet is `503 artifacts_unavailable`, never `cert_not_in_ct_log`, which is kept for an
+  entry at `issueSeq` that is not this certificate's issue entry. An entry published before
+  recording (development planes only) is tied by `beneficiary.coId` alone, and is answered `no`
+  under a key published `compromised`, because only the log shows such bytes were issued.
+- **The answer binds to the bytes sent.** It is about the company the presented certificate
+  names, which the client reads from the bytes it sent (`basis.certificate.jwsSha256`); the
+  route does not establish who presented them.
 - **The answer**, `WaiverCertificateCoverageResponse`: `yes-via-waiver` or `no`, with the words
   of `CoverageResponse` where they mean the same (`answer`, `basis.repo`, `basis.waiver.wvrId`
   and `grantedAt`, `basis.note`, `asOf`, `proof` of type `waiver-record`), and
@@ -5455,20 +5465,22 @@ which kind of change each entry was.
   `repo_not_registered` (`404`), as `cov-v1` answers a waiver for a work with no record.
 - `x-psn-phase: P-M3`, as `getCoverage`; the phase list in `info.description` names both
   coverage endpoints.
-- **Vectors:** `coverage/waiver-certificate-vectors.json` (new), 37 vectors over real
+- **Vectors:** `coverage/waiver-certificate-vectors.json` (new), 40 vectors over real
   certificates signed with the published fixture key `psn-dev-2026-1`: a named and a masked
   waiver (with and without `coId`), both serialisations, a certificate whose period ended, a
   revoked, a withdrawn and a recording waiver, the recording and revocation boundaries, a
   retired, pending and compromised key on both sides of its window, an unknown and an
-  ambiguous `kid`, a forgery, a hash the log did not record, an entry naming another
-  certificate or organisation, an entry published before recording, a repository with no
-  record, the size bound on both sides, and five malformed bodies.
+  ambiguous `kid`, a forgery, a hash the log did not record, an older copy of the open segment
+  read past at `ct/latest.json`, a log that does not reach the entry yet, an entry naming
+  another certificate or organisation, an entry published before recording (tied by its
+  company id, and not under a compromised key), a repository with no record, the size bound on
+  both sides, and six malformed bodies, a validly signed supporter certificate among them.
   `npm run check:certificate-vectors` (new, in `npm test`) validates each fixture against its
   schema, each payload against `certificate.v1`, each signature, and each expected answer
   against the component, and fails on an answer that names a certificate's subject. The
   website's `workers/edge/test/waiver-certificate.test.ts` drives every vector through the
   route, and its `scripts/waiver-certificate-vectors.mjs` writes this file.
-- `check:openapi-examples` validates 80 examples (72 before).
+- `check:openapi-examples` validates 81 examples (72 before).
 
 ## coverage/cov-v1.ts
 

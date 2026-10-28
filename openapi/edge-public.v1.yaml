@@ -524,9 +524,17 @@ paths:
            entry at `record.issueSeq` is the `issue` entry of a `license-status` certificate
            whose `h` is the SHA-256 of the certificate as presented (its compact form);
            otherwise `cert_not_in_ct_log`, because the bytes presented are not the ones the log
-           recorded (CERT-030). Where the entry carries `beneficiary.coId`, it is the
-           certificate's `subId`. An entry naming another certificate or another organisation,
-           or carrying neither `record` nor `coId`, is answered `no`.
+           recorded (CERT-030). The log is read at `ct/{n}.json`, the segment that holds
+           `issueSeq`, and at `ct/latest.json` when that copy does not reach `issueSeq`: the
+           open segment grows in place at its number, and a copy of it can predate an entry the
+           waiver document already names. A log that, as read, does not reach `issueSeq` yet is
+           `503 artifacts_unavailable`, never `cert_not_in_ct_log`. Where the entry carries
+           `beneficiary.coId`, it is the certificate's `subId`. An entry published before
+           recording (development planes only; a production plane has none, `waiver.v1`
+           `grantedAt`) carries no `record` and is tied by `beneficiary.coId` alone; under a key
+           published `compromised` such an entry is answered `no`, because only the log shows
+           that bytes signed under that key were issued. An entry naming another certificate or
+           another organisation, or carrying neither `record` nor `coId`, is answered `no`.
         5. The answer is `yes-via-waiver` while the waiver is in force, which is the waiver test
            of `cov-v1` (FS-10 §4.3 step 2): its `grantedAt` is at or before `asOf`, and it has
            no `revokedAt` at or before `asOf`. Otherwise it is `no`, with a `note`. A waiver
@@ -544,7 +552,10 @@ paths:
         carries, the `kid`), the repository and the waiver, all of which the public waiver
         entry and the log already publish, and never the company's name, id or domain. An
         answer passed on therefore discloses nothing about a masked waiver beyond its public
-        entry. A refusal names no company either.
+        entry. A refusal names no company either. The answer is about the company the
+        presented certificate names (`sub`, `subId`): read it from the bytes you sent, which
+        `basis.certificate.jwsSha256` identifies; the route does not establish who presented
+        them.
       tags: [coverage]
       x-psn-phase: P-M3
       requestBody:
@@ -708,7 +719,24 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
         '503':
-          $ref: '#/components/responses/ArtifactsUnavailable'
+          description: |
+            `artifacts_unavailable`: an artifact the answer depends on could not be read, the
+            waiver document lists the waiver more than once, or the transparency log as read
+            does not reach the entry at `record.issueSeq` yet (neither its segment's copy nor
+            the open segment at `ct/latest.json` carries it). Nothing is asserted about the
+            certificate; ask again in a few minutes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                logNotReached:
+                  summary: The log as read does not reach the certificate's issue entry yet
+                  value:
+                    error:
+                      code: artifacts_unavailable
+                      message: The transparency log this answer reads does not reach this certificate's entry yet. Ask again in a few minutes.
+                      traceId: 01jm3b7h4rs8w2ce0x5a9y1d3g
 
   /v1/verify/{certId}:
     get:
