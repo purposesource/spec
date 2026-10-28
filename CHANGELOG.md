@@ -2160,6 +2160,10 @@ row the new-file rule binds absolutely.
   never sets the deadline, as `cost-support.v1`'s `transfers` says it. The three further
   examples are still rows of `ledger-export.v1`'s credit-month example less `date`, and their
   hashes now recompute: only their `prevHash` and `rowHash` moved. No member, type or rule moves.
+- *(2026-10-28: the released hold in the pool's sentence.)* Wording only. The description's
+  credit-month paragraph now opens with the pool `ledger-export.v1` `poolBasis` names: the Purpose
+  Fees of the payouts a close carries and of the held items the close releases. No member, type or
+  rule moves.
 
 ## ledger-export.v1.json
 
