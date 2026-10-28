@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.19.0
+  version: 1.20.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -42,9 +42,10 @@ info:
       `getRepositoryBadge` are the exception: the edge draws them only where the deployment's
       README card switch is on, and production's is off, so there each is still read as a badge
       name, as it was before the cards existed.
-    - `P-M3` — the computed coverage endpoint. At P-M2 the coverage proof is the
-      published entitlement JWS plus the human verify page; the endpoint activates later
-      with no schema change. The two allocation-key routes are P-M3 as well: their
+    - `P-M3` — the two computed coverage endpoints: the answer for an organisation and a
+      repository, and the answer from a company's own waiver certificate. At P-M2 the coverage
+      proof is the published entitlement JWS plus the human verify page; the endpoints
+      activate later with no schema change. The two allocation-key routes are P-M3 as well: their
       producer is the platform's index build, and until its first run writes the index
       both answer `404`. The designations summary route is P-M3 as well, for the same
       producer: a month no index-build run rendered answers `404`. The two Recipient List
@@ -461,6 +462,249 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/coverage/waiver-certificate:
+    post:
+      operationId: postWaiverCertificateCoverage
+      summary: Coverage answer from the company's own waiver certificate
+      description: |
+        A company that holds a waiver certificate asks whether the waiver it names covers it
+        now, by presenting the certificate itself. The route verifies the certificate, finds
+        the waiver it names in the repository's published waiver document, and answers from
+        that entry (ops decision D65 item 5).
+
+        It exists because of masking. A masked waiver's public entry carries no name and no
+        domain (ops decision D66 item 3), and it stops carrying the company id too, because
+        that id re-identifies the company through its entitlement record. `getCoverage`
+        matches a waiver to an organisation by its company id or a verified domain, so it
+        cannot reach such an entry; the certificate the company holds can. `getCoverage`,
+        `postCoverage` and `cov-v1` are unchanged.
+
+        **The body is the certificate**, in either of its two serialisations: the compact
+        serialisation (`header.payload.signature`, `application/jose`), which is the
+        certificate as it is issued and downloaded, or the flattened JSON serialisation
+        (`{"protected", "payload", "signature"}`, `application/jose+json`, RFC 7515 §7.2.2).
+        The route tells them apart by the body's first character that is not white space,
+        not by `Content-Type`. White space around the compact form is ignored. A body is
+        at most 16384 bytes, counted as it arrives: a longer one is refused
+        (`payload_too_large`) before it is read in full, whether or not it declares its length.
+
+        **POST only, and never cached.** A certificate names its company, so it never travels
+        in a URL, and no shared cache keys on it.
+
+        **What is checked, in order; the first check that fails decides.**
+
+        1. The body is a waiver certificate in the certificate profile (FS08-050): a protected
+           header with `alg` `ES256`, a `kid`, `typ` `application/psn-cert+jws`, at most a
+           `cty` of `application/json` and no other member, and a payload with `typ`
+           `license-status`, `variant` `waiver`, a `cid`, a `co_` subject, a `project` scope
+           naming exactly one repository, and `factRefs.wvrId`. An unprotected `header` in the
+           JSON form is refused, not ignored: everything the route judges is signed.
+           Otherwise `malformed_certificate`.
+        2. Its signature verifies under the key its `kid` names in the key set this deployment
+           serves at `/jwks.json`, and that key could sign at the certificate's `iat`: the
+           key-window rule of `getJwks`. A fault of the token (a signature that does not
+           verify, an unknown `kid`, an `iat` outside the key's window or after its compromise)
+           is `certificate_invalid`, the verify page's INVALID. A key set that does not settle
+           the key (`pending`, two entries under one `kid`, a status or window it does not
+           state) is `certificate_unverifiable`, the page's CANNOT VALIDATE, and asserts nothing
+           about the certificate. A certificate signed before the window of a key published as
+           `compromised` ends is accepted, and the answer says so in
+           `basis.certificate.keyWarning`.
+        3. The repository the certificate names has a published registry record; otherwise
+           `repo_not_registered`, because a waiver is published under a registered repository's
+           record. Its waiver document is then read as `getCoverage` reads it, an absent one
+           as an empty one.
+        4. The waiver entry the certificate names is tied to this certificate. Where the entry
+           carries `record`, its `certId` is the certificate's `cid`, and the transparency log's
+           entry at `record.issueSeq` is the `issue` entry of a `license-status` certificate
+           whose `h` is the SHA-256 of the certificate as presented (its compact form);
+           otherwise `cert_not_in_ct_log`, because the bytes presented are not the ones the log
+           recorded (CERT-030). Where the entry carries `beneficiary.coId`, it is the
+           certificate's `subId`. An entry naming another certificate or another organisation,
+           or carrying neither `record` nor `coId`, is answered `no`.
+        5. The answer is `yes-via-waiver` while the waiver is in force, which is the waiver test
+           of `cov-v1` (FS-10 §4.3 step 2): its `grantedAt` is at or before `asOf`, and it has
+           no `revokedAt` at or before `asOf`. Otherwise it is `no`, with a `note`. A waiver
+           still in the document's `recording[]`, or withdrawn there before it was recorded, is
+           `no`; so is a waiver the document does not carry.
+
+        **The answer is the waiver's.** The certificate's own `period` is not read: a
+        certificate whose period has ended still names its waiver (expiry is non-destructive,
+        CERT-041), and the registry says whether that waiver covers now. Nor is the company's
+        entitlement record read: this route answers from the waiver alone, so it never answers
+        a Pass, a Project or a Portfolio; `getCoverage` does. `coolingEndsAt` and `reviews` do
+        not change the answer, as they do not change `cov-v1`'s.
+
+        **The answer names no company.** It names the certificate (`cid`, the SHA-256 the log
+        carries, the `kid`), the repository and the waiver, all of which the public waiver
+        entry and the log already publish, and never the company's name, id or domain. An
+        answer passed on therefore discloses nothing about a masked waiver beyond its public
+        entry. A refusal names no company either.
+      tags: [coverage]
+      x-psn-phase: P-M3
+      requestBody:
+        required: true
+        description: The waiver certificate, in one of its two serialisations, at most 16384 bytes.
+        content:
+          application/jose:
+            schema:
+              type: string
+              maxLength: 16384
+              pattern: '^\s*[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\s*$'
+              description: The compact serialisation, which is the certificate as issued (FS08-050).
+            examples:
+              compact:
+                summary: A waiver certificate, signed with the published fixture key psn-dev-2026-1
+                value: eyJhbGciOiJFUzI1NiIsImN0eSI6ImFwcGxpY2F0aW9uL2pzb24iLCJraWQiOiJwc24tZGV2LTIwMjYtMSIsInR5cCI6ImFwcGxpY2F0aW9uL3Bzbi1jZXJ0K2p3cyJ9.eyJjaWQiOiJjZXJ0XzAxamsyYTZoMHdxNG04cnQydjZ5YjNkNWZnIiwiY2xhaW1LaXRWZXJzaW9uIjoia2l0LTEiLCJmYWN0UmVmcyI6eyJ3dnJJZCI6Ind2cl8wMWprMmE2ZzNxcjd2MWJkOXc0ejh4MGMzZiJ9LCJpYXQiOjE4MDY1Mzc2MDAsImlzcyI6Imh0dHBzOi8vYXBpLnB1cnBvc2Vzb3VyY2Uub3JnIiwicGVyaW9kIjp7InZhbGlkRnJvbSI6IjIwMjctMDQtMDEiLCJ2YWxpZFVudGlsIjoiOTk5OS0xMi0zMSJ9LCJzY29wZSI6eyJraW5kIjoicHJvamVjdCIsInJlcG9zIjpbIlJfa2dET0FiYzEyMyJdfSwic3ViIjoiS2xlaW5iZXRyaWViIEdtYkgiLCJzdWJJZCI6ImNvXzAxamsyYTZnM3FyN3YxYmQ5dzR6OHgwYzJmIiwic3ViamVjdEtpbmQiOiJjb21wYW55IiwidHlwIjoibGljZW5zZS1zdGF0dXMiLCJ2YXJpYW50Ijoid2FpdmVyIiwidmVyaWZ5IjoiaHR0cHM6Ly9wdXJwb3Nlc291cmNlLm9yZy92ZXJpZnkvY2VydF8wMWprMmE2aDB3cTRtOHJ0MnY2eWIzZDVmZyJ9.-w_gpqDXRus3XRoLUZpvW1_IZzLAK-gb4nKgB4UmjJI9WbXmqy8SPfONUJsGoZgs9ViDpNyzpny2S-Ci2Oh-KA
+          application/jose+json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [protected, payload, signature]
+              description: >-
+                The flattened JSON serialisation (RFC 7515 §7.2.2). The compact form the route
+                verifies and hashes is the three members joined by `.`. No unprotected `header`.
+              properties:
+                protected:
+                  type: string
+                  pattern: '^[A-Za-z0-9_-]+$'
+                payload:
+                  type: string
+                  pattern: '^[A-Za-z0-9_-]+$'
+                signature:
+                  type: string
+                  pattern: '^[A-Za-z0-9_-]+$'
+      responses:
+        '200':
+          description: The coverage answer from the waiver the certificate names. Never cached.
+          headers:
+            Cache-Control:
+              description: Answers from a certificate are never cached.
+              schema:
+                type: string
+              example: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WaiverCertificateCoverageResponse'
+              examples:
+                maskedWaiverCovers:
+                  summary: A masked waiver in force covers; the answer names no company
+                  value:
+                    answer: yes-via-waiver
+                    basis:
+                      certificate:
+                        cid: cert_01jk2a6h0wq4m8rt2v6yb3d5fg
+                        jwsSha256: 9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4
+                        kid: psn-dev-2026-1
+                      repo:
+                        nodeId: R_kgDOAbc123
+                        repoState: registered
+                      waiver:
+                        wvrId: wvr_01jk2a6g3qr7v1bd9w4z8x0c3f
+                        grantedAt: '2027-04-01T00:05:00Z'
+                    asOf: '2027-06-01T12:00:00.000Z'
+                    proof:
+                      type: waiver-record
+                      url: https://api.purposesource.org/v1/waivers/R_kgDOAbc123.json#wvr_01jk2a6g3qr7v1bd9w4z8x0c3f
+                revokedWaiver:
+                  summary: A revoked waiver is no, with the revocation instant
+                  value:
+                    answer: 'no'
+                    basis:
+                      certificate:
+                        cid: cert_01jk2a6h0wq4m8rt2v6yb3d5fg
+                        jwsSha256: 9b1d34c8a3f27af0dda2067ea0aa2bd17f4b822dfd5a4392a6cc63309d64b7a4
+                        kid: psn-dev-2026-1
+                      note: the waiver was revoked
+                      repo:
+                        nodeId: R_kgDOAbc123
+                        repoState: registered
+                      waiver:
+                        wvrId: wvr_01jk2a6g3qr7v1bd9w4z8x0c3f
+                        grantedAt: '2027-04-01T00:05:00Z'
+                        revokedAt: '2027-05-15T00:00:00Z'
+                    asOf: '2027-06-01T12:00:00.000Z'
+        '400':
+          description: |
+            The body is not a waiver certificate in either serialisation
+            (`malformed_certificate`), or a production deployment refused sample material it was
+            asked to read (`sandbox_artifact_on_prod`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                malformedCertificate:
+                  summary: A supporter certificate presented as a waiver certificate
+                  value:
+                    error:
+                      code: malformed_certificate
+                      message: This route reads a waiver certificate (license-status, variant waiver); this one is "supporter", variant "entitlement".
+                      traceId: 01jm3b7h4rs8w2ce0x5a9y1d3g
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: |
+            `certificate_unverifiable`: the published key set does not settle the key the
+            certificate names, and nothing is asserted about the certificate; ask again once
+            the key set does. `cert_not_in_ct_log`: the transparency log does not record this
+            certificate where its waiver's registry entry says it is.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                keyPending:
+                  summary: The key set marks the certificate's key pending
+                  value:
+                    error:
+                      code: certificate_unverifiable
+                      message: "The published key set does not settle this certificate's key: psn-dev-2026-1 is published but not yet in use."
+                      traceId: 01jm3b7h4rs8w2ce0x5a9y1d3g
+                notInLog:
+                  summary: The log's issue entry carries another hash
+                  value:
+                    error:
+                      code: cert_not_in_ct_log
+                      message: The transparency log does not record this certificate where its waiver's registry entry says it is.
+                      traceId: 01jm3b7h4rs8w2ce0x5a9y1d3g
+        '413':
+          description: The body is longer than 16384 bytes (`payload_too_large`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                tooLarge:
+                  summary: Seventeen kilobytes
+                  value:
+                    error:
+                      code: payload_too_large
+                      message: The body is longer than 16384 bytes.
+                      traceId: 01jm3b7h4rs8w2ce0x5a9y1d3g
+        '422':
+          description: |
+            `certificate_invalid`: the certificate is not one the published key it names could
+            have made at its `iat`: its signature does not verify, its `kid` is not in the key
+            set, or its `iat` is outside the key's window or after the key's compromise.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                forged:
+                  summary: A payload rewritten under a kept signature
+                  value:
+                    error:
+                      code: certificate_invalid
+                      message: "This certificate does not verify: its signature is not one the published key psn-dev-2026-1 made over these bytes."
+                      traceId: 01jm3b7h4rs8w2ce0x5a9y1d3g
         '429':
           $ref: '#/components/responses/RateLimited'
         '503':
@@ -3639,6 +3883,10 @@ components:
                 - artifacts_unavailable
                 - internal
                 - page_not_found
+                - malformed_certificate
+                - payload_too_large
+                - certificate_invalid
+                - certificate_unverifiable
               description: The stable machine code.
             message:
               type: string
@@ -3810,6 +4058,119 @@ components:
               format: date-time
         proof:
           $ref: '#/components/schemas/CoverageProof'
+
+    WaiverCertificateCoverageResponse:
+      type: object
+      additionalProperties: false
+      required: [answer, basis, asOf]
+      description: |
+        The answer `postWaiverCertificateCoverage` gives from the waiver a company's own
+        certificate names. Its members carry the words of `CoverageResponse` where they mean
+        the same; it has no `company` member, because it names no company.
+      properties:
+        answer:
+          type: string
+          enum: [yes-via-waiver, 'no']
+          description: >-
+            Two of the eight `CoverageAnswer` values, with their meaning there:
+            `yes-via-waiver` while the waiver the certificate names is in force, `no`
+            otherwise. No other value is returned by this route.
+        basis:
+          $ref: '#/components/schemas/WaiverCertificateCoverageBasis'
+        asOf:
+          type: string
+          format: date-time
+          description: The instant the answer was computed as of, the request instant. Echoed so you can re-derive it yourself.
+        proof:
+          $ref: '#/components/schemas/CoverageProof'
+          description: >-
+            Present on `yes-via-waiver` only, of type `waiver-record`: the waiver's entry in
+            the repository's published waiver document. Absent for `no`, as on `CoverageResponse`.
+
+    WaiverCertificateCoverageBasis:
+      type: object
+      additionalProperties: false
+      required: [certificate, repo, waiver]
+      description: What produced the answer. Always present, including for `no`.
+      properties:
+        certificate:
+          type: object
+          additionalProperties: false
+          required: [cid, jwsSha256, kid]
+          description: >-
+            The certificate the answer was computed from, by what the public record already
+            carries: never its subject.
+          properties:
+            cid:
+              type: string
+              pattern: '^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$'
+            jwsSha256:
+              type: string
+              pattern: '^[0-9a-f]{64}$'
+              description: The SHA-256 of the certificate's compact form, the `h` the transparency log carries for it.
+            kid:
+              type: string
+              pattern: '^psn-(dev|prod|sandbox)-[0-9]{4}-[0-9]+$'
+              description: The published key the certificate verified under.
+            keyWarning:
+              type: string
+              enum: [key_compromised_before]
+              description: >-
+                Present only when the key is published as `compromised` and the certificate
+                was signed before its window ends: accepted, as a genuinely issued certificate
+                may be relied on despite a later compromise of its key (Licence 1.0 §9). The
+                date is the signer's own statement; the transparency log's issue entry, which
+                this route checks where the waiver's entry names it, is what shows it was issued
+                then.
+        note:
+          type: string
+          description: >-
+            Present on `no`, saying why: `the waiver is not in force yet`, `the waiver was
+            revoked`, `the waiver is being recorded`, `the waiver was withdrawn before it was
+            recorded`, `no waiver with this id is published for this repository`, `the
+            registry names another certificate for this waiver`, `the registry names another
+            organisation for this waiver`, or `the registry entry for this waiver cannot be
+            tied to a certificate`.
+        repo:
+          type: object
+          additionalProperties: false
+          required: [nodeId, repoState]
+          description: The repository the certificate's waiver is for, its scope's one node id.
+          properties:
+            nodeId:
+              type: string
+              pattern: '^([A-Za-z0-9_-]{4,128}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$'
+            repoState:
+              type: string
+              enum: [registered, suspended, quit, delisted]
+              description: >-
+                The state the repository's published record carries, as `CoverageBasis` reports
+                it: a record that says `verified`, the token published before ops decision D82,
+                is reported as `registered`. A repository with no record is
+                `repo_not_registered`, never an answer.
+        waiver:
+          type: object
+          additionalProperties: false
+          required: [wvrId]
+          description: >-
+            The waiver the certificate names (`factRefs.wvrId`), with the instants its entry
+            publishes that decided the answer, in the words of `waiver.v1`.
+          properties:
+            wvrId:
+              type: string
+              pattern: '^wvr_[0-9abcdefghjkmnpqrstvwxyz]{26}$'
+            grantedAt:
+              type: string
+              format: date-time
+              description: The instant the waiver was recorded, from which it covers.
+            revokedAt:
+              type: string
+              format: date-time
+              description: The waiver's revocation instant, where its entry publishes one, past or coming.
+            withdrawnAt:
+              type: string
+              format: date-time
+              description: The instant a waiver was withdrawn before it was recorded; it never covered anyone.
 
     Jwks:
       type: object

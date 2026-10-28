@@ -5416,6 +5416,60 @@ which kind of change each entry was.
   move, and validate badge bodies against `badge.v1`, which admits both words, so the order of pushes
   does not matter for them. `check:openapi-examples` validates the same 72 examples.
 
+### 1.20.0 — unreleased (2026-10-28; ops decision D65 item 5, FS-00 §6.3's dated note of 2026-10-28; GO-LIVE list 3 item 1.4, L3-10, PS-1913)
+
+- Additive, a minor bump: one operation, `postWaiverCertificateCoverage`, at
+  `POST /v1/coverage/waiver-certificate`, with two components, four error codes and eight
+  examples. No other operation, status code, cache class, schema member or example moved, and
+  `getCoverage`, `postCoverage`, `CoverageResponse` and `cov-v1` are unchanged.
+- **Why.** D65 item 5 asks, before the first masked waiver, that "the coverage check works from
+  the company's own certificate". A masked waiver's public entry carries no name and no domain
+  (D66 item 3), and stops carrying the company id (PS-2205, the orchestrator's word of
+  2026-10-21 on L2.3-03), so `cov-v1`, which matches a waiver by `beneficiary.coId` or a verified
+  domain, cannot reach it. The certificate the company holds names the waiver
+  (`factRefs.wvrId`), and the waiver's entry names the certificate (`record.certId`, and the log
+  entry at `record.issueSeq` whose `h` is its SHA-256, `waiver.v1` 1.3.0).
+- **The request** is the certificate, in its compact serialisation (`application/jose`) or its
+  flattened JSON serialisation (`application/jose+json`, RFC 7515 §7.2.2), told apart by the
+  first character, at most 16384 bytes. POST only and never cached: a certificate names its
+  company, so it never travels in a URL.
+- **The checks**, in order: a waiver certificate in the certificate profile; its signature under
+  the key its `kid` names in `/jwks.json`, judged by `getJwks`'s key-window rule at its `iat`;
+  the repository's published record; the waiver entry tied to the certificate (`record.certId`
+  and the log's `issue` entry where the entry carries `record`, `beneficiary.coId` where it
+  carries one); and `cov-v1`'s test for a waiver in force (FS-10 §4.3 step 2). The
+  certificate's own `period` is not read (CERT-041), nor is the company's entitlement record:
+  the answer is the waiver's.
+- **The answer**, `WaiverCertificateCoverageResponse`: `yes-via-waiver` or `no`, with the words
+  of `CoverageResponse` where they mean the same (`answer`, `basis.repo`, `basis.waiver.wvrId`
+  and `grantedAt`, `basis.note`, `asOf`, `proof` of type `waiver-record`), and
+  `basis.certificate` (`cid`, `jwsSha256`, `kid`, and `keyWarning` for a certificate signed
+  before its key's compromise) in place of `basis.company`. It names no company: everything in
+  it is on the public waiver entry or in the log. `basis.waiver` may carry `revokedAt` and
+  `withdrawnAt`, `waiver.v1`'s words.
+- **The refusals**, each a new code in `ErrorEnvelope`: `malformed_certificate` (`400`),
+  `payload_too_large` (`413`), `certificate_invalid` (`422`, the token's fault: the verify
+  page's INVALID) and `certificate_unverifiable` (`409`, the key set's fault: its CANNOT
+  VALIDATE). Two existing codes answer here too: `cert_not_in_ct_log` (`409`) for a
+  certificate whose bytes the log did not record where the entry says, and
+  `repo_not_registered` (`404`), as `cov-v1` answers a waiver for a work with no record.
+- `x-psn-phase: P-M3`, as `getCoverage`; the phase list in `info.description` names both
+  coverage endpoints.
+- **Vectors:** `coverage/waiver-certificate-vectors.json` (new), 37 vectors over real
+  certificates signed with the published fixture key `psn-dev-2026-1`: a named and a masked
+  waiver (with and without `coId`), both serialisations, a certificate whose period ended, a
+  revoked, a withdrawn and a recording waiver, the recording and revocation boundaries, a
+  retired, pending and compromised key on both sides of its window, an unknown and an
+  ambiguous `kid`, a forgery, a hash the log did not record, an entry naming another
+  certificate or organisation, an entry published before recording, a repository with no
+  record, the size bound on both sides, and five malformed bodies.
+  `npm run check:certificate-vectors` (new, in `npm test`) validates each fixture against its
+  schema, each payload against `certificate.v1`, each signature, and each expected answer
+  against the component, and fails on an answer that names a certificate's subject. The
+  website's `workers/edge/test/waiver-certificate.test.ts` drives every vector through the
+  route, and its `scripts/waiver-certificate-vectors.mjs` writes this file.
+- `check:openapi-examples` validates 80 examples (72 before).
+
 ## coverage/cov-v1.ts
 
 The published coverage function, versioned together with its vectors (`coverage/vectors.json`)
