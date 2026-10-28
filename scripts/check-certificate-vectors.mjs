@@ -9,7 +9,9 @@
  * gate checks, for the whole file:
  *
  *   · every key set against jwks.v1.json, every repository record against repo-record.v1.json,
- *     every waiver document against waiver.v1.json and every log segment against ct-segment.v1.json;
+ *     every waiver document against waiver.v1.json and every log segment against ct-segment.v1.json,
+ *     a numbered one at its own number, and the open head (`latest`) as an open segment whose
+ *     entries begin with those of any older copy of the same segment the vector publishes;
  *   · every certificate: its protected header, and its payload against certificate.v1.json; and its
  *     ES256 signature against the public half of psn-dev-2026-1 the key sets carry, which must
  *     verify exactly for the certificates marked `signed: true`;
@@ -106,6 +108,7 @@ const STATUS_FOR = {
   certificate_unverifiable: 409,
   cert_not_in_ct_log: 409,
   repo_not_registered: 404,
+  artifacts_unavailable: 503,
 };
 
 if (vectorFile.route !== `POST ${ROUTE}`) problems.push(`${FILE}: route is ${JSON.stringify(vectorFile.route)}`);
@@ -187,7 +190,20 @@ for (const vector of vectorFile.vectors ?? []) {
   if (plane.waivers !== null) check('waivers', `${label} plane.waivers`, plane.waivers);
   for (const [segment, document] of Object.entries(plane.ct ?? {})) {
     check('segment', `${label} plane.ct.${segment}`, document);
-    if (String(document.segment) !== segment) problems.push(`${label}: ct.${segment} says it is segment ${document.segment}`);
+    if (segment === 'latest') {
+      // ct/latest.json is the open segment: it grows in place, and a numbered copy of the same
+      // segment that a vector publishes beside it is an older state of it, never another log.
+      if (document.closed === true) problems.push(`${label}: ct.latest is a closed segment`);
+      const older = plane.ct[String(document.segment)];
+      if (older) {
+        const head = (document.entries ?? []).slice(0, (older.entries ?? []).length);
+        if (JSON.stringify(head) !== JSON.stringify(older.entries ?? [])) {
+          problems.push(`${label}: ct.${document.segment} is not an older copy of ct.latest`);
+        }
+      }
+    } else if (!/^\d+$/.test(segment) || String(document.segment) !== segment) {
+      problems.push(`${label}: ct.${segment} says it is segment ${document.segment}`);
+    }
   }
 
   const request = vector.request ?? {};

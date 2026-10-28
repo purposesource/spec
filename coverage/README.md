@@ -158,7 +158,7 @@ certificate, the repository and the waiver, never the company.
 
 It is a separate route, not a change to this function: FS-00 §6.3 freezes `cov-v1`, and its
 dated note of 2026-10-28 records the decision. `waiver-certificate-vectors.json` holds the
-route's 37 vectors, over real certificates signed with the published fixture key
+route's 40 vectors, over real certificates signed with the published fixture key
 `psn-dev-2026-1`; `npm run check:certificate-vectors` checks them, and the website's edge tests
 drive each one through the route.
 
