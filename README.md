@@ -65,6 +65,9 @@ npm run check:designations      # designations make 100 and derive their slug li
                                 #   summary keeps the floor of 5 and the rounding; monthly totals; refusals
 npm run check:fees-account-statement  # the fees account's statement: lines booked in its month, its rules,
                                 #   and the refusals of what must never be published
+npm run check:transfers         # the month's transfers record: its link to the frozen cost-support
+                                #   document's bytes, identity (4), the export's disburse rows, the
+                                #   regeneration rule, and the refusals
 npm run check:consultations     # the advisory votes' two contracts: the relations their descriptions
                                 #   promise, the floor of 5, and the refusals
 npm run check:jwks              # the key set's one contract in two places (schema, API description), its
@@ -125,6 +128,7 @@ needs a toolchain is not really published.
 | `ledger-chain.v1.json` | `/ledger/chain.json` | first public version |
 | `cost-support.v1.json` | one calendar month of the published cost-support table | P-M3 producer, v0 hand-maintained |
 | `fees-account-statement.v1.json` | `/fees-account/{YYYY-MM}.json` — the published statement of the fees account for one locked month: every line the bank booked, with its class, and nothing that identifies a payer or a natural person (statutes Art. 12(1), Art. 20(1)) | P-M3 producer |
+| `transfers.v1.json` | `/transfers/{YYYY-MM}.json` — what became of one locked month's shares, published after the transfers happen: one row per listed recipient, scheduled or transferred, with the day, the end-to-end identifier and, once it has arrived, the recipient's receipt pinned by its document's SHA-256; it names the month's frozen cost-support document by the SHA-256 of its bytes (ops decision D64 item 1) | P-M3 producer |
 | `recipient-list.v1.json` | `/recipient-list/{version}.json` — one released version of the Recipient List (kept by the board, outside the statutes), each entry pending or active, written once | P-M3 producer |
 | `recipient-lists.v1.json` | `/recipient-list/index.json` — every released List version, newest first, with its state (released, recorded, late or void), its proven publication and its notice, and every immediate removal with its published ground | P-M3 producer |
 | `allocation-key.v1.json` | `/allocation-keys/{YYYY-MM}.json` — the board's allocation key for one month, released by two steward approvals before the month and written once, with the exact text they approved | P-M3 producer |
@@ -165,6 +169,14 @@ attempt's number after it. It never carries a counterparty's name or account, re
 return details, anything a steward wrote or a single personnel payment, so nothing in it identifies a
 payer or a natural person: a personnel cost is published as one line per function, never by name,
 and a month holding a personnel payment is withheld rather than published line by line.
+
+The `transfers.v1` row (2026-10-29) is where a month's transfers are published. The month lock reads and
+hashes the month's cost-support document before the allocation exists, and never edits it, so that
+document carries no transfer; the record states, after the transfers happen, which share went to which
+listed recipient, on which day and under which end-to-end identifier, and adds each recipient's receipt as
+soon as it arrives. It names the frozen document by the SHA-256 of its exact bytes, the value the month's
+ledger export publishes, and its rows sum to that document's `passedOnMinor`: `cost-support.v1`'s identity
+(4), checked through the record (ops decision D64 item 1).
 
 The `recipient-list.v1` and `recipient-lists.v1` rows (FS-00 §6.2's dated note of 2026-10-01)
 publish the Recipient List the way the allocation key is published: each released version is

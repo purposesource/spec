@@ -103,6 +103,10 @@ the decoded payload of the signed record of one ended term that an organisation 
 forty-two schemas in all, the forty-first being `consent-campaign.v1.json` (2026-10-24), whose section is below and which
 these paragraphs had not counted.
 
+The month's transfers record (2026-10-29; ops decision D64 item 1) adds one more, with its own section below: `transfers.v1.json`,
+what became of one locked month's shares, published after the transfers happen and linked to the month's frozen cost-support
+document by the SHA-256 of its bytes — forty-three schemas in all.
+
 ### Contracts published beyond the initially-scoped ten
 
 Seven schemas were added because another repository's acceptance test names a schema
@@ -2827,6 +2831,87 @@ reasoning: no month export has ever been published with a row in it.
     credit-month example, lists the payout, its `heldMinor` including the released items. The
     released money keeps its payout's deadline, 3 January 2028, and the close's transfers are due
     by 1 February 2028, the December payout's.
+
+### 1.5.0 — unreleased (2026-10-29; ops decision D64 item 1, the checked register's row 24) — pre-release
+
+- Identity (4) restated. The month lock reads and hashes this document before the allocation exists, and the bytes are
+  never edited, so every document the lock froze carries `transfers: []`, and its published bytes failed identity (4) in
+  every month that passes money on. D64 item 1 adopted the register's answer: the transfers are published as their own
+  record after they happen, and the frozen file is never edited. That record is `transfers.v1` (`/transfers/{YYYY-MM}.json`,
+  its section below), which names this document by the SHA-256 of its exact bytes, the export's `batch.costSupportSha256`.
+- Identity (4) now reads: the month's transfers sum to `passedOnMinor`, as the rows of `transfers[]` where the document
+  carries any, and otherwise as the rows of that record. Until the record is published, the identity is open, never failed:
+  no transfer of the month has been executed, or the month's record is withheld. A month that passes nothing on meets it on
+  its own empty array.
+- Wording: `passedOnMinor` and `transfers` say the same, and `transfers` says that a frozen document carries no row.
+- **Pre-release (versioning rule 5):** what identity (4) asks of a frozen document changed. No property, type or enum
+  changes: every document valid under 1.4.0 is valid under 1.5.0, a document that carries its own rows reads exactly as
+  before, and nothing frozen is edited. The five examples are unchanged. `cost-support.v1.credit-month.example.json`'s four
+  `scheduled` rows are the shares as the month's close states them, and `transfers.v1`'s two examples say what became of
+  them.
+
+## transfers.v1.json
+
+### 1.0.0 — unreleased (2026-10-29; ops decision D64 item 1, the checked register's row 24; FS-07's dated note of 2026-10-29) — pre-release
+
+- New. What became of one locked month's shares, at `/transfers/{YYYY-MM}.json` (the month in the path, outside `ledger/`, as
+  the fees account's statement has it): one row per listed recipient the month's allocation gave a share to, `scheduled` or
+  `transferred`, published after the transfers happen. FS-00 §6.2's dated note that adopts the path is the orchestrator's.
+- **Why a record of its own.** The month lock reads and hashes the month's `cost-support.v1` document before the allocation
+  exists, and that document is never edited, so it carries `transfers: []` and cannot say who was paid. D64 item 1 adopted
+  the checked register's row 24: publish transfers as their own linked record after they happen, and never edit the frozen
+  file. The record names that document by the SHA-256 of its exact bytes (`costSupportSha256`, the export's
+  `batch.costSupportSha256`), and `cost-support.v1` 1.5.0 restates identity (4) through it.
+- **The arithmetic a reader checks**, stated in the description:
+  - the link;
+  - the rows sum to the frozen document's `passedOnMinor`, which is the export's `totals.disbursed`;
+  - one row per recipient of the export's `disburse` rows, with their summed magnitude and their category;
+  - each `endToEndId` starts with the `disburse` rows' note, the first attempt's identifier;
+  - `lockedAt` is the export's, and no transfer is dated before the lock's day.
+- **A row**:
+  - `recipientId`, `category`, `amountMinor` (the share, above 0) and `status` (`scheduled` or `transferred`);
+  - on `transferred`, `date` (the day the fees account's statement booked the debit) and `endToEndId` (the executed
+    attempt's, with `-n` for attempts 2 to 9, as `fees-account-statement.v1` shows it on the debit line);
+  - `receiptRef` and the recipient's receipts as soon as they arrive (statutes Art. 6e para. 1 item 6 and Finanzreglement
+    § 4 Abs. 5, in part), each `recipient-receipt` evidence entry by its `rct_` id and pinned by the SHA-256 of the receipt
+    document (the orchestrator's word of 2026-10-21 on PS-2037);
+  - a `bank-line` evidence entry by the bank's own reference for the entry, in the form the fees account's statement
+    publishes it (`bankReference`), where the bank gave one;
+  - `note`, in the producer's fixed words only.
+  - Every reference has a fixed form: `receiptRef` and a `recipient-receipt` entry's `ref` are `rct_` ids, and a `bank-line`
+    entry's `ref` is in `fees-account-statement.v1`'s `bankReference` form. With every object closed, no member can carry a
+    name, an account or a screening.
+  - A scheduled share carries no day, receipt or evidence, and carries the identifier of a prepared attempt where there is
+    one.
+- **Existence.** One document per locked month with at least one executed transfer, never before the month's export. A month
+  without one has none, and identity (4) is open until it does; a month that passed nothing on never has one.
+- **Not in version 1:** a share that will not be transferred to its recipient (a recipient struck after the close, statutes
+  Art. 7 para. 6); a month holding one is withheld rather than published. Nor each line's transfer charges (the
+  Überweisungsspesen) or the mark «Einzelauslösung» where one board member alone released the transfer, which statutes Art. 6e
+  para. 1 item 6 and Finanzreglement § 4 Abs. 5 also ask of the line: they come with this record's 1.1.0, with `held`.
+- **Regenerated in three cases only:** a share is transferred; a transfer comes back (the row goes back to `scheduled`, with a
+  note); a receipt arrives. `generatedAt` is derived from the records: the latest of `lockedAt` and, for each transfer the
+  record shows as executed, or in a note as returned, the instant the store recorded its booked debit line (the start of its
+  booking day where the store names no line), and the start, in Europe/Zurich, of the day of each of the recipient's receipts
+  filed against it. A return, or a receipt dated before what the record already shows, is the case it cannot date, and the
+  description says so.
+- `source` is required and admits `sample`, `fixture` and `platform`; `registry-v0` never held a transfer, and no sample
+  plane's builder renders the record yet. Instants are FS-00
+  §6.1's whole-second UTC spelling. Days and instants carry a pattern beside `format`, so a validator that treats `format` as
+  an annotation still refuses a malformed one.
+- **Examples:**
+  - `transfers.v1.example.json`: November 2027, the month of `cost-support.v1`'s and `ledger-export.v1`'s credit-month
+    examples, as first published. Three shares were transferred on 1 December, one has its receipt, and the fourth, whose
+    first file the bank rejected, is scheduled under attempt 2.
+  - `transfers.v1.returned.example.json`: the same record two days on. Attempt 2 is transferred, a second receipt has
+    arrived, and one transfer came back and is owed again.
+- `check:transfers` (new) holds the examples to the link (the SHA-256 of the cost-support example's own bytes), identity (4),
+  the export's `disburse` rows, the row rules and the regeneration rule, each rule held to planted documents. It runs
+  identity (4) as 1.5.0 restates it over every `cost-support.v1` example, and holds its verdict to eight planted pairs: the
+  document the month lock writes (`transfers: []`) is met through its record, open without one, and failed by a record one
+  minor unit short. It proves that the contract still refuses what must never be published (47 refusals with and without
+  `format`, among them a receipt filed under a name and a bank reference longer than the bank's 35 characters, and one by
+  `format` alone, a day that does not exist) and admits what a real month holds (10 admissions).
 
 ## fees-account-statement.v1.json
 

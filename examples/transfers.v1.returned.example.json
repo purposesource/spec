@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-12-03T23:00:00Z",
+  "source": "sample",
+  "month": "2027-11",
+  "lockedAt": "2027-12-01T09:10:00Z",
+  "costSupportSha256": "32de2f6d7617f9430b2c25fbbd0721a97a7dc88527e791c1937c8176b310068c",
+  "currency": "CHF",
+  "transfers": [
+    {
+      "recipientId": "rcp_0svacmgratb4f4q0syghrz8ym4",
+      "category": "education",
+      "amountMinor": 24316,
+      "status": "transferred",
+      "date": "2027-12-01",
+      "endToEndId": "psn-202711-q0syghrz8ym4",
+      "receiptRef": "rct_01kmv2c8d5f7h9j1k3m5n7p9qr",
+      "evidence": [
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2027-12-01-0011"
+        },
+        {
+          "kind": "recipient-receipt",
+          "ref": "rct_01kmv2c8d5f7h9j1k3m5n7p9qr",
+          "sha256": "6cd5c8e2484ac9264c365233806b8617b45940abaa56dc8d659b6aaf5157036e"
+        }
+      ]
+    },
+    {
+      "recipientId": "rcp_8jf9xfejcgadg7cgyag0hmkcxb",
+      "category": "education",
+      "amountMinor": 24316,
+      "status": "transferred",
+      "date": "2027-12-02",
+      "endToEndId": "psn-202711-cgyag0hmkcxb-2",
+      "evidence": [
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2027-12-02-0007"
+        }
+      ]
+    },
+    {
+      "recipientId": "rcp_f5cc8xgz81c00nrve04pdahejb",
+      "category": "health",
+      "amountMinor": 24316,
+      "status": "transferred",
+      "date": "2027-12-01",
+      "endToEndId": "psn-202711-rve04pdahejb",
+      "receiptRef": "rct_01kmrb4x7e2q9w5n3t8v6y0zha",
+      "evidence": [
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2027-12-01-0012"
+        },
+        {
+          "kind": "recipient-receipt",
+          "ref": "rct_01kmrb4x7e2q9w5n3t8v6y0zha",
+          "sha256": "9dc8d396bd1d61758aada72f45fc487d788c6ff4b8563be3bd8e06a2442016ca"
+        }
+      ]
+    },
+    {
+      "recipientId": "rcp_tg8g3ps3smxzdpy1zt0zesjnx9",
+      "category": "health",
+      "amountMinor": 24316,
+      "status": "scheduled",
+      "note": "Transferred on 2027-12-01 and returned by the receiving bank, so the share is owed again until it is sent again."
+    }
+  ]
+}

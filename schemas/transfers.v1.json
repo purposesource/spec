@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/transfers.v1.json",
+  "title": "The month's transfers — /transfers/{YYYY-MM}.json",
+  "description": "The transfers of one locked month's shares to the listed recipients, published as their own record once they happen and linked to the month's frozen cost-support document by its hash (ops decision D64 item 1, which adopted the checked register's row 24: transfers are published as their own linked record after they happen, and the frozen file is never edited). One row per listed recipient the month's allocation gave a share to: the share as allocated, whether it has been transferred, and, once it has, the day the fees account's statement booked the transfer, its end-to-end identifier and, as soon as it has arrived, the recipient's receipt, pinned by the SHA-256 of the receipt document (statutes Art. 6e para. 1 item 6 and Finanzreglement § 4 Abs. 5, in part: one line per recipient with its category, its date and, as soon as it has arrived, its receipt; each line's transfer charges, the Überweisungsspesen, and the mark «Einzelauslösung» where one board member alone released the transfer come with this record's 1.1.0). The fees account's booked statement and the recipients' receipts govern what this document restates: where they and it disagree, they govern, and the divergence is a defect to report.\n\nWHY A RECORD OF ITS OWN. The month's cost-support document (`cost-support.v1`) is the input the month lock reads, and its exact bytes are what the lock hashes: the month's ledger export publishes their SHA-256 as `batch.costSupportSha256`. Those bytes are written before the allocation exists and never change afterwards, so a document the lock froze carries `transfers: []` and cannot say who was paid. This record says it, after the transfers happen, and names that document by the same SHA-256 (`costSupportSha256`). The frozen document is never edited and never restated.\n\nTHE LINK, AND THE ARITHMETIC A READER CHECKS, stated here because JSON Schema can neither compare two documents nor sum across items, as `cost-support.v1` states its own identities: (a) `costSupportSha256` is the SHA-256 of the exact bytes of the month's frozen cost-support document, and the month's ledger export carries the same value as `batch.costSupportSha256`; (b) the `transfers[]` amounts sum to that document's `passedOnMinor`, which is the export's `totals.disbursed` (`cost-support.v1` identity (4), which a document the lock froze satisfies through this record); (c) there is one row for each recipient with a `disburse` row in the month's export and no other row: its `amountMinor` is the magnitude of the sum of that recipient's `disburse` rows, and its `category` is their `categoryFundId`; (d) a row's `endToEndId` starts with the `note` of those `disburse` rows, which is the first attempt's identifier, and is that identifier on a first attempt; (e) every amount is in `currency`, the frozen document's own; (f) `lockedAt` is the export's `lockedAt`, and no transfer is dated before the day of the lock, because the allocation is locked before the transfer (statutes Art. 6a para. 4). Where the frozen document carries rows of its own in `transfers[]`, as one written by hand may, this record has a row for each of them with the same recipient, category and amount, and states what became of it.\n\nTHE PATH. One document per LOCKED month with at least one executed transfer, at `/transfers/{YYYY-MM}.json` on the public data plane (FS-00 §6.2), its month in the path the way the fees account's statement has it, and like it outside `ledger/`, which the platform's index build reads as months. `jobs.index-build` renders it from the first run after one of the month's transfers is marked executed from the fees account's debit line, and never before the month's ledger export is published. A month without an executed transfer has no document. Before the month's first transfer there is nothing executed to state: the month's shares are its export's `disburse` rows. A month whose close passed nothing on never has a transfer, and its frozen document's empty `transfers[]` satisfies identity (4), with `passedOnMinor` 0, on its own.\n\nWHAT VERSION 1 DOES NOT STATE. A share that will not be transferred to its recipient, because the recipient was struck from the List after the month's close (statutes Art. 7 para. 6), has no status in this version: a month holding one is withheld rather than published, and its producer says so. A month withheld after its record was published keeps that document as published.\n\nREGENERATED, NOT WRITTEN ONCE. The ledger is append-only, so a month's shares, and so its rows, are fixed from the first publication, and a row changes in three cases only: its share is transferred (`scheduled` becomes `transferred`); its transfer comes back from the receiving bank before it reached the recipient, so the share is owed again (`transferred` becomes `scheduled`, with a note saying so) until it is sent again; or the recipient's receipt arrives. `generatedAt` is derived from the records and never from a clock: its description says how, and the one case it cannot date.\n\nNOTHING HERE NAMES A PERSON OR AN ACCOUNT. No account number or other bank detail, no bank file, no counterparty or text of a bank line, no steward, approval, reason for an abandoned attempt or screening is published, and every object is closed and every reference has a fixed form, so no member can carry one; `note` carries only the producer's fixed words. A receipt is published by its reference and the SHA-256 of its document, never its bytes: anyone can ask for a copy, which is sent with account numbers and personal data blacked out (Finanzreglement § 4 Abs. 10).",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3 (producer: `jobs.index-build`, from the month's `disburse` ledger rows, its transfer batches and their receipts, platform migrations 0032 and 0087, the receipt documents' SHA-256, migration 0115, the fees account's debit line of each transfer through the view of migration 0107, and the frozen cost-support document the lock read, through migration 0083's read path). No transfer has been executed on any plane yet, so no document exists outside the examples.",
+    "artifactPath": "/transfers/{YYYY-MM}.json — one per locked month with an executed transfer, unless the month is withheld",
+    "authoritative": false,
+    "producer": "`jobs.index-build` (P-M3), from `ledger_rows` (the month's `disburse` rows), `disbursement_batches` and `disbursement_receipts` (platform migration 0032, as 0087 amended them), the receipt documents' SHA-256 (`receipt_files`, migration 0115; never their bytes), the booked debit line of each transfer (the view of migration 0107: its booking date, its bank reference and the instant it was recorded) and the frozen cost-support document (`locked_cost_support_documents()`, migration 0083), whose SHA-256 it checks against the one the allocation names. No sample plane's builder renders it yet; L3-02's will",
+    "consumers": [
+      "the public transparency page of each month (FS-01)",
+      "anyone checking that a month's shares reached the listed recipients (statutes Art. 12 para. 1, Art. 20 para. 1)",
+      "the annual transparency report, which aggregates months and never restates them"
+    ],
+    "fsRefs": [
+      "FS-00 §6.2",
+      "FS-07 §5.1.1, FS07-051, FS07-061, FS07-064, and its dated note of 2026-10-29",
+      "ops decision D64 item 1 (the checked register's row 24)",
+      "statutes Art. 6a para. 4",
+      "statutes Art. 6e para. 1 item 6 (in part)",
+      "statutes Art. 12 para. 1",
+      "Finanzreglement § 4 Abs. 5 and Abs. 10"
+    ],
+    "vsRefs": ["VS-05", "VS-37"],
+    "changelog": "CHANGELOG.md#transfersv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "source", "month", "lockedAt", "costSupportSha256", "currency", "transfers"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": {
+      "$ref": "#/$defs/instant",
+      "description": "The document's envelope instant (FS-00 §6.2), derived from the records and never from a clock: the latest of `lockedAt` and, for each transfer it shows as executed, or in a note as returned, the instant the store recorded its booked debit line (the start of its booking day where the store names no line), and the start, in Europe/Zurich, of the day of each of the recipient's receipts filed against it. So a transfer marked executed, or a receipt dated later than everything the document already shows, moves it past `lockedAt`. THE CASE IT CANNOT DATE: the store records no instant at which a transfer is marked returned or a receipt is filed, so a return, or a receipt dated before something the document already shows, changes the document without moving `generatedAt`; the bytes' ETag still changes. It is the document's own instant, not the plane's, so it differs from the `generatedAt` of the `/meta/publish-log.json` batch that lists this path whenever a newer row existed then, as the fees account's statement does."
+    },
+    "source": {
+      "enum": ["sample", "fixture", "platform"],
+      "description": "Which plane produced this document, in the envelope's vocabulary (FS-00 §6.2): `platform` is `jobs.index-build` in `PSN_ENV=prod`, `fixture` every other environment of it, `sample` a sample plane. `sample` and `fixture` declare a NON-PRODUCTION plane, which a production deployment refuses to serve (`sandbox_artifact_on_prod`). Required, and `registry-v0` is not admitted: the curated registry never held a transfer."
+    },
+    "month": {
+      "$ref": "#/$defs/monthKey",
+      "description": "The month whose shares this record states, `YYYY-MM`: the month whose close allocated them, which is the month of the frozen cost-support document and of the ledger export, not the month the transfers are made in. It names the document's path."
+    },
+    "lockedAt": {
+      "$ref": "#/$defs/instant",
+      "description": "The instant the month locked, the same instant its ledger export states (`ledger-export.v1` `lockedAt`). The lock read the frozen cost-support document and allocated the shares; every transfer comes after it."
+    },
+    "costSupportSha256": {
+      "$ref": "#/$defs/sha256",
+      "description": "THE LINK: the SHA-256 of the exact bytes of the month's frozen cost-support document (`cost-support.v1`), lowercase hex, the value the month's ledger export carries as `batch.costSupportSha256`. Those bytes are never edited: this record states the transfers they cannot."
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "The currency of every `amountMinor` here (ISO 4217): the frozen cost-support document's `currency`, which is the month's `disburse` rows' too. What a recipient's bank credited in its own currency is not part of this version."
+    },
+    "transfers": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/transfer" },
+      "description": "One row per listed recipient that the month's allocation gave a share to (one `disburse` row or more in the month's export), and no other row: never one row per category fund, and never a row for a share of 0, which the allocation does not write (ops decision D33 item 1). Ordered by `recipientId`. Every row of the month is listed from the first publication on, transferred or not, so the amounts always sum to the frozen document's `passedOnMinor`."
+    }
+  },
+  "$defs": {
+    "monthKey": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "instant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]Z$",
+      "description": "An instant in FS-00 §6.1's one spelling, UTC to the whole second, `YYYY-MM-DDTHH:MM:SSZ`. The pattern holds the spelling for a reader whose validator treats `format` as an annotation."
+    },
+    "day": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
+      "description": "A calendar day, `YYYY-MM-DD`. The pattern holds the spelling for a reader whose validator treats `format` as an annotation; that the day exists is `format`'s."
+    },
+    "transfer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recipientId", "category", "amountMinor", "status"],
+      "description": "One listed recipient's share of the month and what became of it.",
+      "properties": {
+        "recipientId": {
+          "type": "string",
+          "pattern": "^rcp_[0-9abcdefghjkmnpqrstvwxyz]{26}$",
+          "description": "The listed recipient, resolvable against the Recipient List version the month's export names (`batch.recipientListVersion`; `recipient-list.v1`). Money rows name organisations on the published List, never persons (URS ENG-083)."
+        },
+        "category": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,31}$",
+          "description": "The recipient's category, the `categoryFundId` of its `disburse` rows: one of the movement's seven published categories. The closed menu is published once in `category-menu.v1` (`$defs.slug`); this contract set may not `$ref` across files, so this member constrains the vocabulary by pattern and names the published menu, as `cost-support.v1`'s transfer row does."
+        },
+        "amountMinor": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "The recipient's share as the month's allocation gave it, in minor units of `currency`: the magnitude of the sum of the recipient's `disburse` rows of the month. Whatever its status, a row always states the share, never part of it."
+        },
+        "status": {
+          "enum": ["scheduled", "transferred"],
+          "description": "`transferred`: the share's transfer was executed, as the fees account's booked debit line shows, and has not come back; the row carries its `date` and `endToEndId`. `scheduled`: the share is allocated and published, and the money has not reached the recipient: it is not yet transferred, or it was transferred and came back from the receiving bank, and it is owed until it is sent again (a note then says so). A scheduled share is never a transfer, and no impact figure is ever drawn from one."
+        },
+        "date": {
+          "$ref": "#/$defs/day",
+          "description": "The day the fees account's statement booked the transfer's debit (its booking date, Europe/Zurich): the day the money left the account. Required on `transferred`, absent on `scheduled`. Never before the day of `lockedAt`."
+        },
+        "endToEndId": {
+          "type": "string",
+          "pattern": "^psn-[0-9]{4}(0[1-9]|1[0-2])-[0-9abcdefghjkmnpqrstvwxyz]{12}(-[2-9])?$",
+          "description": "The credit transfer's end-to-end identifier (ISO 20022 `EndToEndId`): `psn-YYYYMM-` and the last 12 characters of the recipient's ULID, where `YYYYMM` is this document's `month`, with `-n` after it for the transfer's attempt n from 2 to 9 (a transfer the bank rejected, or one that was abandoned or came back, is prepared again under the next attempt). On a first attempt it is the `note` of the recipient's `disburse` rows, and every later attempt's starts with it. On `transferred`, required: the attempt that was executed, which the fees account's statement shows on the debit line (`fees-account-statement.v1` `endToEndId`), so a bank line and this row are matched by anyone holding both. On `scheduled`, present only while an attempt is prepared and not yet executed: the identifier it will be sent under."
+        },
+        "receiptRef": {
+          "type": "string",
+          "pattern": "^rct_[0-9abcdefghjkmnpqrstvwxyz]{26}$",
+          "description": "The recipient's receipt for this transfer (ops decision D33 item 2(f)), by the `rct_` id the Association files it under, and the first of them where the recipient sent more than one: it is the `ref` of one of the row's `recipient-receipt` evidence entries. Present on a `transferred` row once the receipt has arrived and not before (Finanzreglement § 4 Abs. 5: as soon as it has arrived); never on `scheduled`."
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "description": "Narrative for this row, in the producer's fixed words: for one, that the share's transfer came back from the receiving bank and the share is owed again. Never an account, a person, a screening or a reason a steward wrote."
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/evidenceLink" },
+          "description": "The documents behind a `transferred` row: the fees account's debit line, by the bank's own reference for its entry where the bank gave one, and each receipt the recipient sent for the transfer, pinned by its document's SHA-256. Absent where there is none yet, and always on `scheduled`: nothing has moved."
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "A transfer is published with its day and the identifier its debit line carries, so anyone holding the fees account's statement can match the two; a scheduled share has neither, and no evidence, because nothing has moved.",
+          "if": { "properties": { "status": { "const": "transferred" } }, "required": ["status"] },
+          "then": { "required": ["date", "endToEndId"] },
+          "else": { "not": { "anyOf": [{ "required": ["date"] }, { "required": ["receiptRef"] }, { "required": ["evidence"] }] } }
+        },
+        {
+          "$comment": "A receipt reference is one of the row's receipts: a row naming a receipt carries its evidence entry, and a row carrying a receipt names one.",
+          "if": { "required": ["receiptRef"] },
+          "then": {
+            "required": ["evidence"],
+            "properties": { "evidence": { "contains": { "properties": { "kind": { "const": "recipient-receipt" } }, "required": ["kind"] } } }
+          },
+          "else": {
+            "properties": { "evidence": { "not": { "contains": { "properties": { "kind": { "const": "recipient-receipt" } }, "required": ["kind"] } } } }
+          }
+        }
+      ]
+    },
+    "evidenceLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref"],
+      "description": "One piece of evidence behind one transferred row.",
+      "properties": {
+        "kind": {
+          "enum": ["bank-line", "recipient-receipt"],
+          "description": "`bank-line`: the fees account's booked debit line that executed the transfer, by the bank's own reference for its entry (ISO 20022 `AcctSvcrRef`, as the fees account's statement publishes it in `bankReference`, so this entry resolves to that line's row there, or to the rows of one collective entry). `recipient-receipt`: a receipt the recipient sent for this transfer (ops decision D33 item 2(f)), by the reference the Association files it under, with its document's SHA-256."
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "The evidence's own reference, which a reader can ask for by name (Finanzreglement § 4 Abs. 10): the bank's reference of the debit line's entry, in the form the fees account's statement publishes it (`fees-account-statement.v1` `bankReference`), or the receipt's `rct_` id. Each kind's form is held in `allOf` below."
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256",
+          "description": "On a `recipient-receipt` entry, and on no other: the SHA-256 of the receipt document's exact bytes, lowercase hex, so the public record pins the bytes without carrying them. A copy is sent on request with account numbers and personal data blacked out, so its own hash differs; the Association's stored document is the one this names."
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "A receipt is pinned by its document's hash and named by its `rct_` id; a bank line is named by the bank's reference, in the form `fees-account-statement.v1` publishes it, and carries no hash.",
+          "if": { "properties": { "kind": { "const": "recipient-receipt" } }, "required": ["kind"] },
+          "then": { "required": ["sha256"], "properties": { "ref": { "pattern": "^rct_[0-9abcdefghjkmnpqrstvwxyz]{26}$" } } },
+          "else": { "not": { "required": ["sha256"] }, "properties": { "ref": { "pattern": "^[!-~]([ -~]{0,33}[!-~])?$" } } }
+        }
+      ]
+    }
+  }
+}
