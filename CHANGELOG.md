@@ -2857,6 +2857,11 @@ reasoning: no month export has ever been published with a row in it.
     credit-month example, lists the payout, its `heldMinor` including the released items. The
     released money keeps its payout's deadline, 3 January 2028, and the close's transfers are due
     by 1 February 2028, the December payout's.
+- *(2026-10-29: a Paddle debit sets no deadline.)* Wording only. `transferDueBy`'s description now
+  ends with what the member is on a Paddle debit (`netMinor` negative): the debit match's
+  `creditedOn` plus `deadlineDays`, as the match records them, setting no deadline. A debit
+  credits nothing and starts no clock (statutes Art. 6a(4)), so no reading of the close's deadline
+  takes it. No member, type or rule moves, and every document valid before is valid now.
 
 ### 1.5.0 — unreleased (2026-10-29; ops decision D64 item 1, the checked register's row 24) — pre-release
 
