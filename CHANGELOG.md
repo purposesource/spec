@@ -4094,7 +4094,10 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   `sponsorsPlacement`, and `listings` (1.5.0), which it had left out.
 - Example: `sponsors-header` (one link and one GitHub Sponsors button, both together with the name on the `profile` layout, the
   sponsors section second in `sections`), stored as the api stores it, `sponsorsPlacement` right after `sponsors`. The other
-  examples keep their bytes.
+  examples keep their bytes. `check:contributor-page` holds the member to the links' two places with `section` its default,
+  optional and never always written, a settings example to its stored form (only `header`, right after `sponsors`), the build
+  golden's vectors SP-1 to SP-4 to its own reading of the builder's rule, and 5 refusals and 3 admissions, each proved able to
+  fail.
 
 ## contributor-page.v1.json
 
@@ -4121,7 +4124,10 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   `linksPlacement`, the sponsors section second in `sections`, after the summary), and PV-10, its preview vector, so the hash
   pins the member. PV-1 to PV-9 and every other example keep their bytes. The build golden (its 1.6.0) gains the vectors SP-1
   to SP-4: `header` written, `section` stated and no member left out, and `header` written with the sponsors section off, as
-  `linksPlacement` is. The preview golden is its 1.7.0.
+  `linksPlacement` is. The preview golden is its 1.7.0. `check:contributor-page` holds the document's member to `header` alone,
+  written right after `linksPlacement` (or where that would stand) and right before `listings` or `cards` in every page example
+  and preview vector, some vector to drawing the links and the support buttons both with the name, and 5 refusals and 2
+  admissions of its own, each proved able to fail.
 
 ### 1.8.0 — unreleased (2026-10-28; ops decision D186 items 1 and 2) — pre-release
 

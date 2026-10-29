@@ -107,6 +107,15 @@
  *              every member at its default left out and nothing empty, right before `cards`; a settings example
  *              stores it as the api does; some preview vector carries it; and the build golden's `listings` vectors
  *              are the gate's own reading of the builder's rule, every value and the defaults stated exercised.
+ *   sponsors   1.6.0 of the settings and 1.9.0 of the page (ops decision D189 and its dated note of 2026-10-29T10:0xZ):
+ *              `sponsorsPlacement`, where the support buttons show, mirrors `linksPlacement`. In the settings it is `section`
+ *              (the default, their own section) or `header` (together with the name), optional and never always written; the
+ *              page admits `header` alone, the one value the builder writes. A page example or preview vector carries it only
+ *              where the builder writes it, right after `linksPlacement` (or where that would stand) and before `listings` and
+ *              `cards`; a settings example stores it as the api does, only as `header` and right after `sponsors`; the
+ *              sponsors-header pair is valid; some preview vector draws the links and the support buttons both together with
+ *              the name, so its hash pins the member; and the build golden's `sponsorsPlacement` vectors are the gate's own
+ *              reading of the builder's rule: written only as `header`, whatever the sponsors section's switch says.
  *   never      no member of the three page schemas is named for points, shares, bands, ranks,
  *              percentiles, scores, months, amounts or a person's GitHub id, and no published page
  *              example or vector carries a currency figure, a person's GitHub node id (the current
@@ -123,7 +132,8 @@
  *              default, `about.version` being the texts' `current`.
  *   agree      the closed lists the settings and the public document share are the same lists (1.1.0:
  *              the links' two places, the display parts and the palette ids among them; 1.3.0: the cards'
- *              icons and their two name forms; 1.8.0: the two listings' views, in both schemas and with each other).
+ *              icons and their two name forms; 1.8.0: the two listings' views, in both schemas and with each other; the settings'
+ *              1.6.0: the support buttons' two places are the links' two).
  *   facts      in the page examples (1.1.0's further two among them), every link is its table template with its handle, and the
  *              summary's counts are the rows the page shows (design §8.1: a count never reveals a
  *              hidden row).
@@ -169,7 +179,11 @@
  *              before 1.7.0), and with it true and false. And 1.8.0's (ops decision D186): a third view, an upper-case
  *              view, the toggle as a word or null, a listing of its own for the licence adopter or the links, an unknown
  *              member of a listing, the viewer's own choice in the document, and `listings` as a list, a string or null;
- *              and what it admits: no `listings` at all, one member alone, the defaults stated and every other value.
+ *              and what it admits: no `listings` at all, one member alone, the defaults stated and every other value. And
+ *              the settings' 1.6.0 and the page's 1.9.0 (ops decision D189): the support buttons placed in a footer, the
+ *              placement in upper case (settings), as null, a boolean or a list, in either schema, and their own section
+ *              stated in the document, which the builder never writes; and what they admit: no `sponsorsPlacement` at all,
+ *              `section` stated and `header` in the settings, and `header` in the document.
  *   goldens    every `examples/*.golden.json` is one a gate checks.
  *
  * Every rule is proved able to fail before the examples are trusted to pass.
@@ -237,6 +251,10 @@ const real = {
   // 1.8.0's further examples (ops decision D186 items 1 and 2): the certificates as a list, the repositories as a matrix visitors may switch.
   listingsPage: example('contributor-page.v1.listings.example.json'),
   listingsSettings: example('contributor-page-settings.v1.listings.example.json'),
+  // The settings' 1.6.0 and the page's 1.9.0 further examples (ops decision D189): one link and one GitHub Sponsors button, both
+  // together with the name.
+  sponsorsPage: example('contributor-page.v1.sponsors-header.example.json'),
+  sponsorsSettings: example('contributor-page-settings.v1.sponsors-header.example.json'),
   settingsExamples: Object.fromEntries(
     readdirSync(EXAMPLE_DIR)
       .filter((name) => name.startsWith('contributor-page-settings.v1.') && name.endsWith('.example.json'))
@@ -1098,6 +1116,7 @@ function buildProblems(golden) {
   found.push(...buildAdopterProblems(golden.adopter ?? []).map((message) => ['adopter', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   found.push(...buildOrganisationsProblems(golden.organisations ?? []).map((message) => ['organisations', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   found.push(...buildListingsProblems(golden.listings ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
+  found.push(...buildSponsorsPlacementProblems(golden.sponsorsPlacement ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   return found;
 }
 
@@ -1408,6 +1427,7 @@ function cardsProblems(state) {
     ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
     ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
     ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
+    ['examples/contributor-page.v1.sponsors-header.example.json', state.sponsorsPage],
     ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
   ];
   for (const [where, doc] of documents) {
@@ -1534,6 +1554,7 @@ function listingsProblems(state) {
     ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
     ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
     ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
+    ['examples/contributor-page.v1.sponsors-header.example.json', state.sponsorsPage],
     ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
   ];
   /** A stored or built listings member holds no value at its default and nothing empty. */
@@ -1552,6 +1573,113 @@ function listingsProblems(state) {
   }
   if (!state.preview.vectors.some((v) => 'listings' in v.document)) add('no preview vector carries listings');
   for (const [name, settings] of Object.entries(state.settingsExamples)) if ('listings' in settings) storedForm(`examples/${name}`, settings.listings, 'the api');
+  return found;
+}
+
+/* ---------------------------------------------------------------- sponsors placement */
+
+/** D189's two places for the support buttons, the links' two (1.1.0's `linksPlacement`): their own section, the default, or with the name. */
+const SPONSORS_PLACEMENTS = ['section', 'header'];
+const SPONSORS_PLACEMENT_DEFAULT = 'section';
+/** The members the builder writes right before `sponsorsPlacement` (the last of them present) and right after it (the first present). */
+const SPONSORS_PLACEMENT_AFTER = ['identity', 'about', 'linksPlacement'];
+const SPONSORS_PLACEMENT_BEFORE = ['listings', 'cards'];
+
+/**
+ * The gate's own reading of the builder's sponsorsPlacement rule (page 1.9.0; contributor-page.v1 `sponsorsPlacement`), not the
+ * builder: the settings' value is written only where it differs from the settings schema's default, whatever the sponsors section's
+ * switch says, as `linksPlacement` is; otherwise nothing is written (null).
+ */
+function buildSponsorsPlacement(input, settingsSchema) {
+  const value = input.sponsorsPlacement;
+  if (value === null || value === undefined) return null;
+  return value === settingsSchema.properties.sponsorsPlacement?.default ? null : value;
+}
+
+const validatePageSponsorsPlacement = ajv.getSchema(`${cfg.schemaBaseUrl}/${PAGE}#/properties/sponsorsPlacement`);
+const validateSettingsSponsorsPlacement = ajv.getSchema(`${cfg.schemaBaseUrl}/${SETTINGS}#/properties/sponsorsPlacement`);
+
+function buildSponsorsPlacementProblems(vectors) {
+  const found = [];
+  if (vectors.length === 0) found.push('no sponsorsPlacement vector — the placement rule would pass vacuously');
+  const settingsSchema = schemaJson(SETTINGS);
+  const exercised = { headerWritten: false, sectionLeftOut: false, none: false, headerWithTheSectionOff: false };
+  for (const v of vectors) {
+    const input = v.input ?? {};
+    const expected = v.expect?.sponsorsPlacement;
+    const got = buildSponsorsPlacement(input, settingsSchema);
+    if (got !== expected) found.push(`${v.id}: expects ${JSON.stringify(expected)}, the rule gives ${JSON.stringify(got)}`);
+    if (typeof input.sponsorsOn !== 'boolean') found.push(`${v.id}: sponsorsOn is the sponsors section's switch, true or false`);
+    if (input.sponsorsPlacement !== null && !validateSettingsSponsorsPlacement(input.sponsorsPlacement)) found.push(`${v.id}: the input is not a valid settings sponsorsPlacement (${ajv.errorsText(validateSettingsSponsorsPlacement.errors)})`);
+    if (expected !== null && !validatePageSponsorsPlacement(expected)) found.push(`${v.id}: the expected member is not a valid document sponsorsPlacement (${ajv.errorsText(validatePageSponsorsPlacement.errors)})`);
+    if (input.sponsorsPlacement === null) exercised.none = true;
+    else if (expected === null) exercised.sectionLeftOut = true;
+    else if (input.sponsorsOn === true) exercised.headerWritten = true;
+    else if (input.sponsorsOn === false) exercised.headerWithTheSectionOff = true;
+  }
+  for (const [what, done] of Object.entries(exercised)) if (!done) found.push(`no sponsorsPlacement vector exercises ${what}`);
+  return found;
+}
+
+/**
+ * The settings' 1.6.0 and the page's 1.9.0 (ops decision D189 and its dated note of 2026-10-29T10:0xZ): `sponsorsPlacement` mirrors
+ * `linksPlacement`. In the settings it is `section` (the default) or `header`, optional and never always written; the page admits
+ * `header` alone, the one value the builder writes. A page example or preview vector (each the builder's) carries it only where the
+ * builder writes it, right after `linksPlacement`, or where that would stand, and right before `listings` or `cards`; a settings
+ * example stores it as the api does, only as `header` and right after `sponsors`; the sponsors-header pair is valid; and some preview
+ * vector draws the links and the support buttons both together with the name, so its hash pins the member beside `linksPlacement`.
+ */
+function sponsorsPlacementProblems(state) {
+  const found = [];
+  const add = (message) => found.push(['sponsors', message]);
+  const s = state.schemas.settings;
+  const p = state.schemas.page;
+  const ss = s.properties.sponsorsPlacement;
+  const ps = p.properties.sponsorsPlacement;
+  if (!ss || !ps) {
+    add('a schema has no `sponsorsPlacement` member');
+    return found;
+  }
+  if ((ss.enum ?? []).join(',') !== SPONSORS_PLACEMENTS.join(',')) add(`the settings' sponsorsPlacement is [${ss.enum}], D189's two places are [${SPONSORS_PLACEMENTS}]`);
+  if (ss.default !== SPONSORS_PLACEMENT_DEFAULT) add(`the settings' sponsorsPlacement defaults to ${JSON.stringify(ss.default)}; their own section, ${SPONSORS_PLACEMENT_DEFAULT}, is the default`);
+  const written = SPONSORS_PLACEMENTS.filter((value) => value !== SPONSORS_PLACEMENT_DEFAULT);
+  if ((ps.enum ?? []).join(',') !== written.join(',')) add(`the document's sponsorsPlacement admits [${ps.enum}]; the builder writes only [${written}], never the default`);
+  if ((s.required ?? []).includes('sponsorsPlacement') || (p.required ?? []).includes('sponsorsPlacement')) add('sponsorsPlacement is required; it is optional, so a document from before it stays valid');
+  if ((s['x-psn']?.alwaysWritten ?? []).includes('sponsorsPlacement')) add('sponsorsPlacement is always written; the api leaves it out at its default');
+  if (!validatePage(state.sponsorsPage)) add(`examples/contributor-page.v1.sponsors-header.example.json is not a valid contributor-page.v1 (${ajv.errorsText(validatePage.errors)})`);
+  if (!validateSettings(state.sponsorsSettings)) add(`examples/contributor-page-settings.v1.sponsors-header.example.json is not a valid contributor-page-settings.v1 (${ajv.errorsText(validateSettings.errors)})`);
+  const documents = [
+    ['examples/contributor-page.v1.example.json', state.page],
+    ['examples/contributor-page.v1.anonymous.example.json', state.anonymous],
+    ['examples/contributor-page.v1.header.example.json', state.header],
+    ['examples/contributor-page.v1.own-ground.example.json', state.ownGround],
+    ['examples/contributor-page.v1.about.example.json', state.aboutPage],
+    ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
+    ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
+    ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
+    ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
+    ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
+    ['examples/contributor-page.v1.sponsors-header.example.json', state.sponsorsPage],
+    ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
+  ];
+  for (const [where, doc] of documents) {
+    if (!('sponsorsPlacement' in doc)) continue;
+    const order = Object.keys(doc);
+    const at = order.indexOf('sponsorsPlacement');
+    const after = SPONSORS_PLACEMENT_AFTER.filter((member) => member in doc).at(-1);
+    const before = SPONSORS_PLACEMENT_BEFORE.find((member) => member in doc);
+    if (order[at - 1] !== after || order[at + 1] !== before) add(`${where}: sponsorsPlacement is not written right after ${after} and right before ${before}, where the builder writes it`);
+  }
+  for (const [name, settings] of Object.entries(state.settingsExamples)) {
+    if (!('sponsorsPlacement' in settings)) continue;
+    if (settings.sponsorsPlacement === SPONSORS_PLACEMENT_DEFAULT) add(`examples/${name}: sponsorsPlacement is stored at its default; the api leaves it out`);
+    const order = Object.keys(settings);
+    if (order.indexOf('sponsorsPlacement') !== order.indexOf('sponsors') + 1) add(`examples/${name}: sponsorsPlacement is not stored right after sponsors, where the api writes it`);
+  }
+  if (!state.preview.vectors.some((v) => 'sponsorsPlacement' in v.document)) add('no preview vector carries sponsorsPlacement');
+  const drawn = (doc, id) => (doc.sections ?? []).some((x) => x.id === id);
+  const bothWithTheName = (doc) => doc.sponsorsPlacement === 'header' && doc.linksPlacement === 'header' && drawn(doc, 'sponsors') && drawn(doc, 'links');
+  if (!state.preview.vectors.some((v) => bothWithTheName(v.document))) add('no preview vector draws the links and the support buttons both together with the name, so no hash pins the two in one header');
   return found;
 }
 
@@ -1860,7 +1988,9 @@ function agreeProblems(settingsSchema, pageSchema) {
     ['name forms of own and other', s.properties.cards?.properties.ownNames.enum, s.properties.cards?.properties.otherNames.enum],
     ['certificates view', s.properties.listings?.properties.certificates.properties.view.enum, p.properties.listings?.properties.certificates.properties.view.enum],
     ['repositories view', s.properties.listings?.properties.repositories.properties.view.enum, p.properties.listings?.properties.repositories.properties.view.enum],
-    ['views of certificates and repositories', s.properties.listings?.properties.certificates.properties.view.enum, s.properties.listings?.properties.repositories.properties.view.enum]
+    ['views of certificates and repositories', s.properties.listings?.properties.certificates.properties.view.enum, s.properties.listings?.properties.repositories.properties.view.enum],
+    // The settings' 1.6.0 (ops decision D189): the support buttons get the links' placement choice, the same two places.
+    ['support buttons and links placements', s.properties.sponsorsPlacement?.enum, s.properties.linksPlacement?.enum]
   ];
   for (const [what, a, b] of pairs) {
     if ((a ?? []).join(',') !== (b ?? []).join(',')) found.push(['agree', `the ${what} lists differ: settings [${a}], page [${b}]`]);
@@ -2043,7 +2173,18 @@ const REFUSALS = [
   ['listingsPage', 'the toggle as null', (d) => { d.listings = { repositories: { visitorToggle: null } }; }],
   ['listingsPage', "the viewer's own choice stored in the document", (d) => { d.listings = { certificates: { visitorView: 'matrix' } }; }],
   ['listingsPage', 'a listing for the links', (d) => { d.listings = { ...d.listings, links: { view: 'list' } }; }],
-  ['listingsPage', 'listings as a string', (d) => { d.listings = 'list'; }]
+  ['listingsPage', 'listings as a string', (d) => { d.listings = 'list'; }],
+  // 1.9.0 of the page, 1.6.0 of the settings (ops decision D189 and its dated note of 2026-10-29T10:0xZ).
+  ['sponsorsSettings', 'the support buttons placed outside the two places', (d) => { d.sponsorsPlacement = 'footer'; }],
+  ['sponsorsSettings', 'an upper-case place for the support buttons', (d) => { d.sponsorsPlacement = 'Header'; }],
+  ['sponsorsSettings', 'the support buttons\' place as null', (d) => { d.sponsorsPlacement = null; }],
+  ['sponsorsSettings', 'the support buttons\' place as a boolean', (d) => { d.sponsorsPlacement = true; }],
+  ['sponsorsSettings', 'the support buttons\' place as a list', (d) => { d.sponsorsPlacement = []; }],
+  ['sponsorsPage', 'the support buttons placed outside the two places', (d) => { d.sponsorsPlacement = 'footer'; }],
+  ['sponsorsPage', 'the support buttons\' place as null', (d) => { d.sponsorsPlacement = null; }],
+  ['sponsorsPage', 'the support buttons\' place as a boolean', (d) => { d.sponsorsPlacement = true; }],
+  ['sponsorsPage', 'the support buttons\' place as a list', (d) => { d.sponsorsPlacement = []; }],
+  ['sponsorsPage', 'the support buttons\' own section stated in the document, which the builder never writes', (d) => { d.sponsorsPlacement = 'section'; }]
 ];
 
 /** The named example's certificate item (1.6.0's cases). */
@@ -2127,7 +2268,13 @@ const ADMITS = [
   ['listingsSettings', 'the listing defaults stated', (d) => { d.listings = structuredClone(LISTINGS_DEFAULTS); }],
   ['listingsPage', 'no listings at all (a document built before 1.8.0)', (d) => { delete d.listings; }],
   ['listingsPage', 'one listing member alone', (d) => { d.listings = { certificates: { visitorToggle: true } }; }],
-  ['listingsPage', 'every listing value other than its default', (d) => { d.listings = { certificates: { view: 'list', visitorToggle: true }, repositories: { view: 'matrix', visitorToggle: true } }; }]
+  ['listingsPage', 'every listing value other than its default', (d) => { d.listings = { certificates: { view: 'list', visitorToggle: true }, repositories: { view: 'matrix', visitorToggle: true } }; }],
+  // 1.9.0 of the page, 1.6.0 of the settings (ops decision D189).
+  ['sponsorsSettings', 'no sponsorsPlacement at all (stored before 1.6.0, or at its default)', (d) => { delete d.sponsorsPlacement; }],
+  ['sponsorsSettings', 'the support buttons\' own section stated', (d) => { d.sponsorsPlacement = 'section'; }],
+  ['settings', 'the support buttons together with the name, the links in their own section', (d) => { d.sponsorsPlacement = 'header'; }],
+  ['sponsorsPage', 'no sponsorsPlacement at all (a document built before 1.9.0)', (d) => { delete d.sponsorsPlacement; }],
+  ['page', 'the support buttons together with the name, the links in their own section', (d) => { d.sponsorsPlacement = 'header'; }]
 ];
 
 const CONTRACT = {
@@ -2142,6 +2289,8 @@ const CONTRACT = {
   organisationPage: 'contributor-page.v1',
   listingsPage: 'contributor-page.v1',
   listingsSettings: 'contributor-page-settings.v1',
+  sponsorsPage: 'contributor-page.v1',
+  sponsorsSettings: 'contributor-page-settings.v1',
   alias: 'contributor-page-alias.v1'
 };
 
@@ -2150,7 +2299,7 @@ function refusalProblems(docs, refusals) {
   const validators = {
     page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage, adopterYearsPage: validatePage,
     organisationPage: validatePage, listingsPage: validatePage, settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings,
-    listingsSettings: validateSettings, alias: validateAlias
+    listingsSettings: validateSettings, sponsorsPage: validatePage, sponsorsSettings: validateSettings, alias: validateAlias
   };
   for (const [base, what, breakIt] of refusals) {
     const copy = structuredClone(docs[base]);
@@ -2165,7 +2314,7 @@ function admitsProblems(docs, admits) {
   const validators = {
     page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage, adopterYearsPage: validatePage,
     organisationPage: validatePage, listingsPage: validatePage, settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings,
-    listingsSettings: validateSettings
+    listingsSettings: validateSettings, sponsorsPage: validatePage, sponsorsSettings: validateSettings
   };
   for (const [base, what, change] of admits) {
     const copy = structuredClone(docs[base]);
@@ -2208,6 +2357,7 @@ function allProblems(state) {
       ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
       ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
       ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
+      ['examples/contributor-page.v1.sponsors-header.example.json', state.sponsorsPage],
       [`examples/${ABOUT_FILE}`, state.aboutTexts],
       [`examples/${ABOUT_GOLDEN}`, state.aboutGolden]
     ]),
@@ -2223,10 +2373,12 @@ function allProblems(state) {
       ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
       ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
       ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
-      ['examples/contributor-page.v1.listings.example.json', state.listingsPage]
+      ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
+      ['examples/contributor-page.v1.sponsors-header.example.json', state.sponsorsPage]
     ]),
     ...cardsProblems(state),
     ...listingsProblems(state),
+    ...sponsorsPlacementProblems(state),
     ...adopterYearsProblems(
       [
         ['examples/contributor-page.v1.example.json', state.page],
@@ -2239,6 +2391,7 @@ function allProblems(state) {
         ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
         ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
         ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
+        ['examples/contributor-page.v1.sponsors-header.example.json', state.sponsorsPage],
         ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
       ],
       state.preview.vectors
@@ -2255,6 +2408,7 @@ function allProblems(state) {
         ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
         ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
         ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
+        ['examples/contributor-page.v1.sponsors-header.example.json', state.sponsorsPage],
         ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
       ],
       state.preview.vectors
@@ -2271,6 +2425,7 @@ function allProblems(state) {
         ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
         ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
         ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
+        ['examples/contributor-page.v1.sponsors-header.example.json', state.sponsorsPage],
         ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
       ],
       state.preview.vectors
@@ -2438,6 +2593,35 @@ const SELF_TEST = [
   ['admits', (s) => { s.admits = [['listingsSettings', 'a third view', (d) => { d.listings = { certificates: { view: 'grid' } }; }]]; }],
   ['refusals', (s) => { s.refusals = [['listingsPage', 'the listings page unchanged', () => {}]]; }],
   ['refusals', (s) => { s.refusals = [['listingsSettings', 'the listings settings unchanged', () => {}]]; }],
+  // 1.9.0 of the page, 1.6.0 of the settings (ops decision D189).
+  ['sponsors', (s) => { delete s.schemas.page.properties.sponsorsPlacement; }],
+  ['sponsors', (s) => { s.schemas.settings.properties.sponsorsPlacement.default = 'header'; }],
+  ['sponsors', (s) => { s.schemas.settings.properties.sponsorsPlacement.enum = ['section', 'header', 'footer']; }],
+  ['sponsors', (s) => { s.schemas.page.properties.sponsorsPlacement.enum = ['section', 'header']; }],
+  ['sponsors', (s) => { s.schemas.settings.required = [...s.schemas.settings.required, 'sponsorsPlacement']; }],
+  ['sponsors', (s) => { s.schemas.page.required = [...s.schemas.page.required, 'sponsorsPlacement']; }],
+  ['sponsors', (s) => { s.schemas.settings['x-psn'].alwaysWritten = [...s.schemas.settings['x-psn'].alwaysWritten, 'sponsorsPlacement']; }],
+  ['sponsors', (s) => { s.sponsorsPage.sponsorsPlacement = 'section'; }],
+  ['sponsors', (s) => { s.sponsorsSettings.sponsorsPlacement = 'footer'; }],
+  ['sponsors', (s) => { const { sponsorsPlacement, ...rest } = s.sponsorsPage; s.sponsorsPage = { ...rest, sponsorsPlacement }; }],
+  ['sponsors', (s) => { const v = s.preview.vectors.find((x) => x.id === 'PV-10'); const { linksPlacement, ...rest } = v.document; v.document = { ...rest, linksPlacement }; }],
+  ['sponsors', (s) => { s.settingsExamples['contributor-page-settings.v1.sponsors-header.example.json'].sponsorsPlacement = 'section'; }],
+  ['sponsors', (s) => { const name = 'contributor-page-settings.v1.sponsors-header.example.json'; const { sponsorsPlacement, ...rest } = s.settingsExamples[name]; s.settingsExamples[name] = { ...rest, sponsorsPlacement }; }],
+  ['sponsors', (s) => { for (const v of s.preview.vectors) delete v.document.sponsorsPlacement; }],
+  ['sponsors', (s) => { const v = s.preview.vectors.find((x) => x.id === 'PV-10'); v.document.sections = v.document.sections.filter((x) => x.id !== 'links'); }],
+  ['build', (s) => { s.build.sponsorsPlacement.find((v) => v.id === 'SP-2').expect.sponsorsPlacement = 'section'; }],
+  ['build', (s) => { s.build.sponsorsPlacement.find((v) => v.id === 'SP-4').expect.sponsorsPlacement = null; }],
+  ['build', (s) => { delete s.build.sponsorsPlacement.find((v) => v.id === 'SP-1').input.sponsorsOn; }],
+  ['build', (s) => { s.build.sponsorsPlacement = s.build.sponsorsPlacement.filter((v) => v.input.sponsorsOn); }],
+  ['build', (s) => { s.build.sponsorsPlacement = s.build.sponsorsPlacement.filter((v) => v.input.sponsorsPlacement !== null); }],
+  ['build', (s) => { s.build.sponsorsPlacement = s.build.sponsorsPlacement.filter((v) => v.input.sponsorsPlacement !== 'section'); }],
+  ['build', (s) => { s.build.sponsorsPlacement = []; }],
+  ['agree', (s) => { s.schemas.settings.properties.sponsorsPlacement.enum = ['header', 'section']; }],
+  ['defaults', (s) => { s.defaults.sponsorsPlacement = 'section'; }],
+  ['admits', (s) => { s.admits = [['sponsorsSettings', 'the support buttons in a footer', (d) => { d.sponsorsPlacement = 'footer'; }]]; }],
+  ['admits', (s) => { s.admits = [['sponsorsPage', 'the support buttons\' own section stated in the document', (d) => { d.sponsorsPlacement = 'section'; }]]; }],
+  ['refusals', (s) => { s.refusals = [['sponsorsPage', 'the sponsors-header page unchanged', () => {}]]; }],
+  ['refusals', (s) => { s.refusals = [['sponsorsSettings', 'the sponsors-header settings unchanged', () => {}]]; }],
   ['goldens', (s) => { s.goldenFiles = [...s.goldenFiles, 'unchecked.v1.golden.json']; }]
 ];
 
@@ -2480,6 +2664,7 @@ fail(
     `${state.build.vectors.length} builder vectors keep a hidden login off the repository list, ${state.build.about.length} write the about block, ` +
     `${state.build.cards.length} write the cards' choices resolved, ${state.build.adopter.length} list the licence adopter's repositories with their years, ` +
     `${state.build.organisations.length} judge whose organisation picture a page may name, ${state.build.listings.length} write the listings' choices that differ from D186's defaults, ` +
+    `${state.build.sponsorsPlacement.length} write the support buttons' place only where it is with the name, ` +
     `${state.aboutTexts.versions.length} version(s) of our about texts hold their recorded digests, ${state.aboutGolden.sentences.length} about sentences and ${state.aboutGolden.blocks.length} blocks recompute, ` +
     'every certificate item names its period by its months, in order and in its years, ' +
     'no page member or example carries points, money or a GitHub id, ' +
