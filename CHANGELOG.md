@@ -4076,7 +4076,44 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   to its own reading of the builder's rule, the two lists of views to agree, and 12 refusals and 6 admissions (both schemas), each
   proved able to fail.
 
+### 1.6.0 — unreleased (2026-10-29; ops decision D189 and its dated note of 2026-10-29T10:0xZ) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump. `sponsorsPlacement`, `section` | `header`, right after `sponsors`:
+  where the support buttons show, the second of the operator's two additions when they approved the page editor's preview
+  (D189's dated note: Support gets the Links section's placement choice, in its own section or together with the name at the
+  top). It mirrors `linksPlacement` member for member: `section`, the default, keeps the buttons in their own section headed
+  "Support {name} directly", where `sections` puts it; `header` puts them together with the name, in the header after the bio
+  and after the links when `linksPlacement` puts those there too, with no heading, the section's place in `sections` then
+  ignored. The fixed line under the buttons (design §5.3) goes with them in either place. The section's own switch still
+  decides whether they show, and in either place they are never printed and never on the card.
+- LEFT OUT AT ITS DEFAULT, as `linksPlacement` is: optional, absent means `section`, and the api writes it only as `header`,
+  so a document stored before 1.6.0 reads and serialises to the same bytes and keeps its `settings_sha256` (a published page
+  stays "published"). Any other value, or another type, is `page.settings_invalid` at `/sponsorsPlacement`. Not in
+  `x-psn.alwaysWritten`: its absence means `section`.
+- Wording: `sectionId`'s `sponsors` names its two places, and the description's paragraph on the optional members names
+  `sponsorsPlacement`, and `listings` (1.5.0), which it had left out.
+
 ## contributor-page.v1.json
+
+### 1.9.0 — unreleased (2026-10-29; ops decision D189 and its dated note of 2026-10-29T10:0xZ) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump, optional: every document written under 1.8.x stays valid, and a
+  renderer before 1.9.0 ignores the new member, as it ignores every unknown member, and draws the support buttons in their own
+  section as before. `sponsorsPlacement`, right after `linksPlacement`: the settings' `sponsorsPlacement`
+  (`contributor-page-settings.v1` 1.6.0), where the support buttons show.
+- WRITTEN ONLY AS `header`, as `linksPlacement` is, and this schema admits `header` alone: `section`, the settings' default,
+  is never written. So a page whose owner keeps the default, every earlier example and preview vector, and the platform's
+  builder tests keep their bytes and their hashes on either side of the builder's change; `page.preview_changed` never fires
+  for a page only because the platform learns the member. Written whatever sections the page shows, as `linksPlacement` is;
+  inside the preview hash like every member, so a placement changed after the preview answers `page.preview_changed`.
+- WITH `header`, the sponsors section, which keeps its shape and its place in `sections`, is drawn together with the name: in
+  the header after the bio, after the links when those stand there too, with no heading (its list of buttons still named
+  "Support {name} directly" for assistive technology), the buttons and then the fixed line, centred as the rest of the header
+  is in the `profile` layout; its place in the order is ignored. Absent, it is drawn where `sections` puts it, headed "Support
+  {name} directly", as before. In either place it is never printed and never drawn on the card (`sponsorsPlacement`'s and
+  `sponsorsSection`'s descriptions). The operator's addition came after the approved preview and has no picture of its own,
+  so its look copies the links' approved one: no heading, after the links, centred with the header (the orchestrator's
+  defaults).
 
 ### 1.8.0 — unreleased (2026-10-28; ops decision D186 items 1 and 2) — pre-release
 
