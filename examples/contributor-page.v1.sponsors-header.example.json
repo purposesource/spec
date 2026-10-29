@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2027-03-01T00:00:00Z",
+  "source": "fixture",
+  "pid": "s5p2n8r4w7k3x9qd",
+  "versionId": "pgv_s5p2n8r4w7k3x9qds5p2n8r4w7",
+  "address": "login",
+  "search": false,
+  "login": "example-contributor",
+  "layout": "profile",
+  "theme": { "preset": "purpose" },
+  "picture": { "kind": "monogram", "letters": "AE" },
+  "cover": { "kind": "none" },
+  "identity": { "displayName": "Alex Example", "pronouns": "they/them", "bio": "Maintainer of small accounting libraries." },
+  "about": { "variant": "short", "version": 1 },
+  "linksPlacement": "header",
+  "sponsorsPlacement": "header",
+  "cards": { "icon": "owner", "ownNames": "name", "otherNames": "owner/name" },
+  "sections": [
+    { "id": "summary", "projects": 3, "organisations": 2, "since": 2026, "certificates": 1 },
+    {
+      "id": "sponsors",
+      "items": [
+        { "platform": "github-sponsors", "handle": "example-contributor", "url": "https://github.com/sponsors/example-contributor" }
+      ]
+    },
+    {
+      "id": "certificates",
+      "items": [
+        {
+          "cid": "cert_01jk2m4p6r8t0v2x4z6b8d0f2h",
+          "typ": "contributor",
+          "variant": "participation",
+          "years": { "from": 2026, "to": 2026 },
+          "months": { "from": "2026-01", "to": "2026-12" },
+          "status": "expired",
+          "disclosure": "full",
+          "repos": [
+            { "nodeId": "R_kgDOSMPL0001", "fullName": "example-org/ledger-tools" },
+            { "nodeId": "R_kgDOSMPL0003", "fullName": "other-org/invoice-kit" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "items": [{ "platform": "linkedin", "handle": "alex-example", "url": "https://www.linkedin.com/in/alex-example" }]
+    }
+  ],
+  "card": { "picture": true, "name": true, "login": true, "summary": true, "adopter": false, "links": true },
+  "autoUpdated": ["summary", "certificate-status", "registry-names", "login"],
+  "factsAsOf": "2027-02"
+}

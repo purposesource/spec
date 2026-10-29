@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "start": "named",
+  "layout": "profile",
+  "theme": { "preset": "purpose", "accent": null },
+  "picture": { "kind": "monogram" },
+  "cover": { "kind": "none" },
+  "identity": {
+    "displayName": "Alex Example",
+    "pronouns": "they/them",
+    "bio": "Maintainer of small accounting libraries.",
+    "showLogin": true
+  },
+  "about": { "on": true, "variant": "short", "ownText": null, "version": 1 },
+  "address": "login",
+  "search": false,
+  "sections": [
+    { "id": "summary", "on": true },
+    { "id": "sponsors", "on": true },
+    { "id": "certificates", "on": true },
+    { "id": "links", "on": true },
+    { "id": "repositories", "on": false },
+    { "id": "adopter", "on": false }
+  ],
+  "summary": { "projects": true, "organisations": true, "since": true, "certificates": true },
+  "certificates": { "mode": "all-eligible" },
+  "repositories": { "mode": "all", "hidden": [], "years": true },
+  "adopter": { "hidden": [] },
+  "links": [{ "platform": "linkedin", "handle": "alex-example" }],
+  "website": null,
+  "linksPlacement": "header",
+  "sponsors": [{ "platform": "github-sponsors", "handle": "example-contributor" }],
+  "sponsorsPlacement": "header",
+  "card": { "picture": true, "name": true, "login": true, "summary": true, "adopter": true, "links": true }
+}

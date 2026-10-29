@@ -4092,6 +4092,9 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   `x-psn.alwaysWritten`: its absence means `section`.
 - Wording: `sectionId`'s `sponsors` names its two places, and the description's paragraph on the optional members names
   `sponsorsPlacement`, and `listings` (1.5.0), which it had left out.
+- Example: `sponsors-header` (one link and one GitHub Sponsors button, both together with the name on the `profile` layout, the
+  sponsors section second in `sections`), stored as the api stores it, `sponsorsPlacement` right after `sponsors`. The other
+  examples keep their bytes.
 
 ## contributor-page.v1.json
 
@@ -4114,6 +4117,11 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   `sponsorsSection`'s descriptions). The operator's addition came after the approved preview and has no picture of its own,
   so its look copies the links' approved one: no heading, after the links, centred with the header (the orchestrator's
   defaults).
+- Examples: `sponsors-header`, the document the one builder makes of that settings example (`sponsorsPlacement` right after
+  `linksPlacement`, the sponsors section second in `sections`, after the summary), and PV-10, its preview vector, so the hash
+  pins the member. PV-1 to PV-9 and every other example keep their bytes. The build golden (its 1.6.0) gains the vectors SP-1
+  to SP-4: `header` written, `section` stated and no member left out, and `header` written with the sponsors section off, as
+  `linksPlacement` is. The preview golden is its 1.7.0.
 
 ### 1.8.0 — unreleased (2026-10-28; ops decision D186 items 1 and 2) — pre-release
 
