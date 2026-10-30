@@ -2169,6 +2169,19 @@ row the new-file rule binds absolutely.
   Fees of the payouts a close carries and of the held items the close releases. No member, type or
   rule moves.
 
+### 1.6.1 — unreleased (2026-10-30; ops decision D64 item 1, with `transfers.v1` 1.0.0; PS-2586) — wording only
+
+- A patch under policy 3, beside `ledger-export.v1` 1.9.1. The file's description called a
+  `disburse` row "one transfer per listed recipient", and `recipientId` named "the listed recipient
+  a `disburse` row transferred to". A month's lock writes each listed recipient's `disburse` row
+  when it allocates the share, before any money leaves the fees account, and the transfers are
+  published after they happen, in each month's own record (`transfers.v1`, the record ops decision
+  D64 item 1 adopted). Both now say what the row is: the share the month's lock allocated to the
+  recipient, transferred directly from the fees account, the day of each transfer being in the
+  month's transfers record.
+- No property, type, enum or rule changes: every row valid under 1.6.0 is valid under 1.6.1 and
+  means the same, no `rowHash` preimage moves, and every example keeps its bytes.
+
 ## ledger-export.v1.json
 
 ### 1.0.0 — unreleased
@@ -2509,6 +2522,19 @@ reasoning: no month export has ever been published with a row in it.
     `prevHash`; `monthDigest` is taken over the month's rows less the lock row, as published;
     `headHash` is the last row's; and `batch.costSupportSha256` is the SHA-256 of the bytes of
     `cost-support.v1`'s credit-month example. Only hash values moved.
+
+### 1.9.1 — unreleased (2026-10-30; ops decision D64 item 1, with `ledger-row.v1` 1.6.1 and `transfers.v1` 1.0.0; PS-2586) — wording only
+
+- A patch under policy 3. `totals.disbursed` said its figure was "transferred directly to the
+  listed recipients". It is the sum of the month's `disburse` rows, which the lock writes when it
+  allocates the shares, before any money leaves the fees account; the transfers are published after
+  they happen, in the month's own record (`transfers.v1`; ops decision D64 item 1). It now reads:
+  the shares the month's lock allocated to the listed recipients, one row per recipient, each
+  transferred directly from the fees account; the day of each transfer is in the month's transfers
+  record.
+- The export row's `recipientId` says the same, as `ledger-row.v1` 1.6.1's does.
+- No property, type, enum or rule changes: every document valid under 1.9.0 is valid under 1.9.1
+  and means the same, and every example keeps its bytes.
 
 ## ledger-chain.v1.json
 
