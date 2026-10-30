@@ -5677,6 +5677,36 @@ which kind of change each entry was.
   answer moved. The website's `scripts/waiver-certificate-vectors.mjs`, which writes that file,
   says `1.21.0` too (website branch `orc-og-wait`), so a run of it still writes these bytes.
 
+### 1.22.0 — unreleased (2026-10-30; `transfers.v1` 1.0.0, FS-00 §6.2's dated note of 2026-10-30, ops decision D64 item 1; L3-02's follow-up, PS-2585)
+
+- Additive, a minor bump like 1.17.0: one new GET operation serves the artifact `transfers.v1` 1.0.0 describes, and
+  nothing that existed moved. 1.21.0 is the version route's `card`, so this route takes the next number.
+  `getTransfersRecord` at `/v1/transfers/{month}.json` answers `transfers.v1`. The plane path
+  is `/transfers/{YYYY-MM}.json`, outside `ledger/`, as the fees account's statement's is; FS-00 §6.2's note of 2026-10-30
+  adopted it, and the platform's index build writes it, with its purge naming this route.
+- `x-psn-phase: P-M3`, and the phase list in `info.description` says so: the producer is the platform's index build, and a
+  month whose record no run has written answers `404`. A new tag, `transfers`, because the record is neither the ledger,
+  whose export names the frozen document it links to, nor the fees account's statement, whose debit lines it dates.
+- Cached 300 s, the fees account's statement's class: a month's record is rewritten when one of its transfers is executed
+  or comes back or a receipt arrives, and a `404` read before a month's first record is not held for longer than that.
+- The description says what the schema says and nothing more: one row per listed recipient the month's allocation gave a
+  share to, the link to the frozen cost-support document by the SHA-256 of its bytes, one document per locked month with an
+  executed transfer and never before the month's export, the months with no document and the document a month withheld
+  after its publication keeps, the three cases that change a row, `generatedAt` as the document's own instant, and nothing
+  that names a person or an account. It says what the schema's case that `generatedAt` cannot date means for a client: a
+  return, or a receipt dated before something the document already shows, changes the bytes and the `ETag` without moving
+  `Last-Modified`, so a client polls with `If-None-Match`, as this description's introduction already asks.
+- Errors: `404` for a month with no record, `429`, and `503`, as the fees account's statement's.
+- Two examples: `firstPublished` is `examples/transfers.v1.example.json` and `regenerated` is
+  `examples/transfers.v1.returned.example.json`, each copied member for member, so the route shows one month's record as
+  first published and as regenerated. `check:openapi-examples` validates 84 examples (82 before).
+- `coverage/waiver-certificate-vectors.json` names this version, `specVersion` 1.22.0, as `check:certificate-vectors`
+  requires of it. No vector, certificate or key set moved, and the website's generator
+  (`scripts/waiver-certificate-vectors.mjs`, which names the same version) writes the same bytes.
+- The website's edge serves the route (its allow-list, the same 300 s on the response and on the mirror read, the public
+  family and the `artifacts` rate-limit class). Its tests do not read this file, so the order of pushes does not matter
+  for them.
+
 ## coverage/cov-v1.ts
 
 The published coverage function, versioned together with its vectors (`coverage/vectors.json`)

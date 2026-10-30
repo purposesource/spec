@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.21.0
+  version: 1.22.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -52,7 +52,8 @@ info:
       routes are P-M3 for the same producer: both answer `404` until its first run writes
       the index, and a version no run has written answers `404` after that. The fees-account
       statement route is P-M3 for the same producer: a month whose statement no run has
-      written answers `404`. The three
+      written answers `404`. The transfers record route is P-M3 for the same producer: a
+      month whose record no run has written answers `404`. The three
       contributor-page routes are P-M3 too: nothing is published under them until a
       person publishes a page, and production publishes none
       until its publishing switch is on, so until then each answers as for a page that does
@@ -167,6 +168,8 @@ tags:
     description: "Designations in summary: the projects' and, behind a floor, the contributors' designations for each month (advisory; routes money only after the fairness review, D27)."
   - name: fees-account
     description: "The statement of the fees account: for each locked month from the account's opening month, its opening and closing balances and every line the bank booked on it, with its class, and nothing that identifies a payer or a natural person."
+  - name: transfers
+    description: "The month's transfers: for each locked month with an executed transfer, every listed recipient's share and whether it has been transferred, with the day, the transfer's identifier and the recipient's receipt by its reference once there is one, linked to the month's frozen cost-support document by its hash, and nothing that names a person or an account."
   - name: badges
     description: README badges — the shields.io endpoint body, and the SVG badges the edge draws for a repository, its README cards included, and for a certificate.
   - name: cards
@@ -3623,6 +3626,177 @@ paths:
                         amountMinor: 30
                         currency: CHF
                         bankReference: STMT-2027-08-0400
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ArtifactsUnavailable'
+
+  /v1/transfers/{month}.json:
+    get:
+      operationId: getTransfersRecord
+      summary: The transfers of one locked month's shares
+      description: |
+        The transfers of one locked month's shares to the listed recipients, published as their
+        own record once they happen (ops decision D64 item 1; statutes Art. 6e para. 1 item 6
+        and Finanzreglement § 4 Abs. 5, in part): one row per listed recipient the month's
+        allocation gave a share to, in `recipientId` order, with its category, its share as
+        allocated and whether it has been transferred and, once it has, the day the fees
+        account's statement booked the debit, the transfer's end-to-end identifier and, as soon
+        as it has arrived, the recipient's receipt, by its reference and the SHA-256 of its
+        document. The fees account's booked statement and the recipients' receipts govern what
+        the record restates.
+
+        The month lock hashes the month's cost-support document before the allocation exists,
+        and that document is never edited, so it cannot say who was paid. This record says it,
+        after the transfers happen, and names the frozen document by the SHA-256 of its exact
+        bytes (`costSupportSha256`), the value the month's ledger export carries as
+        `batch.costSupportSha256`. JSON Schema can neither compare two documents nor sum across
+        items, so the schema states in words the link and the arithmetic a reader checks.
+
+        One document per locked month with at least one executed transfer, never before the
+        month's ledger export is published; before a month's first transfer its shares are the
+        `disburse` rows of its export. An open month, a locked month with no executed transfer
+        and a month its producer withholds have no document and answer `404`, and a month
+        withheld after its record was published keeps that document as published.
+
+        Regenerated, not written once. A month's rows are fixed from the first publication, and
+        a row changes in three cases only: its share is transferred; its transfer comes back
+        from the receiving bank before it reached the recipient, so the share is owed again
+        until it is sent again, with a note saying so; or the recipient's receipt arrives. Its
+        `generatedAt` is the document's own, derived from the records and never from a clock
+        (the schema says how), not the plane's. A return, or a receipt dated before something
+        the document already shows, changes the document without moving `generatedAt`, and so
+        without moving `Last-Modified`; its `ETag` changes with its bytes, so poll with
+        `If-None-Match`.
+
+        Nothing here names a person or an account: no account number or other bank detail, no
+        bank file, no counterparty or text of a bank line, no steward, approval, reason for an
+        abandoned attempt or screening, and a receipt is published by its reference and its
+        document's SHA-256, never its bytes. Every object is closed and every reference has a
+        fixed form, so no member can carry one. The schema states every rule in full.
+
+        Cached 300 s, like the fees account's statement: a month's record is rewritten when one
+        of its transfers is executed or comes back or a receipt arrives, and a month asked for
+        before its record is written is not held as `404` for longer than that.
+      tags: [transfers]
+      x-psn-phase: P-M3
+      parameters:
+        - name: month
+          in: path
+          required: true
+          description: The locked month whose shares the record states, `YYYY-MM`, the month whose close allocated them, not the month the transfers are made in.
+          schema:
+            type: string
+            pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$'
+          example: 2027-11
+      responses:
+        '200':
+          description: The month's transfers record. Cached 300 s.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/transfers.v1.json'
+              examples:
+                firstPublished:
+                  summary: A month's record as first published, three shares transferred on the day of the lock, one with its receipt, and one scheduled with its second attempt prepared (sample plane)
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-12-02T06:05:00Z'
+                    source: sample
+                    month: 2027-11
+                    lockedAt: '2027-12-01T09:10:00Z'
+                    costSupportSha256: 32de2f6d7617f9430b2c25fbbd0721a97a7dc88527e791c1937c8176b310068c
+                    currency: CHF
+                    transfers:
+                      - recipientId: rcp_0svacmgratb4f4q0syghrz8ym4
+                        category: education
+                        amountMinor: 24316
+                        status: transferred
+                        date: '2027-12-01'
+                        endToEndId: psn-202711-q0syghrz8ym4
+                        evidence:
+                          - kind: bank-line
+                            ref: SMPL-2027-12-01-0011
+                      - recipientId: rcp_8jf9xfejcgadg7cgyag0hmkcxb
+                        category: education
+                        amountMinor: 24316
+                        status: scheduled
+                        endToEndId: psn-202711-cgyag0hmkcxb-2
+                      - recipientId: rcp_f5cc8xgz81c00nrve04pdahejb
+                        category: health
+                        amountMinor: 24316
+                        status: transferred
+                        date: '2027-12-01'
+                        endToEndId: psn-202711-rve04pdahejb
+                        receiptRef: rct_01kmrb4x7e2q9w5n3t8v6y0zha
+                        evidence:
+                          - kind: bank-line
+                            ref: SMPL-2027-12-01-0012
+                          - kind: recipient-receipt
+                            ref: rct_01kmrb4x7e2q9w5n3t8v6y0zha
+                            sha256: 9dc8d396bd1d61758aada72f45fc487d788c6ff4b8563be3bd8e06a2442016ca
+                      - recipientId: rcp_tg8g3ps3smxzdpy1zt0zesjnx9
+                        category: health
+                        amountMinor: 24316
+                        status: transferred
+                        date: '2027-12-01'
+                        endToEndId: psn-202711-y1zt0zesjnx9
+                        evidence:
+                          - kind: bank-line
+                            ref: SMPL-2027-12-01-0013
+                regenerated:
+                  summary: The same month regenerated, the second attempt sent and a second receipt arrived, and one transfer returned by the receiving bank, its share owed again (sample plane)
+                  value:
+                    schemaVersion: 1
+                    generatedAt: '2027-12-03T23:00:00Z'
+                    source: sample
+                    month: 2027-11
+                    lockedAt: '2027-12-01T09:10:00Z'
+                    costSupportSha256: 32de2f6d7617f9430b2c25fbbd0721a97a7dc88527e791c1937c8176b310068c
+                    currency: CHF
+                    transfers:
+                      - recipientId: rcp_0svacmgratb4f4q0syghrz8ym4
+                        category: education
+                        amountMinor: 24316
+                        status: transferred
+                        date: '2027-12-01'
+                        endToEndId: psn-202711-q0syghrz8ym4
+                        receiptRef: rct_01kmv2c8d5f7h9j1k3m5n7p9qr
+                        evidence:
+                          - kind: bank-line
+                            ref: SMPL-2027-12-01-0011
+                          - kind: recipient-receipt
+                            ref: rct_01kmv2c8d5f7h9j1k3m5n7p9qr
+                            sha256: 6cd5c8e2484ac9264c365233806b8617b45940abaa56dc8d659b6aaf5157036e
+                      - recipientId: rcp_8jf9xfejcgadg7cgyag0hmkcxb
+                        category: education
+                        amountMinor: 24316
+                        status: transferred
+                        date: '2027-12-02'
+                        endToEndId: psn-202711-cgyag0hmkcxb-2
+                        evidence:
+                          - kind: bank-line
+                            ref: SMPL-2027-12-02-0007
+                      - recipientId: rcp_f5cc8xgz81c00nrve04pdahejb
+                        category: health
+                        amountMinor: 24316
+                        status: transferred
+                        date: '2027-12-01'
+                        endToEndId: psn-202711-rve04pdahejb
+                        receiptRef: rct_01kmrb4x7e2q9w5n3t8v6y0zha
+                        evidence:
+                          - kind: bank-line
+                            ref: SMPL-2027-12-01-0012
+                          - kind: recipient-receipt
+                            ref: rct_01kmrb4x7e2q9w5n3t8v6y0zha
+                            sha256: 9dc8d396bd1d61758aada72f45fc487d788c6ff4b8563be3bd8e06a2442016ca
+                      - recipientId: rcp_tg8g3ps3smxzdpy1zt0zesjnx9
+                        category: health
+                        amountMinor: 24316
+                        status: scheduled
+                        note: Transferred on 2027-12-01 and returned by the receiving bank, so the share is owed again until it is sent again.
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
