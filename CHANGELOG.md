@@ -5618,6 +5618,39 @@ which kind of change each entry was.
   route, and its `scripts/waiver-certificate-vectors.mjs` writes this file.
 - `check:openapi-examples` validates 81 examples (72 before).
 
+### 1.21.0 — unreleased (2026-10-30; the orchestrator's promise to the operator of 2026-10-30, "a first publish should wait for its own card"; design PROFILE-PAGE-2026-10-06 §3.4, §4.8 and correction 4)
+
+- Additive, a minor bump: `PageVersion` gains one optional, nullable member, `card`, and
+  `getContributorPageVersion` gains one example. No operation, status code, cache class, error
+  code or other member moved; the route stays `no-store` and still names nobody.
+- **Why.** Publishing never waits for the render job (the design's correction 4, which stands):
+  index-build writes the page document at once, asks the render job for the page's card, and
+  names the drawn files in the document (`contributor-page.v1` `card.h16`) on a later run, a
+  minute or two on. Until then the page's `og:image` is the site's generic card, and a link
+  shared in that window keeps the generic card in that message's preview. The dashboard could
+  not tell the person: it polled this route for `versionId` alone, and nothing it reads said
+  whether the card was drawn. The wait therefore lives in the dashboard, which keeps asking
+  after the version appears, for at most five minutes from the publish, says until then that
+  the link preview is being drawn, and shows the page's own card once `card` names it.
+- **What it carries.** The first eight hex characters of the served document's `card.h16`: the
+  `v` of the page's `og:image` address (`/cards/p/{pid}-og.png?v={card}`, design §4.8), the one
+  value `getContributorPageCard` admits; `null` while the document names no card. Nothing new
+  is disclosed: the page's own head carries the same characters for anyone who reads it, and
+  they date nothing. The `v` parameter's description names the member.
+- **Optional, on purpose.** An edge older than 1.21.0 answers without `card` (production's,
+  until the website's next release), and a reader takes the absence as saying nothing about the
+  card: the dashboard then behaves exactly as before. So this file may land before the edge
+  that sends the member, and must: `PageVersion` is closed (`additionalProperties: false`), and
+  the website's edge test validates the route's body against it from a spec checkout. Push this
+  file first.
+- The route's `200` gains the example `cardNotDrawnYet` (the anonymous example page's `pid` and
+  `versionId`; its document names no card), and `published` gains `card` `78169a78`, the named
+  example page's. `check:openapi-examples` validates 82 examples (81 before).
+- `coverage/waiver-certificate-vectors.json` moves its `specVersion` to `1.21.0`, as
+  `check:certificate-vectors` holds it to this file's `info.version`; no vector, certificate or
+  answer moved. The website's `scripts/waiver-certificate-vectors.mjs`, which writes that file,
+  says `1.21.0` too (website branch `orc-og-wait`), so a run of it still writes these bytes.
+
 ## coverage/cov-v1.ts
 
 The published coverage function, versioned together with its vectors (`coverage/vectors.json`)

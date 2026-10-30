@@ -5,7 +5,7 @@
     "A vector publishes `plane` and asks: `repo` names a fixture of `repos` published at registry/repo/{nodeId}.json, or null for none; `waivers` is the document at waivers/{nodeId}.json, or null for none; `ct` maps a segment number to the document at ct/{n}.json, and `latest` to the open segment at ct/latest.json, which the edge reads when its copy of ct/{n}.json does not reach the entry; `keySet` names the key set at jwks.json. `request` is the certificate named, in its compact form or its flattened JSON form (with any `extra` members), padded with spaces after the compact form to `padTo` bytes; or a literal `body`. `now` is the instant of the request. `expect` is the status and, for 200, the body without asOf, which is `now`; for a refusal, the error code."
   ],
   "route": "POST /v1/coverage/waiver-certificate",
-  "specVersion": "1.20.0",
+  "specVersion": "1.21.0",
   "maxBodyBytes": 16384,
   "repos": {
     "registered": {
