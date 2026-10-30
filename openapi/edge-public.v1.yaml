@@ -4638,10 +4638,11 @@ components:
           description: >-
             1.21.0: the drawn card the served document names, as the first eight hex characters of
             its `card.h16`, which is the `v` of the page's `og:image` address
-            (`getContributorPageCard`); null while the document names none, until the render job
-            has drawn the card this version shows and index-build has copied it. The page's own
-            head carries the same characters, and they date nothing. Optional: an edge older than
-            1.21.0 sends no `card`, and its absence says nothing about the card.
+            (`getContributorPageCard`); null while the document names none: until index-build has
+            copied the card the render job drew for what this version shows, or for as long as no
+            card is drawn for it. The page's own head carries the same characters, and they date
+            nothing. Optional: an edge older than 1.21.0 sends no `card`, and its absence says
+            nothing about the card.
 
   responses:
     BadRequest:
