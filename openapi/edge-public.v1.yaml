@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.20.0
+  version: 1.21.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -1130,6 +1130,16 @@ paths:
         It answers from the live page document (`contributor-page.v1`, unlisted at `p/{pid}.json`
         in the published plane), read without a cache.
 
+        **`card` says when the page's link preview is its own** (1.21.0): the first eight hex
+        characters of the document's `card.h16`, the `v` its `og:image` address carries
+        (`getContributorPageCard`, `/cards/p/{pid}-og.png?v={card}`), or `null` while the document
+        names no card. Publishing never waits for the render job, so for a minute or two after a
+        publish whose card is new the page is public and a link to it is previewed with the site's
+        generic card. The dashboard keeps asking after the version appears, for at most five
+        minutes from the publish, until `card` names the drawn card, and says until then that the
+        link preview is being drawn. An edge older than 1.21.0 sends no `card`; its absence says
+        nothing about the card.
+
         The page itself is HTML on the site host — `https://purposesource.org/p/{pid}`, and the
         address the person chose, `/u/{login}` or `/u/{login}/{pid}` — rendered by the same worker
         from that document, with no script and no third-party request. The document is never
@@ -1171,11 +1181,19 @@ paths:
                 $ref: '#/components/schemas/PageVersion'
               examples:
                 published:
-                  summary: A published page
+                  summary: A published page, its card drawn
                   value:
                     schemaVersion: 1
                     pid: 7k2m9xq4tpz3r8vd
                     versionId: pgv_vg0hnfg53ns86tr52cs6pxetbg
+                    card: 78169a78
+                cardNotDrawnYet:
+                  summary: A page just published, its card not drawn yet
+                  value:
+                    schemaVersion: 1
+                    pid: m3q8zt0v5k1x9r2c
+                    versionId: pgv_mbpc3jstp765jf1rpqse0qkhh1
+                    card: null
         '404':
           description: |
             No public contributor page has this id — unknown, hidden, deleted, erased, replaced by
@@ -1240,8 +1258,9 @@ paths:
           required: false
           description: >-
             The first eight hex characters of the card's file id, which the page's `og:image` URL
-            carries so that a link-preview cache fetches again after the card changes. A value that
-            is not the current one answers the neutral image.
+            carries so that a link-preview cache fetches again after the card changes, and which
+            `getContributorPageVersion` names as `card` (1.21.0). A value that is not the current
+            one answers the neutral image.
           schema:
             type: string
             pattern: '^[0-9a-f]{8}$'
@@ -4598,8 +4617,8 @@ components:
       required: [schemaVersion, pid, versionId]
       description: |
         Which published version of a contributor page is being served: the page document's
-        `pid` and `versionId` (`contributor-page.v1`), and nothing else — no name, no login, no
-        date.
+        `pid` and `versionId` (`contributor-page.v1`), and since 1.21.0 which drawn card it names,
+        and nothing else — no name, no login, no date.
       properties:
         schemaVersion:
           const: 1
@@ -4613,6 +4632,16 @@ components:
             Opaque: 130 random bits, never a ULID, whose leading characters would be a millisecond
             timestamp and so would date each publish on this public route. The dashboard compares
             it with the id its publish was given.
+        card:
+          type: [string, 'null']
+          pattern: '^[0-9a-f]{8}$'
+          description: >-
+            1.21.0: the drawn card the served document names, as the first eight hex characters of
+            its `card.h16`, which is the `v` of the page's `og:image` address
+            (`getContributorPageCard`); null while the document names none, until the render job
+            has drawn the card this version shows and index-build has copied it. The page's own
+            head carries the same characters, and they date nothing. Optional: an edge older than
+            1.21.0 sends no `card`, and its absence says nothing about the card.
 
   responses:
     BadRequest:
