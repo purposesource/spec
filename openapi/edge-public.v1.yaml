@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.22.0
+  version: 1.23.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -22,6 +22,14 @@ info:
     Every artifact response carries an `ETag` and a `Last-Modified` equal to the
     artifact's own `generatedAt`, and honours `If-None-Match` with `304`. Polling with
     `If-None-Match` is the intended usage pattern, not an abuse of it.
+
+    Every document a cache may keep also states a browser's lifetime in its
+    `Cache-Control`, `max-age=0`, beside the shared caches' `s-maxage` that each route
+    below gives as its "Cached" time: a browser keeps its copy and asks again before each
+    use, answered `304` while nothing changed, so no browser holds a document past what its
+    route states, as it could by heuristic from the `Last-Modified` alone. The badges, the
+    shields.io endpoint among them, and the cards state their own browser time with their
+    route.
 
     ## Errors
 
@@ -240,13 +248,13 @@ paths:
           example: R_kgDOAbc123
       responses:
         '200':
-          description: The coverage answer. Edge-cached for 300 s and purged on every entitlement or waiver publish batch.
+          description: The coverage answer. Cached 300 s in shared caches and purged on every entitlement or waiver publish batch; a browser asks again before each use.
           headers:
             Cache-Control:
-              description: Edge cache policy for this route.
+              description: The cache policy for this route. Shared caches keep the answer 300 s (`s-maxage`), the whole of the five minutes the propagation bound allows; a browser keeps none of it fresh (`max-age=0`) and revalidates.
               schema:
                 type: string
-              example: public, s-maxage=300
+              example: public, max-age=0, s-maxage=300
             ETag:
               description: Strong validator. Send it back as `If-None-Match`.
               schema:
@@ -1079,8 +1087,13 @@ paths:
         '200':
           description: |
             The badge body — including for an unknown repository, which returns the
-            error-shaped body at 200. Cached 3600 s, stale-while-revalidate 24 h,
-            stale-if-error 7 days.
+            error-shaped body at 200. Cached five minutes in a browser and 3600 s in shared
+            caches, stale-while-revalidate 24 h, stale-if-error 7 days.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+              example: public, max-age=300, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800
           content:
             application/json:
               schema:
@@ -3856,10 +3869,17 @@ paths:
   /ct/{segment}.json:
     get:
       operationId: getCtSegment
-      summary: One closed transparency-log segment
+      summary: One transparency-log segment, by its number
       description: |
-        A frozen segment, chained to its predecessor by hash. Closed segments are cached
-        for a day because they can never change.
+        A segment of the log at its number, chained to its predecessor by hash.
+
+        A **closed** segment holds ten thousand entries and is frozen, so it is cached for a
+        day: it can never change. The **open** segment is served at its number as well, and
+        the log rewrites it there on every append until it closes, so it answers and caches
+        as `/ct/latest.json` does, 300 s. It is the segment `/ct/latest.json` serves, without
+        the `closed` and `generatedAt` members a numbered segment never carries. Which of the
+        two a segment is, the edge reads from the segment's own entry count. Keep a numbered
+        segment as immutable only once it is closed.
       tags: [certificates]
       x-psn-phase: P-M2
       parameters:
@@ -3873,7 +3893,7 @@ paths:
           example: 0
       responses:
         '200':
-          description: The segment. Cached 86400 s.
+          description: The segment. Cached 86400 s when closed, and 300 s while it is the open one.
           content:
             application/json:
               schema:
