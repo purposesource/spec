@@ -5707,6 +5707,41 @@ which kind of change each entry was.
   family and the `artifacts` rate-limit class). Its tests do not read this file, so the order of pushes does not matter
   for them.
 
+### 1.23.0 — unreleased (2026-11-01; the verify page's skeptic of 2026-11-01 and its second round, website PRs 179 and 180 and branch `orc-verify-round2`) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: caching classes move, and one route stops promising what the log never did. No operation,
+  status code, error code, schema member or body example moved.
+- **`getCtSegment` serves the open segment too.** It said "One closed transparency-log segment" and "Cached 86400 s". The
+  producer has always written the OPEN segment at its number as well, rewriting it there on every append until it
+  closes at ten thousand entries (`ct-segment.v1`, FS08-111), so the route never served closed segments alone, and an
+  edge that held every number a day held the open one a day behind the log: a certificate logged since then read as
+  not yet logged to a reader of `/ct/{n}.json` (the verify page, the log's mirror, anyone checking by hand). Since
+  website PR 180 the edge answers the open segment at its number as it answers `/ct/latest.json`, 300 s, and a closed
+  one 86400 s, telling them apart by the segment's own entry count, with no second read. The summary, the description
+  and the `200` say so, and that a numbered segment is to be kept as immutable only once it is closed. It is the
+  segment `/ct/latest.json` serves, without the `closed` and `generatedAt` members the producer never writes into a
+  numbered segment, whose bytes the next segment hashes. Pre-release because a reader that took the old words at
+  their face and kept every numbered segment for good would now be wrong about the open one.
+- **A browser's lifetime, stated.** `info.description` says that every document a cache may keep states `max-age=0`
+  beside the shared caches' `s-maxage`, the "Cached" time each route gives: a browser keeps its copy and asks again
+  before each use, answered `304` while nothing changed. With a `Last-Modified` and no `max-age`, a browser may keep a
+  document by heuristic for about a tenth of its age (RFC 9111 §4.2.2): a certificate's record a month old for three
+  days, past its revocation. The edge states it on every document of the read plane since website PR 180, and on the
+  coverage answer from `orc-verify-round2`, so `getCoverage`'s `200` says so and its `Cache-Control` example is
+  `public, max-age=0, s-maxage=300`: its 300 s in shared caches are the whole of the five-minute propagation bound,
+  and a browser adds nothing to them.
+- `getBadge` states its browser time, five minutes (`max-age=300`), as the certificate and repository badges and the
+  cards already do, beside its shared lines, which do not move (3600 s, `stale-while-revalidate` 24 h, `stale-if-error`
+  7 days): the badge names a repository and nobody. Its `200` gains the `Cache-Control` header those badges declare.
+- `coverage/waiver-certificate-vectors.json` names this version, `specVersion` 1.23.0, as `check:certificate-vectors`
+  requires of it. No vector, certificate or key set moved. The website's generator (`scripts/waiver-certificate-vectors.mjs`,
+  which names the same version on `orc-verify-round2`) writes this file again but for its ES256 signatures, which it
+  makes anew on every run, and the hashes taken over them.
+- Nothing mirrors this file byte for byte. The website's tests read its status codes and components, none of which
+  moved, so the order of pushes does not matter for them; land this before the website's edge change all the same, so
+  the description says what that edge does from its first deploy. `check:openapi-examples` validates the same 84
+  examples.
+
 ## coverage/cov-v1.ts
 
 The published coverage function, versioned together with its vectors (`coverage/vectors.json`)
