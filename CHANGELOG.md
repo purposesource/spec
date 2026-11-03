@@ -2535,6 +2535,12 @@ reasoning: no month export has ever been published with a row in it.
 - The export row's `recipientId` says the same, as `ledger-row.v1` 1.6.1's does.
 - No property, type, enum or rule changes: every document valid under 1.9.0 is valid under 1.9.1
   and means the same, and every example keeps its bytes.
+- *(2026-11-02: the credit-month example's `disburse` notes in the producer's form, with `transfers.v1` 1.1.0.)* Each of the
+  four `disburse` rows of `examples/ledger-export.v1.credit-month.example.json` notes its share's first transfer identifier
+  as the platform's allocator writes it, after the label `EndToEndId ` (FS07-062's ruling (c)), where the example wrote the
+  bare identifier. `transfers.v1` 1.1.0's (d) reads the note so. The four row hashes, the lock row's `prevHash`,
+  `monthDigest` and `rowHash`, and the export's `monthDigest` and `headHash` follow; nothing else moved, and no schema
+  changed.
 
 ## ledger-chain.v1.json
 
@@ -2881,6 +2887,42 @@ reasoning: no month export has ever been published with a row in it.
   `scheduled` rows are the shares as the month's close states them, and `transfers.v1`'s two examples say what became of
   them.
 
+### 1.6.0 — unreleased (2026-11-02; ops decisions D64 item 1 and D177 items 2 and 3; the recipient accounts design's §4.9, §4.10 and §5.3; with `transfers.v1` 1.1.0)
+
+- Additive. A document that carries rows of its own in `transfers[]`, as one written by hand may, can state each row as the
+  month's transfers record states it from `transfers.v1` 1.1.0 on, so its table carries every element statutes Art. 6e(1)
+  item 6 and Finanzreglement § 4 Abs. 5 ask of a transfer's line. A document the month lock froze carries no row
+  (`transfers: []`, 1.5.0), and its record states them.
+  - `endToEndId` admits a later attempt: `-n` after the short form, for n from 2 to 9 (a transfer the bank rejected, or one
+    that was abandoned or came back, is prepared again under the next attempt). The row names the attempt that was executed;
+    the `disburse` rows' note names the first, and every later attempt's identifier starts with it. The long form takes no
+    suffix.
+  - `status` admits `held`: the share is held back (statutes Art. 8(5)), with `heldOn`, the day, and `ground`, one of the four
+    generic words of `transfers.v1` 1.1.0, never the cause the Association's records give. A share whose recipient was struck
+    from the List after the close is `struck (Art. 7 Abs. 6)`, never `frozen` (ops decision D177 item 3). A held share carries
+    no day of transfer, receipt, evidence or identifier.
+  - A `transferred` row may carry what the transfer paid (`paidAmountMinor` in `paidCurrency`, the currency of the
+    recipient's account), the rate the payment file converted the share at with the rate's day (`rate`, a decimal string,
+    and `rateDate`, each only with the other), its charges as its debit line booked them (`chargesMinor`, the
+    Überweisungsspesen, signed), and the mark «Einzelauslösung» (`singleRelease`, `true` or absent). None of them is on a
+    share that is not transferred.
+- Additive. `directCostClass` gains `fees-account-charges`: the rest of the fees account's own bank charges, keeping the
+  account, receiving its incoming payments and a conversion that is no outbound transfer's (Cost Class Rules class 6).
+  `transfer-charges` stays the outbound transfers' charges, one entry per transfer. A bank's charge on an incoming payout,
+  which 1.4.0 calls a bank charge of the fees account (`bankDeductionMinor`), now has its class.
+- Nothing is removed and no meaning moves: every document valid under 1.5.0 is valid under 1.6.0 and reads the same, and the
+  five examples are unchanged.
+- `check:transfers` holds the row's rules to planted documents edited from `cost-support.v1.example.json`, since no example
+  carries them. The contract refuses a held share without its day or its ground, or with a day of transfer, a receipt,
+  evidence, an identifier or a member only a transfer has; a ground outside the four and the status `frozen`; a day held or a
+  ground on any other status; what a transfer paid, its currency, its rate, its charges or its release mark on a scheduled
+  share; a rate without its day and a day without its rate; a rate that is no decimal string, a release mark that is not
+  `true`, a payment of 0; attempt 1 as a suffix, a tenth attempt and the long form with a suffix; and a class no rule names
+  (39 refusals with and without `format`; 2 by `format` alone, since this contract's days carry `format` alone). It admits a
+  transfer and a scheduled share as 1.5.0 states them, a share held under each ground, a transfer with what it paid and its
+  charges of 0, above 0 or below 0, a converted one with its rate and the rate's day, attempts 2 and 9, and the class
+  `fees-account-charges` (14 admissions).
+
 ## transfers.v1.json
 
 ### 1.0.0 — unreleased (2026-10-29; ops decision D64 item 1, the checked register's row 24; FS-07's dated note of 2026-10-29) — pre-release
@@ -2943,6 +2985,77 @@ reasoning: no month export has ever been published with a row in it.
   minor unit short. It proves that the contract still refuses what must never be published (47 refusals with and without
   `format`, among them a receipt filed under a name and a bank reference longer than the bank's 35 characters, and one by
   `format` alone, a day that does not exist) and admits what a real month holds (10 admissions).
+
+### 1.1.0 — unreleased (2026-11-02; ops decisions D64 item 1 and D177 items 2 and 3; the recipient accounts design's §4.9, §4.10, §5.3 and §7) — pre-release
+
+- **`held`.** A share the Association holds back is published `held` (zurückgestellt, statutes Art. 8 para. 5) with
+  `heldOn`, the day it was held, and `ground`, one of four generic words, never the cause the Association's records give
+  (Finanzreglement § 9 Abs. 6 and 7): `struck (Art. 7 Abs. 6)`, `transfer returned`, `account not confirmed` and
+  `a precondition of the transfer is open`. A share whose recipient was struck from the List after the month's close is
+  `held`, `struck (Art. 7 Abs. 6)`, whatever the ground of the striking, and never `frozen` (ops decision D177 item 3). A
+  transfer that came back reads `transfer returned` once the Association holds its share (statutes Art. 6a para. 3, which
+  sends it to Art. 8 para. 5). Where more than one cause holds a share, the first of the four that applies. A held share
+  carries no day of transfer, identifier, receipt or evidence.
+  - 1.0.0 withheld a month holding a struck share, because it had no status for one. That month is now published.
+  - A share whose transfer a prohibition of law blocks (statutes Art. 6a para. 5, «gesperrt») is shown as statutes Art. 8
+    para. 5 shows such an amount, held back, under the generic ground its recorded cause maps to: `struck (Art. 7 Abs. 6)`
+    once its recipient is struck (ops decision D177 item 3). The record never says that a share is blocked, or why
+    (Finanzreglement § 9 Abs. 6 and 7). A block that rests on no cause the records name is not stated in this version.
+- **The rest of a transfer's line** (statutes Art. 6e para. 1 item 6; Finanzreglement § 4 Abs. 4 and 5). A `transferred`
+  row now carries:
+  - `paidAmountMinor` in `paidCurrency`: what the transfer paid, in the currency of the recipient's account, as the
+    Association's payment file instructed it;
+  - `rate` and `rateDate`, exactly where `paidCurrency` is not the record's `currency`: the rate the payment file converted
+    the share at, as a decimal string, and the day of that reference rate (ops decision D177 item 2). The rate is the one the
+    European Central Bank's euro foreign exchange reference rates give, published on the bank working day before the
+    payment file's requested execution date and crossed through the euro, and the amount paid is the share at it, rounded
+    down;
+  - `chargesMinor`: the transfer's charges, the Überweisungsspesen, as the fees account's statement books them on its debit
+    line: the line's amount less the share, a new identity (g) held to the fees account's statement. It is negative where the
+    conversion cost less than the share: a negative conversion cost of the fees account, booked against the transfer, never
+    income. A charge the bank books on a line of its own is not in it: the Association's records do not tie such a line to a
+    transfer yet, so the line's charges are met in part;
+  - `singleRelease`, `true`, exactly where the Association's record of the transfer day states that one board member alone
+    released the transfer: the mark «Einzelauslösung». It is absent where that record shows no single release, or holds no
+    record of the day. The record of the transfer day is never published beyond this mark.
+- **Words** (the orchestrator's of 2026-10-30 on L3-02):
+  - (d): a row's `endToEndId` on a first attempt is the identifier the `note` of its `disburse` rows carries after
+    `EndToEndId ` (FS07-062's ruling (c)), and every later attempt's starts with it. `endToEndId`'s description says the
+    same. The platform's allocator writes each note so (`EndToEndId psn-…`); 1.0.0's words matched only the examples.
+  - (f): `lockedAt` is the export's to the whole second, its fraction dropped and never rounded (the export states the lock
+    row's `createdAt` with its milliseconds; this record's instants are whole seconds, FS-00 §6.1). `lockedAt`'s
+    description says the same. (f) now holds a held share's day too: none is before the lock's day in Europe/Zurich.
+  - The producer line ends "PS-153's will": the sample plane's builder that renders the record is that item's.
+  - The returned note begins "Sent on {day} and returned by the receiving bank". On a share whose recipient is struck it
+    ends there, and never says the share is owed again: such a share is never sent to its recipient again (statutes Art. 7
+    para. 6, Art. 8 para. 5).
+- **`generatedAt`** also takes the instant the store recorded each hold of the month's shares, and the instant each attempt
+  was prepared, which is also the instant a hold ends (a hold is open while its share has no attempt at or above its own,
+  migration 0087). So a share held back, the end of its hold and an attempt prepared move it. A return, an abandoned
+  attempt and a receipt dated earlier are the cases it cannot date.
+- **Regenerated** names a fifth case of change, which 1.0.0 had and did not name: an attempt prepared or abandoned adds,
+  changes or removes the identifier a scheduled row carries.
+- **Pre-release (versioning rule 5):** a `transferred` row must now carry `paidAmountMinor`, `paidCurrency` and
+  `chargesMinor`, and (d) changes what a first attempt's identifier is compared with. No record has been published: no plane
+  holds an executed transfer, and this version is on `main` before the payout pass runs on production.
+- **Examples:**
+  - `transfers.v1.example.json`: the 1 December run was released by one board member alone, so its three transfers carry the
+    mark. One recipient's account is in CHF, one in EUR and one in GBP; the two conversions carry their rate, its day and the
+    difference their debit lines booked.
+  - `transfers.v1.returned.example.json`: the transfer that came back is now `held`, `transfer returned`, since 3 December,
+    with its note; attempt 2, released by two board members, carries no mark.
+  - `ledger-export.v1.credit-month.example.json`: its four `disburse` notes are in the producer's form, `EndToEndId psn-…`,
+    with their row hashes, `monthDigest` and `headHash` (its own section, 1.9.1's dated note).
+- `check:transfers` holds (d) to the labelled note and to two planted exports whose notes carry no label or another one; the
+  rate to the currency paid and a payment in the record's currency to the share; a held share's day to the lock, a share
+  held on the lock's own day passing, and to the record's own day; (g) to planted statements; and the regeneration rule to
+  a transfer's paid amount, rate, charges and release mark. The contract refuses a ground outside the four (the raw cause,
+  `screening`, `frozen`), a held share without its day or ground or with an identifier, a transfer without what it paid or
+  its charges, a rate without its day, a rate that is no decimal string, a rate's day that is no day, the release mode, a
+  rate's source text, and each new member of a transfer alone on a share that is not transferred: what it paid, its
+  currency, its rate with its day, its charges and its release mark (80 refusals with and without `format`, 3 by `format`
+  alone); it admits a share held under each ground, charges below 0 and a transfer two board members released (17
+  admissions).
 
 ## fees-account-statement.v1.json
 
@@ -5746,6 +5859,27 @@ which kind of change each entry was.
   moved, so the order of pushes does not matter for them; land this before the website's edge change all the same, so
   the description says what that edge does from its first deploy. `check:openapi-examples` validates the same 84
   examples.
+
+### 1.24.0 — unreleased (2026-11-02; `transfers.v1` 1.1.0, ops decisions D64 item 1 and D177 items 2 and 3) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**, with the record it serves: `getTransfersRecord` answers `transfers.v1` 1.1.0, whose
+  `transferred` row must now carry what it paid and its charges. No operation, status code, error code, cache class or
+  parameter moved, and the route still names nobody.
+- The description says what 1.1.0 adds: a share held back, with its day and one of four generic grounds, never the cause
+  behind it (a recipient struck from the List after the month's close reads `struck (Art. 7 Abs. 6)`, ops decision D177
+  item 3); and on a transfer, what it paid in the currency of the recipient's account and at which rate, its charges as
+  its debit line booked them, and the mark «Einzelauslösung». A row now changes in five cases: a share held back or its
+  hold ending, and an attempt prepared or abandoned, are among them, the last a case 1.22.0's description did not name. A
+  return, an abandoned attempt and a receipt dated earlier are the changes `generatedAt` cannot date, so they move the
+  `ETag` and not `Last-Modified`; the end of a hold, dated by the attempt whose preparing ends it, moves both. A share
+  whose recipient is struck is never said to be owed again. The tag `transfers` says the same in brief.
+- The two examples follow `transfers.v1`'s, member for member: `firstPublished` with the 1 December run released by one
+  board member alone and two transfers paid in EUR and GBP, and `regenerated` with the returned transfer's share held back,
+  `transfer returned`. `check:openapi-examples` validates the same 84 examples.
+- `coverage/waiver-certificate-vectors.json` names this version, `specVersion` 1.24.0, as `check:certificate-vectors`
+  requires of it. No vector, certificate or key set moved, and the website's generator (`scripts/waiver-certificate-vectors.mjs`,
+  which names the same version in the website's change beside this one) writes these bytes again, byte for byte.
+- The website's edge tests do not read the route's examples, so the order of pushes does not matter for them.
 
 ## coverage/cov-v1.ts
 

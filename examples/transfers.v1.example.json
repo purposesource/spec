@@ -14,6 +14,10 @@
       "status": "transferred",
       "date": "2027-12-01",
       "endToEndId": "psn-202711-q0syghrz8ym4",
+      "paidAmountMinor": 24316,
+      "paidCurrency": "CHF",
+      "chargesMinor": 0,
+      "singleRelease": true,
       "evidence": [
         {
           "kind": "bank-line",
@@ -35,6 +39,12 @@
       "status": "transferred",
       "date": "2027-12-01",
       "endToEndId": "psn-202711-rve04pdahejb",
+      "paidAmountMinor": 25804,
+      "paidCurrency": "EUR",
+      "rate": "1.0612",
+      "rateDate": "2027-11-30",
+      "chargesMinor": 45,
+      "singleRelease": true,
       "receiptRef": "rct_01kmrb4x7e2q9w5n3t8v6y0zha",
       "evidence": [
         {
@@ -55,6 +65,12 @@
       "status": "transferred",
       "date": "2027-12-01",
       "endToEndId": "psn-202711-y1zt0zesjnx9",
+      "paidAmountMinor": 21672,
+      "paidCurrency": "GBP",
+      "rate": "0.8913",
+      "rateDate": "2027-11-30",
+      "chargesMinor": 86,
+      "singleRelease": true,
       "evidence": [
         {
           "kind": "bank-line",

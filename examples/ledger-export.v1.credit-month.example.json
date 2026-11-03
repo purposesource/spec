@@ -262,11 +262,11 @@
       "categoryFundId": "health",
       "recipientId": "rcp_f5cc8xgz81c00nrve04pdahejb",
       "batchId": "bat_01kmk6k96qb489wd6rp6djeb3g",
-      "note": "psn-202711-rve04pdahejb",
+      "note": "EndToEndId psn-202711-rve04pdahejb",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
       "prevHash": "4aa2e6e57938237b8295d95583b1f152e06b1a5a657f61038d79a5490a723219",
-      "rowHash": "f21601cdddbcf02b6bc18d2262ca2decff03a63643e495d592678099b3d6ecff"
+      "rowHash": "64de0638952096c0f78fed4b976f813df3caf71d96226dc5bc5cca96a0c0ed07"
     },
     {
       "ledId": "led_01k3gawtmwzb02ng0pb4sgtcmg",
@@ -279,11 +279,11 @@
       "categoryFundId": "health",
       "recipientId": "rcp_tg8g3ps3smxzdpy1zt0zesjnx9",
       "batchId": "bat_01kmk6k96qb489wd6rp6djeb3g",
-      "note": "psn-202711-y1zt0zesjnx9",
+      "note": "EndToEndId psn-202711-y1zt0zesjnx9",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "f21601cdddbcf02b6bc18d2262ca2decff03a63643e495d592678099b3d6ecff",
-      "rowHash": "3a87dbfd340d4e5e3e8f96727ebb7e6ba1107b9ed53d379df72b687b7da8ae27"
+      "prevHash": "64de0638952096c0f78fed4b976f813df3caf71d96226dc5bc5cca96a0c0ed07",
+      "rowHash": "9437912708055be6a87df789e7da390710b64a9941a4e76486c5e25c3d78bca3"
     },
     {
       "ledId": "led_01k3f6s020mteybh5psmjew1pk",
@@ -296,11 +296,11 @@
       "categoryFundId": "education",
       "recipientId": "rcp_0svacmgratb4f4q0syghrz8ym4",
       "batchId": "bat_01kmk6k96qb489wd6rp6djeb3g",
-      "note": "psn-202711-q0syghrz8ym4",
+      "note": "EndToEndId psn-202711-q0syghrz8ym4",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "3a87dbfd340d4e5e3e8f96727ebb7e6ba1107b9ed53d379df72b687b7da8ae27",
-      "rowHash": "4826fd1a02b2e78483c121e7b93aa10568d9247fa327352bcaca2ea658719244"
+      "prevHash": "9437912708055be6a87df789e7da390710b64a9941a4e76486c5e25c3d78bca3",
+      "rowHash": "b16229edc7ed48e89ff507425fbb0aae4003d3af557e1dec6ef359a64d09f0fb"
     },
     {
       "ledId": "led_01k466p4mydgk0m39tyaxenth8",
@@ -313,11 +313,11 @@
       "categoryFundId": "education",
       "recipientId": "rcp_8jf9xfejcgadg7cgyag0hmkcxb",
       "batchId": "bat_01kmk6k96qb489wd6rp6djeb3g",
-      "note": "psn-202711-cgyag0hmkcxb",
+      "note": "EndToEndId psn-202711-cgyag0hmkcxb",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "prevHash": "4826fd1a02b2e78483c121e7b93aa10568d9247fa327352bcaca2ea658719244",
-      "rowHash": "140b4ae0a0f0da382c2e9c72834141c72fbc70ac20f67844caca1a43ad7cd3e6"
+      "prevHash": "b16229edc7ed48e89ff507425fbb0aae4003d3af557e1dec6ef359a64d09f0fb",
+      "rowHash": "3a138cbd0e46f81b30c4f8d08e139ce42929ddbc29908a8e10698f0700f8a797"
     },
     {
       "ledId": "led_01k79t1hamj0e7xys54299rm3p",
@@ -331,13 +331,13 @@
       "note": "Month 2027-11 locked on the credit-month key under the SAMPLE allocation key in force for the month. Its close carried two payouts: SAMPLE-REMIT-002711, credited 2027-11-04, and SAMPLE-REMIT-002710, credited 2027-10-04 and found only after October's close.",
       "emittingJob": "jobs.allocator",
       "createdAt": "2027-12-01T09:10:00Z",
-      "monthDigest": "e4e265f881180e063747bd76c14114fc5e522131a3745963de4c11862dcb6170",
-      "prevHash": "140b4ae0a0f0da382c2e9c72834141c72fbc70ac20f67844caca1a43ad7cd3e6",
-      "rowHash": "ddcb49ae5f28c53150faf660177973c5160c8261fa167cd33ee9b91456864f67"
+      "monthDigest": "e0bd718db923c24a324d8871b8eb12b012757ee6685fca644e0f6fb8f8a55af3",
+      "prevHash": "3a138cbd0e46f81b30c4f8d08e139ce42929ddbc29908a8e10698f0700f8a797",
+      "rowHash": "18716eb711e51ebec1fe397ef9a3beaa547eb906bd8e61207da7422c6f241829"
     }
   ],
-  "headHash": "ddcb49ae5f28c53150faf660177973c5160c8261fa167cd33ee9b91456864f67",
+  "headHash": "18716eb711e51ebec1fe397ef9a3beaa547eb906bd8e61207da7422c6f241829",
   "prevHeadHash": "a0437310217708927780c63088b97b44f2c51ea8f5dd3586d4daa76507c2d3d3",
-  "monthDigest": "e4e265f881180e063747bd76c14114fc5e522131a3745963de4c11862dcb6170",
+  "monthDigest": "e0bd718db923c24a324d8871b8eb12b012757ee6685fca644e0f6fb8f8a55af3",
   "methodologyUrl": "https://purposesource.org/trust/ledger-methodology"
 }

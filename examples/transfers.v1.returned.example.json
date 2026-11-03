@@ -14,6 +14,10 @@
       "status": "transferred",
       "date": "2027-12-01",
       "endToEndId": "psn-202711-q0syghrz8ym4",
+      "paidAmountMinor": 24316,
+      "paidCurrency": "CHF",
+      "chargesMinor": 0,
+      "singleRelease": true,
       "receiptRef": "rct_01kmv2c8d5f7h9j1k3m5n7p9qr",
       "evidence": [
         {
@@ -34,6 +38,9 @@
       "status": "transferred",
       "date": "2027-12-02",
       "endToEndId": "psn-202711-cgyag0hmkcxb-2",
+      "paidAmountMinor": 24316,
+      "paidCurrency": "CHF",
+      "chargesMinor": 0,
       "evidence": [
         {
           "kind": "bank-line",
@@ -48,6 +55,12 @@
       "status": "transferred",
       "date": "2027-12-01",
       "endToEndId": "psn-202711-rve04pdahejb",
+      "paidAmountMinor": 25804,
+      "paidCurrency": "EUR",
+      "rate": "1.0612",
+      "rateDate": "2027-11-30",
+      "chargesMinor": 45,
+      "singleRelease": true,
       "receiptRef": "rct_01kmrb4x7e2q9w5n3t8v6y0zha",
       "evidence": [
         {
@@ -65,8 +78,10 @@
       "recipientId": "rcp_tg8g3ps3smxzdpy1zt0zesjnx9",
       "category": "health",
       "amountMinor": 24316,
-      "status": "scheduled",
-      "note": "Transferred on 2027-12-01 and returned by the receiving bank, so the share is owed again until it is sent again."
+      "status": "held",
+      "heldOn": "2027-12-03",
+      "ground": "transfer returned",
+      "note": "Sent on 2027-12-01 and returned by the receiving bank, so the share is owed again until it is sent again."
     }
   ]
 }
