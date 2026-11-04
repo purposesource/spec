@@ -2923,6 +2923,19 @@ reasoning: no month export has ever been published with a row in it.
   charges of 0, above 0 or below 0, a converted one with its rate and the rate's day, attempts 2 and 9, and the class
   `fees-account-charges` (14 admissions).
 
+### 1.6.1 — unreleased (2026-11-04; FS07-051; the backlog triage's row L2.6-22, PS-2039, as the orchestrator answered it on 2026-10-21; FS-00 §6.2's dated note that adopts the path is the orchestrator's)
+
+- **The path.** `x-psn.artifactPath` is `/ledger/{YYYY}-{MM}.cost-support.json`, beside the month's export, where until now
+  it said the path was deferred. There is one document per locked month whose export names its frozen document
+  (`batch.costSupportSha256`), and none for an open month or for a month whose export is withheld. Its bytes are the ones the
+  month's lock froze, published verbatim and written once, so the file's SHA-256 is the export's `batch.costSupportSha256`,
+  and the month's transfers record names the same bytes by the same hash (`transfers.v1` `costSupportSha256`).
+- **The producer.** `jobs.ledger-publish` archives the stored bytes, as `{YYYY}-{MM}.cost-support.json` in the immutable
+  archive and before the month's export, and `jobs.index-build`, the public plane's one writer (FS07-051), publishes them once
+  the month is archived. The line named `jobs.ledger-publish` alone.
+- Metadata only. No member, type, rule or example moves, and every document valid under 1.6.0 is valid under 1.6.1. The v0
+  table the website renders from its hand-maintained file is named as before.
+
 ## transfers.v1.json
 
 ### 1.0.0 — unreleased (2026-10-29; ops decision D64 item 1, the checked register's row 24; FS-07's dated note of 2026-10-29) — pre-release
