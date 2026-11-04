@@ -3143,6 +3143,16 @@ reasoning: no month export has ever been published with a row in it.
   published, the first regeneration case's words and the phase line. As first written, version 1 published no balance
   yet, and its documents were the locked months with a booked line; nothing had been published under it but the sample
   plane's example month.)*
+- *(Amended in place on 2026-11-03, because 1.0.0 is unreleased (versioning rule 5, as the amendment of 2026-10-25 above
+  read it; PS-1906; ops decision D64 item 1, which adopted the checked register's row 35: "Record every real bank
+  movement. One made without the required sign-offs is recorded as an incident, never hidden"): `class` admits a
+  twentieth value after the nineteen, `debit-without-signoffs`, a debit made before two people had signed it off in the
+  Association's records, such as a share paid at the bank before two people had signed its transfer. Until now such a
+  line could carry no class that said what it was. The reconciliation pass gives it to a debit carrying the reference of
+  a transfer whose two sign-offs are not both given, and a steward to any other such debit, with a reason that is never
+  published. It is no transfer of the Association's own, so the line carries no `endToEndId` (the `allOf` rule,
+  unchanged). Additive: every document 1.0.0 admitted it still admits. The platform's store admits the value with its
+  migration (`bank_line_classes_class_known`), and the producer and the statement's page take it with it.)*
 
 ## recipient-list.v1.json
 
