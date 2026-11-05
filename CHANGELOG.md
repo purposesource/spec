@@ -972,6 +972,26 @@ creating one.
   already did. On a recorded entry it stays the `ts` of the certificate's `revoke` entry
   (D71 item 1).
 
+### 1.5.2 — unreleased (2026-11-05; ops decision D65 item 5; the orchestrator's word of 2026-10-21T20:26Z on L2.3-03, after PS-1913 and ORC-37 W4; PS-2205)
+
+- Wording only; no constraint moved. `beneficiary.coId`'s description says what 1.4.0 said would
+  follow: only a named entry carries the company id, and a masked entry does not. 1.4.0 kept it on
+  a masked entry "for now", so that `cov-v1` kept matching a masked waiver on a development plane.
+  D65 item 5 bars the shared company id on a masked public entry, because `/entitlements/{coId}.jws`
+  (the verified domains), `entitlements/domain-index.json` (a domain to its `coId`) and
+  `covered-organisations` (the name, when listed) re-identify the company. The platform's
+  index-build and the website's sample plane stop writing it in the same change.
+- So `cov-v1` matches a masked waiver to no organisation, and a masked waiver covers a company only
+  through the company's own waiver certificate (`POST /v1/coverage/waiver-certificate`,
+  `openapi/edge-public.v1.yaml` 1.20.0, PS-1913), which names the waiver as the entry's
+  `record.certId` names the certificate. The vectors W1-01 and W1-02 change in place (no second
+  version before the launch, D136; `coverage/cov-v1.ts` 1.2.1 below): W1-01's masked entry carries
+  no `coId`, and the company it waives, asking by its own id, is answered `no`, where it was
+  `yes-via-waiver`; W1-02's masked entry drops its `coId` too.
+- No constraint moves, as the orchestrator's note of 2026-10-26T13:01Z said of this change: a masked
+  entry without `coId` has validated since 1.4.0, and one that carries it still validates.
+- Example: the main example's masked entry drops its `coId`.
+
 ## entitlement-record.v1.json
 
 ### 1.0.0 — unreleased
@@ -5917,6 +5937,8 @@ the edge has served, and the text behind it:
   1.1.0's function, published then as a separate module beside the first text under the next
   version name (1.2.0 folds it back).
 - `d1a3a4cba8e448d358dc9dfde8f150d76174584fdb4aa8391087331c5d78fe33`, from the edge's next deploy: the same function under this name (1.2.0).
+- `4482b3df50286828f21da44a2804185b760e67c56c74253f19ca58ac764ee7ad`, from the edge's next deploy after 2026-11-05: the same
+  function, with the waiver beneficiary typed as `waiver.v1` publishes it (1.2.1).
 
 Until the public launch the function changes in place, with a dated entry here (ops decision
 D136). From the launch a published version is never edited: a change in behaviour is the next
@@ -6032,3 +6054,19 @@ entitlement record carries. The API description says so from `openapi/edge-publi
   (`workers/edge/src/coverage/cov-v1.ts`) moves with it, and its CI reads this file. The
   coverage route is not in production's route set, so no production answer changes. The API
   description says so from `openapi/edge-public.v1.yaml` 1.7.0.
+
+### 1.2.1 — unreleased (2026-11-05; `waiver.v1` 1.5.2; the orchestrator's answer of 2026-10-28T06:51Z on ORC-37 W5, its R6; PS-2205)
+
+- Types only; no answer moved, and no step reads anything it did not read before. `WaiverBeneficiary`
+  gains `display?: 'named' | 'masked'`, and its `name` is optional, as `waiver.v1` has published them
+  since 1.4.0: a masked entry carries no name. A doc comment on the interface says what the function
+  reads of a beneficiary (`coId` and `domain`, never `display` or `name`) and what a masked entry
+  carries. The bytes moved, so the pin moves (`check:module`), and so do the edge's mirror in the
+  website repository (`workers/edge/src/coverage/cov-v1.ts`, byte for byte, FS10-020) and the digest
+  it publishes at `/v1/meta` (`workers/edge/src/coverage/digest.ts`), in the same change: the
+  website's CI reads this file.
+- Vectors: W1-01 and W1-02 change in place with `waiver.v1` 1.5.2. A masked entry carries no company
+  id, so the company W1-01 waives, asking by its own id, is answered `no` (it was `yes-via-waiver`),
+  and W1-02's entry drops the other company's id it carried. W1-01's id names what it shows now,
+  `W1-01-masked-waiver-matches-no-company`; the 54 vectors keep their order. `vectors.json` takes
+  `specVersion` 1.2.1, the function's.

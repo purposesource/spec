@@ -130,9 +130,11 @@ which `/v1/meta` lists in full; keeping it is the smallest change.
   seconds, and a waiver still in `recording[]` covers nobody, because the caller passes
   `waivers[]` alone. The function needed no change for it. S1-01 to S1-05 pin it, one
   millisecond either side of `grantedAt` and `revokedAt`.
-- **A masked waiver carries no name and no domain** (D66 item 3; `waiver.v1` 1.4.0). For now
-  it keeps the company id, so it is matched by `coId` alone (W1-01) and never by a domain
-  (W1-02). The function never reads `name`, so it needed no change.
+- **A masked waiver carries no name, no domain and no company id** (D66 item 3, D65 item 5;
+  `waiver.v1` 1.5.2). So the function matches it to no organisation, neither by the company's
+  own id (W1-01) nor by a verified domain (W1-02); the company's coverage is answered from its
+  own waiver certificate (below). The function needed no change for it; its type for the
+  beneficiary says what a masked entry carries.
 - **A waiver under review still covers** (FS-12 §9.8 step 3; `waiver.v1` 1.5.0). The `reviews`
   annotation is never read; coverage changes only through `revokedAt` (UR-01).
 - **A delisted or quit repository still computes.** Entitlements and vesting stand; the
@@ -147,8 +149,8 @@ which `/v1/meta` lists in full; keeping it is the smallest change.
 
 ## Coverage from a waiver certificate
 
-A masked waiver's public entry names no company (D66 item 3), and, once PS-2205 lands, carries
-no company id either, so `cov-v1` cannot match it to an organisation. The company holds what
+A masked waiver's public entry names no company (D66 item 3) and carries no company id either
+(D65 item 5; `waiver.v1` 1.5.2), so `cov-v1` cannot match it to an organisation. The company holds what
 ties the two together: the waiver's certificate. `POST /v1/coverage/waiver-certificate`
 (`openapi/edge-public.v1.yaml` 1.20.0, operation `postWaiverCertificateCoverage`) takes that
 certificate as its body, verifies it against the published keys, ties it to the waiver entry it

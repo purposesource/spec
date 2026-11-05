@@ -206,9 +206,17 @@ export interface NoRecordRepo {
   state: 'no-record';
 }
 
+/**
+ * Who a waiver covers, as `waiver.v1` publishes it. This function reads `coId` and `domain`
+ * alone. A masked entry (`display: 'masked'`, D66 item 3) carries no name, no domain and no
+ * company id (D65 item 5), so step 2 matches it to no organisation; its company's coverage is
+ * answered from the company's own waiver certificate, by a route that does not call this
+ * function. `display` absent reads as `named`.
+ */
 export interface WaiverBeneficiary {
+  display?: 'named' | 'masked';
   coId?: string;
-  name: string;
+  name?: string;
   domain?: string;
 }
 

@@ -1,7 +1,7 @@
 {
-  "$comment": "Test vectors for cov-v1 (FS10-020), the published coverage function. Every input is a COMPLETE published artifact (scripts/check-vectors.mjs validates each `repos` fixture against repo-record.v1.json, each `company` against entitlement-record.v1.json and each `waivers` document against waiver.v1.json), and `expect` is asserted by DEEP EQUALITY against the whole outcome, so the wire shape is pinned here too. FS10-120(b) requires each of the eight answer values to be producible from fixtures; coverage/cov-v1.test.ts asserts that this file does so. VEC-01 to VEC-25 are the vectors of the function's first text (2026-09-17), with their ids, inputs and answers unchanged; since 2026-09-30 an answer reports a `verified` record as `registered` (D82's dated note (d)). The other 21 were added on 2026-09-30 for that date's three changes (ops decisions D48 item 5 and D82): (a) a Pass inside its term covers a work with no published record (`repo: null`, `repoNodeId` names the repository asked about, and nothing is published at registry/repo/{repoNodeId}.json; the answer reports `repoState: no-record`), and every other organisation gets `repo_not_registered`, expected as `{error, algoVersion, repo}`; (b) a registered repository its admins never claimed answers like any registered one; (c) the one public state. Until the public launch the vectors change in place with the function, each change dated in CHANGELOG.md (ops decision D136); from the launch they are appended, never edited. Since 2026-10-26 (ops decision D68 item 8; waiver.v1 1.3.0) the file also carries S1-01 to S1-05, the waiver recording instant: a waiver covers from its published grantedAt, the ts of its log record entry, whole seconds, and the vectors sit one millisecond either side of grantedAt and revokedAt (a millisecond clock and a whole-second instant give the same answer); a waiver in recording[] covers nobody. The function did not change for them: its bytes and its pinned digest are the same. W1-01 and W1-02 (ops decision D66 item 3; waiver.v1 1.4.0): a masked waiver carries no name and no domain and, for now, keeps the company id it is matched by; PS-2205 changes W1-01 in place when the id leaves a masked entry. UR-01 (FS-12 §9.8 step 3; waiver.v1 1.5.0): a waiver under review covers exactly as it would without the annotation, because coverage changes only through revokedAt.",
+  "$comment": "Test vectors for cov-v1 (FS10-020), the published coverage function. Every input is a COMPLETE published artifact (scripts/check-vectors.mjs validates each `repos` fixture against repo-record.v1.json, each `company` against entitlement-record.v1.json and each `waivers` document against waiver.v1.json), and `expect` is asserted by DEEP EQUALITY against the whole outcome, so the wire shape is pinned here too. FS10-120(b) requires each of the eight answer values to be producible from fixtures; coverage/cov-v1.test.ts asserts that this file does so. VEC-01 to VEC-25 are the vectors of the function's first text (2026-09-17), with their ids, inputs and answers unchanged; since 2026-09-30 an answer reports a `verified` record as `registered` (D82's dated note (d)). The other 21 were added on 2026-09-30 for that date's three changes (ops decisions D48 item 5 and D82): (a) a Pass inside its term covers a work with no published record (`repo: null`, `repoNodeId` names the repository asked about, and nothing is published at registry/repo/{repoNodeId}.json; the answer reports `repoState: no-record`), and every other organisation gets `repo_not_registered`, expected as `{error, algoVersion, repo}`; (b) a registered repository its admins never claimed answers like any registered one; (c) the one public state. Until the public launch the vectors change in place with the function, each change dated in CHANGELOG.md (ops decision D136); from the launch they are appended, never edited. Since 2026-10-26 (ops decision D68 item 8; waiver.v1 1.3.0) the file also carries S1-01 to S1-05, the waiver recording instant: a waiver covers from its published grantedAt, the ts of its log record entry, whole seconds, and the vectors sit one millisecond either side of grantedAt and revokedAt (a millisecond clock and a whole-second instant give the same answer); a waiver in recording[] covers nobody. The function did not change for them: its bytes and its pinned digest are the same. W1-01 and W1-02 (ops decision D66 item 3; waiver.v1 1.4.0, changed in place on 2026-11-05 with waiver.v1 1.5.2, PS-2205): a masked waiver carries no name, no domain and no company id, so the function matches it to no organisation, neither by the company's own id (W1-01) nor by a verified domain (W1-02); the company's coverage is answered from its own waiver certificate (coverage/waiver-certificate-vectors.json). UR-01 (FS-12 §9.8 step 3; waiver.v1 1.5.0): a waiver under review covers exactly as it would without the annotation, because coverage changes only through revokedAt.",
   "algoVersion": "cov-v1",
-  "specVersion": "1.2.0",
+  "specVersion": "1.2.1",
   "repos": {
     "verified": {
       "schemaVersion": 1,
@@ -2952,9 +2952,9 @@
       }
     },
     {
-      "id": "W1-01-masked-waiver-matched-by-its-company-id",
-      "description": "A masked waiver (D66 item 3: masked by default) carries no name and no domain, and for now keeps the company id, so the coverage function still matches it by coId (the orchestrator's word of 2026-10-21 on L2.3-03). A follow-up (PS-2205) stops writing coId on a masked entry and changes this vector in place; until then no masked waiver is published on production.",
-      "fsRef": "FS-10 §4.3 step 2 and step 6; D66 item 3; D65 item 5 (waiver.v1 1.4.0, beneficiary.display)",
+      "id": "W1-01-masked-waiver-matches-no-company",
+      "description": "A masked waiver (D66 item 3: masked by default) carries no name, no domain and no company id (D65 item 5; PS-2205, the orchestrator's word of 2026-10-21 on L2.3-03), so the coverage function matches it to no organisation: the company it waives, asking by its own id, is answered no. That company's coverage is answered from its own waiver certificate (POST /v1/coverage/waiver-certificate, coverage/waiver-certificate-vectors.json). Changed in place on 2026-11-05: until then the entry kept the company id, and the same company was answered yes-via-waiver.",
+      "fsRef": "FS-10 §4.3 step 2 and step 10; D66 item 3; D65 item 5 (waiver.v1 1.5.2, beneficiary.coId)",
       "now": "2027-06-01T12:00:00Z",
       "repo": "verified",
       "company": {
@@ -2974,8 +2974,7 @@
           {
             "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
             "beneficiary": {
-              "display": "masked",
-              "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f"
+              "display": "masked"
             },
             "grantedAt": "2027-04-01T00:05:00Z",
             "coolingEndsAt": "2027-04-04T00:05:00Z",
@@ -2989,7 +2988,7 @@
         ]
       },
       "expect": {
-        "answer": "yes-via-waiver",
+        "answer": "no",
         "basis": {
           "algoVersion": "cov-v1",
           "company": {
@@ -2999,23 +2998,14 @@
           "repo": {
             "nodeId": "R_kgDOAbc123",
             "repoState": "registered"
-          },
-          "waiver": {
-            "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
-            "grantedAt": "2027-04-01T00:05:00Z"
           }
-        },
-        "proofRef": {
-          "type": "waiver-record",
-          "repoNodeId": "R_kgDOAbc123",
-          "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f"
         }
       }
     },
     {
       "id": "W1-02-masked-waiver-is-not-reached-by-a-domain",
-      "description": "A masked entry carries no domain, so a company whose verified domain is the waived company's, but whose id is not the entry's, is not covered by it: a masked waiver is reached through its company id alone.",
-      "fsRef": "FS-10 §4.3 step 2; D66 item 3 (waiver.v1 1.4.0, beneficiary.display)",
+      "description": "A masked entry carries no domain, nor a company id (W1-01), so a company holding the waived company's domain, verified, is not covered by it: nothing a masked entry publishes ties it to an organisation. Changed in place on 2026-11-05 (PS-2205): until then the entry kept another company's id, and this description said a masked waiver was reached through its company id alone.",
+      "fsRef": "FS-10 §4.3 step 2; D66 item 3; D65 item 5 (waiver.v1 1.5.2, beneficiary.display and beneficiary.coId)",
       "now": "2027-06-01T12:00:00Z",
       "repo": "verified",
       "company": {
@@ -3037,8 +3027,7 @@
           {
             "wvrId": "wvr_01jk2a6g3qr7v1bd9w4z8x0c3f",
             "beneficiary": {
-              "display": "masked",
-              "coId": "co_01jk2a6g3qr7v1bd9w4z8x0c2f"
+              "display": "masked"
             },
             "grantedAt": "2027-04-01T00:05:00Z",
             "coolingEndsAt": "2027-04-04T00:05:00Z",

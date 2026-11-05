@@ -47,10 +47,11 @@ const MODULES = [
     version: 'cov-v1',
     file: 'cov-v1.ts',
     vectors: 'vectors.json',
-    // Pinned 2026-10-12 (ops decision D136): the function as changed on 2026-09-30, under its
-    // own name. The edge served 96b19df4… from 2026-09-17 and a2c5f117… from 2026-09-30; the
-    // CHANGELOG's coverage/cov-v1.ts section records all three digests and what moved.
-    pinned: 'd1a3a4cba8e448d358dc9dfde8f150d76174584fdb4aa8391087331c5d78fe33',
+    // Pinned 2026-11-05 (ops decision D136, in place): 1.2.0's function, with `WaiverBeneficiary`
+    // typed as `waiver.v1` publishes it (an optional `display` and `name`); no answer moved. The
+    // edge served 96b19df4… from 2026-09-17, a2c5f117… from 2026-09-30 and 1.2.0's d1a3a4cb…
+    // after them; the CHANGELOG's coverage/cov-v1.ts section records every digest and what moved.
+    pinned: '4482b3df50286828f21da44a2804185b760e67c56c74253f19ca58ac764ee7ad',
   },
 ];
 
