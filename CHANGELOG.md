@@ -988,6 +988,10 @@ creating one.
   version before the launch, D136; `coverage/cov-v1.ts` 1.2.1 below): W1-01's masked entry carries
   no `coId`, and the company it waives, asking by its own id, is answered `no`, where it was
   `yes-via-waiver`; W1-02's masked entry drops its `coId` too.
+- `beneficiary`'s own description says the same: a named beneficiary with no account and no
+  verified domain still resolves by ULID, while a masked one resolves to no organisation, its
+  company's coverage is answered from its own waiver certificate, and it carries neither `name`,
+  `domain` nor `coId`.
 - No constraint moves, as the orchestrator's note of 2026-10-26T13:01Z said of this change: a masked
   entry without `coId` has validated since 1.4.0, and one that carries it still validates.
 - Example: the main example's masked entry drops its `coId`.
