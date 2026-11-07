@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "generatedAt": "2027-09-01T05:00:00Z",
-  "state": "post-first-franc",
+  "state": "post-first-transfer",
   "projectsRegistered": 31,
   "contributorsClaimed": 57,
   "contributorsAttribution": {
@@ -11,8 +11,8 @@
     "algorithmNotesUrl": "https://purposesource.org/trust/algorithms"
   },
   "companiesCovered": 14,
-  "chfRoutedMinor": 1834500,
-  "cur": "CHF",
+  "routedMinor": 1834500,
+  "cur": "USD",
   "firstDisbursementScheduledFor": null,
   "loi": null,
   "smallnessThresholds": {

@@ -55,7 +55,9 @@ Individual gates:
 ```sh
 npm run check:schemas           # compile, $id, self-containment, provenance, changelog section,
                                 #   one published state for a registered repository (D82)
-npm run check:examples          # one example per schema, each valid
+npm run check:examples          # one example per schema, each valid; and planted documents for what the
+                                #   two-currency members refuse (cost-support 1.7.0, ledger-export
+                                #   1.10.0) and the counter's state rules under their new names (stats 1.4.0)
 npm run check:kits              # every claim-language kit: valid, correctly addressed, no figure
 npm run check:menu              # the category menu is one list; every copy of it is identical
 npm run check:recipient-lists   # the List examples: order, dates, notices, index agreement, refusals

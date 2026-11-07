@@ -3983,6 +3983,14 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   both cases. The schema admits both bodies, so the order of pushes does not matter for the website's
   tests.
 
+### 1.4.1 — unreleased (2026-11-07; `stats.v1` 1.4.0, the orchestrator's ruling of 2026-11-07T14:40Z on the lock-currency record's A2 design, item 6) — wording only
+
+- A patch under policy 3. `message` said a money band may appear only "post-first-franc", the name of the counters' third
+  state, which `stats.v1` 1.4.0 renames `post-first-transfer` in place. It now names that state. The description's rule (2)
+  said a charity band may render only "after the first franc actually moves"; it now says after the first transfer, for the
+  same reason: that transfer leaves the fees account in US dollars (D84 item 1). No value, member or rule moved, and the
+  example keeps its bytes.
+
 ## stats.v1.json
 
 ### 1.0.0 — unreleased
@@ -4067,6 +4075,30 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 - The top description's sentence on the P-M2 null is kept and dated, with the new meaning beside it.
 - A further example, `stats.v1.post-first-franc.example.json`, shows every figure real, the count of
   57 contributors of July 2027 included. The main example is unchanged.
+
+### 1.4.0 — unreleased (2026-11-07; ops decisions D84 item 1 and D201 item 2; the lock-currency record's A2 design, §2.4, and the orchestrator's ruling of 2026-11-07T14:40Z on it, item 6) — pre-release
+
+- **Renamed in place:** `chfRoutedMinor` is `routedMinor`, and the third state `post-first-franc` is `post-first-transfer`.
+  Since D84 the transfer total is in the currency of the months it adds, the fees account's US dollars, so neither name may
+  say francs, and this is the last moment either can change in place: from the launch, Tuesday 1 December 2026, the contract
+  changes only additively. The member keeps its type and its place; the three state rules moved with it and with the state.
+- `routedMinor` says what it adds: the ledger's `disburse` rows, each a listed recipient's share, as a positive figure in
+  minor units of `cur`; NULL, never 0, before the first transfer.
+- `cur` is the currency of the months whose `disburse` rows the total adds, each month's being the currency its lock froze
+  (`ledger-export.v1` 1.10.0 `currency`), and before the first transfer the fees account's. A total over months of two
+  currencies is never published: the producer refuses such a plane. It said "Reporting currency for `chfRoutedMinor` (CHF;
+  the final ruling is URS §21 OPEN-26)", which D84 and D201 item 2 settled.
+- The description's state machine says the same, and "'CHF 0' is never rendered" reads "a zero is never rendered".
+- **Pre-release (versioning rule 5), and coupled.** The schema is closed (`additionalProperties: false`), so a document
+  written under 1.3.0 fails 1.4.0 and one written under 1.4.0 fails 1.3.0: the producers (the platform's renderer, the
+  website's index build and its edge's pre-launch skeleton) and the readers move together, in one landing, and every plane
+  renders `/stats.json` again.
+- Both examples move: `routedMinor` and `cur` `USD`, and the further example is renamed
+  `stats.v1.post-first-transfer.example.json` with its state; no figure changed. `edge-public.v1` 1.24.1's two examples, the
+  comment in `check:openapi-examples` and `badge.v1` 1.4.1's one sentence move with them.
+- `check:examples` holds the three state rules to planted documents under the new names: a figure before the first
+  transfer or a missing one after it is refused, and so are the two names before 1.4.0; each rule was proved able to fail
+  first.
 
 ## publish-log.v1.json
 
@@ -6014,6 +6046,18 @@ which kind of change each entry was.
   requires of it. No vector, certificate or key set moved, and the website's generator (`scripts/waiver-certificate-vectors.mjs`,
   which names the same version in the website's change beside this one) writes these bytes again, byte for byte.
 - The website's edge tests do not read the route's examples, so the order of pushes does not matter for them.
+
+### 1.24.1 — unreleased (2026-11-07; `stats.v1` 1.4.0, ops decisions D84 item 1 and D201 item 2) — examples and wording only
+
+- A patch: no operation, status code, error code, cache class, parameter or schema reference moved. `getStats` answers
+  `stats.v1` by `$ref`, which 1.4.0 changes in place.
+- `getStats`'s two examples, `preLaunch` and `launched`, write the money figure under its new name, `routedMinor`, and `cur`
+  `USD`, the fees account's currency, which the counter names before the first transfer. They wrote `chfRoutedMinor` and
+  `CHF`. The description names the third state `post-first-transfer`, the money figure's member and its currency, and says
+  that a zero is never rendered, where it said "CHF 0". `check:openapi-examples` validates the same 84 examples.
+- `coverage/waiver-certificate-vectors.json` names this version, `specVersion` 1.24.1, as `check:certificate-vectors`
+  requires of it. No vector, certificate or key set moved; the website's generator (`scripts/waiver-certificate-vectors.mjs`)
+  names the same version in the website's change beside this one, so it writes these bytes again, byte for byte.
 
 ## coverage/cov-v1.ts
 

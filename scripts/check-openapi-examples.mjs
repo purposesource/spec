@@ -18,7 +18,7 @@
  * exactly what our conditional rules look like:
  *
  *     allOf: [{ if: { properties: { state: { const: pre-launch } } },
- *               then: { properties: { chfRoutedMinor: { const: null } } } }]
+ *               then: { properties: { routedMinor: { const: null } } } }]
  *
  * Rather than restructure correct schemas to satisfy an incorrect check, or shrug and
  * lose the guarantee, this script keeps the guarantee with a conformant validator: the

@@ -323,6 +323,34 @@ holdToPlants('ledger-export.v1.json', {
   ],
 });
 
+/* stats.v1 1.4.0: the money member is `routedMinor` and the third state `post-first-transfer`, both renamed in place. The three
+   state rules moved with them, and a rule left behind on the old name would constrain nothing, so each must still bite under
+   the new names. The plants edit the two examples. */
+const launched = readJson(join(EXAMPLE_DIR, 'stats.v1.example.json'));
+const afterFirst = readJson(join(EXAMPLE_DIR, 'stats.v1.post-first-transfer.example.json'));
+const beforeLaunch = (d) => {
+  d.state = 'pre-launch';
+  for (const member of ['projectsRegistered', 'contributorsClaimed', 'companiesCovered', 'routedMinor', 'firstDisbursementScheduledFor']) {
+    d[member] = null;
+  }
+};
+holdToPlants('stats.v1.json', {
+  refuse: [
+    ['a money figure of 0 before the launch', edit(launched, (d) => { beforeLaunch(d); d.routedMinor = 0; })],
+    ['a money figure of 0 before the first transfer', edit(launched, (d) => { d.routedMinor = 0; })],
+    ['no money figure after the first transfer', edit(afterFirst, (d) => { delete d.routedMinor; })],
+    ['a null money figure after the first transfer', edit(afterFirst, (d) => { d.routedMinor = null; })],
+    ['the money figure under its name before 1.4.0', edit(afterFirst, (d) => { d.chfRoutedMinor = d.routedMinor; delete d.routedMinor; })],
+    ['the third state under its name before 1.4.0', edit(afterFirst, (d) => { d.state = 'post-first-franc'; })],
+    ['a currency code in lowercase', edit(afterFirst, (d) => { d.cur = 'usd'; })],
+  ],
+  admit: [
+    ['before the launch, every counter null', edit(launched, beforeLaunch)],
+    ["before the first transfer, in the fees account's currency (the main example as it stands)", launched],
+    ['after the first transfer, its total in the currency of the months it adds (the further example as it stands)', afterFirst],
+  ],
+});
+
 fail(
   problems,
   `${checked} examples validate against their schemas (${further} of them further examples of a schema's shape); ` +

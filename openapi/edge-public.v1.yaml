@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.24.0
+  version: 1.24.1
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -1935,9 +1935,9 @@ paths:
 
         In `pre-launch` every numeric field is `null`. In `launched-pre-disbursement` the
         registry counts are real while the money figure stays `null` and
-        `firstDisbursementScheduledFor` names the date. Only in `post-first-franc` is the
-        money figure a number. "CHF 0" is never rendered — not as an achievement and not
-        as an embarrassment.
+        `firstDisbursementScheduledFor` names the date. Only in `post-first-transfer` is
+        the money figure a number, `routedMinor`, in the currency `cur` names. A zero is
+        never rendered — not as an achievement and not as an embarrassment.
 
         `state` is computed from real registry and ledger facts and is never set by hand.
       tags: [counters]
@@ -1959,8 +1959,8 @@ paths:
                     projectsRegistered: null
                     contributorsClaimed: null
                     companiesCovered: null
-                    chfRoutedMinor: null
-                    cur: CHF
+                    routedMinor: null
+                    cur: USD
                     firstDisbursementScheduledFor: null
                     loi: null
                     smallnessThresholds:
@@ -1976,8 +1976,8 @@ paths:
                     projectsRegistered: 12
                     contributorsClaimed: null
                     companiesCovered: 6
-                    chfRoutedMinor: null
-                    cur: CHF
+                    routedMinor: null
+                    cur: USD
                     firstDisbursementScheduledFor: '2027-07-15'
                     loi: null
                     smallnessThresholds:

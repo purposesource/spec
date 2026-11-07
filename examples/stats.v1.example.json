@@ -5,8 +5,8 @@
   "projectsRegistered": 12,
   "contributorsClaimed": null,
   "companiesCovered": 6,
-  "chfRoutedMinor": null,
-  "cur": "CHF",
+  "routedMinor": null,
+  "cur": "USD",
   "firstDisbursementScheduledFor": "2027-07-15",
   "loi": null,
   "smallnessThresholds": {
