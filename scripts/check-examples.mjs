@@ -305,6 +305,24 @@ holdToPlants('cost-support.v1.json', {
   ],
 });
 
+/* ledger-export.v1 1.10.0: a month whose frozen table keeps its reserve in the reserve account's currency names that currency
+   beside the target. The plants edit the credit-month export, the one example that carries a policy block. */
+const creditExport = readJson(join(EXAMPLE_DIR, 'ledger-export.v1.credit-month.example.json'));
+const inDollars = (d) => {
+  d.currency = 'USD';
+  d.policy.reserveTargetCurrency = 'CHF';
+};
+holdToPlants('ledger-export.v1.json', {
+  refuse: [
+    ["a reserve target's currency without the target", edit(creditExport, (d) => { inDollars(d); delete d.policy.reserveTargetMinor; })],
+    ["a reserve target's currency in lowercase", edit(creditExport, (d) => { inDollars(d); d.policy.reserveTargetCurrency = 'chf'; })],
+  ],
+  admit: [
+    ["a month locked in the fees account's currency, its reserve target in the reserve account's", edit(creditExport, inDollars)],
+    ['a policy block as 1.9.1 wrote it (the credit-month example as it stands)', creditExport],
+  ],
+});
+
 fail(
   problems,
   `${checked} examples validate against their schemas (${further} of them further examples of a schema's shape); ` +

@@ -2206,6 +2206,19 @@ row the new-file rule binds absolutely.
 - No property, type, enum or rule changes: every row valid under 1.6.0 is valid under 1.6.1 and
   means the same, no `rowHash` preimage moves, and every example keeps its bytes.
 
+### 1.6.2 — unreleased (2026-11-07; ops decisions D84 item 1 and D201 item 2, with `cost-support.v1` 1.7.0 and `ledger-export.v1` 1.10.0) — wording only
+
+- A patch under policy 3. The description said the reporting currency is CHF with each transaction's rate captured on the
+  row, and that the final currency ruling was URS §21 OPEN-26. D84 and D201 item 2 settled it: a row is in the currency of
+  its month's cost-support table, the fees account's (US dollars) for every month from the first the table counts in it and
+  francs before, and no row is converted. The month's one rate, for the figures that join two currencies without money
+  changing hands, is on that month's `cost-support.v1` document (`rate`, 1.7.0), never on a row. A dated sentence says so,
+  and the earlier sentence stays as history.
+- `currency` says the same, its earlier words kept as history. The captured-FX members stay, for a row recorded natively in
+  another currency, and keep their meaning.
+- No property, type, enum or rule changes: every row valid under 1.6.1 is valid under 1.6.2 and means the same, no
+  `rowHash` preimage moves, and every example keeps its bytes.
+
 ## ledger-export.v1.json
 
 ### 1.0.0 — unreleased
@@ -2565,6 +2578,24 @@ reasoning: no month export has ever been published with a row in it.
   bare identifier. `transfers.v1` 1.1.0's (d) reads the note so. The four row hashes, the lock row's `prevHash`,
   `monthDigest` and `rowHash`, and the export's `monthDigest` and `headHash` follow; nothing else moved, and no schema
   changed.
+
+### 1.10.0 — unreleased (2026-11-07; ops decisions D84 item 1 and D201 item 2, with `cost-support.v1` 1.7.0 and `ledger-row.v1` 1.6.2) — pre-release
+
+- **`currency` is the month's currency, the one its lock froze:** the `currency` of the `cost-support.v1` document the batch
+  names (`batch.costSupportSha256`). An open month on the credit-month key is in the fees account's currency, and any other
+  month in francs, the reporting currency every month had before (FS07-051: a month's export never changes). Every `*Minor`
+  of `totals` and `policy` is in it, and each row carries this same currency: no row is converted. The member's earlier
+  words stay as history.
+- **Additive.** Optional `policy.reserveTargetCurrency`, written after `reserveTargetMinor` where the month's frozen
+  cost-support document names the reserve's own currency (`reserve.currency`, 1.7.0): the target is then in the reserve
+  account's francs while the rest of the block is in the month's currency. It stands only beside `reserveTargetMinor`
+  (`dependentRequired`). Absent, the target is in `currency`, as in every month locked before. `reserveTargetMinor` and the
+  block's description say the same, and the target's earlier words stay as history.
+- **Pre-release (versioning rule 5):** `currency` was "Reporting currency (CHF)", and from now on a month counts in the
+  currency its lock froze. Every export already published keeps its meaning, and every document valid under 1.9.1 is valid
+  under 1.10.0. Every example keeps its bytes.
+- `check:examples` holds the new member to planted documents edited from the credit-month export: refused without the
+  target and in lowercase, and admitted beside the target of a month locked in US dollars.
 
 ## ledger-chain.v1.json
 
