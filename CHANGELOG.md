@@ -768,6 +768,13 @@ creating one.
   writes; the record's figure is `attribution.contributorCount`.
 - The example carries a PP-v0 summary of April 2027 crediting 41 contributors.
 
+### 1.8.1 — unreleased (2026-11-07; ops decisions D84 item 1 and D201 item 2, with `stats.v1` 1.4.0) — wording only
+
+- A patch under policy 3. `stats` said a record shows "no zero-CHF theatre" before the first disbursed ledger row. A
+  record's money figures are in the currency of the months they come from, the fees account's since D84, so the rule
+  reads "no zero-amount theatre": no zero is staged in any currency. No member, type or rule moved, and the example keeps
+  its bytes.
+
 ## designations-summary.v1.json
 
 ### 1.0.0 — unreleased (2026-10-08; ops decisions D117 §6 and D121 item 1, statutes Art. 8(4), Calculation Rules Nr. 25 and Nr. 26)

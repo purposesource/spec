@@ -4,7 +4,7 @@
   "title": "Repo record — /registry/repo/{node_id}.json",
   "description": "The published per-repository record: one of the three inputs to the coverage function (`cov-v1`; FS-10 §4.2) and the data behind the public project page (WEB-080). Published for every registered repository, whether or not its admins have claimed it, in state `registered`, and for `suspended`, `quit` and `delisted` ones (ops decision D82 item 1); a record published before D82 carries `verified` where one published since carries `registered`. *(Amended 2026-09-30, D82 and its dated note (d) of 2026-09-29: it said \"Published for repositories in state `verified`, `suspended`, `quit` or `delisted`; `detected` repositories appear in aggregate counts only (FS02-062, GH-014).\")* A delisted or quit repository still HAS a record and still computes coverage — entitlements and vesting stand (D12) — and `state` is what the answer reports as `basis.repoState` (FS-10 §4.3 step 1), a `verified` record reported as `registered`. A repository with no record is answered only for an organisation holding a Pass inside its term, with `basis.repoState` `no-record` (ops decisions D48 item 5 and D82 item 10). At P-M2 the `stats` block is deliberately ABSENT: Purpose-Points and charity figures do not exist before the first disbursed ledger row, and publishing a zero would be theatre (VS-18, NEV-017).",
   "x-psn": {
-    "specVersion": "1.8.0",
+    "specVersion": "1.8.1",
     "phase": "P-M2",
     "artifactPath": "/registry/repo/{node_id}.json",
     "authoritative": true,
@@ -221,7 +221,7 @@
     "stats": {
       "type": "object",
       "additionalProperties": false,
-      "description": "P-M3+ ONLY. Absent at P-M2 by design: no Purpose-Points figures, no charity figures, no zero-CHF theatre before the first disbursed ledger row (VS-18, NEV-017, D21). Every money figure that ever appears here is ledger-derived and deep-linked.",
+      "description": "P-M3+ ONLY. Absent at P-M2 by design: no Purpose-Points figures, no charity figures, no zero-amount theatre before the first disbursed ledger row (VS-18, NEV-017, D21). Every money figure that ever appears here is ledger-derived and deep-linked.",
       "properties": {
         "contributorsClaimed": { "type": ["integer", "null"], "minimum": 0, "description": "A sample plane's fictional figure: no real plane writes it, and the record's contributor figure is `attribution.contributorCount`, from 5. *(Described 1.8.0, 2026-10-24, pre-release; the member had no description.)*" },
         "coverageCount": { "type": ["integer", "null"], "minimum": 0, "description": "Number of organisations currently answering yes for this repository." },
