@@ -3592,6 +3592,21 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 
 ## allocation-key.v1.json
 
+### 1.2.1 — unreleased (2026-11-07; PS-2767; statutes Art. 6g(1)) — wording only
+
+- Wording only, in `approvedBody`'s description (versioning rule 3). The reserve target the approved
+  text carries, `reserveTargetMinor`, is a positive integer of minor units, or `null` in a key released
+  before the calendar year of its effective month began (Europe/Zurich). The board sets each year's
+  target in January (statutes Art. 6g(1)), so such a key may carry none, and then each month it governs takes
+  the target the board set for that month's year, the figure that month's cost-support table
+  (`cost-support.v1`'s `reserve.targetMinor`) and ledger export (`ledger-export.v1`'s
+  `reserveTargetMinor`) carry. The description listed the target among the figures the approvals bind
+  and said nothing of a `null` there.
+- No member, type, pattern or rule moves. `approvedBody` stays a string matching its pattern, RFC 8785
+  writes `null` as `null`, `bodySha256` is computed over the text as before, and reader checks (1) to
+  (5) read no target. The example, `allocation-keys.v1` (which carries no target) and
+  `ledger-export.v1` (whose `reserveTargetMinor` stays an integer) are unchanged.
+
 ### 1.2.0 — unreleased (2026-10-01; PS-870 item 7; ops decision D89 item 1) — pre-release
 
 - **Pre-release (versioning rule 5).** Nothing has been published under this file (no key has
