@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "month": "2027-02",
+  "generatedAt": "2027-03-01T08:40:00Z",
+  "currency": "USD",
+  "closed": true,
+  "financialYear": "2027",
+  "purposeFeesNetMinor": 200000,
+  "payouts": [
+    {
+      "payoutRef": "SAMPLE-REMIT-002702",
+      "creditedOn": "2027-02-04",
+      "creditMonth": "2027-02",
+      "closedLate": false,
+      "netMinor": 200000,
+      "deadlineDays": 60,
+      "transferDueBy": "2027-04-05",
+      "evidence": [
+        {
+          "kind": "rail-payout-statement",
+          "ref": "SAMPLE-REMIT-002702",
+          "label": "The payment rail's statement of the payout"
+        },
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2027-02-04-0002",
+          "label": "Its credit on the fees account, in US dollars"
+        }
+      ]
+    }
+  ],
+  "directCosts": [
+    {
+      "invoiceRef": "INV-EDGE-2027-02-0001",
+      "class": "dns-hosting-cdn-edge-storage",
+      "description": "DNS, edge compute and object storage for the movement's own properties, on the movement's own account.",
+      "amountMinor": 2400,
+      "paidOn": "2027-02-08",
+      "supplier": {
+        "kind": "company",
+        "legalName": "SAMPLE — Edge Hosting Ltd"
+      },
+      "evidence": [
+        {
+          "kind": "invoice",
+          "ref": "INV-EDGE-2027-02-0001"
+        },
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2027-02-08-0004"
+        }
+      ]
+    },
+    {
+      "invoiceRef": "INV-DOMAIN-2027-02-0002",
+      "class": "domains-and-marks",
+      "description": "Renewal of the movement's own domain, invoiced in francs and paid from the fees account: the bank exchanged the dollars the account paid out, so the invoice counts at the debit.",
+      "amountMinor": 2221,
+      "invoiceAmountMinor": 1900,
+      "invoiceCurrency": "CHF",
+      "invoiceRate": "0.85547",
+      "paidOn": "2027-02-15",
+      "supplier": {
+        "kind": "company",
+        "legalName": "SAMPLE — Domain Registrar AG"
+      },
+      "evidence": [
+        {
+          "kind": "invoice",
+          "ref": "INV-DOMAIN-2027-02-0002"
+        },
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2027-02-15-0003",
+          "label": "The fees account's debit, in US dollars"
+        }
+      ]
+    },
+    {
+      "invoiceRef": "INV-CLOUD-2027-02-0003",
+      "class": "dns-hosting-cdn-edge-storage",
+      "description": "Cloud hosting for the movement's own properties, on the movement's own account, invoiced in euros.",
+      "amountMinor": 5685,
+      "invoiceAmountMinor": 5240,
+      "invoiceCurrency": "EUR",
+      "invoiceRate": "0.921658",
+      "supporter": "SAMPLE — founding members of the Association",
+      "paidOn": "2027-02-10",
+      "supplier": {
+        "kind": "company",
+        "legalName": "SAMPLE — Cloud Provider SE"
+      },
+      "evidence": [
+        {
+          "kind": "invoice",
+          "ref": "INV-CLOUD-2027-02-0003"
+        },
+        {
+          "kind": "supporter-payment",
+          "ref": "SUP-2027-02-0001",
+          "label": "Settled in place of the fees account, in euros"
+        }
+      ]
+    }
+  ],
+  "directCostsTotalMinor": 10306,
+  "supporters": [
+    {
+      "name": "SAMPLE — founding members of the Association",
+      "amountMinor": 5685,
+      "invoiceRefs": [
+        "INV-CLOUD-2027-02-0003"
+      ],
+      "note": "Settled the cloud invoice of EUR 52.40 in place of the fees account; it counts as USD 56.85 at the month's cross of the ECB's quotes, 0.921658 euros per dollar, rounded down (identity (8)). The payment never entered the fees account.",
+      "evidence": [
+        {
+          "kind": "supporter-payment",
+          "ref": "SUP-2027-02-0001"
+        }
+      ]
+    }
+  ],
+  "supportTotalMinor": 5685,
+  "chargedToFeesMinor": 4621,
+  "yearRunningTotalMinor": 7021,
+  "capBps": 1500,
+  "reserveRetentionMinor": 71,
+  "reserveRetentionNote": "Retained up to the operations reserve's target and no further: at the month's end the reserve account held CHF 399.38 of its CHF 400.00 target, and its room of CHF 0.62 is USD 0.71 at the month's rate of 0.864055 francs per dollar (the ECB's quotes of Friday 26 February), rounded down (identity (7)). 5% of SAMPLE-REMIT-002702's Purpose Fees, 10000, would have been more. Above the target nothing is retained. Interest is never retained.",
+  "interestMinor": 0,
+  "passedOnMinor": 195308,
+  "transfers": [
+    {
+      "recipientId": "rcp_f5cc8xgz81c00nrve04pdahejb",
+      "category": "health",
+      "amountMinor": 48827,
+      "status": "scheduled",
+      "endToEndId": "psn-202702-rve04pdahejb",
+      "note": "The category's 97654 divides evenly between its two listed recipients. Due no later than 2027-04-05, the deadline of SAMPLE-REMIT-002702. Each share is in US dollars, the table's currency; what a transfer pays into an account in another currency is stated by the month's transfers record (`transfers.v1`)."
+    },
+    {
+      "recipientId": "rcp_tg8g3ps3smxzdpy1zt0zesjnx9",
+      "category": "health",
+      "amountMinor": 48827,
+      "status": "scheduled",
+      "endToEndId": "psn-202702-y1zt0zesjnx9"
+    },
+    {
+      "recipientId": "rcp_0svacmgratb4f4q0syghrz8ym4",
+      "category": "education",
+      "amountMinor": 48827,
+      "status": "scheduled",
+      "endToEndId": "psn-202702-q0syghrz8ym4"
+    },
+    {
+      "recipientId": "rcp_8jf9xfejcgadg7cgyag0hmkcxb",
+      "category": "education",
+      "amountMinor": 48827,
+      "status": "scheduled",
+      "endToEndId": "psn-202702-cgyag0hmkcxb"
+    }
+  ],
+  "reserve": {
+    "balanceMinor": 39938,
+    "targetMinor": 40000,
+    "currency": "CHF",
+    "note": "The reserve account is kept in francs. The month opened at CHF 350.00, January's closing balance. January's retention of USD 57.86, the most its room of CHF 50.00 allowed at January's rate, left the fees account on January's transfer day, Monday 1 February, and the reserve account booked CHF 49.38 for it at the bank's rate of 0.8535: less than the room, by the bank's margin. This close's retention moves on its own transfer day, Monday 1 March, and is listed in March's table.",
+    "movements": [
+      {
+        "amountMinor": 4938,
+        "kind": "retention-from-fees",
+        "date": "2027-02-01",
+        "srcAmountMinor": 5786,
+        "srcCurrency": "USD",
+        "fxRate": "0.8535",
+        "fxSource": "The reserve account's statement line STMT-RES-2027-02-0001",
+        "fxDate": "2027-02-01",
+        "retainedIn": "2027-01",
+        "note": "January's reserve retention, sent in US dollars and booked in francs by the reserve account, which is not the fees account.",
+        "evidence": [
+          {
+            "kind": "reserve-movement",
+            "ref": "STMT-RES-2027-02-0001"
+          },
+          {
+            "kind": "bank-line",
+            "ref": "SMPL-2027-02-01-0001",
+            "label": "The fees account's debit, in US dollars"
+          }
+        ]
+      }
+    ]
+  },
+  "rate": "0.864055",
+  "rateDate": "2027-02-26",
+  "rateSource": {
+    "name": "ECB euro foreign exchange reference rates",
+    "perEuro": {
+      "USD": "1.0850",
+      "CHF": "0.9375"
+    }
+  },
+  "recipientListVersion": "v1",
+  "evidence": [
+    {
+      "kind": "rail-payout-statement",
+      "ref": "SAMPLE-REMIT-002702",
+      "label": "The rail payout statement of the payout credited in the month"
+    }
+  ],
+  "methodologyUrl": "https://purposesource.org/trust/money"
+}

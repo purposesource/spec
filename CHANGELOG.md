@@ -2960,6 +2960,62 @@ reasoning: no month export has ever been published with a row in it.
 - Metadata only. No member, type, rule or example moves, and every document valid under 1.6.0 is valid under 1.6.1. The v0
   table the website renders from its hand-maintained file is named as before.
 
+### 1.7.0 — unreleased (2026-11-07; ops decisions D84 items 1 and 4 and D201 item 2; the lock-currency record's A2 design, `design/money-policy/lock-currency-2026-11-06`, with the orchestrator's rulings on it) — pre-release
+
+- **Why.** Since D84 the table counts in the fees account's currency, US dollars, and the operations reserve stays in its own
+  account's francs. D201 item 2 settled how the two meet: a real exchange counts at what the bank booked, and a figure that
+  joins the two currencies without money changing hands counts at one rate a month, the European Central Bank's euro
+  reference rates of the month's last bank working day, printed on the table beside the figure. The contract had one
+  currency per document and a place for neither.
+- **The table's currency.** `currency` is the fees account's. Every `*Minor` member is in it except the reserve line's, an
+  invoice's own amount and the other side of an exchange or of a converted transfer, each beside its own currency; the
+  description's money sentence says the same. A document written before 1.7.0 is in the currency its writer named.
+- **The reserve line's currency.** Optional `reserve.currency`: `balanceMinor`, `targetMinor` and every movement's
+  `amountMinor` are in it, as the reserve account's statement shows them. A producer writes it on every document whose
+  currency is not the reserve account's, and never equal to `currency`. Absent, it is the document's `currency`.
+- **The month's rate.** Optional `rate`, `rateDate` and `rateSource`, each only with the others, and required wherever
+  `reserve.currency` is present. `rate` is the units of the reserve's currency one unit of the table's bought: the cross of
+  the ECB's quotes of `rateDate` (`rateSource.perEuro`, exactly as published), cut to six decimal places toward zero as the
+  payment files cut theirs, a decimal string above zero (a reader refuses a rate at or below zero). An amount becomes the
+  reserve's currency by multiplication and the table's by division, each rounded down. It serves the figures that exist only
+  on paper and no other: the reserve's room to its target, an invoice the fees account did not pay, the year's cost cap in
+  francs, and the francs of the direct costs the board sets the target from. `rateDate` is the latest ECB publication on or
+  before the month's last bank working day, on the house bank's one calendar; once the month is locked it is a fact of the
+  document and is never recomputed, so a bank-day list published later never moves it.
+- **The bank's exchange on a movement.** A reserve movement may carry the exchange the bank booked (URS ENG-037): the other
+  side, `srcAmountMinor` in `srcCurrency`, with the bank's `fxRate`, each requiring the others, and `fxRate` its `fxSource`
+  and `fxDate`. A `retention-from-fees` names the month whose retention it receives (`retainedIn`), which no other kind
+  names. Where `reserve.currency` is present a `retention-from-fees` and a `refill-from-fees` always cross the two
+  currencies, so each requires the exchange, and the retention its `retainedIn`. The bank's rate is never the month's rate,
+  except on a plane labelled `fixture`, whose SAMPLE movement says so in `fxSource`.
+- **An invoice in another currency.** A direct cost may carry its own amount (`invoiceAmountMinor` in `invoiceCurrency`) and
+  `invoiceRate`, the three together: the rate the fees account's debit implies where the fees account paid it, and otherwise
+  the month's cross of the same quotes, from which `amountMinor` is computed.
+- **Three identities appended.** (7) The retention's room is the room to the target at the month's rate, rounded down, so
+  nothing is retained above the target at that rate. (8) An invoice in another currency counts at what really paid it, part
+  by part, each part rounded down. (9) Across the two currencies an advance is what the reserve's payment came to in the
+  table's currency: the dollars the bank paid out where it changed the reserve's francs into the table's currency to pay the
+  invoice, and otherwise the reserve's own payment at the month's rate. A refill's other side is exactly the charge it pays
+  back, a retention's exactly the retention of `retainedIn`, and the balance is never converted. The description's paragraph
+  on an advance and `reserveAdvanceMinor` say the same, dated.
+- **Pre-release (versioning rule 5), and final at the launch.** A table whose reserve line names its own currency must carry
+  members it could not carry before: a tightening, made in place while nothing outside the build depends on it. From the
+  launch, Tuesday 1 December 2026, this contract changes only additively, so these are the words the platform's money code is
+  built to. Every document valid under 1.6.1 is valid under 1.7.0 and reads the same: nothing new is required of a document
+  without `reserve.currency`, and no member, type or rule of 1.6.1 moved. The five examples are unchanged.
+- **A sixth example**, `cost-support.v1.fees-currency.example.json`: a USD table for February 2027 on the credit-month key,
+  its reserve in CHF, at the illustrative quotes of Friday 26 February 2027, USD 1.0850 and CHF 0.9375 per euro (rate
+  0.864055). It carries a USD invoice, a CHF invoice the fees account paid (counted at its USD debit), an EUR invoice the
+  founding members settled (EUR 52.40, USD 56.85 at the month's cross of 0.921658), and January's retention of USD 57.86,
+  which the reserve account booked as CHF 49.38 at the bank's 0.8535; that leaves CHF 0.62 of room, USD 0.71 at the month's
+  rate, which is what the month retains.
+- **`check:examples` holds the new rules to planted documents**, each one edit away from that example: 51 refusals, each
+  with and without `format`, 2 by `format` alone, and 8 admissions, among them the shape a document before 1.7.0 has. Each
+  rule was proved able to fail first.
+- **The citations name the Rules' new version.** Calculation Rules Nr. 33 and Nr. 34 are the numbers of the new version the
+  board adopts before the first payout (D201 item 2); if it adopts other numbers, these citations change in place before the
+  launch.
+
 ## transfers.v1.json
 
 ### 1.0.0 — unreleased (2026-10-29; ops decision D64 item 1, the checked register's row 24; FS-07's dated note of 2026-10-29) — pre-release
