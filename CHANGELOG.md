@@ -4503,6 +4503,44 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 
 ## contributor-page.v1.json
 
+### 1.10.0 — unreleased (2026-11-08; ops decision D202 items 1 and 2) — pre-release
+
+- **Pre-release** change under policy 5, a minor bump: what the one builder lists in `certificatesSection` narrows, and no
+  constraint moves, so every document written under 1.9.x stays valid and a renderer draws it as before. The operator's word of
+  2026-11-08, "certificates proposals: go", on the orchestrator's three-rule proposal; item 3 (On my page in the request) is the
+  platform's and asks nothing of this schema.
+- VALID ONLY (item 1): the one builder lists a certificate only while its record's status is `valid`. A `revoked`, `superseded` or
+  `expired` certificate is never listed, whatever its period. This amends ops decision D137 item 4 (a revoked certificate listed
+  with its "Revoked" chip and without its projects) and the orchestrator's order of 2026-10-27 on PS-2455 (a superseded one as
+  "Updated, see new"). Its own verify page keeps its true status for anyone who holds its id or link, so nothing is hidden from a
+  verifier; a participation certificate's dates are the period it attests, never an expiry, and nothing writes `expired` for one,
+  so a page keeps its whole range over time.
+- NO NESTED CARDS (item 2): of the certificates the page would list (valid, On my page, in the page's display and, by hand,
+  chosen), the builder lists only the ones whose period no other of them contains, compared by the months each item names
+  (`months`). So where a month's certificate lies inside its year's, and both inside all the time credited, the page lists the
+  all-time certificate alone; two periods that overlap without one containing the other are both listed, as a year's certificate
+  is beside an all-time one that starts after that year's January and ends after its December. One certificate per person and
+  period is in service (FS08-121), so two equal periods do not occur; were two read, the one with the greater `cid`, the newer,
+  would be listed. An item that names no months is compared with none. The order and the limit of 50 apply after the rule. A
+  certificate left off stays valid, checkable and on its holder's own certificates screen; the summary's `certificates` counts
+  only what the section lists.
+- KEPT FOR WHAT WAS BUILT BEFORE: `status` keeps its four values and the item keeps 1.7.0's `successorNamed`, so a document built
+  before 1.10.0 still validates. From 1.10.0 the builder writes only `valid` and no `successorNamed`. `certificatesSection` gains
+  WHAT IS LISTED; its first paragraph, THE SUCCESSOR, `status`, `successorNamed`, the summary's `certificates` and `autoUpdated`'s
+  `certificate-status` say what 1.10.0 lists (a certificate that leaves `valid` leaves the section, and one it contained is listed
+  again where no other listed certificate contains it). The renderer's chips for the other three statuses stay, for those bytes.
+- Examples: the page examples that listed a certificate `expired` (the named, `anonymous`, `header`, `own-ground`, `cards`,
+  `listings` and `sponsors-header` ones) list it `valid`, their documents the builder's from the same facts with a valid
+  certificate; PV-1, PV-2, PV-6, PV-9 and PV-10 are recomputed with them (the preview golden's 1.8.0), and every other example and
+  vector keeps its bytes. No example or vector listed a revoked, superseded or nested certificate. The build golden (its 1.7.0)
+  gains the `certificates` vectors CL-1 to CL-15: the operator's dev case (February, February–March, February–April revoked,
+  February–May superseded, February–May valid, February–June: February–June alone), each other status, a month inside all the time
+  credited, a year beside an all-time certificate that does not contain it, an overlap without containment, two equal periods,
+  three periods nested, a container off the page and one in the other display, both choices by hand, a period by its years alone
+  and one whose dates contradict its years, a page without the login, and nothing to list. The theme table
+  (`contributor-page-contrast.v1.golden.json`) keeps a tone for every status, and the about golden keeps its revoked and superseded
+  sentences: both are a reader's, for every document this schema admits.
+
 ### 1.9.0 — unreleased (2026-10-29; ops decision D189 and its dated note of 2026-10-29T10:0xZ) — pre-release
 
 - **Pre-release** addition under policy 5, a minor bump, optional: every document written under 1.8.x stays valid, and a
