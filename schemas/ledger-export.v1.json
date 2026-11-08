@@ -4,8 +4,8 @@
   "title": "Monthly ledger export — /ledger/{YYYY}-{MM}.json",
   "description": "The published monthly ledger export (FS-07 §6.2). Immutable once written: regeneration may only re-emit byte-identical content for a locked month, and a divergence is an alert, not a fix (FS07-051). The `.csv` twin carries the same rows flat; the human ledger page generates from the same rows, and any divergence between page, JSON and CSV is a defect (VS-37, ENG-043/044).\n\nThe shadow section, when present, carries its label IN BAND so no downstream consumer can strip it accidentally: contributor votes are computed and NOT used for routing until the fairness-review gate opens (D27, FS07-052).\n\nDisplay law: pages generate exclusively from these rows; per-contributor money respects the published materiality floor; unclaimed shares appear in aggregate only; there are no leaderboards (FS07-052, D15).\n\nAt P-M2 there are no allocation rows and no `policy`/`totals` allocation figures — the export carries intake rows only, and before the first money moves the ledger page says 'no money has moved yet' in words rather than rendering a zero (FS07-100, VS-37).",
   "x-psn": {
-    "specVersion": "1.10.0",
-    "phase": "P-M2 (intake rows only); P-M3 locked months carry policy, batch and shadow (1.7.0); a month on the credit-month key names its poolBasis and carries its close's payout rows (1.9.0)",
+    "specVersion": "1.11.0",
+    "phase": "P-M2 (intake rows only); P-M3 locked months carry policy, batch and shadow (1.7.0); a month on the credit-month key names its poolBasis and carries its close's payout rows (1.9.0); a month whose close carries no payout may name no Recipient List version (1.11.0)",
     "artifactPath": "/ledger/{YYYY}-{MM}.json (+ .csv twin)",
     "authoritative": true,
     "producer": "index-build (P-M2: index-build-lite CI, VS-04) from the committed monthly table",
@@ -51,12 +51,12 @@
     "batch": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["batchId", "inputsDigest", "recipientListVersion", "costSupportSha256"],
-      "description": "The allocation batch that wrote this month (FS07-010, FS07-012; statutes Art. 6e(2)). Absent on a month no allocation locked. `monthDigest` is also the batch's output digest (FS07-094), so that number is published once, below.",
+      "required": ["batchId", "inputsDigest", "costSupportSha256"],
+      "description": "The allocation batch that wrote this month (FS07-010, FS07-012; statutes Art. 6e(2)). Absent on a month no allocation locked. `monthDigest` is also the batch's output digest (FS07-094), so that number is published once, below. A month whose close carries no payout, locked while no Recipient List version was in force for it, names no `recipientListVersion` (1.11.0); every other batch names one.",
       "properties": {
         "batchId": { "type": "string", "maxLength": 64, "description": "The batch id every allocator row of the month carries as `batchId`." },
         "inputsDigest": { "$ref": "#/$defs/sha256", "description": "SHA-256 of the RFC 8785 serialization of the frozen input the month was computed from (FS07-011). A COMMITMENT: an auditor given the frozen input can recompute it and compare; a member of the public, who does not hold that input, cannot, and this contract does not claim otherwise." },
-        "recipientListVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$", "description": "The adopted Recipient List version the month's disbursements were computed against (`recipient-list.v1`)." },
+        "recipientListVersion": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?$", "description": "The adopted Recipient List version the month's disbursements were computed against (`recipient-list.v1`). Absent where the month locked while no version was in force for it, which only a month whose close carries no payout, releases no held item and passes no interest on may do (added in 1.11.0): it pays nobody, so nothing in it was computed against a List, and nothing is withheld. Such a month is on the credit-month key and carries no `payout-assign`, `payout-setoff`, `interest-in` or `disburse` row (this file's `allOf`). A month locked while a version was in force for it names that version, whatever its close carried." },
         "costSupportSha256": { "$ref": "#/$defs/sha256", "description": "SHA-256 of the exact bytes of the month's `cost-support.v1` document that the lock read. Where that document is published beside the export, it is those bytes (FS07-051)." }
       }
     },
@@ -137,6 +137,21 @@
                   { "required": ["movement"] }
                 ]
               }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "Added 2026-11-08 (1.11.0): a batch names no Recipient List version only on a month on the credit-month key whose close carries no payout and passes no interest on, and which pays nobody: none of the key's three row types and no disburse row.",
+      "if": { "properties": { "batch": { "not": { "required": ["recipientListVersion"] } } }, "required": ["batch"] },
+      "then": {
+        "required": ["poolBasis"],
+        "properties": {
+          "poolBasis": { "const": "credit-month" },
+          "rows": {
+            "items": {
+              "not": { "properties": { "type": { "enum": ["payout-assign", "payout-setoff", "interest-in", "disburse"] } }, "required": ["type"] }
             }
           }
         }

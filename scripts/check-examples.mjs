@@ -39,6 +39,12 @@
  * export's `policy.reserveTargetCurrency`, and for the counter's money rules, which moved with
  * `stats.v1`'s renamed member and state and must still bite under the new names.
  *
+ * A BATCH THAT NAMES NO RECIPIENT LIST VERSION (added 2026-11-08: `ledger-export.v1` 1.11.0; ops decision
+ * D200 item 3). No example carries one, because the credit-month export's close carries payouts; that the
+ * contract admits such a batch only on a credit month that carries none of the key's three row types and
+ * no `disburse` row is held to planted documents edited from that export into a month whose close carries
+ * no payout, each refusal one row or the basis away from the admitted month.
+ *
  * Run: node scripts/check-examples.mjs
  */
 import { existsSync, readdirSync } from 'node:fs';
@@ -312,14 +318,30 @@ const inDollars = (d) => {
   d.currency = 'USD';
   d.policy.reserveTargetCurrency = 'CHF';
 };
+/* ledger-export.v1 1.11.0: a batch names no Recipient List version only on a credit month whose close carries no payout, passes no
+   interest on and pays nobody. `noPayout` is the credit-month export made such a month: its batch's version and every row of the four
+   kinds removed. Each refusal puts one row of one kind back, from the export as it stands, or takes the basis away. */
+const LIST_ROW_TYPES = ['payout-assign', 'payout-setoff', 'interest-in', 'disburse'];
+const noPayout = edit(creditExport, (d) => {
+  delete d.batch.recipientListVersion;
+  d.rows = d.rows.filter((row) => !LIST_ROW_TYPES.includes(row.type));
+});
+const withRowOf = (type) => edit(noPayout, (d) => {
+  d.rows.splice(d.rows.length - 1, 0, clone(creditExport.rows.find((row) => row.type === type)));
+});
 holdToPlants('ledger-export.v1.json', {
   refuse: [
     ["a reserve target's currency without the target", edit(creditExport, (d) => { inDollars(d); delete d.policy.reserveTargetMinor; })],
     ["a reserve target's currency in lowercase", edit(creditExport, (d) => { inDollars(d); d.policy.reserveTargetCurrency = 'chf'; })],
+    ...LIST_ROW_TYPES.map((type) => [`a batch that names no Recipient List version beside a \`${type}\` row`, withRowOf(type)]),
+    ['a batch that names no Recipient List version on a month that names no pool basis', edit(noPayout, (d) => { delete d.poolBasis; })],
+    ['a batch that names no Recipient List version on a settlement month', edit(noPayout, (d) => { d.poolBasis = 'settlement-month'; })],
   ],
   admit: [
     ["a month locked in the fees account's currency, its reserve target in the reserve account's", edit(creditExport, inDollars)],
     ['a policy block as 1.9.1 wrote it (the credit-month example as it stands)', creditExport],
+    ['a credit month whose close carries no payout, its batch naming no Recipient List version', noPayout],
+    ['the same month naming a version', edit(noPayout, (d) => { d.batch.recipientListVersion = creditExport.batch.recipientListVersion; })],
   ],
 });
 

@@ -2604,6 +2604,23 @@ reasoning: no month export has ever been published with a row in it.
 - `check:examples` holds the new member to planted documents edited from the credit-month export: refused without the
   target and in lowercase, and admitted beside the target of a month locked in US dollars.
 
+### 1.11.0 — unreleased (2026-11-08; ops decision D200 item 3) — additive
+
+- **Additive (rule 1): `batch.recipientListVersion` is no longer required.** A month whose close carries no payout,
+  releases no held item and passes no interest on pays nobody, so nothing in it is computed against a Recipient List,
+  and it locks whether or not a version is in force for it: nothing is withheld, so statutes Art. 8(5) has nothing to
+  act on.
+  Locked while no version was in force for it, its batch names none. A month locked while a version was in force for it
+  names that version, whatever its close carried, as before.
+- **A document-level conditional (`allOf`):** a batch that names no version belongs to a month whose export says
+  `poolBasis` `credit-month` and carries no `payout-assign`, `payout-setoff`, `interest-in` or `disburse` row. A month that
+  pays a recipient always names the version its transfers resolve against (`transfers.v1`).
+- The member's and the block's descriptions say the same, and `x-psn.phase` names it. Nothing else moves: every document
+  valid under 1.10.0 is valid under 1.11.0 and means the same, and every example keeps its bytes.
+- `check:examples` holds the rule to planted documents edited from the credit-month export: a batch with no version is
+  refused on a month that carries a `disburse`, `payout-assign`, `payout-setoff` or `interest-in` row and on a month that
+  does not say `credit-month`, and admitted on a credit month whose rows carry none of the four.
+
 ## ledger-chain.v1.json
 
 ### 1.0.0 — unreleased
