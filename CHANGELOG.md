@@ -4540,6 +4540,11 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   and one whose dates contradict its years, a page without the login, and nothing to list. The theme table
   (`contributor-page-contrast.v1.golden.json`) keeps a tone for every status, and the about golden keeps its revoked and superseded
   sentences: both are a reader's, for every document this schema admits.
+- `check:contributor-page` holds the page schema to the four statuses and `successorNamed`; every certificate item of every page
+  example and preview vector to `valid`, no `successorNamed` and no period inside another item's; some preview vector to listing a
+  certificate; and the build golden's `certificates` vectors to its own reading of the listing, every case exercised. Its refusal of
+  `successorNamed` beside `expired` states that status itself now, since the named example lists its certificate `valid`. 21 breaks
+  of its own, each proved able to fail. README names the build golden's new vectors.
 
 ### 1.9.0 — unreleased (2026-10-29; ops decision D189 and its dated note of 2026-10-29T10:0xZ) — pre-release
 

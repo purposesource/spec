@@ -116,6 +116,18 @@
  *              sponsors-header pair is valid; some preview vector draws the links and the support buttons both together with
  *              the name, so its hash pins the member; and the build golden's `sponsorsPlacement` vectors are the gate's own
  *              reading of the builder's rule: written only as `header`, whatever the sponsors section's switch says.
+ *   listed     1.10.0 of the page (ops decision D202 items 1 and 2): the page schema keeps a certificate item's four statuses and
+ *              1.7.0's `successorNamed`, so a document built before 1.10.0 still validates; every certificate item of every page
+ *              example and preview vector is `valid`, carries no `successorNamed`, and names months no other item's months contain
+ *              (of two equal periods, the greater id stands), as the one builder lists them from 1.10.0 (the documents are the
+ *              builder's); and some preview vector lists a certificate. The build golden's `certificates` vectors are the gate's own
+ *              reading of the builder's listing: only a `valid` certificate its holder put On my page, in the page's display and,
+ *              where the person chooses by hand, chosen, in the order chosen or newest years first and then the id; of those only
+ *              the ones whose period, by the months its item names, no other of them contains, of two equal periods the greater
+ *              id; one that names no months compared with none; the summary's count what is listed. Between them the vectors give
+ *              each other status, a period nested, an overlap without containment, two equal periods, a container off the page and
+ *              one in the other display, a container chosen and one not chosen by hand, a period by its years alone and one whose
+ *              dates contradict its years, a page without the login, and nothing to list.
  *   never      no member of the three page schemas is named for points, shares, bands, ranks,
  *              percentiles, scores, months, amounts or a person's GitHub id, and no published page
  *              example or vector carries a currency figure, a person's GitHub node id (the current
@@ -1117,6 +1129,7 @@ function buildProblems(golden) {
   found.push(...buildOrganisationsProblems(golden.organisations ?? []).map((message) => ['organisations', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   found.push(...buildListingsProblems(golden.listings ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   found.push(...buildSponsorsPlacementProblems(golden.sponsorsPlacement ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
+  found.push(...buildCertificatesProblems(golden.certificates ?? []).map((message) => ['listed', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   return found;
 }
 
@@ -1249,6 +1262,131 @@ function monthsProblems(documents, vectors) {
   const months = (i) => typeof i.months?.from === 'string' && typeof i.months?.to === 'string';
   const pinned = vectors.some((v) => ((v.document.sections ?? []).find((s) => s.id === 'certificates')?.items ?? []).some((i) => months(i) && !oneWholeYear(i.months)));
   if (!pinned) add('no preview vector carries a period that is not one whole calendar year, so no hash pins the months the years cannot say');
+  return found;
+}
+
+/* --------------------------------------------------------------------------- listed */
+
+const CERTIFICATE_STATUSES = ['valid', 'expired', 'revoked', 'superseded'];
+const CERTIFICATE_ID = /^cert_[0-9abcdefghjkmnpqrstvwxyz]{26}$/;
+const DAY = /^([0-9]{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
+const byId = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+
+/**
+ * A certificate fact's period as its page item names it (contributor-page.v1 1.6.0 `months`, the one builder's): both of the
+ * record's dates handed over, the end no earlier than the start, and each in the year the fact names on its side; as months
+ * (year * 12 + month), never a day. Null otherwise: such a certificate is compared with none (1.10.0, WHAT IS LISTED).
+ */
+function factPeriod(c) {
+  const from = DAY.exec(c.validFrom ?? '');
+  const until = DAY.exec(c.validUntil ?? '');
+  if (!from || !until || c.validUntil < c.validFrom) return null;
+  if (Number(from[1]) !== c.years?.from || Number(until[1]) !== c.years?.to) return null;
+  return { from: Number(from[1]) * 12 + Number(from[2]), to: Number(until[1]) * 12 + Number(until[2]) };
+}
+
+/** A page item's period by its `months`, as months; null where it names none. */
+function itemPeriod(item) {
+  const from = CERTIFICATE_MONTH.exec(item.months?.from ?? '');
+  const to = CERTIFICATE_MONTH.exec(item.months?.to ?? '');
+  if (!from || !to) return null;
+  return { from: Number(from[1]) * 12 + Number(item.months.from.slice(5)), to: Number(to[1]) * 12 + Number(item.months.to.slice(5)) };
+}
+
+/** Whether period `outer` (of id `outerId`) contains period `inner` (of id `innerId`): equal periods go to the greater id. */
+function contains(outer, outerId, inner, innerId) {
+  if (!outer || !inner || outerId === innerId) return false;
+  if (outer.from > inner.from || outer.to < inner.to) return false;
+  return outer.from !== inner.from || outer.to !== inner.to || outerId > innerId;
+}
+
+/**
+ * The gate's own reading of the one builder's certificate listing (contributor-page.v1 1.10.0 `certificatesSection`, WHAT IS
+ * LISTED; ops decision D202 items 1 and 2), not the builder's code: the ids the section lists, in its order.
+ */
+function buildCertificates(input) {
+  const display = input.showLogin ? 'full' : 'status-only';
+  const allowed = (c) => c.onPage === true && c.status === 'valid' && c.disclosure === display;
+  const chosen = input.mode === 'selected'
+    ? (input.selected ?? []).map((id) => input.certificates.find((c) => c.cid === id)).filter((c) => c && allowed(c))
+    : input.certificates.filter(allowed).sort((a, b) => b.years.from - a.years.from || b.years.to - a.years.to || byId(a.cid, b.cid));
+  return chosen
+    .filter((inner, at) => !chosen.some((outer, other) => other !== at && contains(factPeriod(outer), outer.cid, factPeriod(inner), inner.cid)))
+    .slice(0, 50)
+    .map((c) => c.cid);
+}
+
+function buildCertificatesProblems(vectors) {
+  const found = [];
+  if (vectors.length === 0) found.push('no certificates vector — the listing rule would pass vacuously');
+  const exercised = {
+    'an expired certificate left out': false, 'a revoked certificate left out': false, 'a superseded certificate left out': false,
+    'a period nested': false, 'an overlap without containment': false, 'two equal periods': false, 'a container off the page': false,
+    'a container in the other display': false, 'a container chosen by hand': false, 'a container not chosen by hand': false,
+    'a period by its years alone': false, 'dates that contradict the years': false, 'a page without the login': false, 'nothing to list': false
+  };
+  for (const v of vectors) {
+    const input = v.input ?? {};
+    const certificates = input.certificates ?? [];
+    for (const c of certificates) {
+      if (!CERTIFICATE_ID.test(c.cid ?? '')) found.push(`${v.id}: ${JSON.stringify(c.cid)} is not a certificate id`);
+      if (!CERTIFICATE_STATUSES.includes(c.status)) found.push(`${v.id}: ${c.cid} has status ${JSON.stringify(c.status)}, which the page schema does not name`);
+      if (!['full', 'status-only'].includes(c.disclosure)) found.push(`${v.id}: ${c.cid} has display ${JSON.stringify(c.disclosure)}`);
+      if (!Number.isInteger(c.years?.from) || !Number.isInteger(c.years?.to)) found.push(`${v.id}: ${c.cid} names no years`);
+      if (('validFrom' in c) !== ('validUntil' in c)) found.push(`${v.id}: ${c.cid} hands over one of its record's two dates`);
+    }
+    if (new Set(certificates.map((c) => c.cid)).size !== certificates.length) found.push(`${v.id}: two facts share an id`);
+    if (!['all-eligible', 'selected'].includes(input.mode)) found.push(`${v.id}: mode ${JSON.stringify(input.mode)} is not the settings' certificates mode`);
+    const got = buildCertificates(input);
+    if (JSON.stringify(got) !== JSON.stringify(v.expect?.listed)) found.push(`${v.id}: expects ${JSON.stringify(v.expect?.listed)}, the rule lists ${JSON.stringify(got)}`);
+    if (v.expect?.certificates !== got.length) found.push(`${v.id}: the summary's count is ${JSON.stringify(v.expect?.certificates)}, the rule lists ${got.length}`);
+
+    const listed = certificates.filter((c) => got.includes(c.cid));
+    const display = input.showLogin ? 'full' : 'status-only';
+    const coversListed = (c) => listed.some((l) => contains(factPeriod(c), c.cid, factPeriod(l), l.cid));
+    for (const c of certificates.filter((x) => x.status !== 'valid' && !got.includes(x.cid))) exercised[`a${c.status === 'expired' ? 'n' : ''} ${c.status} certificate left out`] = true;
+    const candidates = certificates.filter((c) => c.onPage === true && c.status === 'valid' && c.disclosure === display && (input.mode !== 'selected' || (input.selected ?? []).includes(c.cid)));
+    if (candidates.some((c) => !got.includes(c.cid))) exercised['a period nested'] = true;
+    if (listed.some((a) => listed.some((b) => a.cid < b.cid && factPeriod(a) && factPeriod(b) && factPeriod(a).from <= factPeriod(b).to && factPeriod(b).from <= factPeriod(a).to))) exercised['an overlap without containment'] = true;
+    if (candidates.some((a) => candidates.some((b) => a.cid < b.cid && factPeriod(a) && JSON.stringify(factPeriod(a)) === JSON.stringify(factPeriod(b))))) exercised['two equal periods'] = true;
+    if (certificates.some((c) => c.onPage !== true && c.status === 'valid' && coversListed(c))) exercised['a container off the page'] = true;
+    if (certificates.some((c) => c.onPage === true && c.status === 'valid' && c.disclosure !== display && coversListed(c))) exercised['a container in the other display'] = true;
+    if (input.mode === 'selected' && candidates.some((c) => !got.includes(c.cid))) exercised['a container chosen by hand'] = true;
+    if (input.mode === 'selected' && certificates.some((c) => !(input.selected ?? []).includes(c.cid) && c.onPage === true && c.status === 'valid' && c.disclosure === display && coversListed(c))) exercised['a container not chosen by hand'] = true;
+    if (listed.some((c) => !('validFrom' in c))) exercised['a period by its years alone'] = true;
+    if (listed.some((c) => 'validFrom' in c && factPeriod(c) === null)) exercised['dates that contradict the years'] = true;
+    if (!input.showLogin && got.length > 0) exercised['a page without the login'] = true;
+    if (got.length === 0) exercised['nothing to list'] = true;
+  }
+  for (const [what, done] of Object.entries(exercised)) if (!done) found.push(`no certificates vector exercises ${what}`);
+  return found;
+}
+
+/**
+ * 1.10.0 (ops decision D202 items 1 and 2): the page schema keeps a certificate item's four statuses and `successorNamed`, for
+ * documents built before; and on every page document (each the builder's), every certificate item is `valid`, carries no
+ * `successorNamed`, and names months no other item's months contain. Some preview vector lists a certificate.
+ */
+function listedProblems(schema, documents, vectors) {
+  const found = [];
+  const add = (message) => found.push(['listed', message]);
+  const item = schema.$defs?.certificatesSection?.properties?.items?.items;
+  if ((item?.properties?.status?.enum ?? []).join(',') !== CERTIFICATE_STATUSES.join(',')) {
+    add(`the page schema's certificate status is [${item?.properties?.status?.enum}]; it keeps [${CERTIFICATE_STATUSES}], so a document built before 1.10.0 still validates`);
+  }
+  if (!item?.properties?.successorNamed) add("the page schema drops 1.7.0's successorNamed; it keeps it, so a document built before 1.10.0 still validates");
+  for (const [where, doc] of documents) {
+    const items = (doc.sections ?? []).find((s) => s.id === 'certificates')?.items ?? [];
+    for (const it of items) {
+      if (it.status !== 'valid') add(`${where}: ${it.cid} is listed ${it.status}; from 1.10.0 the one builder lists a certificate only while it is valid`);
+      if ('successorNamed' in it) add(`${where}: ${it.cid} carries successorNamed; from 1.10.0 the one builder writes it on no item`);
+      const outer = items.find((o) => contains(itemPeriod(o), o.cid, itemPeriod(it), it.cid));
+      if (outer) add(`${where}: ${it.cid}'s period lies inside ${outer.cid}'s; from 1.10.0 the one builder lists only the containing one`);
+    }
+  }
+  if (!vectors.some((v) => ((v.document.sections ?? []).find((s) => s.id === 'certificates')?.items ?? []).length > 0)) {
+    add('no preview vector lists a certificate, so no hash pins what 1.10.0 lists');
+  }
   return found;
 }
 
@@ -2154,7 +2292,7 @@ const REFUSALS = [
   ['page', 'months in the summary', (d) => { sectionOf(d, 'summary').months = { from: '2026-01', to: '2027-02' }; }],
   // 1.7.0 (a superseded certificate that names no successor; the orchestrator's decision of 2026-10-27 on the CW-47 B follow-up).
   ['page', 'successorNamed beside a valid status', (d) => { const c = certificateOf(d); c.status = 'valid'; c.successorNamed = true; }],
-  ['page', 'successorNamed beside an expired status', (d) => { certificateOf(d).successorNamed = false; }],
+  ['page', 'successorNamed beside an expired status', (d) => { const c = certificateOf(d); c.status = 'expired'; c.successorNamed = false; }],
   ['page', 'successorNamed beside a revoked status', (d) => { const c = certificateOf(d); c.status = 'revoked'; c.successorNamed = false; }],
   ['page', 'successorNamed as a string', (d) => { const c = certificateOf(d); c.status = 'superseded'; c.successorNamed = 'false'; }],
   ['page', 'successorNamed as null', (d) => { const c = certificateOf(d); c.status = 'superseded'; c.successorNamed = null; }],
@@ -2413,6 +2551,24 @@ function allProblems(state) {
       ],
       state.preview.vectors
     ),
+    ...listedProblems(
+      state.schemas.page,
+      [
+        ['examples/contributor-page.v1.example.json', state.page],
+        ['examples/contributor-page.v1.anonymous.example.json', state.anonymous],
+        ['examples/contributor-page.v1.header.example.json', state.header],
+        ['examples/contributor-page.v1.own-ground.example.json', state.ownGround],
+        ['examples/contributor-page.v1.about.example.json', state.aboutPage],
+        ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
+        ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
+        ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
+        ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
+        ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
+        ['examples/contributor-page.v1.sponsors-header.example.json', state.sponsorsPage],
+        ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
+      ],
+      state.preview.vectors
+    ),
     ...monthsProblems(
       [
         ['examples/contributor-page.v1.example.json', state.page],
@@ -2543,7 +2699,7 @@ const SELF_TEST = [
   ['months', (s) => { for (const v of s.preview.vectors) for (const x of v.document.sections) if (x.id === 'certificates') for (const i of x.items) i.months = { from: `${i.years.from}-01`, to: `${i.years.to}-12` }; }],
   ['admits', (s) => { s.admits = [['page', "a day in a certificate's months", (d) => { certificateOf(d).months = { from: '2026-01-15', to: '2026-12' }; }]]; }],
   ['refusals', (s) => { s.refusals = [['page', 'a period across two years', (d) => { const c = certificateOf(d); c.years = { from: 2026, to: 2027 }; c.months = { from: '2026-11', to: '2027-01' }; }]]; }],
-  ['admits', (s) => { s.admits = [['page', 'successorNamed beside an expired status', (d) => { certificateOf(d).successorNamed = false; }]]; }],
+  ['admits', (s) => { s.admits = [['page', 'successorNamed beside an expired status', (d) => { const c = certificateOf(d); c.status = 'expired'; c.successorNamed = false; }]]; }],
   ['refusals', (s) => { s.refusals = [['page', 'a superseded item whose record names none', (d) => { const c = certificateOf(d); c.status = 'superseded'; c.successorNamed = false; }]]; }],
   ['defaults', (s) => { s.defaults.address = 'login'; }],
   ['defaults', (s) => { s.defaults.linksPlacement = 'section'; }],
@@ -2622,6 +2778,28 @@ const SELF_TEST = [
   ['admits', (s) => { s.admits = [['sponsorsPage', 'the support buttons\' own section stated in the document', (d) => { d.sponsorsPlacement = 'section'; }]]; }],
   ['refusals', (s) => { s.refusals = [['sponsorsPage', 'the sponsors-header page unchanged', () => {}]]; }],
   ['refusals', (s) => { s.refusals = [['sponsorsSettings', 'the sponsors-header settings unchanged', () => {}]]; }],
+  // 1.10.0 of the page (ops decision D202 items 1 and 2).
+  ['listed', (s) => { s.schemas.page.$defs.certificatesSection.properties.items.items.properties.status.enum = ['valid']; }],
+  ['listed', (s) => { delete s.schemas.page.$defs.certificatesSection.properties.items.items.properties.successorNamed; }],
+  ['listed', (s) => { certificateOf(s.page).status = 'expired'; }],
+  ['listed', (s) => { certificateOf(s.anonymous).status = 'revoked'; }],
+  ['listed', (s) => { const c = certificateOf(s.preview.vectors.find((v) => v.id === 'PV-5').document); c.status = 'superseded'; c.successorNamed = true; }],
+  ['listed', (s) => { certificateOf(s.header).successorNamed = false; }],
+  ['listed', (s) => { const c = sectionOf(s.cardsPage, 'certificates').items[1]; c.years = { from: 2026, to: 2027 }; c.months = { from: '2026-01', to: '2027-01' }; }],
+  ['listed', (s) => { const items = sectionOf(s.listingsPage, 'certificates').items; items.push({ ...structuredClone(items[0]), cid: 'cert_01jxd2020000000000000000zz' }); }],
+  ['listed', (s) => { for (const v of s.preview.vectors) v.document.sections = v.document.sections.filter((x) => x.id !== 'certificates'); }],
+  ['listed', (s) => { s.build.certificates.find((v) => v.id === 'CL-1').expect.listed.push('cert_01jxd202000000000000000105'); }],
+  ['listed', (s) => { s.build.certificates.find((v) => v.id === 'CL-2').expect.certificates = 2; }],
+  ['listed', (s) => { s.build.certificates.find((v) => v.id === 'CL-4').expect.listed.reverse(); }],
+  ['listed', (s) => { s.build.certificates.find((v) => v.id === 'CL-6').expect.listed = ['cert_01jxd202000000000000000601']; }],
+  ['listed', (s) => { s.build.certificates.find((v) => v.id === 'CL-12').expect.listed = ['cert_01jxd202000000000000001201']; }],
+  ['listed', (s) => { s.build.certificates.find((v) => v.id === 'CL-14').expect.listed.push('cert_01jxd202000000000000001403'); }],
+  ['listed', (s) => { s.build.certificates.find((v) => v.id === 'CL-11').expect.listed.reverse(); }],
+  ['listed', (s) => { s.build.certificates.find((v) => v.id === 'CL-3').input.certificates[0].cid = 'cert_01jxd2020000000000000003I1'; }],
+  ['listed', (s) => { s.build.certificates = s.build.certificates.filter((v) => !['CL-4', 'CL-5'].includes(v.id)); }],
+  ['listed', (s) => { s.build.certificates = s.build.certificates.filter((v) => v.input.mode !== 'selected'); }],
+  ['listed', (s) => { s.build.certificates = s.build.certificates.filter((v) => !['CL-12', 'CL-13'].includes(v.id)); }],
+  ['listed', (s) => { s.build.certificates = []; }],
   ['goldens', (s) => { s.goldenFiles = [...s.goldenFiles, 'unchecked.v1.golden.json']; }]
 ];
 
@@ -2665,8 +2843,9 @@ fail(
     `${state.build.cards.length} write the cards' choices resolved, ${state.build.adopter.length} list the licence adopter's repositories with their years, ` +
     `${state.build.organisations.length} judge whose organisation picture a page may name, ${state.build.listings.length} write the listings' choices that differ from D186's defaults, ` +
     `${state.build.sponsorsPlacement.length} write the support buttons' place only where it is with the name, ` +
+    `${state.build.certificates.length} list a person's certificates, only valid ones and of nested periods only the containing one, ` +
     `${state.aboutTexts.versions.length} version(s) of our about texts hold their recorded digests, ${state.aboutGolden.sentences.length} about sentences and ${state.aboutGolden.blocks.length} blocks recompute, ` +
-    'every certificate item names its period by its months, in order and in its years, ' +
+    'every certificate item names its period by its months, in order and in its years, is valid and lies inside no other, ' +
     'no page member or example carries points, money or a GitHub id, ' +
     `the defaults are the schema's, ${REFUSALS.length} refusals and ${ADMITS.length} admissions hold, and every rule was proved able to fail`,
 );
