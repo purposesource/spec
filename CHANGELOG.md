@@ -6124,6 +6124,36 @@ which kind of change each entry was.
   requires of it. No vector, certificate or key set moved; the website's generator (`scripts/waiver-certificate-vectors.mjs`)
   names the same version in the website's change beside this one, so it writes these bytes again, byte for byte.
 
+### 1.25.0 — unreleased (2026-11-08; `cost-support.v1`'s path, FS-00 §6.2's amendment note of 2026-11-05; the go-live backlog's GLB:95, PS-2040)
+
+- Additive, a minor bump like 1.22.0: one new GET operation serves the artifact `cost-support.v1` describes, and nothing
+  that existed moved. 1.24.1 is the counters' new names, so this route takes the next number.
+  `getCostSupportDocument` at `/v1/ledger/{month}.cost-support.json` answers `cost-support.v1`: each locked month's
+  frozen document, at the plane path `/ledger/{YYYY}-{MM}.cost-support.json` beside the month's export, which
+  `cost-support.v1` 1.6.1's `x-psn.artifactPath` states and FS-00 §6.2's note of 2026-11-05 adopted. The platform's index
+  build writes it, and its purge already names this route.
+- Under the `ledger` tag, inside the ledger's own family, because the document sits beside the month's export, which names
+  it; the tag's description now says so. `x-psn-phase: P-M3`, and the phase list in `info.description` says so too: the
+  producer is the platform's index build, and a month whose document no run has published answers `404`.
+- Cached 300 s, the allocation keys' class, not the export's day: the document is written once, but an open month has none,
+  and a `404` read before a month's lock is not held for longer than that.
+- The description says what the schema and the producer line say and nothing more: the bytes the lock froze, never edited,
+  archived before the month's export and published verbatim once the month is archived; the export's
+  `batch.costSupportSha256` and the transfers record's `costSupportSha256` name the document by the SHA-256 of its exact
+  bytes, so a reader hashes the bytes served, never a re-serialisation of them; the months with no document; and a
+  published document that is never rewritten, so its `ETag` never moves.
+- Errors: `404` for a month with no document, `429`, and `503`, as the transfers record's.
+- One example: `creditMonth` is `examples/cost-support.v1.credit-month.example.json`, copied member for member, the
+  document whose exact bytes `examples/ledger-export.v1.credit-month.example.json` and both transfers examples name by their
+  SHA-256, so the route shows the document `getTransfersRecord`'s examples link to. `check:openapi-examples` validates 85
+  examples (84 before).
+- `coverage/waiver-certificate-vectors.json` names this version, `specVersion` 1.25.0, as `check:certificate-vectors`
+  requires of it. No vector, certificate or key set moved, and the website's generator (`scripts/waiver-certificate-vectors.mjs`,
+  which names the same version in the website's change beside this one) writes these bytes again, byte for byte.
+- The website's edge serves the route: its allow-list, and the same 300 s on the response and on the mirror read. The
+  `/v1/ledger/` family and the `artifacts` rate-limit class carry it already. The edge's tests do not read this file's
+  routes, so the order of pushes does not matter for them.
+
 ## coverage/cov-v1.ts
 
 The published coverage function, versioned together with its vectors (`coverage/vectors.json`)
