@@ -2646,6 +2646,18 @@ reasoning: no month export has ever been published with a row in it.
   refused on a month that carries a `disburse`, `payout-assign`, `payout-setoff` or `interest-in` row and on a month that
   does not say `credit-month`, and admitted on a credit month whose rows carry none of the four.
 
+### 1.11.1 — unreleased (2026-11-08; the orchestrator's answer of 2026-11-06T19:15Z on PS-2032, point 4, with `ledger-chain.v1` 1.2.1; PS-2773) — wording only
+
+- A patch under policy 3. `headHash` and `prevHeadHash` said what they hold for a month with rows, the global chain head
+  after its last row and before its first, and nothing for a month with none, which both producers publish: the current
+  month on a plane with no row yet, and, since platform `ed3250f6` (PS-2032), every month from the ledger's first to its
+  latest, each open until its lock. Such a month publishes the head it inherited in both members, the `rowHash` of the
+  last row written in the months before it, or genesis when they have none: the chain did not advance over it. Both
+  descriptions now say so after their unchanged first sentences, and `ledger-chain.v1` 1.2.1's entry for the month
+  carries the same `headHash`.
+- No property, type, enum or rule changes: every document valid under 1.11.0 is valid under 1.11.1 and means the same,
+  and every example keeps its bytes.
+
 ## ledger-chain.v1.json
 
 ### 1.0.0 — unreleased
@@ -2691,6 +2703,21 @@ reasoning: no month export has ever been published with a row in it.
   guard still refuses it. No second value was added — `dev` was considered and rejected
   for exactly that reason. Authority: **Settled 2** above, and ops decision D35 of
   2026-09-10, which authorises the P-M3 build.
+
+### 1.2.1 — unreleased (2026-11-08; the orchestrator's answer of 2026-11-06T19:15Z on PS-2032, point 4, with `ledger-export.v1` 1.11.1; PS-2773) — wording only
+
+- A patch under policy 3: two descriptions said what neither producer publishes.
+- `months` said "One entry per month that has rows". Both producers list months with no rows: on a plane with no row
+  yet, the current month alone, open, with `rowCount` 0, as the P-M2 build published it and the platform's renderer
+  does; and, since platform `ed3250f6` (PS-2032), every month from the ledger's first to its latest, each open until its
+  lock. It now reads: every month from the ledger's first month to its latest, and the current month (the UTC month of
+  `generatedAt`) with every month between it and the ledger's latest; a month with no rows has `rowCount` 0.
+- `months[].headHash` said "The GLOBAL chain head at the moment this month was locked (or at `generatedAt` for an open
+  month)". Both producers write the month's own head: its last row's `rowHash`, or, for a month with no rows, the head
+  it inherited, the value its export publishes as `headHash` (`ledger-export.v1` 1.11.1). An open month's own head is
+  not the global head at `generatedAt` once a row of another month has been written after its last row.
+- No property, type, enum or rule changes: every document valid under 1.2.0 is valid under 1.2.1 and means the same.
+  `edge-public.v1` 1.26.1's `genesis` example now lists the current month, as the first point says.
 
 ## cost-support.v1.json
 
@@ -6213,6 +6240,19 @@ which kind of change each entry was.
   repository's main. The platform's renderer emits the member already (`ArtifactRenderer.Trust.cs`,
   from the incidents migration `0121` records), and its artifact tests validate the rendered set against this
   component, the compromised key's lists included, unchanged.
+
+### 1.26.1 — unreleased (2026-11-10; `ledger-chain.v1` 1.2.1, the orchestrator's answer of 2026-11-06T19:15Z on PS-2032, point 4; PS-2773) — examples only
+
+- A patch: no operation, status code, error code, cache class, parameter or schema reference moved. `getLedgerChain`
+  answers `ledger-chain.v1` by `$ref`, whose 1.2.1 says which months the chain lists.
+- `getLedgerChain`'s `genesis` example listed no month (`months: []`). Before the ledger's first row both producers list
+  the current month alone, so the example now does, in the members and order of `oneMonth`'s entry: `2027-05`, the
+  month of its `generatedAt`, with the digest of no rows (`4f53cda1…`, the SHA-256 of `[]`), the genesis head,
+  `rowCount` 0, `locked` false, `lockedAt` null and its export's address. Its summary and every other member are
+  unchanged. `check:openapi-examples` validates the same 85 examples.
+- `coverage/waiver-certificate-vectors.json` names this version, `specVersion` 1.26.1, as `check:certificate-vectors`
+  requires of it. No vector, certificate or key set moved; the website's generator (`scripts/waiver-certificate-vectors.mjs`)
+  names the same version in the website's change beside this one, so it writes these bytes again, byte for byte.
 
 ## coverage/cov-v1.ts
 

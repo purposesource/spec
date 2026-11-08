@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.26.0
+  version: 1.26.1
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -2755,7 +2755,14 @@ paths:
                     genesisPrevHash: '0000000000000000000000000000000000000000000000000000000000000000'
                     headHash: '0000000000000000000000000000000000000000000000000000000000000000'
                     rowCount: 0
-                    months: []
+                    months:
+                      - month: 2027-05
+                        monthDigest: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
+                        headHash: '0000000000000000000000000000000000000000000000000000000000000000'
+                        rowCount: 0
+                        locked: false
+                        lockedAt: null
+                        exportUrl: https://api.purposesource.org/v1/ledger/2027-05.json
                 oneMonth:
                   summary: One open month
                   value:

@@ -4,7 +4,7 @@
   "title": "Monthly ledger export — /ledger/{YYYY}-{MM}.json",
   "description": "The published monthly ledger export (FS-07 §6.2). Immutable once written: regeneration may only re-emit byte-identical content for a locked month, and a divergence is an alert, not a fix (FS07-051). The `.csv` twin carries the same rows flat; the human ledger page generates from the same rows, and any divergence between page, JSON and CSV is a defect (VS-37, ENG-043/044).\n\nThe shadow section, when present, carries its label IN BAND so no downstream consumer can strip it accidentally: contributor votes are computed and NOT used for routing until the fairness-review gate opens (D27, FS07-052).\n\nDisplay law: pages generate exclusively from these rows; per-contributor money respects the published materiality floor; unclaimed shares appear in aggregate only; there are no leaderboards (FS07-052, D15).\n\nAt P-M2 there are no allocation rows and no `policy`/`totals` allocation figures — the export carries intake rows only, and before the first money moves the ledger page says 'no money has moved yet' in words rather than rendering a zero (FS07-100, VS-37).",
   "x-psn": {
-    "specVersion": "1.11.0",
+    "specVersion": "1.11.1",
     "phase": "P-M2 (intake rows only); P-M3 locked months carry policy, batch and shadow (1.7.0); a month on the credit-month key names its poolBasis and carries its close's payout rows (1.9.0); a month whose close carries no payout may name no Recipient List version (1.11.0)",
     "artifactPath": "/ledger/{YYYY}-{MM}.json (+ .csv twin)",
     "authoritative": true,
@@ -114,8 +114,8 @@
         }
       }
     },
-    "headHash": { "$ref": "#/$defs/sha256", "description": "Global chain head after this month's last row." },
-    "prevHeadHash": { "$ref": "#/$defs/sha256OrGenesis", "description": "Global chain head before this month's first row. Genesis is 64 zeros." },
+    "headHash": { "$ref": "#/$defs/sha256", "description": "Global chain head after this month's last row. A month with no rows publishes the head it inherited, the same value as `prevHeadHash`: the chain did not advance over it." },
+    "prevHeadHash": { "$ref": "#/$defs/sha256OrGenesis", "description": "Global chain head before this month's first row. Genesis is 64 zeros. A month with no rows publishes the head it inherited: the `rowHash` of the last row written in the months before it, or genesis when they have none, which is also its `headHash`." },
     "monthDigest": { "$ref": "#/$defs/sha256", "description": "Digest over this month's rows, mirrored in the chain document and in the month-lock row. THE PREIMAGE, stated exactly because two implementations read this sentence differently and disagreed on every locked month (2026-09-22): SHA-256 of the RFC 8785 canonical JSON of the ARRAY of this month's rows in ascending `seq`, each row AS PUBLISHED HERE — complete, chain members included, with the export-only `date` member — and WITHOUT the `month-lock` row, which carries this value and therefore cannot be inside it." },
     "methodologyUrl": { "type": "string", "format": "uri", "description": "The published methodology: the annual cap on direct costs charged to fees; the lock-before-sweep rule (ops decisions D33 item 4 and D43 item 4, as amended by D109 item 4 — every payout's allocation is locked before its transfer, as statutes Art. 6a(4) provides, and its transfers follow within that article's deadline, counted from its credit; a joint month lock must meet the deadline of the month's earliest payout); the reserve retention (the steward hardship pay, the second capped line of D34, was struck 2026-09-14); the append-only doctrine, and annotation-never-restatement (VS-37)." }
   },
