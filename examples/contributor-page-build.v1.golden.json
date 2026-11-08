@@ -8,9 +8,10 @@
     "`adopter` (1.4.0; ops decision D168 item 3): vectors of the one builder's licence adopter section, for the rules the public document cannot show alone: which repositories are listed and which years each item carries (schemas/contributor-page.v1.json `adopterSection`). `input.facts` are the builder's adopter facts in observed order, each with its repository's registry name, its evidence (`number` for `merged-pr`, `oid` for `direct-commit`, null where it has none), `registered` (the registry lists the repository at this build), `since` (the UTC year of the evidence's own date, null where none is stored) and `until` (the UTC year of the registry's recorded quit, which the callers pass for a repository that quit; null otherwise); `input.hidden` is the settings' `adopter.hidden`. `expect.adopter` is the section, or null when it has nothing to show. A registered repository is listed with `since` where it is known; one that left (not registered, with `until`) is listed only with both years, `since` no later than `until`; every other repository drops out.",
     "`organisations` (1.5.0; ops decision D165 item 3, the organisation's picture): vectors of the one builder's judgment of which logins on a page are an organisation's, for the rule the public document cannot show: an organisation's copy (schemas/contributor-page.v1.json `$defs.organisationPicture`) is named only where GitHub's own answer, stored per repository, says so. `input.login` is the person's current GitHub login; `input.icon` the cards' icon, resolved; `input.shown` every repository the document shows, by the login it shows it under, the projects' groups first and then the licence adopter's items, each in its own order; `input.answers` the stored answers by repository (`ownerNodeId`, GitHub's node id of the owner; `ownerType`, GitHub's own `__typename`; `ownerLogin`, an organisation's login as GitHub answered, null for a user); `input.drawn` the organisations' copies the render job holds, by the owner's node id, each its `h16`. `expect.organisations` lists, in login order without regard to case, each login judged an organisation's, spelt as the page first shows it, with its owner's node id and the `h16` the document names on its every group and item, or null where no copy is drawn yet (the request side asks for it; the document names none). A login is an organisation's only while the cards' icon is `owner`, it is not the person's own, and every repository shown under it has an answer, each an `Organization`, all one owner, each under that login (compared without regard to case). Anything else draws the tile: a person's repository, an answer not yet read, two owners, a login that moved.",
     "`listings` (1.5.0; ops decision D186 items 1 and 2): vectors of the one builder's listings member: what it writes for the settings' `listings` (schemas/contributor-page-settings.v1.json `listings`, stored with every member at its default left out, and a listing, or the member itself, left out when nothing is left) into the document's `listings` (schemas/contributor-page.v1.json `listings`). `input.listings` is the settings' member, or null where the settings carry none (stored before 1.5.0, or every choice at its default); `expect.listings` is the document's member, or null when none is written. Unlike `cards`, the builder writes only what differs from the defaults (the certificates `matrix`, the repositories `list`, no toggle on either), member by member, and leaves out a value the settings state at its default, so a page at the defaults carries no member and keeps its bytes. The renderer reads an absent member as its default.",
-    "`sponsorsPlacement` (settings 1.6.0, page 1.9.0; ops decision D189 and its dated note of 2026-10-29T10:0xZ): vectors of the one builder's `sponsorsPlacement`, where the support buttons show: what it writes for the settings' member (schemas/contributor-page-settings.v1.json `sponsorsPlacement`, `section` or `header`, stored only as `header`) into the document's (schemas/contributor-page.v1.json `sponsorsPlacement`, `header` alone). `input.sponsorsPlacement` is the settings' member, or null where the settings carry none (stored before 1.6.0, or at its default); `input.sponsorsOn` is the sponsors section's switch in the settings' `sections`. `expect.sponsorsPlacement` is the document's member, or null when none is written. As for `linksPlacement`, the builder writes it only as `header`, whatever the section's switch says (the switch decides whether the buttons show, the placement only where), and never `section`, so a page at the default carries no member and keeps its bytes. The renderer reads an absent member as `section`."
+    "`sponsorsPlacement` (settings 1.6.0, page 1.9.0; ops decision D189 and its dated note of 2026-10-29T10:0xZ): vectors of the one builder's `sponsorsPlacement`, where the support buttons show: what it writes for the settings' member (schemas/contributor-page-settings.v1.json `sponsorsPlacement`, `section` or `header`, stored only as `header`) into the document's (schemas/contributor-page.v1.json `sponsorsPlacement`, `header` alone). `input.sponsorsPlacement` is the settings' member, or null where the settings carry none (stored before 1.6.0, or at its default); `input.sponsorsOn` is the sponsors section's switch in the settings' `sections`. `expect.sponsorsPlacement` is the document's member, or null when none is written. As for `linksPlacement`, the builder writes it only as `header`, whatever the section's switch says (the switch decides whether the buttons show, the placement only where), and never `section`, so a page at the default carries no member and keeps its bytes. The renderer reads an absent member as `section`.",
+    "`certificates` (page 1.10.0; ops decision D202 items 1 and 2): vectors of the one builder's certificate listing, for the rule the public document cannot show: which of the person's own certificates the certificates section lists, in its order, and the summary's count (schemas/contributor-page.v1.json `certificatesSection`, WHAT IS LISTED). `input.showLogin` is whether the page shows the login, so the display it lists (`full` with it, `status-only` without); `input.mode` the settings' `certificates.mode`, with `selected` in the order chosen; `input.certificates` the person's certificate facts as the builder is handed them, each with its record's status, display, whether its holder put it On my page, the years its period names and, where the caller hands them over, the record's `validFrom` and `validUntil`. `expect.listed` is the ids the section lists, in its order (empty: no section), and `expect.certificates` the count the summary takes. The rule: only a `valid` certificate its holder put On my page, in the page's display and, by hand, chosen; of those only the ones whose period, by the months the item names (`months`: both dates handed over, in order and in their years), no other of them contains; of two equal periods the one with the greater id. A certificate that names no months is compared with none. Between them the vectors give the operator's dev case, each other status, a month inside all the time credited, a year beside an all-time certificate that does not contain it, an overlap without containment, two equal periods, three periods nested, a container off the page and one in the other display, both choices by hand, a period by its years alone and one whose dates contradict its years, a page without the login, and nothing to list."
   ],
-  "specVersion": "1.6.0",
+  "specVersion": "1.7.0",
   "vectors": [
     {
       "id": "BV-1",
@@ -1401,6 +1402,763 @@
       },
       "expect": {
         "sponsorsPlacement": "header"
+      }
+    }
+  ],
+  "certificates": [
+    {
+      "id": "CL-1",
+      "note": "The operator's dev case: February, February–March, February–April revoked, February–May superseded, February–May valid and February–June, all On my page with the login shown. The revoked and the superseded ones are never listed (item 1), and February–June contains every other valid one (item 2): one card, the longest.",
+      "input": {
+        "showLogin": true,
+        "mode": "all-eligible",
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000000101",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2026-02-28",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000102",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2026-03-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000103",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2026-04-30",
+            "status": "revoked",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000104",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2026-05-31",
+            "status": "superseded",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000105",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2026-05-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000106",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2026-06-30",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000000106"
+        ],
+        "certificates": 1
+      }
+    },
+    {
+      "id": "CL-2",
+      "note": "Valid only (item 1): four periods no other contains, one valid, one expired, one revoked and one superseded. The valid one alone is listed and counted.",
+      "input": {
+        "showLogin": true,
+        "mode": "all-eligible",
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000000201",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-01-01",
+            "validUntil": "2026-01-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000202",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-03-01",
+            "validUntil": "2026-03-31",
+            "status": "expired",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000203",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-05-01",
+            "validUntil": "2026-05-31",
+            "status": "revoked",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000204",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-07-01",
+            "validUntil": "2026-07-31",
+            "status": "superseded",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000000201"
+        ],
+        "certificates": 1
+      }
+    },
+    {
+      "id": "CL-3",
+      "note": "A month inside all the time credited: the all-time certificate alone.",
+      "input": {
+        "showLogin": true,
+        "mode": "all-eligible",
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000000301",
+            "years": {
+              "from": 2026,
+              "to": 2027
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2027-03-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000302",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-11-01",
+            "validUntil": "2026-11-30",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000000301"
+        ],
+        "certificates": 1
+      }
+    },
+    {
+      "id": "CL-4",
+      "note": "A year's certificate beside an all-time one that starts in its February, so contains no January: neither contains the other, and both are listed, newest years first.",
+      "input": {
+        "showLogin": true,
+        "mode": "all-eligible",
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000000401",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-01-01",
+            "validUntil": "2026-12-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000402",
+            "years": {
+              "from": 2026,
+              "to": 2027
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2027-03-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000000402",
+          "cert_01jxd202000000000000000401"
+        ],
+        "certificates": 2
+      }
+    },
+    {
+      "id": "CL-5",
+      "note": "Two periods that overlap without one containing the other (February–May and April–July): both listed, by their ids.",
+      "input": {
+        "showLogin": true,
+        "mode": "all-eligible",
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000000501",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2026-05-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000502",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-04-01",
+            "validUntil": "2026-07-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000000501",
+          "cert_01jxd202000000000000000502"
+        ],
+        "certificates": 2
+      }
+    },
+    {
+      "id": "CL-6",
+      "note": "Two certificates of one period, which one live certificate per person and period rules out: the newer, the greater id, alone.",
+      "input": {
+        "showLogin": true,
+        "mode": "all-eligible",
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000000601",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2026-06-30",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000602",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2026-06-30",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000000602"
+        ],
+        "certificates": 1
+      }
+    },
+    {
+      "id": "CL-7",
+      "note": "A month inside its year's certificate, both inside all the time credited from January: the all-time one alone.",
+      "input": {
+        "showLogin": true,
+        "mode": "all-eligible",
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000000701",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2026-02-28",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000702",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-01-01",
+            "validUntil": "2026-12-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000703",
+            "years": {
+              "from": 2026,
+              "to": 2027
+            },
+            "validFrom": "2026-01-01",
+            "validUntil": "2027-03-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000000703"
+        ],
+        "certificates": 1
+      }
+    },
+    {
+      "id": "CL-8",
+      "note": "A longer certificate its holder has not put On my page hides nothing: the month alone is listed.",
+      "input": {
+        "showLogin": true,
+        "mode": "all-eligible",
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000000801",
+            "years": {
+              "from": 2026,
+              "to": 2027
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2027-03-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": false
+          },
+          {
+            "cid": "cert_01jxd202000000000000000802",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-11-01",
+            "validUntil": "2026-11-30",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000000802"
+        ],
+        "certificates": 1
+      }
+    },
+    {
+      "id": "CL-9",
+      "note": "A longer certificate in the display the page does not show (status-only on a page that shows the login) is not listed and hides nothing.",
+      "input": {
+        "showLogin": true,
+        "mode": "all-eligible",
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000000901",
+            "years": {
+              "from": 2026,
+              "to": 2027
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2027-03-31",
+            "status": "valid",
+            "disclosure": "status-only",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000000902",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-11-01",
+            "validUntil": "2026-11-30",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000000902"
+        ],
+        "certificates": 1
+      }
+    },
+    {
+      "id": "CL-10",
+      "note": "Chosen by hand: an all-time certificate the person did not choose hides nothing, and the chosen are listed in the order chosen.",
+      "input": {
+        "showLogin": true,
+        "mode": "selected",
+        "selected": [
+          "cert_01jxd202000000000000001002",
+          "cert_01jxd202000000000000001003"
+        ],
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000001001",
+            "years": {
+              "from": 2026,
+              "to": 2027
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2027-03-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000001002",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-11-01",
+            "validUntil": "2026-11-30",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000001003",
+            "years": {
+              "from": 2027,
+              "to": 2027
+            },
+            "validFrom": "2027-01-01",
+            "validUntil": "2027-01-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000001002",
+          "cert_01jxd202000000000000001003"
+        ],
+        "certificates": 2
+      }
+    },
+    {
+      "id": "CL-11",
+      "note": "Chosen by hand, the all-time certificate among them: it hides the chosen month it contains, and the rest keep the order chosen.",
+      "input": {
+        "showLogin": true,
+        "mode": "selected",
+        "selected": [
+          "cert_01jxd202000000000000001102",
+          "cert_01jxd202000000000000001101",
+          "cert_01jxd202000000000000001103"
+        ],
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000001101",
+            "years": {
+              "from": 2026,
+              "to": 2027
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2027-03-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000001102",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-11-01",
+            "validUntil": "2026-11-30",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000001103",
+            "years": {
+              "from": 2027,
+              "to": 2027
+            },
+            "validFrom": "2027-05-01",
+            "validUntil": "2027-05-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000001101",
+          "cert_01jxd202000000000000001103"
+        ],
+        "certificates": 2
+      }
+    },
+    {
+      "id": "CL-12",
+      "note": "A certificate whose record's dates were not handed over names its years alone and is compared with none: it stays beside an all-time certificate its years would fit in, which still hides a dated month.",
+      "input": {
+        "showLogin": true,
+        "mode": "all-eligible",
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000001201",
+            "years": {
+              "from": 2026,
+              "to": 2027
+            },
+            "validFrom": "2026-01-01",
+            "validUntil": "2027-03-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000001202",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000001203",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-05-01",
+            "validUntil": "2026-05-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000001201",
+          "cert_01jxd202000000000000001202"
+        ],
+        "certificates": 2
+      }
+    },
+    {
+      "id": "CL-13",
+      "note": "Dates that contradict the years the record names (an end in 2027 for a certificate of 2026) name no months, so that certificate is compared with none.",
+      "input": {
+        "showLogin": true,
+        "mode": "all-eligible",
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000001301",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-01-01",
+            "validUntil": "2027-03-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000001302",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-05-01",
+            "validUntil": "2026-05-31",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000001301",
+          "cert_01jxd202000000000000001302"
+        ],
+        "certificates": 2
+      }
+    },
+    {
+      "id": "CL-14",
+      "note": "A page without the login lists status-only certificates, nested as on any page; a full one is not listed and hides nothing.",
+      "input": {
+        "showLogin": false,
+        "mode": "all-eligible",
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000001401",
+            "years": {
+              "from": 2026,
+              "to": 2027
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2027-03-31",
+            "status": "valid",
+            "disclosure": "status-only",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000001402",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-11-01",
+            "validUntil": "2026-11-30",
+            "status": "valid",
+            "disclosure": "status-only",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000001403",
+            "years": {
+              "from": 2026,
+              "to": 2027
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2027-06-30",
+            "status": "valid",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [
+          "cert_01jxd202000000000000001401"
+        ],
+        "certificates": 1
+      }
+    },
+    {
+      "id": "CL-15",
+      "note": "Nothing valid: a revoked, a superseded and an expired certificate, the longest revoked. Nothing is listed or counted, and no section is drawn.",
+      "input": {
+        "showLogin": true,
+        "mode": "all-eligible",
+        "certificates": [
+          {
+            "cid": "cert_01jxd202000000000000001501",
+            "years": {
+              "from": 2026,
+              "to": 2027
+            },
+            "validFrom": "2026-02-01",
+            "validUntil": "2027-03-31",
+            "status": "revoked",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000001502",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-11-01",
+            "validUntil": "2026-11-30",
+            "status": "superseded",
+            "disclosure": "full",
+            "onPage": true
+          },
+          {
+            "cid": "cert_01jxd202000000000000001503",
+            "years": {
+              "from": 2026,
+              "to": 2026
+            },
+            "validFrom": "2026-05-01",
+            "validUntil": "2026-05-31",
+            "status": "expired",
+            "disclosure": "full",
+            "onPage": true
+          }
+        ]
+      },
+      "expect": {
+        "listed": [],
+        "certificates": 0
       }
     }
   ]
