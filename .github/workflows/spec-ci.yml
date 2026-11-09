@@ -109,6 +109,13 @@ jobs:
         # is proved able to fail first (the check's planted documents).
         run: npm run check:fees-account-statement
 
+      - name: The transfers record keeps its link to the frozen cost-support document, its arithmetic and its refusals
+        # PS-1904 (D64 item 1): transfers.v1's examples name the month's frozen cost-support document by the SHA-256
+        # of its exact bytes and sum to its passedOnMinor, and the contract refuses what must never be published. In
+        # npm test since PS-1904 and missing here until 2026-11-09 (PS-2040's review): the credit-month examples'
+        # links to `32de2f6d...` are held only by this gate. Each rule is proved able to fail first.
+        run: npm run check:transfers
+
       - name: The advisory votes' examples keep their hashes, chain and counts, and the contracts refuse what must never be published
         # PS-1777 (ops decision D143): consultation.v1's examples hash to their documents, chain version to version and keep
         # the small-count rule's arithmetic; the index agrees with them; both contracts refuse a person, a written answer, the
@@ -147,6 +154,12 @@ jobs:
         # does so over inputs that are shaped like real artifacts, and that all eight
         # answers are still covered.
         run: npm run check:vectors
+
+      - name: The waiver-certificate vectors are real artifacts and answer as the API description says
+        # PS-1913 (D65 item 5): every vector of postWaiverCertificateCoverage is a valid key set, record, waiver and log
+        # segment, and its specVersion is edge-public.v1's own info.version. In npm test since PS-1913 and missing
+        # here until 2026-11-09 (PS-2040's review): a version move that leaves the vectors behind went green.
+        run: npm run check:certificate-vectors
 
       - name: Published coverage module is dependency-free and clock-free
         # Prints moduleSha256 in the log. The deployed worker publishes the same digest
