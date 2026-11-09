@@ -129,7 +129,7 @@ needs a toolchain is not really published.
 | `ledger-row.v1.json` | one ledger row | first public version |
 | `ledger-export.v1.json` | `/ledger/{YYYY}-{MM}.json` (+ CSV twin) | first public version |
 | `ledger-chain.v1.json` | `/ledger/chain.json` | first public version |
-| `cost-support.v1.json` | one calendar month of the published cost-support table | P-M3 producer, v0 hand-maintained |
+| `cost-support.v1.json` | `/ledger/{YYYY}-{MM}.cost-support.json` — one locked month's cost-support table, the bytes its lock froze and its export names by `batch.costSupportSha256`, written once (the path since 1.6.1; served by the edge at `/v1/ledger/{YYYY-MM}.cost-support.json` since `edge-public.v1` 1.25.0) | P-M3 producer, v0 hand-maintained |
 | `fees-account-statement.v1.json` | `/fees-account/{YYYY-MM}.json` — the published statement of the fees account for one locked month: every line the bank booked, with its class, and nothing that identifies a payer or a natural person (statutes Art. 12(1), Art. 20(1)) | P-M3 producer |
 | `transfers.v1.json` | `/transfers/{YYYY-MM}.json` — what became of one locked month's shares, published after the transfers happen: one row per listed recipient, scheduled, held back with its day and a generic ground, or transferred, with the day, the end-to-end identifier, what it paid in the recipient's currency and at which rate, its charges, the mark «Einzelauslösung» and, once it has arrived, the recipient's receipt pinned by its document's SHA-256; it names the month's frozen cost-support document by the SHA-256 of its bytes (ops decision D64 item 1) | P-M3 producer |
 | `recipient-list.v1.json` | `/recipient-list/{version}.json` — one released version of the Recipient List (kept by the board, outside the statutes), each entry pending or active, written once | P-M3 producer |
@@ -160,7 +160,9 @@ The `cost-support.v1` and `recipient-list.v1` rows are the money contracts of 20
 artifact catalogue did not yet name — that deferral was deliberate — so each said so in its
 `x-psn.artifactPath` rather than claiming a URL. The cost-support table still does: at v0 it is
 hand-maintained and rendered on the transparency page, a published file whose schema is the
-contract whether the producer is a job or a person.
+contract whether the producer is a job or a person. *(2026-11-09: no longer. Since `cost-support.v1` 1.6.1
+its `x-psn.artifactPath` names `/ledger/{YYYY}-{MM}.cost-support.json`, the frozen document a month's lock
+writes, and since `edge-public.v1` 1.25.0 the edge serves it; the v0 file is the page's rendering only.)*
 
 The `fees-account-statement.v1` row (2026-10-21) is the statement the statutes make the proof of
 the money rules: every allocation and every transfer is reconcilable against it (Art. 12(1)), by
