@@ -2649,8 +2649,9 @@ reasoning: no month export has ever been published with a row in it.
 ### 1.11.1 — unreleased (2026-11-08; the orchestrator's answer of 2026-11-06T19:15Z on PS-2032, point 4, with `ledger-chain.v1` 1.2.1; PS-2773) — wording only
 
 - A patch under policy 3. `headHash` and `prevHeadHash` said what they hold for a month with rows, the global chain head
-  after its last row and before its first, and nothing for a month with none, which both producers publish: the current
-  month on a plane with no row yet, and, since platform `ed3250f6` (PS-2032), every month from the ledger's first to its
+  after its last row and before its first, and nothing for a month with none. Both producers publish such months: the
+  website's pre-launch builder its one committed month, which has no row, and the platform's renderer the current month
+  on a plane with no row yet and, since platform `ed3250f6` (PS-2032), every month from the ledger's first to its
   latest, each open until its lock. Such a month publishes the head it inherited in both members, the `rowHash` of the
   last row written in the months before it, or genesis when they have none: the chain did not advance over it. Both
   descriptions now say so after their unchanged first sentences, and `ledger-chain.v1` 1.2.1's entry for the month
@@ -2707,10 +2708,12 @@ reasoning: no month export has ever been published with a row in it.
 ### 1.2.1 — unreleased (2026-11-08; the orchestrator's answer of 2026-11-06T19:15Z on PS-2032, point 4, with `ledger-export.v1` 1.11.1; PS-2773) — wording only
 
 - A patch under policy 3: two descriptions said what neither producer publishes.
-- `months` said "One entry per month that has rows". Both producers list months with no rows: on a plane with no row
-  yet, the current month alone, open, with `rowCount` 0, as the P-M2 build published it and the platform's renderer
-  does; and, since platform `ed3250f6` (PS-2032), every month from the ledger's first to its latest, each open until its
-  lock. It now reads: every month from the ledger's first month to its latest, and the current month (the UTC month of
+- `months` said "One entry per month that has rows". Both producers list months with no rows. The platform's renderer
+  lists, on a plane with no row yet, the current month alone, open, with `rowCount` 0, and, since platform `ed3250f6`
+  (PS-2032), every month from the ledger's first to its latest, each open until its lock. The website's pre-launch
+  builder lists its one committed month, the month of the P-M2 build, whatever the month of `generatedAt`: the one
+  departure from the words below.
+  It now reads: every month from the ledger's first month to its latest, and the current month (the UTC month of
   `generatedAt`) with every month between it and the ledger's latest; a month with no rows has `rowCount` 0.
 - `months[].headHash` said "The GLOBAL chain head at the moment this month was locked (or at `generatedAt` for an open
   month)". Both producers write the month's own head: its last row's `rowHash`, or, for a month with no rows, the head
@@ -6245,8 +6248,9 @@ which kind of change each entry was.
 
 - A patch: no operation, status code, error code, cache class, parameter or schema reference moved. `getLedgerChain`
   answers `ledger-chain.v1` by `$ref`, whose 1.2.1 says which months the chain lists.
-- `getLedgerChain`'s `genesis` example listed no month (`months: []`). Before the ledger's first row both producers list
-  the current month alone, so the example now does, in the members and order of `oneMonth`'s entry: `2027-05`, the
+- `getLedgerChain`'s `genesis` example listed no month (`months: []`). Before the ledger's first row the platform's
+  renderer lists the current month alone, so the example now does, in the members and order of `oneMonth`'s entry:
+  `2027-05`, the
   month of its `generatedAt`, with the digest of no rows (`4f53cda1…`, the SHA-256 of `[]`), the genesis head,
   `rowCount` 0, `locked` false, `lockedAt` null and its export's address. Its summary and every other member are
   unchanged. `check:openapi-examples` validates the same 85 examples.
