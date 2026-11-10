@@ -1913,6 +1913,26 @@ value inside `v1` is not additive (versioning policy 1).*
   `signing_keys`' CHECK (`0016`) and `0053`'s trigger still hold three values, so the platform renders no pending key until
   its own change; the website's verifiers still read the value as unknown until theirs.
 
+### 1.3.0 — unreleased (2026-11-10; FS08-104, the go-live backlog's GLB:1067: "a reference from each key"; PS-2080)
+
+- Additive: a compromised key names its incident lists. `psn:incidents` is the path of every `/ct/incident-{date}.json`
+  that names the key (`key-incidents.v1`), earliest first, read against the host that served the set (the API host and
+  the apex both serve `/ct/*`). Only a `compromised` key carries it (`dependentSchemas`), at least one path and each
+  once, and a compromised key may lack it until its first list is published. A list is final once published, so a later
+  finding adds a path and never changes one. A verifier that warns on a token signed before a compromised key's
+  `notAfter` can now point at the lists from the key itself. Every key set valid before is valid still: no key published
+  anywhere is compromised, and a `pending`, `active` or `retired` key never carries the member.
+- `examples/jwks.v1.compromised.example.json` names its list. `check:jwks` holds each named path to an incident list
+  example that names the key, earliest first, holds the key's `notAfter` to those lists' exposure, and proves 23
+  refusals and 12 admissions on both copies (incident lists on an active, retired or test key, an absolute address, a
+  path outside the grammar, an empty or repeated list refused; a compromised key without a list yet, and with two,
+  admitted). `edge-public.v1` 1.26.0 changes the `Jwks` component the same way.
+- It is owed before the first incident is recorded on any environment, an RB-04 drill on dev included, so that the
+  first list a plane publishes is named from its key. Written on 2026-10-22 as 1.1.0 and held, because it moves the
+  website's key-set readers; it takes the next free number now.
+- Nothing is mirrored: the platform's `packages/contracts` mirrors no key set. The website's readers move with the
+  `Jwks` component (`edge-public.v1` 1.26.0 says how).
+
 ## key-incidents.v1.json
 
 ### 1.0.0 — unreleased (2026-10-22; FS08-104 and FS-08 §11's dated note of 2026-09-26; the go-live backlog's GLB:1067, PS-2080)
@@ -1935,6 +1955,11 @@ value inside `v1` is not additive (versioning policy 1).*
 - Examples: `key-incidents.v1.example.json` (the compromise `jwks.v1.compromised.example.json` shows, two forged entries)
   and `key-incidents.v1.none-found.example.json` (a fixture plane's incident whose enumeration found nothing).
   `check:jwks` holds both to their dating, order and exposure rules, and proves 12 refusals and 3 admissions.
+
+### 1.0.1 — unreleased (2026-11-10; PS-2080) — wording only
+
+- Patch: the description says that the key set names each list from the key it concerns (`jwks.v1` 1.3.0,
+  `psn:incidents`). No member moved.
 
 ## ledger-row.v1.json
 
@@ -6170,6 +6195,24 @@ which kind of change each entry was.
 - The website's edge serves the route: its allow-list, and the same 300 s on the response and on the mirror read. The
   `/v1/ledger/` family and the `artifacts` rate-limit class carry it already. The edge's tests do not read this file's
   routes, so the order of pushes does not matter for them.
+
+### 1.26.0 — unreleased (2026-11-10; FS08-104, the go-live backlog's GLB:1067: "a reference from each key"; PS-2080)
+
+- Minor, additive: the `Jwks` component's key entry gains a member, `psn:incidents`, on a compromised key only: the paths
+  of its incident lists, as `jwks.v1` 1.3.0 describes. `afterCompromise` names its list, and `getJwks`'s verdict tells a
+  reader warned about a compromised key's token to check the lists the key names. No operation, status code, cache class
+  or error code moved, and `check:openapi-examples` validates the same 85 examples.
+- `coverage/waiver-certificate-vectors.json` names this version, `specVersion` 1.26.0, as `check:certificate-vectors`
+  requires of it. No vector, certificate or key set moved, and the website's generator (`scripts/waiver-certificate-vectors.mjs`,
+  which names the same version in the website's change beside this one) writes these bytes again, byte for byte.
+- **The website's key-set readers move with it.** Its tests hold the members a published entry may carry
+  (`src/lib/key-window.mjs` `PUBLISHED_KEY_MEMBERS`) to this component's key members (`tests/unit/jwks.test.mjs`), and
+  its build gate, its production edge and its live check refuse an entry carrying any other member. So that list gains
+  `psn:incidents` in the same step, right behind this file (with `COMMITTED_KEY_MEMBERS`, which
+  `tests/unit/key-window.test.mjs` holds to it), or the website's unit suite fails at its next run against this
+  repository's main. The platform's renderer emits the member already (`ArtifactRenderer.Trust.cs`,
+  from the incidents migration `0121` records), and its artifact tests validate the rendered set against this
+  component, the compromised key's lists included, unchanged.
 
 ## coverage/cov-v1.ts
 
