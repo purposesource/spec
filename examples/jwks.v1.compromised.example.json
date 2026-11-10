@@ -28,7 +28,8 @@
       "psn:validityWindow": {
         "notBefore": "2027-01-01T00:00:00Z",
         "notAfter": "2027-03-10T06:00:00Z"
-      }
+      },
+      "psn:incidents": ["/ct/incident-2027-03-14.json"]
     },
     {
       "kty": "EC",
