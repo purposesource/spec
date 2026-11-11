@@ -1314,6 +1314,17 @@ value inside `v1` is not additive (versioning policy 1).*
   or a sponsor certificate; 1.6.0 refuses the member, so this version lands before any signer
   writes it.
 
+### 1.8.0 — unreleased (2026-11-11; FS05-121, PS-1920)
+
+- Additive. `factRefs` gains `regId`, one `reg_` id on the pattern every other id here has: the
+  threshold registration a `license-status` `under-threshold` certificate attests. FS05-121 gives a
+  confirmed registration that certificate, and FS08-012 has every issuance reference its recorded
+  fact by immutable id. A registration's fact is its own `reg_` row (FS05-120's registry record),
+  which is no entitlement, waiver, ledger row or snapshot, so before this entry no member could
+  carry it, and a certificate that cites no fact is the anticipatory one CERT-004 forbids.
+- No other member, rule or enum moves. Every payload valid under 1.7.0 still validates and means
+  the same, and every example keeps its bytes.
+
 ## certificate-record.v1.json
 
 ### 1.0.0 — unreleased
