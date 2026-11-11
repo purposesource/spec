@@ -1,0 +1,17 @@
+{
+  "ledId": "led_01ndek46j0c4rry5m7p1e2028f",
+  "month": "2028-02",
+  "seq": 509,
+  "type": "pool-carry",
+  "amountMinor": 0,
+  "currency": "CHF",
+  "batchId": "bat_01ndejhwm0feb2028c1053bat0",
+  "externalKey": "car:2028-01",
+  "note": "The pool of 2028-01 was -21000, below zero. This close carries it as the first line of its pool (FS07-020; Finanzreglement § 4 Abs. 8).",
+  "emittingJob": "jobs.allocator",
+  "createdAt": "2028-03-01T09:10:00Z",
+  "prevHash": "a5f52b8aff5d910155d93dd578f522bb9c5f385b908405173b75b2deb3893c7b",
+  "rowHash": "e6944bd901a6382cb786840f4d24364ff1e6d6e2d44884a3a5fa25c582c1bc73",
+  "assignedMonth": "2028-01",
+  "assignedAmountMinor": -21000
+}

@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "month": "2028-01",
+  "generatedAt": "2028-02-01T08:40:00Z",
+  "currency": "CHF",
+  "closed": true,
+  "financialYear": "2028",
+  "purposeFeesNetMinor": -21000,
+  "payouts": [
+    {
+      "payoutRef": "SAMPLE-REMIT-002801",
+      "creditedOn": "2028-01-05",
+      "creditMonth": "2028-01",
+      "closedLate": false,
+      "netMinor": 9000,
+      "setOffs": [
+        {
+          "movement": "swift-fee",
+          "amountMinor": -1333
+        }
+      ],
+      "deadlineDays": 60,
+      "transferDueBy": "2028-03-05",
+      "evidence": [
+        {
+          "kind": "rail-payout-statement",
+          "ref": "SAMPLE-REMIT-002801",
+          "label": "The payment rail's statement of the payout"
+        },
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2028-01-05-0003",
+          "label": "Its credit on the fees account"
+        }
+      ]
+    },
+    {
+      "payoutRef": "SAMPLE-REMIT-002802",
+      "creditedOn": "2028-01-19",
+      "creditMonth": "2028-01",
+      "closedLate": false,
+      "netMinor": -30000,
+      "setOffs": [
+        {
+          "movement": "chargeback-fee",
+          "amountMinor": -1000
+        }
+      ],
+      "deadlineDays": 60,
+      "transferDueBy": "2028-03-19",
+      "evidence": [
+        {
+          "kind": "rail-payout-statement",
+          "ref": "SAMPLE-REMIT-002802",
+          "label": "The payment rail's statement of the debit"
+        },
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2028-01-19-0006",
+          "label": "Its debit on the fees account"
+        }
+      ]
+    }
+  ],
+  "directCosts": [],
+  "directCostsTotalMinor": 0,
+  "supporters": [],
+  "supportTotalMinor": 0,
+  "chargedToFeesMinor": 0,
+  "yearRunningTotalMinor": 0,
+  "capBps": 1500,
+  "reserveRetentionMinor": 0,
+  "reserveRetentionNote": "Stage 1b (FS07-033): nothing is retained in a month whose pool is not positive (FS07-020).",
+  "poolCarryOutMinor": -21000,
+  "passedOnMinor": 0,
+  "transfers": [],
+  "reserve": {
+    "balanceMinor": 70624,
+    "targetMinor": 2700000,
+    "note": "The month opened at 67541. December's retention moved to the reserve account on December's transfer day, 3 January. This close retains nothing.",
+    "movements": [
+      {
+        "amountMinor": 3083,
+        "kind": "retention-from-fees",
+        "date": "2028-01-03",
+        "evidence": [
+          {
+            "kind": "reserve-movement",
+            "ref": "STMT-RES-2028-01-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "recipientListVersion": "v1",
+  "evidence": [
+    {
+      "kind": "rail-payout-statement",
+      "ref": "SAMPLE-REMIT-002801"
+    },
+    {
+      "kind": "rail-payout-statement",
+      "ref": "SAMPLE-REMIT-002802"
+    }
+  ],
+  "methodologyUrl": "https://purposesource.org/trust/money"
+}

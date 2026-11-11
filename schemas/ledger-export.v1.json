@@ -4,8 +4,8 @@
   "title": "Monthly ledger export — /ledger/{YYYY}-{MM}.json",
   "description": "The published monthly ledger export (FS-07 §6.2). Immutable once written: regeneration may only re-emit byte-identical content for a locked month, and a divergence is an alert, not a fix (FS07-051). The `.csv` twin carries the same rows flat; the human ledger page generates from the same rows, and any divergence between page, JSON and CSV is a defect (VS-37, ENG-043/044).\n\nThe shadow section, when present, carries its label IN BAND so no downstream consumer can strip it accidentally: contributor votes are computed and NOT used for routing until the fairness-review gate opens (D27, FS07-052).\n\nDisplay law: pages generate exclusively from these rows; per-contributor money respects the published materiality floor; unclaimed shares appear in aggregate only; there are no leaderboards (FS07-052, D15).\n\nAt P-M2 there are no allocation rows and no `policy`/`totals` allocation figures — the export carries intake rows only, and before the first money moves the ledger page says 'no money has moved yet' in words rather than rendering a zero (FS07-100, VS-37).",
   "x-psn": {
-    "specVersion": "1.11.1",
-    "phase": "P-M2 (intake rows only); P-M3 locked months carry policy, batch and shadow (1.7.0); a month on the credit-month key names its poolBasis and carries its close's payout rows (1.9.0); a month whose close carries no payout may name no Recipient List version (1.11.0)",
+    "specVersion": "1.12.0",
+    "phase": "P-M2 (intake rows only); P-M3 locked months carry policy, batch and shadow (1.7.0); a month on the credit-month key names its poolBasis and carries its close's payout rows (1.9.0); a month whose close carries no payout may name no Recipient List version (1.11.0); and its close may carry the pool of the month before, below 0 (1.12.0)",
     "artifactPath": "/ledger/{YYYY}-{MM}.json (+ .csv twin)",
     "authoritative": true,
     "producer": "index-build (P-M2: index-build-lite CI, VS-04) from the committed monthly table",
@@ -62,14 +62,14 @@
     },
     "poolBasis": {
       "enum": ["settlement-month", "credit-month"],
-      "description": "Which rule the month's pool follows, so a reader knows which rows to add up (FS07-020; ops decision D60 item 2, adopted by D64 item 1; Calculation Rules Nr. 4). Added in 1.9.0. `credit-month`: the pool is the Purpose Fees of the payouts the month's close carries — each payout credited to the fees account in the month, and any payout credited earlier and found only after its own month's close, which the next close carries under that close's allocation key (ops decision D125 item 3) — and of the held items the close releases: items an earlier close held when it carried their payout, which the first close after their hold is released assigns (`cost-support.v1` `payouts[].fate` `released-hold`). It is the sum of `assignedAmountMinor` over the month's `payout-assign` rows and of `amountMinor` over its `payout-setoff` rows, and the month's `cost-support.v1` document lists those payouts (`payouts[]`). The intake rows booked in such a month do not count in its pool: each counts once, through the `payout-assign` row of the close that assigns it, which is the close that carries its payout or, for an item held there, the first close after its release. Interest (`interest-in`) is passed on beside the pool and is never part of it (statutes Art. 6a(3)). `settlement-month`: the pool is the intake booked in the month, the rule every month followed before the credit-month key. A producer writes `credit-month` on every month from the first month on that key, open or locked, and only such a month carries the three row types of the key or any of their five members (this file's `allOf`). Absent: the month follows `settlement-month` — every month locked before the key existed, whose bytes never change (FS07-051), and every P-M2 file, which allocates nothing."
+      "description": "Which rule the month's pool follows, so a reader knows which rows to add up (FS07-020; ops decision D60 item 2, adopted by D64 item 1; Calculation Rules Nr. 4). Added in 1.9.0. `credit-month`: the pool is the Purpose Fees of the payouts the month's close carries — each payout credited to the fees account in the month, and any payout credited earlier and found only after its own month's close, which the next close carries under that close's allocation key (ops decision D125 item 3) — and of the held items the close releases: items an earlier close held when it carried their payout, which the first close after their hold is released assigns (`cost-support.v1` `payouts[].fate` `released-hold`). It is the sum of `assignedAmountMinor` over the month's `payout-assign` and `pool-carry` rows and of `amountMinor` over its `payout-setoff` rows, and the month's `cost-support.v1` document lists those payouts (`payouts[]`); a `pool-carry` row is the pool of the month before, carried where it was below 0 (FS07-020), which that document states as `poolCarryInMinor`. The intake rows booked in such a month do not count in its pool: each counts once, through the `payout-assign` row of the close that assigns it, which is the close that carries its payout or, for an item held there, the first close after its release. Interest (`interest-in`) is passed on beside the pool and is never part of it (statutes Art. 6a(3)). `settlement-month`: the pool is the intake booked in the month, the rule every month followed before the credit-month key. A producer writes `credit-month` on every month from the first month on that key, open or locked, and only such a month carries the four row types of the key or any of their five members (this file's `allOf`). Absent: the month follows `settlement-month` — every month locked before the key existed, whose bytes never change (FS07-051), and every P-M2 file, which allocates nothing."
     },
     "totals": {
       "type": "object",
       "additionalProperties": false,
       "description": "Month totals in minor units of `currency`. At P-M2 only `pool` is meaningful; the allocation totals arrive with the allocator at P-M3.",
       "properties": {
-        "pool": { "type": "integer", "description": "The month's pool, by the rule `poolBasis` names. On `credit-month`, written once the month is locked: the sum of `assignedAmountMinor` over its `payout-assign` rows and of `amountMinor` over its `payout-setoff` rows, which is the `purposeFeesNetMinor` of the month's `cost-support.v1` document; interest is never part of it. On `settlement-month`, or with no `poolBasis`: the intake booked in the month, net of its adjustments." },
+        "pool": { "type": "integer", "description": "The month's pool, by the rule `poolBasis` names. On `credit-month`, written once the month is locked: the sum of `assignedAmountMinor` over its `payout-assign` and `pool-carry` rows and of `amountMinor` over its `payout-setoff` rows, which is the `purposeFeesNetMinor` plus the `poolCarryInMinor` of the month's `cost-support.v1` document; interest is never part of it. It is below 0 where the month's payouts and any carried pool net below zero: the month then charges, retains and passes on nothing of it, and the next month's export carries it in its `pool-carry` row (FS07-020). On `settlement-month`, or with no `poolBasis`: the intake booked in the month, net of its adjustments." },
         "chargedToFees": { "type": "integer", "description": "Sum of the month's `charged-to-fees` rows: direct invoices paid from the fees account and not settled by a listed supporter. Not a levy." },
         "reserveRetention": { "type": "integer", "minimum": 0, "description": "Sum of the month's `reserve-retention` rows, as a positive figure (ops decision D34 item 4). Zero is a published state: the rule applied and produced nothing." },
         "hardshipPay": { "type": "integer", "minimum": 0, "description": "STRUCK 2026-09-14 by the operator's override, written into the statutes set for adoption at the founding assembly of 1 October 2026; retained in the published contract so earlier documents keep validating, and never written again. Sum of the month's `hardship-pay` rows, as a positive figure (ops decision D34 item 3). Zero is a published state: no episode was active." },
@@ -121,7 +121,7 @@
   },
   "allOf": [
     {
-      "$comment": "Added 2026-10-27 (1.9.0): the three row types of the credit-month key and their five members belong to a month whose export says poolBasis credit-month, and to no other. Absent, poolBasis is settlement-month.",
+      "$comment": "Added 2026-10-27 (1.9.0); 1.12.0 adds `pool-carry`: the four row types of the credit-month key and their five members belong to a month whose export says poolBasis credit-month, and to no other. Absent, poolBasis is settlement-month.",
       "if": { "properties": { "poolBasis": { "const": "credit-month" } }, "required": ["poolBasis"] },
       "else": {
         "properties": {
@@ -129,7 +129,7 @@
             "items": {
               "not": {
                 "anyOf": [
-                  { "properties": { "type": { "enum": ["payout-assign", "payout-setoff", "interest-in"] } }, "required": ["type"] },
+                  { "properties": { "type": { "enum": ["payout-assign", "payout-setoff", "interest-in", "pool-carry"] } }, "required": ["type"] },
                   { "required": ["assignedLedId"] },
                   { "required": ["assignedMonth"] },
                   { "required": ["assignedAmountMinor"] },
@@ -143,7 +143,7 @@
       }
     },
     {
-      "$comment": "Added 2026-11-08 (1.11.0): a batch names no Recipient List version only on a month on the credit-month key whose close carries no payout and passes no interest on, and which pays nobody: none of the key's three row types and no disburse row.",
+      "$comment": "Added 2026-11-08 (1.11.0): a batch names no Recipient List version only on a month on the credit-month key whose close carries no payout and passes no interest on, and which pays nobody: no `payout-assign`, `payout-setoff`, `interest-in` or `disburse` row.",
       "if": { "properties": { "batch": { "not": { "required": ["recipientListVersion"] } } }, "required": ["batch"] },
       "then": {
         "required": ["poolBasis"],
@@ -165,7 +165,7 @@
       "required": ["ledId", "seq", "type", "amountMinor", "rowHash"],
       "properties": {
         "ledId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$" },
-        "month": { "$ref": "#/$defs/monthKey", "description": "The BOOKING month. For an allocation row, the month allocated. For an intake row, the Europe/Zurich month of its settlement while that month is open; when that month had already locked at the time the row was written, the first month after the lock frontier (statutes Art. 6a(4); FS07-042), and the settlement instant stays in `createdAt`. A `payout-assign`, `payout-setoff` or `interest-in` row is booked in the month whose close wrote it; the assigned intake row's own month is `assignedMonth`. `(month, seq)` is unique." },
+        "month": { "$ref": "#/$defs/monthKey", "description": "The BOOKING month. For an allocation row, the month allocated. For an intake row, the Europe/Zurich month of its settlement while that month is open; when that month had already locked at the time the row was written, the first month after the lock frontier (statutes Art. 6a(4); FS07-042), and the settlement instant stays in `createdAt`. A `payout-assign`, `payout-setoff`, `interest-in` or `pool-carry` row is booked in the month whose close wrote it; `assignedMonth` names another month: the assigned intake row's, or on a `pool-carry` row the month whose pool it carries. `(month, seq)` is unique." },
         "seq": { "type": "integer", "minimum": 1 },
         "type": {
           "enum": [
@@ -175,9 +175,9 @@
             "commons-alloc", "directed-alloc", "directed-to-commons", "repo-pool",
             "category-route", "category-agg", "rollforward-in", "rollforward-out",
             "disburse", "month-note", "month-lock", "annotation",
-            "payout-assign", "payout-setoff", "interest-in"
+            "payout-assign", "payout-setoff", "interest-in", "pool-carry"
           ],
-          "description": "The row type: the same enum as `ledger-row.v1`'s `type`, whose description governs every value. `topup-multiplier-in` is reserved: the voluntary multipliers were withdrawn before any sale (ops decision D44 item 7, 2026-09-15), so no ledger writes it; the value stays in the enum because a published enum value is never removed. `payout-assign`, `payout-setoff` and `interest-in` joined in 1.9.0, with the credit-month key of `ledger-row.v1` 1.6.0 (`poolBasis`)."
+          "description": "The row type: the same enum as `ledger-row.v1`'s `type`, whose description governs every value. `topup-multiplier-in` is reserved: the voluntary multipliers were withdrawn before any sale (ops decision D44 item 7, 2026-09-15), so no ledger writes it; the value stays in the enum because a published enum value is never removed. `payout-assign`, `payout-setoff` and `interest-in` joined in 1.9.0, with the credit-month key of `ledger-row.v1` 1.6.0 (`poolBasis`). `pool-carry` joined in 1.12.0, with `ledger-row.v1` 1.7.0."
         },
         "date": { "type": "string", "format": "date", "description": "The row's UTC date, rendered for this export and its CSV twin. EXPORT-ONLY, and the one member here that is not a `ledger-row.v1` key: it is therefore NOT inside the body `rowHash` is taken over, because FS07-040's hash is defined over the row contract, which has no such member. A reader recomputing `rowHash` from an export row drops `date` along with `prevHash` and `rowHash`; everything else in this object is a hashed row member." },
         "amountMinor": { "type": "integer" },
@@ -214,8 +214,8 @@
         "prevHash": { "$ref": "#/$defs/sha256OrGenesis" },
         "rowHash": { "$ref": "#/$defs/sha256" },
         "assignedLedId": { "type": "string", "pattern": "^led_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "`payout-assign` rows only: the intake row the close counts, as on `ledger-row.v1` (1.6.0). Each intake row is assigned once, across every month's export." },
-        "assignedMonth": { "$ref": "#/$defs/monthKey", "description": "`payout-assign` rows only: the assigned intake row's `month`, as on `ledger-row.v1` (1.6.0)." },
-        "assignedAmountMinor": { "type": "integer", "description": "`payout-assign` rows only: the assigned intake row's amount, with its sign, which the close counts in its pool while the row's own `amountMinor` stays 0; 0 on a covered row. As on `ledger-row.v1` (1.6.0)." },
+        "assignedMonth": { "$ref": "#/$defs/monthKey", "description": "`payout-assign` and `pool-carry` rows only: the assigned intake row's `month`, or on a `pool-carry` row the month whose pool it carries, as on `ledger-row.v1` (1.6.0, 1.7.0)." },
+        "assignedAmountMinor": { "type": "integer", "description": "`payout-assign` and `pool-carry` rows only: the assigned intake row's amount, with its sign, or on a `pool-carry` row the carried pool, below 0, which the close counts in its pool while the row's own `amountMinor` stays 0; 0 on a covered row. As on `ledger-row.v1` (1.6.0, 1.7.0)." },
         "payoutRef": { "type": "string", "minLength": 1, "maxLength": 120, "description": "`payout-assign` and `payout-setoff` rows only: the payout's remittance reference, by which the month's rows group into the payouts of its `cost-support.v1` document (`payouts[]`). As on `ledger-row.v1` (1.6.0)." },
         "movement": {
           "enum": ["swift-fee", "retained-fee", "chargeback-fee", "credit", "rebate", "chargeback-warning", "chargeback-warning-reverse", "fee-return", "unexplained", "unitemised"],
