@@ -2251,6 +2251,18 @@ row the new-file rule binds absolutely.
 - No property, type, enum or rule changes: every row valid under 1.6.1 is valid under 1.6.2 and means the same, no
   `rowHash` preimage moves, and every example keeps its bytes.
 
+### 1.7.0 — unreleased (2026-11-05; FS07-020 and FS07-071 on the credit-month key)
+
+- Additive. `pool-carry` joins the enum: the close of a month on the credit-month key writes one, first, when the month
+  before closed with a pool below 0. It names that month in `assignedMonth` and carries its pool in `assignedAmountMinor`;
+  its own `amountMinor` is 0, because the reversals behind that pool are already in the chain. Its `externalKey` is `car:`
+  and that month, so a month's pool is carried once. It carries no payout, movement, intake row, purchase or scope.
+- One conditional holds the shape; the five-members conditional lists the fourth type.
+- Wording: the description, `type`, `month`, `amountMinor`, `externalKey`, `note`, `assignedMonth` and `assignedAmountMinor`
+  say so.
+- Nothing is removed and no rule of an existing type moves: every row valid under 1.6.0 is valid under 1.7.0, and no
+  committed row's hash preimage moves. A further example: `examples/ledger-row.v1.pool-carry.example.json`.
+
 ## ledger-export.v1.json
 
 ### 1.0.0 — unreleased
@@ -2658,6 +2670,16 @@ reasoning: no month export has ever been published with a row in it.
   carries the same `headHash`.
 - No property, type, enum or rule changes: every document valid under 1.11.0 is valid under 1.11.1 and means the same,
   and every example keeps its bytes.
+
+### 1.12.0 — unreleased (2026-11-05; with `ledger-row.v1` 1.7.0 and `cost-support.v1` 1.8.0)
+
+- Additive. The export row admits `pool-carry`, and `poolBasis` `credit-month` counts its `assignedAmountMinor` in the pool.
+  `totals.pool` is the month's `purposeFeesNetMinor` plus its `poolCarryInMinor`, and below 0 where the month's payouts net
+  below zero.
+- The document conditional lists the fourth type among those only a credit-month export carries. No published document
+  carries one.
+- The CSV twin's header is unchanged: the row uses `assignedMonth`, `assignedAmountMinor` and `externalKey`, which are
+  columns already.
 
 ## ledger-chain.v1.json
 
@@ -3125,6 +3147,29 @@ reasoning: no month export has ever been published with a row in it.
 - **The citations name the Rules' new version.** Calculation Rules Nr. 33 and Nr. 34 are the numbers of the new version the
   board adopts before the first payout (D201 item 2); if it adopts other numbers, these citations change in place before the
   launch.
+
+### 1.8.0 — unreleased (2026-11-05; FS07-020 on the credit-month key, the orchestrator's answer on PS-1959, reading 6) — pre-release
+
+- A month whose pool is below 0. On the credit-month key a payment rail's debit is a payout with a negative `netMinor` (the
+  reversal of a receipt, statutes Art. 6a(3)), and a debit larger than the month's other payouts takes the pool below 0.
+  Until now no document could say so: `purposeFeesNetMinor` had `minimum: 0`, and identity (3) gave a negative
+  `passedOnMinor`. The month could not lock, and every later month waited.
+- `purposeFeesNetMinor` is signed. It stays the month's own Purpose Fees, identity (6) unchanged.
+- Additive. `poolCarryOutMinor`: the month's pool where it is below 0. `poolCarryInMinor`: the month before's, which this
+  close carries. Both present only below 0, and only on the credit-month key.
+- Identity (3) adds the two carries: `passedOnMinor` = `purposeFeesNetMinor` + `poolCarryInMinor` − `poolCarryOutMinor` −
+  `chargedToFeesMinor` − `reserveRetentionMinor` + `interestMinor`. Absent, both are 0, and every document reads as before.
+- Identity (10) is new: the pool is `purposeFeesNetMinor` + `poolCarryInMinor`; `poolCarryOutMinor` is the pool where it is
+  below 0; charges and retention never exceed the pool, and are 0 where it is at or below 0; a month's `poolCarryInMinor` is
+  the month before's `poolCarryOutMinor`.
+- Three conditionals hold what a schema can: a month that carries a pool out lists `payouts[]` and charges and retains 0; a
+  month that carries one in lists `payouts[]`; a month whose `purposeFeesNetMinor` is below 0 states `poolCarryOutMinor`.
+- Wording: the file's description gains A MONTH WHOSE POOL IS BELOW ZERO; `purposeFeesNetMinor`, `interestMinor`,
+  `passedOnMinor` and `yearRunningTotalMinor` say so, the last that such a month lowers the year's cap and charges nothing.
+- **Pre-release (versioning rule 5):** identity (10) adds a check a document could fail. No document is published on
+  production, and the six examples meet it. Two further examples: `examples/cost-support.v1.negative-pool.example.json`
+  (January 2028, a debit of 30000 against a payout of 9000) and `examples/cost-support.v1.pool-carry.example.json` (February
+  2028, which carries the −21000).
 
 ## transfers.v1.json
 

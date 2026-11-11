@@ -67,6 +67,8 @@ npm run check:designations      # designations make 100 and derive their slug li
                                 #   summary keeps the floor of 5 and the rounding; monthly totals; refusals
 npm run check:fees-account-statement  # the fees account's statement: lines booked in its month, its rules,
                                 #   and the refusals of what must never be published
+npm run check:cost-support      # a cost-support document's identities (1) to (3), (5), (6) and (10) in every example,
+                                #   a pool below 0 carried to the month after, and the refusals of a carry gone wrong
 npm run check:transfers         # the month's transfers record: its link to the frozen cost-support
                                 #   document's bytes, identity (4), the export's disburse rows, a
                                 #   transfer's charges, the regeneration rule, and the refusals; and

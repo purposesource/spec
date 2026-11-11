@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "month": "2028-02",
+  "generatedAt": "2028-03-01T08:40:00Z",
+  "currency": "CHF",
+  "closed": true,
+  "financialYear": "2028",
+  "purposeFeesNetMinor": 52040,
+  "payouts": [
+    {
+      "payoutRef": "SAMPLE-REMIT-002803",
+      "creditedOn": "2028-02-03",
+      "creditMonth": "2028-02",
+      "closedLate": false,
+      "netMinor": 52040,
+      "setOffs": [
+        {
+          "movement": "swift-fee",
+          "amountMinor": -1333
+        }
+      ],
+      "deadlineDays": 60,
+      "transferDueBy": "2028-04-03",
+      "evidence": [
+        {
+          "kind": "rail-payout-statement",
+          "ref": "SAMPLE-REMIT-002803",
+          "label": "The payment rail's statement of the payout"
+        },
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2028-02-03-0005",
+          "label": "Its credit on the fees account"
+        }
+      ]
+    }
+  ],
+  "poolCarryInMinor": -21000,
+  "directCosts": [
+    {
+      "invoiceRef": "INV-EDGE-2028-02-0001",
+      "class": "dns-hosting-cdn-edge-storage",
+      "description": "DNS, edge compute and object storage for the movement's own properties, on the movement's own account.",
+      "amountMinor": 2400,
+      "paidOn": "2028-02-08",
+      "supplier": {
+        "kind": "company",
+        "legalName": "SAMPLE — Edge Hosting Ltd"
+      },
+      "evidence": [
+        {
+          "kind": "invoice",
+          "ref": "INV-EDGE-2028-02-0001"
+        },
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2028-02-08-0004"
+        }
+      ]
+    }
+  ],
+  "directCostsTotalMinor": 2400,
+  "supporters": [],
+  "supportTotalMinor": 0,
+  "chargedToFeesMinor": 2400,
+  "yearRunningTotalMinor": 2400,
+  "capBps": 1500,
+  "reserveRetentionMinor": 1552,
+  "reserveRetentionNote": "Stage 1b (FS07-033): the least of 500 bps of each payout's Purpose Fees, summed over the 1 payout(s) the close counts (2602), 500 bps of the pool after the -21000 carried from 2028-01 (1552), the distance to the reserve's target (2629376) and the pool after charges (28640), never below 0: 1552.",
+  "passedOnMinor": 27088,
+  "transfers": [
+    {
+      "recipientId": "rcp_f5cc8xgz81c00nrve04pdahejb",
+      "category": "health",
+      "amountMinor": 6772,
+      "status": "scheduled",
+      "endToEndId": "psn-202802-rve04pdahejb",
+      "note": "The month's 27088, after the -21000 carried from January, divides evenly: 13544 to each of the two categories and 6772 to each recipient. Due no later than 2028-04-03, the deadline of SAMPLE-REMIT-002803."
+    },
+    {
+      "recipientId": "rcp_tg8g3ps3smxzdpy1zt0zesjnx9",
+      "category": "health",
+      "amountMinor": 6772,
+      "status": "scheduled",
+      "endToEndId": "psn-202802-y1zt0zesjnx9"
+    },
+    {
+      "recipientId": "rcp_0svacmgratb4f4q0syghrz8ym4",
+      "category": "education",
+      "amountMinor": 6772,
+      "status": "scheduled",
+      "endToEndId": "psn-202802-q0syghrz8ym4"
+    },
+    {
+      "recipientId": "rcp_8jf9xfejcgadg7cgyag0hmkcxb",
+      "category": "education",
+      "amountMinor": 6772,
+      "status": "scheduled",
+      "endToEndId": "psn-202802-cgyag0hmkcxb"
+    }
+  ],
+  "reserve": {
+    "balanceMinor": 70624,
+    "targetMinor": 2700000,
+    "note": "The month opened at 70624. January's close retained nothing. This close's retention moves on its own transfer day, 1 March, and is listed in March's table."
+  },
+  "recipientListVersion": "v1",
+  "evidence": [
+    {
+      "kind": "rail-payout-statement",
+      "ref": "SAMPLE-REMIT-002803"
+    }
+  ],
+  "methodologyUrl": "https://purposesource.org/trust/money"
+}
