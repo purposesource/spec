@@ -3968,6 +3968,17 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   sponsor certificate (`supporter.sponsor`, `certificate.v1` 1.3.0), or is null.
 - The example is a fixture: one sponsor two months into its period.
 
+## org-webhook-event.v1.json
+
+### 1.0.0 — unreleased (2026-11-11)
+
+- Initial publication, with the delivery engine that sends it (APP-063; FS04-069, FS04-072, FS05-043). The body of one
+  signed delivery to an organisation's registered endpoint: the event's `evt_` id (the dedup key, the same in every
+  attempt and redelivery), its name, when it took effect and when it was recorded, the organisation, and the entitlement
+  as the transition left it. The signature (`X-PSN-Signature-256`: HMAC-SHA256 with the endpoint's secret over the
+  timestamp and the raw body, a 300-second tolerance for receivers) is stated in the description, as the receivers'
+  contract. Version 1 sends the entitlement lifecycle's seven notices; APP-063's others come with a later version.
+
 ## change-event.v1.json
 
 ### 1.0.0 — unreleased

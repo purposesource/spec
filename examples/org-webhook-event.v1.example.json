@@ -1,0 +1,17 @@
+{
+  "schema": "org-webhook-event.v1",
+  "id": "evt_01jcz8m4x6q2w9e7r5t3y1v0ab",
+  "type": "entitlement.suspended",
+  "occurredAt": "2026-11-11T09:14:02Z",
+  "recordedAt": "2026-11-11T09:14:03Z",
+  "coId": "co_01j8f3n2k5p7r9t0v2x4y6z8cd",
+  "data": {
+    "entitlement": {
+      "entId": "ent_01j8f3p6m8q0s2t4w6y8a0c2eg",
+      "status": "suspended",
+      "periodStart": "2026-03-01",
+      "periodEnd": "2027-03-01",
+      "graceEnd": "2027-03-31"
+    }
+  }
+}

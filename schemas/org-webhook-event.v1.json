@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/org-webhook-event.v1.json",
+  "title": "Organisation webhook event (v1) — the body of one signed delivery to an organisation's endpoint",
+  "description": "The JSON body the platform POSTs to an address an organisation registered for its webhooks (APP-063; FS04-069, FS04-072): one notice of a change to what the organisation holds, fired from the entitlement's own transition (FS05-043). Every delivery of one notice, to every endpoint and at every attempt, carries the same bytes.\n\nSIGNATURE. Each request carries `X-PSN-Signature-256: t=<unix seconds>,v1=<64 lower-case hex>`. `v1` is HMAC-SHA256 keyed with the endpoint's secret exactly as it was shown (its UTF-8 bytes, the `psn_whsec_` prefix included), over the decimal timestamp, a full stop, and the raw body bytes as received. A receiver recomputes it over the bytes it received (never over a re-serialised body), compares in constant time, and refuses a timestamp more than 300 seconds from its own clock, so a captured delivery cannot be replayed later. The `id` inside the signed body is the event id to dedupe on: a retry or a redelivery carries the same `id`. The request also carries `X-PSN-Event-Id` and `X-PSN-Event-Type` with the same values as the body, for routing before the body is read; the body is what is signed.\n\nDELIVERY. A 2xx answer is a delivery; anything else, a timeout or a refused connection is retried with exponential backoff and jitter, at most twelve attempts a round; redirects are not followed. The answer's body is not read beyond 1 KiB and never stored.\n\nPERSONAL DATA: NONE. A notice carries the organisation's own record as its dashboard shows it, and never an account id, a login, a name or an address.\n\nVERSION 1 sends the entitlement lifecycle. APP-063's other notices (a purchase still pending, the T-60/T-30/T-7 reminders, a Schedule-version change, a certificate issued or revoked) come with a later version of this schema, which widens `type` and `data` and never redefines a value already published.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3, after launch (after-launch item 3.3): sent by jobs.org-webhooks from its release; never published as a file",
+    "artifactPath": "never published: the body of POST {an endpoint's registered https address}, signed in X-PSN-Signature-256",
+    "authoritative": true,
+    "producer": "jobs.org-webhooks (the delivery engine; the notice is recorded by jobs.commerce in the transition's own transaction)",
+    "consumers": ["an organisation's own systems (its OSPO, procurement or compliance tooling)"],
+    "fsRefs": ["APP-063", "FS04-069", "FS04-072", "FS05-043", "FS-00 §6.1", "FS-00 §6.6"],
+    "changelog": "CHANGELOG.md#org-webhook-eventv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "id", "type", "occurredAt", "recordedAt", "coId", "data"],
+  "properties": {
+    "schema": {
+      "const": "org-webhook-event.v1",
+      "description": "This schema's name and version, so a receiver that keeps bodies can tell later which contract one was sent under."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^evt_[0-9abcdefghjkmnpqrstvwxyz]{26}$",
+      "description": "The event's ULID (FS-00 §6.1, §6.6). The same in every attempt and every redelivery of this notice: dedupe on it."
+    },
+    "type": {
+      "enum": [
+        "entitlement.activated",
+        "entitlement.renewed",
+        "entitlement.grace_started",
+        "entitlement.lapsed",
+        "entitlement.reinstated",
+        "entitlement.suspended",
+        "entitlement.revoked"
+      ],
+      "description": "What happened (APP-063). `entitlement.activated`: the first term began. `entitlement.renewed`: a further paid term began, from `active` or from `grace`. `entitlement.grace_started`: the term ended with no renewal settled, and the entitlement is in its 30-day grace (COM-042). `entitlement.lapsed`: it ended unrenewed. `entitlement.reinstated`: it is `active` again with no new term (a chargeback reversed). `entitlement.suspended`: a chargeback's first stage. `entitlement.revoked`: a refund or an upheld chargeback. An endpoint registered for `entitlement.*` receives every one of them. Additive: a later version may add a value, and never redefines one."
+    },
+    "occurredAt": {
+      "$ref": "#/$defs/instant",
+      "description": "When the transition took effect, as its own event says (FS05-053 orders by it)."
+    },
+    "recordedAt": {
+      "$ref": "#/$defs/instant",
+      "description": "When the platform recorded the notice. An endpoint receives the notices recorded after it was registered."
+    },
+    "coId": {
+      "type": "string",
+      "pattern": "^co_[0-9abcdefghjkmnpqrstvwxyz]{26}$",
+      "description": "The organisation the notice is for: the one that registered the endpoint."
+    },
+    "data": {
+      "$ref": "#/$defs/entitlementData"
+    }
+  },
+  "$defs": {
+    "instant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "description": "UTC, to the second, with a `Z`."
+    },
+    "day": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "description": "A UTC calendar day, `YYYY-MM-DD`, or null where the entitlement has none yet."
+    },
+    "entitlementData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entitlement"],
+      "description": "The entitlement as the transition left it, as the organisation's own dashboard shows it.",
+      "properties": {
+        "entitlement": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["entId", "status", "periodStart", "periodEnd", "graceEnd"],
+          "properties": {
+            "entId": { "type": "string", "pattern": "^ent_[0-9abcdefghjkmnpqrstvwxyz]{26}$", "description": "The entitlement's ULID." },
+            "status": {
+              "enum": ["active", "grace", "lapsed", "suspended", "revoked"],
+              "description": "Its status after the transition (FS05-051)."
+            },
+            "periodStart": { "$ref": "#/$defs/day", "description": "The first day of its current term." },
+            "periodEnd": { "$ref": "#/$defs/day", "description": "The day its current term ends." },
+            "graceEnd": { "$ref": "#/$defs/day", "description": "The day its grace ends: its term's end plus 30 days (COM-042)." }
+          }
+        }
+      }
+    }
+  }
+}
