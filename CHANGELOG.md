@@ -4654,7 +4654,67 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   golden's vectors SP-1 to SP-4 to its own reading of the builder's rule, and 5 refusals and 3 admissions, each proved able to
   fail.
 
+### 1.7.0 — unreleased (2026-11-14; ops decisions D206 item 3, D203 item 4 and D206 item 2) — pre-release
+
+- **Pre-release** addition under policy 5, a minor bump: two optional members, and no constraint moves for a document stored
+  before, so every stored draft and version stays valid and keeps its bytes and its `settings_sha256`.
+- ONE DISPLAY FOR ALL LINKS (D206 item 3, the operator's ruling: "one icon · label · username choice for all links, as the
+  GitHub line has, not one per link"). `linksShow`, of `$defs.show` (the logo, the name, the username; at least one), right
+  after `linksPlacement`. The website follows its logo and name and always shows its domain. Per-link `show` and
+  `website.show` stay in the schema for what was stored before; the editor no longer writes them.
+- THE ONE RULE for what a page's links show, the builder's and the editor's alike: `linksShow` where the document carries it;
+  else the first link's `show` (absent: all three), so an existing page keeps the look of its first link; else, with no link,
+  the website's two parts beside its domain; else the logo and the name, as a new page starts (D206 item 3's two defaults).
+  The builder writes that one display on every link's item and the website's item from its logo and name.
+- NO DEFAULT, AND WRITTEN WHATEVER ITS VALUE: absent means "stored before 1.7.0, or the links not changed since", which no
+  default could say. The api writes it whenever the settings carry it, all three included, and never adds it on a read. Not
+  in `x-psn.alwaysWritten`.
+- A FOURTH CROSS-FIELD RULE in the schema: a document that carries `linksShow` carries no `links[].show` and no
+  `website.show`. At save each such member is refused where it stands (`page.link_display_invalid`, reason
+  `per_link_retired`); `linksShow` that shows nothing is `none_shown` at `/linksShow`. Check (m)'s `no_mark` stays for a
+  per-link `show` alone: `linksShow` is never refused for a platform whose brand refuses its logo, because the builder writes
+  that link's item with its name whatever the choice says. The description's checks gain (o).
+- NEW CERTIFICATES ADDED AUTOMATICALLY (D203 item 4: "i want users to have the choice to set new certificates to
+  automatically appear on their public page"; D206 item 2: on by default). `certificates.addNew`, a boolean, right after
+  `mode`. It acts only through a PUBLISHED version that lists all eligible certificates, shows its Certificates section and
+  carries `addNew: true`, while full display is open: each new certificate then starts at On my page instead of Private, in
+  the display the published page has (`full` with the GitHub login, `status-only` without). One that names a project the
+  page's `repositories` choice leaves out is skipped. Nothing is written for a certificate that exists already.
+- THREE STATES BY ABSENCE, NO DEFAULT: `true` or `false` is what the person's editor saved; absent is a document stored
+  before 1.7.0, on which the rule does not act. The editor shows such a draft with the switch on, and its next save writes
+  `true`. Refused beside `mode: selected` (a second `allOf` of `certificates`; check (p)), whatever its value. The builder
+  does not read it for the document, so no byte of a public document and no preview hash moves with it.
+- Wording: `certificates` no longer says that a yearly certificate always starts Private; `links[].show` and `website` say
+  what 1.7.0 leaves of them; the paragraph on optional members names the two members and why they have no default; the
+  description counts four cross-field rules.
+- Examples: `links-show` (three links, GitLab among them, and a website, with `linksShow` the logo alone) and `add-new` (a
+  page that lists all eligible certificates with `addNew: true`), each stored as the api stores it. The `header` and
+  `own-ground` settings examples keep their bytes: they are the form stored before 1.7.0, with a look per link. Their page
+  examples move with the rule (see `contributor-page.v1.json` 1.10.1). The build golden (its 1.8.0) gains `linksShow`, LS-1
+  to LS-12, and `addNew`, AN-1 to AN-17.
+- `check:contributor-page` holds `linksShow` to `$defs.show`, optional, never always written and without a default, absent
+  from the public document; a settings example to its stored form; every page example and preview vector to one display on
+  all its links, the website following; `certificates.addNew` to a boolean without a default, stored right after `mode`; both
+  lists of vectors to its own reading of the two rules, every case exercised; and 11 refusals and 8 admissions. 54 breaks of
+  its own, each proved able to fail.
+
 ## contributor-page.v1.json
+
+### 1.10.1 — unreleased (2026-11-14; ops decisions D203 item 4 and D206 items 2 and 3) — wording only
+
+- Wording only, a patch bump: no member, no constraint and no vector's hash moves.
+- `certificatesSection`, WHAT IS LISTED: On my page is its holder's own choice either way, a press for that certificate or,
+  from the settings' 1.7.0, the setting `certificates.addNew` of a page they published; the document never says which.
+- `autoUpdated`: "Nothing else changes until the person publishes again" left out a certificate put On my page after the
+  publish, by a press or by the setting, which a page that lists all eligible certificates lists at its next build. It says
+  so now.
+- `linksSection`: an item's `show` and the website's say that from the settings' 1.7.0 (ops decision D206 item 3) the one
+  builder writes ONE display on every link of a page, with the name added on a platform whose brand refuses its logo, and the
+  website's two parts from it. The document's shape does not change: each item keeps its `show`.
+- Examples: the `header` page example draws its third link and its website as its first link is drawn (the logo alone; the
+  website with its globe), and the `own-ground` one draws its second link as its first (the logo and the name). Both are the
+  builder's documents from the same settings, which keep their bytes: "existing pages keep the look of their first link".
+  Neither is a preview vector, so no hash moves.
 
 ### 1.10.0 — unreleased (2026-11-08; ops decision D202 items 1 and 2) — pre-release
 

@@ -75,9 +75,14 @@
           "url": "https://fosstodon.org/@alex",
           "show": { "icon": true, "label": false, "handle": false }
         },
-        { "platform": "orcid", "handle": "0000-0002-1825-0097", "url": "https://orcid.org/0000-0002-1825-0097" }
+        {
+          "platform": "orcid",
+          "handle": "0000-0002-1825-0097",
+          "url": "https://orcid.org/0000-0002-1825-0097",
+          "show": { "icon": true, "label": false, "handle": false }
+        }
       ],
-      "website": { "url": "https://alex.dev/", "show": { "icon": false, "label": false } }
+      "website": { "url": "https://alex.dev/", "show": { "icon": true, "label": false } }
     }
   ],
   "card": { "picture": true, "name": true, "login": true, "summary": true, "adopter": false, "links": true },

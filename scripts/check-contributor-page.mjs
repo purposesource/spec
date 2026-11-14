@@ -116,6 +116,22 @@
  *              sponsors-header pair is valid; some preview vector draws the links and the support buttons both together with
  *              the name, so its hash pins the member; and the build golden's `sponsorsPlacement` vectors are the gate's own
  *              reading of the builder's rule: written only as `header`, whatever the sponsors section's switch says.
+ *   links      1.7.0 of the settings (ops decision D206 item 3): `linksShow`, one display for all of a page's links, is the
+ *              settings' `$defs.show`, optional, never always written and WITHOUT a default, because its absence means a
+ *              document stored before it; the page schema has no such member (each item keeps its `show`). A settings example
+ *              stores it right before `sponsors` and never beside a per-link `show` or a website `show`; one example carries it
+ *              and one keeps per-link looks. On every page example and preview vector (each the builder's) every link item
+ *              carries one `show`, and the website's two parts are its logo and name. The build golden's `linksShow` vectors
+ *              are the gate's own reading of the one rule: the member where the settings carry it; else the first link's
+ *              `show` (absent: all three); else, with no link, the website's two parts and its domain; else the logo and the
+ *              name; a platform whose brand refuses its logo always written with its name; a display of all three left out.
+ *   addnew     1.7.0 of the settings (ops decisions D203 item 4 and D206 item 2): `certificates.addNew` is a boolean, optional
+ *              and WITHOUT a default (three states by absence), refused beside `mode: selected`; a settings example stores it
+ *              right after `mode`. The build golden's `addNew` vectors are the gate's own reading of the one rule
+ *              (`AddNewDisplay`): nothing without a live version, without `addNew: true` beside `all-eligible`, with the
+ *              Certificates section off, without the stored 16-or-older tick or with full display closed; else `full` where
+ *              the page shows a GitHub login and `status-only` where it does not; and nothing for a `full` certificate that
+ *              names a repository the page's `repositories` choice leaves out.
  *   listed     1.10.0 of the page (ops decision D202 items 1 and 2): the page schema keeps a certificate item's four statuses and
  *              1.7.0's `successorNamed`, so a document built before 1.10.0 still validates; every certificate item of every page
  *              example and preview vector is `valid`, carries no `successorNamed`, and names months no other item's months contain
@@ -195,7 +211,12 @@
  *              the settings' 1.6.0 and the page's 1.9.0 (ops decision D189): the support buttons placed in a footer, the
  *              placement in upper case (settings), as null, a boolean or a list, in either schema, and their own section
  *              stated in the document, which the builder never writes; and what they admit: no `sponsorsPlacement` at all,
- *              `section` stated and `header` in the settings, and `header` in the document.
+ *              `section` stated and `header` in the settings, and `header` in the document. And the settings' 1.7.0 (ops
+ *              decisions D206 item 3, D203 item 4 and D206 item 2): `linksShow` that shows nothing, with a part too few, as a
+ *              word or null, beside a per-link `show` or beside the website's, and in the public document; `addNew` beside
+ *              chosen certificates, true or false, and as a word or null; and what it admits: no `linksShow`, all three
+ *              stated, the username alone, per-link looks without it; no `addNew`, `addNew` off, and chosen certificates
+ *              without it.
  *   goldens    every `examples/*.golden.json` is one a gate checks.
  *
  * Every rule is proved able to fail before the examples are trusted to pass.
@@ -267,6 +288,10 @@ const real = {
   // together with the name.
   sponsorsPage: example('contributor-page.v1.sponsors-header.example.json'),
   sponsorsSettings: example('contributor-page-settings.v1.sponsors-header.example.json'),
+  // The settings' 1.7.0 further examples: one display for all the links, a platform whose logo is refused among them (ops decision
+  // D206 item 3); and new certificates added automatically (ops decisions D203 item 4 and D206 item 2).
+  linksSettings: example('contributor-page-settings.v1.links-show.example.json'),
+  addNewSettings: example('contributor-page-settings.v1.add-new.example.json'),
   settingsExamples: Object.fromEntries(
     readdirSync(EXAMPLE_DIR)
       .filter((name) => name.startsWith('contributor-page-settings.v1.') && name.endsWith('.example.json'))
@@ -1130,6 +1155,8 @@ function buildProblems(golden) {
   found.push(...buildListingsProblems(golden.listings ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   found.push(...buildSponsorsPlacementProblems(golden.sponsorsPlacement ?? []).map((message) => ['build', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   found.push(...buildCertificatesProblems(golden.certificates ?? []).map((message) => ['listed', `examples/contributor-page-build.v1.golden.json: ${message}`]));
+  found.push(...buildLinksShowProblems(golden.linksShow ?? []).map((message) => ['links', `examples/contributor-page-build.v1.golden.json: ${message}`]));
+  found.push(...buildAddNewProblems(golden.addNew ?? []).map((message) => ['addnew', `examples/contributor-page-build.v1.golden.json: ${message}`]));
   return found;
 }
 
@@ -1821,6 +1848,265 @@ function sponsorsPlacementProblems(state) {
   return found;
 }
 
+/* ----------------------------------------------------------- one display for all links */
+
+/** How a new page's links start (ops decision D206 item 3, "new pages start with icon and label"). */
+const LINKS_SHOW_NEW = { icon: true, label: true, handle: false };
+const SHOW_ALL = { icon: true, label: true, handle: true };
+const showIsAll = (show) => show.icon && show.label && show.handle;
+const sameShow = (a, b) => JSON.stringify(sortDeep(a ?? SHOW_ALL)) === JSON.stringify(sortDeep(b ?? SHOW_ALL));
+
+/**
+ * The gate's own reading of THE ONE RULE (settings 1.7.0 `linksShow`; ops decision D206 item 3), not the builder: what every link
+ * of a page shows. The member where the settings carry it; else the first link's `show` (absent: all three), so an existing page
+ * keeps the look of its first link; else, with no link, the website's two parts beside its domain; else the logo and the name.
+ */
+function linksShowOf(settings) {
+  if (settings.linksShow) return settings.linksShow;
+  const first = (settings.links ?? [])[0];
+  if (first) return first.show ?? SHOW_ALL;
+  if (settings.website) return { icon: settings.website.show?.icon ?? true, label: settings.website.show?.label ?? true, handle: true };
+  return LINKS_SHOW_NEW;
+}
+
+/**
+ * The gate's own reading of what the one builder writes from it: every link's item with that one `show`, with the name added
+ * on a platform whose brand refuses its logo (`neutral`, the answer of the logo record the vector states), and left out when it
+ * is all three; and the website's item with its logo and name, left out when it is both.
+ */
+function buildLinksShow(input) {
+  const settings = input.settings ?? {};
+  const show = linksShowOf(settings);
+  const items = (settings.links ?? []).map((link) => {
+    const drawn = (input.neutral ?? []).includes(link.platform) ? { ...show, label: true } : show;
+    return { platform: link.platform, show: showIsAll(drawn) ? null : drawn };
+  });
+  const website = settings.website && !(show.icon && show.label) ? { icon: show.icon, label: show.label } : null;
+  return { linksShow: show, items, website };
+}
+
+const validateSettingsShow = ajv.getSchema(`${cfg.schemaBaseUrl}/${SETTINGS}#/$defs/show`);
+const validateSettingsWebsiteShow = ajv.getSchema(`${cfg.schemaBaseUrl}/${SETTINGS}#/$defs/websiteShow`);
+const validatePageShow = ajv.getSchema(`${cfg.schemaBaseUrl}/${PAGE}#/$defs/show`);
+const validatePageWebsiteShow = ajv.getSchema(`${cfg.schemaBaseUrl}/${PAGE}#/$defs/websiteShow`);
+
+function buildLinksShowProblems(vectors) {
+  const found = [];
+  if (vectors.length === 0) found.push('no linksShow vector — the one rule would pass vacuously');
+  const socials = schemaJson(SETTINGS).$defs.socialPlatform.enum;
+  const exercised = {
+    'the member carried': false, 'all three carried': false, "the first link's look": false, 'a first link with no display of its own': false,
+    'a later link that follows the first': false, 'the website following the links': false, 'the website alone with its two parts': false,
+    'the website alone at its default': false, 'a new page': false, 'a refused logo written with its name': false,
+    'a stored look kept though its platform now refuses its logo': false
+  };
+  for (const v of vectors) {
+    const input = v.input ?? {};
+    const settings = input.settings ?? {};
+    const links = settings.links;
+    if (!Array.isArray(links)) {
+      found.push(`${v.id}: input.settings.links is the settings' list of links`);
+      continue;
+    }
+    if (!('website' in settings)) found.push(`${v.id}: input.settings.website is the settings' website, or null`);
+    if (!Array.isArray(input.neutral)) found.push(`${v.id}: input.neutral lists the platforms whose brand refuses its logo at this build`);
+    for (const link of links) {
+      if (!socials.includes(link.platform)) found.push(`${v.id}: ${JSON.stringify(link.platform)} is not a social platform`);
+      if ('show' in link && !validateSettingsShow(link.show)) found.push(`${v.id}: ${link.platform}'s show is not a valid settings display`);
+    }
+    for (const platform of input.neutral ?? []) if (!socials.includes(platform)) found.push(`${v.id}: ${JSON.stringify(platform)} is not a social platform`);
+    if ('linksShow' in settings && !validateSettingsShow(settings.linksShow)) found.push(`${v.id}: the input's linksShow is not a valid settings display`);
+    if (settings.website && 'show' in settings.website && !validateSettingsWebsiteShow(settings.website.show)) found.push(`${v.id}: the website's show is not a valid settings display`);
+    const perLink = links.some((link) => 'show' in link) || Boolean(settings.website && 'show' in settings.website);
+    if ('linksShow' in settings && perLink) found.push(`${v.id}: the input carries linksShow beside a per-link or website display, which the schema refuses`);
+
+    const got = buildLinksShow(input);
+    if (JSON.stringify(sortDeep(got)) !== JSON.stringify(sortDeep(v.expect))) found.push(`${v.id}: expects ${JSON.stringify(v.expect)}, the rule gives ${JSON.stringify(got)}`);
+    if (!validateSettingsShow(v.expect?.linksShow)) found.push(`${v.id}: the expected linksShow is not a valid display`);
+    for (const item of v.expect?.items ?? []) if (item.show !== null && (!validatePageShow(item.show) || showIsAll(item.show))) found.push(`${v.id}: ${item.platform}'s expected show is not one the builder writes`);
+    if (v.expect?.website != null && (!validatePageWebsiteShow(v.expect.website) || (v.expect.website.icon && v.expect.website.label))) found.push(`${v.id}: the website's expected show is not one the builder writes`);
+
+    const neutral = input.neutral ?? [];
+    if ('linksShow' in settings) exercised['the member carried'] = true;
+    if ('linksShow' in settings && showIsAll(settings.linksShow)) exercised['all three carried'] = true;
+    if (!('linksShow' in settings) && links.length > 0 && 'show' in links[0]) exercised["the first link's look"] = true;
+    if (!('linksShow' in settings) && links.length > 0 && !('show' in links[0])) exercised['a first link with no display of its own'] = true;
+    if (!('linksShow' in settings) && links.slice(1).some((link) => !sameShow(link.show, links[0].show))) exercised['a later link that follows the first'] = true;
+    if (links.length > 0 && settings.website && got.website !== null) exercised['the website following the links'] = true;
+    if (!('linksShow' in settings) && links.length === 0 && settings.website && 'show' in settings.website) exercised['the website alone with its two parts'] = true;
+    if (!('linksShow' in settings) && links.length === 0 && settings.website && !('show' in settings.website)) exercised['the website alone at its default'] = true;
+    if (!('linksShow' in settings) && links.length === 0 && !settings.website) exercised['a new page'] = true;
+    if (links.some((link) => neutral.includes(link.platform)) && got.linksShow.label === false) exercised['a refused logo written with its name'] = true;
+    if (!('linksShow' in settings) && links.length > 0 && neutral.includes(links[0].platform) && links[0].show?.label === false) exercised['a stored look kept though its platform now refuses its logo'] = true;
+  }
+  for (const [what, done] of Object.entries(exercised)) if (!done) found.push(`no linksShow vector exercises ${what}`);
+  return found;
+}
+
+/** Every page document's links section, as `[where, section]`. */
+const linksSections = (documents) => documents.map(([where, doc]) => [where, (doc.sections ?? []).find((x) => x.id === 'links')]).filter(([, section]) => section);
+
+/**
+ * The settings' 1.7.0 (ops decision D206 item 3): `linksShow` is one display for all of a page's links. It is the settings' own
+ * `$defs.show`, optional, never always written and without a default (absent means a document stored before it); the public
+ * document has no such member. A settings example stores it right before `sponsors`, where the api writes it (after
+ * `linksPlacement`, or after `website` where that is left out), and never beside a per-link or website display. And on every page
+ * document (each the builder's) every link item carries one `show`, and the website's two parts are that display's logo and name.
+ * No example links a platform whose logo is refused while hiding its name, so the items' displays are equal as written.
+ */
+function linksShowProblems(state, documents) {
+  const found = [];
+  const add = (message) => found.push(['links', message]);
+  const s = state.schemas.settings;
+  const member = s.properties.linksShow;
+  if (!member) {
+    add('the settings schema has no `linksShow` member');
+    return found;
+  }
+  if (member.$ref !== '#/$defs/show') add("the settings' linksShow is not `$defs.show`, the display a link and the GitHub line have");
+  if (member.default !== undefined) add('linksShow names a default; its absence means a document stored before 1.7.0, which no default says');
+  if ((s.required ?? []).includes('linksShow')) add('linksShow is required; it is optional, so a document stored before it stays valid');
+  if ((s['x-psn']?.alwaysWritten ?? []).includes('linksShow')) add('linksShow is always written; the api writes it only once the settings carry it');
+  if ('linksShow' in (state.schemas.page.properties ?? {})) add('the public document has a linksShow member; each link item keeps its own `show`, which the builder writes from the one rule');
+  if (!validateSettings(state.linksSettings)) add(`examples/contributor-page-settings.v1.links-show.example.json is not a valid contributor-page-settings.v1 (${ajv.errorsText(validateSettings.errors)})`);
+  let carried = 0;
+  let perLink = 0;
+  for (const [name, settings] of Object.entries(state.settingsExamples)) {
+    const own = (settings.links ?? []).some((link) => 'show' in link) || Boolean(settings.website && 'show' in settings.website);
+    if (!('linksShow' in settings)) {
+      if (own) perLink += 1;
+      continue;
+    }
+    carried += 1;
+    if (own) add(`examples/${name}: linksShow stands beside a per-link or website display; a document carries one or the other`);
+    const order = Object.keys(settings);
+    const after = 'linksPlacement' in settings ? 'linksPlacement' : 'website';
+    const at = order.indexOf('linksShow');
+    if (order[at - 1] !== after || order[at + 1] !== 'sponsors') add(`examples/${name}: linksShow is not stored right after ${after} and right before sponsors, where the api writes it`);
+  }
+  if (carried === 0) add('no settings example carries linksShow');
+  if (perLink === 0) add('no settings example keeps per-link displays without linksShow, the form stored before 1.7.0');
+  let together = 0;
+  for (const [where, section] of linksSections(documents)) {
+    const items = section.items ?? [];
+    for (const item of items.slice(1)) {
+      if (!sameShow(item.show, items[0].show)) add(`${where}: ${item.platform} shows ${JSON.stringify(item.show ?? SHOW_ALL)} beside ${items[0].platform}'s ${JSON.stringify(items[0].show ?? SHOW_ALL)}; the builder writes one display on every link`);
+    }
+    if (items.length > 0 && section.website) {
+      const show = items[0].show ?? SHOW_ALL;
+      if (!(show.icon && show.label)) together += 1;
+      const site = section.website.show ?? { icon: true, label: true };
+      if (site.icon !== show.icon || site.label !== show.label) add(`${where}: the website shows ${JSON.stringify(site)} beside links that show ${JSON.stringify(show)}; it follows their logo and name`);
+    }
+  }
+  if (together === 0) add('no page document draws a website beside links that leave the logo or the name out, so nothing shows the website following them');
+  return found;
+}
+
+/* ------------------------------------------------- new certificates added automatically */
+
+const validateGitHubLogin = ajv.getSchema(`${cfg.schemaBaseUrl}/${PAGE}#/$defs/githubLogin`);
+const ADD_NEW_DISPLAYS = ['full', 'status-only'];
+
+/**
+ * The gate's own reading of the one rule `AddNewDisplay` (settings 1.7.0 `certificates.addNew`; ops decisions D203 item 4 and D206
+ * item 2; design D203-AUTO-LISTING-2026-11-09 §1, §6 and §8 item 3), not the builder: the display a new certificate starts On my
+ * page in, or null where the setting is not in effect or skips it. `live` is the settings of the person's live published version
+ * (null: none, never published or hidden).
+ */
+function addNewDisplay(input) {
+  const live = input.live;
+  if (!live) return null;
+  if (live.certificates?.mode !== 'all-eligible' || live.certificates?.addNew !== true) return null;
+  if (!(live.sections ?? []).some((section) => section.id === 'certificates' && section.on === true)) return null;
+  if (input.ageConfirmed !== true || input.fullDisplayOpen !== true) return null;
+  const loginShown = live.identity?.showLogin === true && typeof input.login === 'string' && validateGitHubLogin(input.login);
+  if (!loginShown) return 'status-only';
+  const choice = live.repositories ?? {};
+  const leftOut = (id) => (choice.mode === 'selected' ? !(choice.selected ?? []).includes(id) : (choice.hidden ?? []).includes(id));
+  return (input.certificateRepositoryIds ?? []).some(leftOut) ? null : 'full';
+}
+
+function buildAddNewProblems(vectors) {
+  const found = [];
+  if (vectors.length === 0) found.push('no addNew vector — the rule would pass vacuously');
+  const validateCertificates = ajv.getSchema(`${cfg.schemaBaseUrl}/${SETTINGS}#/properties/certificates`);
+  const validateRepositories = ajv.getSchema(`${cfg.schemaBaseUrl}/${SETTINGS}#/properties/repositories`);
+  const exercised = {
+    'a full display': false, 'a status-only display': false, 'a login switched on that is not known': false, 'no live version': false,
+    'the setting off': false, 'the setting absent': false, 'certificates chosen by hand': false, 'the Certificates section off': false,
+    'no 16-or-older tick': false, 'full display closed': false, 'a hidden project skipped': false, 'a project not selected skipped': false,
+    'a status-only display that names a hidden project': false, 'a certificate that names no project': false
+  };
+  for (const v of vectors) {
+    const input = v.input ?? {};
+    const live = input.live;
+    const expected = v.expect?.display;
+    if (!('live' in input)) found.push(`${v.id}: input.live is the live version's settings, or null`);
+    if (typeof input.ageConfirmed !== 'boolean' || typeof input.fullDisplayOpen !== 'boolean') found.push(`${v.id}: ageConfirmed and fullDisplayOpen are true or false`);
+    if (!Array.isArray(input.certificateRepositoryIds)) found.push(`${v.id}: certificateRepositoryIds lists the new certificate's repositories`);
+    if (live) {
+      if (!validateCertificates(live.certificates)) found.push(`${v.id}: live.certificates is not a valid settings member (${ajv.errorsText(validateCertificates.errors)})`);
+      if (!validateRepositories(live.repositories)) found.push(`${v.id}: live.repositories is not a valid settings member (${ajv.errorsText(validateRepositories.errors)})`);
+      if (typeof live.identity?.showLogin !== 'boolean') found.push(`${v.id}: live.identity.showLogin is true or false`);
+    }
+    if (expected !== null && !ADD_NEW_DISPLAYS.includes(expected)) found.push(`${v.id}: ${JSON.stringify(expected)} is not a display`);
+    const got = addNewDisplay(input);
+    if (got !== expected) found.push(`${v.id}: expects ${JSON.stringify(expected)}, the rule gives ${JSON.stringify(got)}`);
+
+    const ids = input.certificateRepositoryIds ?? [];
+    const inEffect = addNewDisplay({ ...input, certificateRepositoryIds: [] });
+    const hidden = live?.repositories?.mode === 'all' && ids.some((id) => (live.repositories.hidden ?? []).includes(id));
+    if (got === 'full') exercised['a full display'] = true;
+    if (got === 'status-only') exercised['a status-only display'] = true;
+    if (got === 'status-only' && live?.identity?.showLogin === true) exercised['a login switched on that is not known'] = true;
+    if (live === null) exercised['no live version'] = true;
+    if (live?.certificates?.addNew === false) exercised['the setting off'] = true;
+    if (live && live.certificates?.mode === 'all-eligible' && !('addNew' in live.certificates)) exercised['the setting absent'] = true;
+    if (live?.certificates?.mode === 'selected') exercised['certificates chosen by hand'] = true;
+    if (live?.certificates?.addNew === true && !(live.sections ?? []).some((x) => x.id === 'certificates' && x.on)) exercised['the Certificates section off'] = true;
+    if (live?.certificates?.addNew === true && input.ageConfirmed === false) exercised['no 16-or-older tick'] = true;
+    if (live?.certificates?.addNew === true && input.fullDisplayOpen === false) exercised['full display closed'] = true;
+    if (inEffect === 'full' && got === null && hidden) exercised['a hidden project skipped'] = true;
+    if (inEffect === 'full' && got === null && live.repositories.mode === 'selected') exercised['a project not selected skipped'] = true;
+    if (got === 'status-only' && hidden) exercised['a status-only display that names a hidden project'] = true;
+    if (got === 'full' && ids.length === 0) exercised['a certificate that names no project'] = true;
+  }
+  for (const [what, done] of Object.entries(exercised)) if (!done) found.push(`no addNew vector exercises ${what}`);
+  return found;
+}
+
+/**
+ * The settings' 1.7.0 (ops decisions D203 item 4 and D206 item 2): `certificates.addNew` is a boolean, optional and without a
+ * default, because it has three states by absence (`true` or `false` as the editor saved it; absent for a document stored
+ * before); the schema refuses it beside `mode: selected` (REFUSALS). A settings example stores it right after `mode`.
+ */
+function addNewProblems(state) {
+  const found = [];
+  const add = (message) => found.push(['addnew', message]);
+  const certificates = state.schemas.settings.properties.certificates;
+  const member = certificates?.properties?.addNew;
+  if (!member) {
+    add('the settings schema has no `certificates.addNew` member');
+    return found;
+  }
+  if (member.type !== 'boolean') add('certificates.addNew is not a boolean');
+  if (member.default !== undefined) add('certificates.addNew names a default; absent means a document stored before 1.7.0, which no default says');
+  if ((certificates.required ?? []).includes('addNew')) add('certificates.addNew is required; it is optional, so a document stored before it stays valid');
+  if (!validateSettings(state.addNewSettings)) add(`examples/contributor-page-settings.v1.add-new.example.json is not a valid contributor-page-settings.v1 (${ajv.errorsText(validateSettings.errors)})`);
+  let carried = 0;
+  for (const [name, settings] of Object.entries(state.settingsExamples)) {
+    if (!('addNew' in (settings.certificates ?? {}))) continue;
+    carried += 1;
+    const order = Object.keys(settings.certificates);
+    if (order.indexOf('addNew') !== order.indexOf('mode') + 1) add(`examples/${name}: certificates.addNew is not stored right after mode, where the api writes it`);
+    if (settings.certificates.mode !== 'all-eligible') add(`examples/${name}: certificates.addNew stands beside mode ${JSON.stringify(settings.certificates.mode)}; it stands only beside all-eligible`);
+  }
+  if (carried === 0) add('no settings example carries certificates.addNew');
+  if ('addNew' in (state.defaults.certificates ?? {})) add('the defaults example carries certificates.addNew; a new document carries none until its editor saves one');
+  return found;
+}
+
 const validatePageAbout = ajv.getSchema(`${cfg.schemaBaseUrl}/${PAGE}#/properties/about`);
 const validateSettingsAbout = ajv.getSchema(`${cfg.schemaBaseUrl}/${SETTINGS}#/properties/about`);
 
@@ -2057,6 +2343,13 @@ function neverProblems(schemaSet, documents) {
  * because the api writes an optional member only when it differs from its default, so a document stored before the
  * member existed keeps its bytes and its hash.
  */
+/**
+ * The top-level members whose ABSENCE SAYS SOMETHING a default could not (1.7.0; ops decision D206 item 3): `linksShow` absent
+ * means a document stored before 1.7.0, whose links keep the look the one rule gives them. Such a member is optional, names no
+ * `default`, is never always written, and the defaults example leaves it out.
+ */
+const ABSENT_MEANS_STORED_BEFORE = ['linksShow'];
+
 function defaultsProblems(defaults, settingsSchema, aboutCurrent) {
   const found = [];
   const add = (message) => found.push(['defaults', `examples/contributor-page-settings.v1.defaults.example.json: ${message}`]);
@@ -2066,6 +2359,12 @@ function defaultsProblems(defaults, settingsSchema, aboutCurrent) {
   const stamped = { about: { version: aboutCurrent } };
   for (const [member, schema] of Object.entries(settingsSchema.properties)) {
     if (member === 'schemaVersion') continue;
+    if (ABSENT_MEANS_STORED_BEFORE.includes(member)) {
+      if (member in defaults) add(`${member} is written only once the person's editor saves it, but the example carries ${JSON.stringify(defaults[member])}`);
+      if (schema.default !== undefined) add(`${member} names a default; its absence means a document stored before it, which no default says`);
+      if (required.includes(member) || always.includes(member)) add(`${member} is required or always written; a document stored before it carries none`);
+      continue;
+    }
     if (always.includes(member)) {
       // Optional (a document stored before it stays valid) but never left out at its default: the api always writes it.
       const expected = { ...collectDefault(schema), ...(stamped[member] ?? {}) };
@@ -2322,7 +2621,19 @@ const REFUSALS = [
   ['sponsorsPage', 'the support buttons\' place as null', (d) => { d.sponsorsPlacement = null; }],
   ['sponsorsPage', 'the support buttons\' place as a boolean', (d) => { d.sponsorsPlacement = true; }],
   ['sponsorsPage', 'the support buttons\' place as a list', (d) => { d.sponsorsPlacement = []; }],
-  ['sponsorsPage', 'the support buttons\' own section stated in the document, which the builder never writes', (d) => { d.sponsorsPlacement = 'section'; }]
+  ['sponsorsPage', 'the support buttons\' own section stated in the document, which the builder never writes', (d) => { d.sponsorsPlacement = 'section'; }],
+  // 1.7.0 of the settings (ops decision D206 item 3; D203 item 4 and D206 item 2).
+  ['linksSettings', 'one display for all links that shows nothing', (d) => { d.linksShow = { icon: false, label: false, handle: false }; }],
+  ['linksSettings', 'one display for all links with a part too few', (d) => { d.linksShow = { icon: true, label: true }; }],
+  ['linksSettings', 'one display for all links as a word', (d) => { d.linksShow = 'icon'; }],
+  ['linksSettings', 'one display for all links as null', (d) => { d.linksShow = null; }],
+  ['linksSettings', 'one display for all links beside a per-link display', (d) => { d.links[1].show = { icon: true, label: true, handle: false }; }],
+  ['linksSettings', "one display for all links beside the website's own", (d) => { d.website.show = { icon: false, label: true }; }],
+  ['page', 'one display for all links in the public document', (d) => { d.linksShow = { icon: true, label: true, handle: false }; }],
+  ['addNewSettings', 'new certificates added automatically beside certificates chosen by hand', (d) => { d.certificates = { mode: 'selected', selected: [], addNew: true }; }],
+  ['addNewSettings', 'the setting switched off beside certificates chosen by hand', (d) => { d.certificates = { mode: 'selected', selected: [], addNew: false }; }],
+  ['addNewSettings', 'the setting as a word', (d) => { d.certificates.addNew = 'on'; }],
+  ['addNewSettings', 'the setting as null', (d) => { d.certificates.addNew = null; }]
 ];
 
 /** The named example's certificate item (1.6.0's cases). */
@@ -2412,7 +2723,16 @@ const ADMITS = [
   ['sponsorsSettings', 'the support buttons\' own section stated', (d) => { d.sponsorsPlacement = 'section'; }],
   ['settings', 'the support buttons together with the name, the links in their own section', (d) => { d.sponsorsPlacement = 'header'; }],
   ['sponsorsPage', 'no sponsorsPlacement at all (a document built before 1.9.0)', (d) => { delete d.sponsorsPlacement; }],
-  ['page', 'the support buttons together with the name, the links in their own section', (d) => { d.sponsorsPlacement = 'header'; }]
+  ['page', 'the support buttons together with the name, the links in their own section', (d) => { d.sponsorsPlacement = 'header'; }],
+  // 1.7.0 of the settings (ops decision D206 item 3; D203 item 4 and D206 item 2).
+  ['linksSettings', 'no linksShow at all (stored before 1.7.0, or the links not changed since)', (d) => { delete d.linksShow; }],
+  ['linksSettings', 'all three parts stated', (d) => { d.linksShow = { icon: true, label: true, handle: true }; }],
+  ['linksSettings', 'the username alone', (d) => { d.linksShow = { icon: false, label: false, handle: true }; }],
+  ['linksSettings', 'per-link displays and a website display without linksShow (stored before 1.7.0)', (d) => { delete d.linksShow; d.links[0].show = { icon: true, label: false, handle: false }; d.website.show = { icon: false, label: false }; }],
+  ['settings', 'one display for all links on the named settings', (d) => { d.linksShow = { icon: true, label: true, handle: false }; }],
+  ['addNewSettings', 'no addNew (stored before 1.7.0)', (d) => { delete d.certificates.addNew; }],
+  ['addNewSettings', 'the setting switched off', (d) => { d.certificates.addNew = false; }],
+  ['addNewSettings', 'certificates chosen by hand, without the setting', (d) => { d.certificates = { mode: 'selected', selected: [] }; }]
 ];
 
 const CONTRACT = {
@@ -2429,6 +2749,8 @@ const CONTRACT = {
   listingsSettings: 'contributor-page-settings.v1',
   sponsorsPage: 'contributor-page.v1',
   sponsorsSettings: 'contributor-page-settings.v1',
+  linksSettings: 'contributor-page-settings.v1',
+  addNewSettings: 'contributor-page-settings.v1',
   alias: 'contributor-page-alias.v1'
 };
 
@@ -2437,7 +2759,8 @@ function refusalProblems(docs, refusals) {
   const validators = {
     page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage, adopterYearsPage: validatePage,
     organisationPage: validatePage, listingsPage: validatePage, settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings,
-    listingsSettings: validateSettings, sponsorsPage: validatePage, sponsorsSettings: validateSettings, alias: validateAlias
+    listingsSettings: validateSettings, sponsorsPage: validatePage, sponsorsSettings: validateSettings, linksSettings: validateSettings,
+    addNewSettings: validateSettings, alias: validateAlias
   };
   for (const [base, what, breakIt] of refusals) {
     const copy = structuredClone(docs[base]);
@@ -2452,7 +2775,8 @@ function admitsProblems(docs, admits) {
   const validators = {
     page: validatePage, anonymous: validatePage, aboutOwnPage: validatePage, cardsPage: validatePage, adopterYearsPage: validatePage,
     organisationPage: validatePage, listingsPage: validatePage, settings: validateSettings, aboutSettings: validateSettings, cardsSettings: validateSettings,
-    listingsSettings: validateSettings, sponsorsPage: validatePage, sponsorsSettings: validateSettings
+    listingsSettings: validateSettings, sponsorsPage: validatePage, sponsorsSettings: validateSettings, linksSettings: validateSettings,
+    addNewSettings: validateSettings
   };
   for (const [base, what, change] of admits) {
     const copy = structuredClone(docs[base]);
@@ -2517,6 +2841,21 @@ function allProblems(state) {
     ...cardsProblems(state),
     ...listingsProblems(state),
     ...sponsorsPlacementProblems(state),
+    ...linksShowProblems(state, [
+      ['examples/contributor-page.v1.example.json', state.page],
+      ['examples/contributor-page.v1.anonymous.example.json', state.anonymous],
+      ['examples/contributor-page.v1.header.example.json', state.header],
+      ['examples/contributor-page.v1.own-ground.example.json', state.ownGround],
+      ['examples/contributor-page.v1.about.example.json', state.aboutPage],
+      ['examples/contributor-page.v1.about-own.example.json', state.aboutOwnPage],
+      ['examples/contributor-page.v1.cards.example.json', state.cardsPage],
+      ['examples/contributor-page.v1.adopter-years.example.json', state.adopterYearsPage],
+      ['examples/contributor-page.v1.organisation-pictures.example.json', state.organisationPage],
+      ['examples/contributor-page.v1.listings.example.json', state.listingsPage],
+      ['examples/contributor-page.v1.sponsors-header.example.json', state.sponsorsPage],
+      ...state.preview.vectors.map((v) => [`examples/contributor-page-preview.v1.golden.json ${v.id}`, v.document])
+    ]),
+    ...addNewProblems(state),
     ...adopterYearsProblems(
       [
         ['examples/contributor-page.v1.example.json', state.page],
@@ -2800,6 +3139,62 @@ const SELF_TEST = [
   ['listed', (s) => { s.build.certificates = s.build.certificates.filter((v) => v.input.mode !== 'selected'); }],
   ['listed', (s) => { s.build.certificates = s.build.certificates.filter((v) => !['CL-12', 'CL-13'].includes(v.id)); }],
   ['listed', (s) => { s.build.certificates = []; }],
+  // 1.7.0 of the settings: one display for all links (ops decision D206 item 3).
+  ['links', (s) => { delete s.schemas.settings.properties.linksShow; }],
+  ['links', (s) => { s.schemas.settings.properties.linksShow.default = { icon: true, label: true, handle: false }; }],
+  ['links', (s) => { s.schemas.settings.properties.linksShow = { type: 'object' }; }],
+  ['links', (s) => { s.schemas.settings.required = [...s.schemas.settings.required, 'linksShow']; }],
+  ['links', (s) => { s.schemas.settings['x-psn'].alwaysWritten = [...s.schemas.settings['x-psn'].alwaysWritten, 'linksShow']; }],
+  ['links', (s) => { s.schemas.page.properties.linksShow = { $ref: '#/$defs/show' }; }],
+  ['links', (s) => { s.linksSettings.linksShow = { icon: false, label: false, handle: false }; }],
+  ['links', (s) => { delete s.settingsExamples['contributor-page-settings.v1.links-show.example.json'].linksShow; }],
+  ['links', (s) => { s.settingsExamples['contributor-page-settings.v1.links-show.example.json'].links[0].show = { icon: true, label: true, handle: false }; }],
+  ['links', (s) => { const name = 'contributor-page-settings.v1.links-show.example.json'; const { linksShow, ...rest } = s.settingsExamples[name]; s.settingsExamples[name] = { ...rest, linksShow }; }],
+  ['links', (s) => { for (const settings of Object.values(s.settingsExamples)) { for (const link of settings.links ?? []) delete link.show; if (settings.website) delete settings.website.show; } }],
+  ['links', (s) => { sectionOf(s.header, 'links').items[1].show = { icon: true, label: true, handle: false }; }],
+  ['links', (s) => { delete sectionOf(s.ownGround, 'links').items[1].show; }],
+  ['links', (s) => { sectionOf(s.header, 'links').website.show = { icon: false, label: false }; }],
+  ['links', (s) => { delete sectionOf(s.header, 'links').website; }],
+  ['links', (s) => { s.build.linksShow.find((v) => v.id === 'LS-1').expect.linksShow = { icon: true, label: true, handle: true }; }],
+  ['links', (s) => { s.build.linksShow.find((v) => v.id === 'LS-3').expect.items[1].show = null; }],
+  ['links', (s) => { s.build.linksShow.find((v) => v.id === 'LS-3').expect.website = { icon: false, label: false }; }],
+  ['links', (s) => { s.build.linksShow.find((v) => v.id === 'LS-7').expect.linksShow = { icon: true, label: true, handle: true }; }],
+  ['links', (s) => { s.build.linksShow.find((v) => v.id === 'LS-8').expect.items[0].show = { icon: true, label: false, handle: false }; }],
+  ['links', (s) => { s.build.linksShow.find((v) => v.id === 'LS-5').expect.linksShow.handle = false; }],
+  ['links', (s) => { s.build.linksShow.find((v) => v.id === 'LS-1').input.settings.links[0].show = { icon: true, label: true, handle: false }; }],
+  ['links', (s) => { delete s.build.linksShow.find((v) => v.id === 'LS-1').input.neutral; }],
+  ['links', (s) => { s.build.linksShow = s.build.linksShow.filter((v) => !('linksShow' in v.input.settings)); }],
+  ['links', (s) => { s.build.linksShow = s.build.linksShow.filter((v) => v.input.settings.links.length > 0); }],
+  ['links', (s) => { s.build.linksShow = s.build.linksShow.filter((v) => v.input.neutral.length === 0); }],
+  ['links', (s) => { s.build.linksShow = s.build.linksShow.filter((v) => !v.input.settings.website); }],
+  ['links', (s) => { s.build.linksShow = []; }],
+  ['defaults', (s) => { s.defaults.linksShow = { icon: true, label: true, handle: false }; }],
+  ['admits', (s) => { s.admits = [['linksSettings', 'one display for all links that shows nothing', (d) => { d.linksShow = { icon: false, label: false, handle: false }; }]]; }],
+  ['refusals', (s) => { s.refusals = [['linksSettings', 'the links-show settings unchanged', () => {}]]; }],
+  // 1.7.0 of the settings: new certificates added automatically (ops decisions D203 item 4 and D206 item 2).
+  ['addnew', (s) => { delete s.schemas.settings.properties.certificates.properties.addNew; }],
+  ['addnew', (s) => { s.schemas.settings.properties.certificates.properties.addNew.default = true; }],
+  ['addnew', (s) => { s.schemas.settings.properties.certificates.properties.addNew.type = 'string'; }],
+  ['addnew', (s) => { s.schemas.settings.properties.certificates.required = ['mode', 'addNew']; }],
+  ['addnew', (s) => { s.addNewSettings.certificates = { mode: 'selected', selected: [], addNew: true }; }],
+  ['addnew', (s) => { delete s.settingsExamples['contributor-page-settings.v1.add-new.example.json'].certificates.addNew; }],
+  ['addnew', (s) => { s.settingsExamples['contributor-page-settings.v1.add-new.example.json'].certificates = { addNew: true, mode: 'all-eligible' }; }],
+  ['addnew', (s) => { s.defaults.certificates.addNew = true; }],
+  ['addnew', (s) => { s.build.addNew.find((v) => v.id === 'AN-1').expect.display = 'status-only'; }],
+  ['addnew', (s) => { s.build.addNew.find((v) => v.id === 'AN-2').expect.display = 'full'; }],
+  ['addnew', (s) => { s.build.addNew.find((v) => v.id === 'AN-6').expect.display = 'full'; }],
+  ['addnew', (s) => { s.build.addNew.find((v) => v.id === 'AN-12').expect.display = 'full'; }],
+  ['addnew', (s) => { s.build.addNew.find((v) => v.id === 'AN-15').expect.display = null; }],
+  ['addnew', (s) => { s.build.addNew.find((v) => v.id === 'AN-1').expect.display = 'public'; }],
+  ['addnew', (s) => { delete s.build.addNew.find((v) => v.id === 'AN-1').input.fullDisplayOpen; }],
+  ['addnew', (s) => { s.build.addNew.find((v) => v.id === 'AN-7').input.live.certificates.addNew = true; }],
+  ['addnew', (s) => { s.build.addNew = s.build.addNew.filter((v) => v.expect.display !== null); }],
+  ['addnew', (s) => { s.build.addNew = s.build.addNew.filter((v) => v.input.live === null || !('addNew' in v.input.live.certificates) || v.input.live.certificates.addNew); }],
+  ['addnew', (s) => { s.build.addNew = s.build.addNew.filter((v) => v.input.fullDisplayOpen); }],
+  ['addnew', (s) => { s.build.addNew = s.build.addNew.filter((v) => v.input.certificateRepositoryIds.length > 0); }],
+  ['addnew', (s) => { s.build.addNew = []; }],
+  ['admits', (s) => { s.admits = [['addNewSettings', 'the setting beside certificates chosen by hand', (d) => { d.certificates = { mode: 'selected', selected: [], addNew: true }; }]]; }],
+  ['refusals', (s) => { s.refusals = [['addNewSettings', 'the add-new settings unchanged', () => {}]]; }],
   ['goldens', (s) => { s.goldenFiles = [...s.goldenFiles, 'unchecked.v1.golden.json']; }]
 ];
 
@@ -2844,6 +3239,7 @@ fail(
     `${state.build.organisations.length} judge whose organisation picture a page may name, ${state.build.listings.length} write the listings' choices that differ from D186's defaults, ` +
     `${state.build.sponsorsPlacement.length} write the support buttons' place only where it is with the name, ` +
     `${state.build.certificates.length} list a person's certificates, only valid ones and of nested periods only the containing one, ` +
+    `${state.build.linksShow.length} give every link of a page one display, ${state.build.addNew.length} say when a new certificate starts On my page by the page's setting, ` +
     `${state.aboutTexts.versions.length} version(s) of our about texts hold their recorded digests, ${state.aboutGolden.sentences.length} about sentences and ${state.aboutGolden.blocks.length} blocks recompute, ` +
     'every certificate item names its period by its months, in order and in its years, is valid and lies inside no other, ' +
     'no page member or example carries points, money or a GitHub id, ' +

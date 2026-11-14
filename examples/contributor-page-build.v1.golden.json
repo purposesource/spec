@@ -9,9 +9,11 @@
     "`organisations` (1.5.0; ops decision D165 item 3, the organisation's picture): vectors of the one builder's judgment of which logins on a page are an organisation's, for the rule the public document cannot show: an organisation's copy (schemas/contributor-page.v1.json `$defs.organisationPicture`) is named only where GitHub's own answer, stored per repository, says so. `input.login` is the person's current GitHub login; `input.icon` the cards' icon, resolved; `input.shown` every repository the document shows, by the login it shows it under, the projects' groups first and then the licence adopter's items, each in its own order; `input.answers` the stored answers by repository (`ownerNodeId`, GitHub's node id of the owner; `ownerType`, GitHub's own `__typename`; `ownerLogin`, an organisation's login as GitHub answered, null for a user); `input.drawn` the organisations' copies the render job holds, by the owner's node id, each its `h16`. `expect.organisations` lists, in login order without regard to case, each login judged an organisation's, spelt as the page first shows it, with its owner's node id and the `h16` the document names on its every group and item, or null where no copy is drawn yet (the request side asks for it; the document names none). A login is an organisation's only while the cards' icon is `owner`, it is not the person's own, and every repository shown under it has an answer, each an `Organization`, all one owner, each under that login (compared without regard to case). Anything else draws the tile: a person's repository, an answer not yet read, two owners, a login that moved.",
     "`listings` (1.5.0; ops decision D186 items 1 and 2): vectors of the one builder's listings member: what it writes for the settings' `listings` (schemas/contributor-page-settings.v1.json `listings`, stored with every member at its default left out, and a listing, or the member itself, left out when nothing is left) into the document's `listings` (schemas/contributor-page.v1.json `listings`). `input.listings` is the settings' member, or null where the settings carry none (stored before 1.5.0, or every choice at its default); `expect.listings` is the document's member, or null when none is written. Unlike `cards`, the builder writes only what differs from the defaults (the certificates `matrix`, the repositories `list`, no toggle on either), member by member, and leaves out a value the settings state at its default, so a page at the defaults carries no member and keeps its bytes. The renderer reads an absent member as its default.",
     "`sponsorsPlacement` (settings 1.6.0, page 1.9.0; ops decision D189 and its dated note of 2026-10-29T10:0xZ): vectors of the one builder's `sponsorsPlacement`, where the support buttons show: what it writes for the settings' member (schemas/contributor-page-settings.v1.json `sponsorsPlacement`, `section` or `header`, stored only as `header`) into the document's (schemas/contributor-page.v1.json `sponsorsPlacement`, `header` alone). `input.sponsorsPlacement` is the settings' member, or null where the settings carry none (stored before 1.6.0, or at its default); `input.sponsorsOn` is the sponsors section's switch in the settings' `sections`. `expect.sponsorsPlacement` is the document's member, or null when none is written. As for `linksPlacement`, the builder writes it only as `header`, whatever the section's switch says (the switch decides whether the buttons show, the placement only where), and never `section`, so a page at the default carries no member and keeps its bytes. The renderer reads an absent member as `section`.",
-    "`certificates` (page 1.10.0; ops decision D202 items 1 and 2): vectors of the one builder's certificate listing, for the rule the public document cannot show: which of the person's own certificates the certificates section lists, in its order, and the summary's count (schemas/contributor-page.v1.json `certificatesSection`, WHAT IS LISTED). `input.showLogin` is whether the page shows the login, so the display it lists (`full` with it, `status-only` without); `input.mode` the settings' `certificates.mode`, with `selected` in the order chosen; `input.certificates` the person's certificate facts as the builder is handed them, each with its record's status, display, whether its holder put it On my page, the years its period names and, where the caller hands them over, the record's `validFrom` and `validUntil`. `expect.listed` is the ids the section lists, in its order (empty: no section), and `expect.certificates` the count the summary takes. The rule: only a `valid` certificate its holder put On my page, in the page's display and, by hand, chosen; of those only the ones whose period, by the months the item names (`months`: both dates handed over, in order and in their years), no other of them contains; of two equal periods the one with the greater id. A certificate that names no months is compared with none. Between them the vectors give the operator's dev case, each other status, a month inside all the time credited, a year beside an all-time certificate that does not contain it, an overlap without containment, two equal periods, three periods nested, a container off the page and one in the other display, both choices by hand, a period by its years alone and one whose dates contradict its years, a page without the login, and nothing to list."
+    "`certificates` (page 1.10.0; ops decision D202 items 1 and 2): vectors of the one builder's certificate listing, for the rule the public document cannot show: which of the person's own certificates the certificates section lists, in its order, and the summary's count (schemas/contributor-page.v1.json `certificatesSection`, WHAT IS LISTED). `input.showLogin` is whether the page shows the login, so the display it lists (`full` with it, `status-only` without); `input.mode` the settings' `certificates.mode`, with `selected` in the order chosen; `input.certificates` the person's certificate facts as the builder is handed them, each with its record's status, display, whether its holder put it On my page, the years its period names and, where the caller hands them over, the record's `validFrom` and `validUntil`. `expect.listed` is the ids the section lists, in its order (empty: no section), and `expect.certificates` the count the summary takes. The rule: only a `valid` certificate its holder put On my page, in the page's display and, by hand, chosen; of those only the ones whose period, by the months the item names (`months`: both dates handed over, in order and in their years), no other of them contains; of two equal periods the one with the greater id. A certificate that names no months is compared with none. Between them the vectors give the operator's dev case, each other status, a month inside all the time credited, a year beside an all-time certificate that does not contain it, an overlap without containment, two equal periods, three periods nested, a container off the page and one in the other display, both choices by hand, a period by its years alone and one whose dates contradict its years, a page without the login, and nothing to list.",
+    "`linksShow` (settings 1.7.0; ops decision D206 item 3): vectors of THE ONE RULE for what every link of a page shows, which the one builder (`ContributorPageSettings.LinksShowOf`) and the editor (`linksShowOf`) both run, and of what the builder writes from it. `input.settings` is the slice of the settings the rule reads, member for member as stored: `links` (each with its `show` where it carries one), `website` (null, or with its `show` where it carries one) and `linksShow` where the settings carry it. `input.neutral` is the logo record's answer at this build, which the builder asks Psn.PageSafety and this file states: the platforms whose brand's own rules refuse its logo on the page. `expect.linksShow` is the rule's answer, always all three members. `expect.items` is, per link in order, the `show` the builder writes on its item, or null where it writes none (all three); `expect.website` the `show` it writes on the website's item, or null where it writes none (both parts, or no website). The rule: `linksShow` where the settings carry it; else the first link's `show` (absent: all three), so an existing page keeps the look of its first link; else, with no link, the website's two parts with `handle` true for its domain; else the logo and the name, as a new page starts. The builder writes that one display on every link's item, with the name added on a `neutral` platform, and the website's item with its logo and name. The save refuses `linksShow` beside a per-link or website display, so no vector carries both.",
+    "`addNew` (settings 1.7.0; ops decisions D203 item 4 and D206 item 2; design D203-AUTO-LISTING-2026-11-09 §1, §6 and §8 item 3): vectors of the one rule `ContributorPageBuilder.AddNewDisplay`, which the yearly pass and the api ask and never re-derive: the display a new certificate starts On my page in, by the person's published page's setting, or null where it starts Private. `input.live` is the slice of the settings of the person's LIVE published version that the rule reads (`identity.showLogin`, `sections`, `certificates`, `repositories`), or null where the person has none (never published, hidden); never a draft. `input.login` is the person's current GitHub login, or null where none is known; `input.ageConfirmed` the stored 16-or-older tick of the page's first publish; `input.fullDisplayOpen` the plane's full-display switch; `input.certificateRepositoryIds` the node ids of the repositories the new certificate names. `expect.display` is `full`, `status-only` or null. The rule: null with no live version, unless the version carries `addNew: true` beside `mode: all-eligible`, with the Certificates section off, without the tick, or with full display closed; else `full` where the page shows a GitHub login (`identity.showLogin` and a login of the page schema's shape) and `status-only` where it does not; and null for a `full` certificate that names a repository the live `repositories` choice leaves out (in `hidden` in `all` mode, not among `selected` in `selected` mode), which the setting skips. The repositories section's own switch is not read: a `full` item names its projects whatever that switch says."
   ],
-  "specVersion": "1.7.0",
+  "specVersion": "1.8.0",
   "vectors": [
     {
       "id": "BV-1",
@@ -2159,6 +2161,1188 @@
       "expect": {
         "listed": [],
         "certificates": 0
+      }
+    }
+  ],
+  "linksShow": [
+    {
+      "id": "LS-1",
+      "note": "The settings carry `linksShow`, the logo alone: every link's item is written with it, and the website's item with its logo and without the word \"Website\". Its domain always shows.",
+      "input": {
+        "settings": {
+          "links": [
+            {
+              "platform": "linkedin",
+              "handle": "alex-example"
+            },
+            {
+              "platform": "mastodon",
+              "handle": "alex",
+              "instance": "fosstodon.org"
+            }
+          ],
+          "website": {
+            "url": "https://alex.dev/"
+          },
+          "linksShow": {
+            "icon": true,
+            "label": false,
+            "handle": false
+          }
+        },
+        "neutral": []
+      },
+      "expect": {
+        "linksShow": {
+          "icon": true,
+          "label": false,
+          "handle": false
+        },
+        "items": [
+          {
+            "platform": "linkedin",
+            "show": {
+              "icon": true,
+              "label": false,
+              "handle": false
+            }
+          },
+          {
+            "platform": "mastodon",
+            "show": {
+              "icon": true,
+              "label": false,
+              "handle": false
+            }
+          }
+        ],
+        "website": {
+          "icon": true,
+          "label": false
+        }
+      }
+    },
+    {
+      "id": "LS-2",
+      "note": "The settings carry `linksShow` with all three parts, which the api stores as stated: the builder writes no `show` on any item and none on the website, as it leaves every display out at all three.",
+      "input": {
+        "settings": {
+          "links": [
+            {
+              "platform": "linkedin",
+              "handle": "alex-example"
+            }
+          ],
+          "website": {
+            "url": "https://alex.dev/"
+          },
+          "linksShow": {
+            "icon": true,
+            "label": true,
+            "handle": true
+          }
+        },
+        "neutral": []
+      },
+      "expect": {
+        "linksShow": {
+          "icon": true,
+          "label": true,
+          "handle": true
+        },
+        "items": [
+          {
+            "platform": "linkedin",
+            "show": null
+          }
+        ],
+        "website": null
+      }
+    },
+    {
+      "id": "LS-3",
+      "note": "Stored before 1.7.0 with three looks: the first link the logo alone, the second with no display of its own, the third the logo and the name, and the website with neither part. An existing page keeps the look of its first link: every item is written with the logo alone, and the website follows it.",
+      "input": {
+        "settings": {
+          "links": [
+            {
+              "platform": "linkedin",
+              "handle": "alex-example",
+              "show": {
+                "icon": true,
+                "label": false,
+                "handle": false
+              }
+            },
+            {
+              "platform": "codeberg",
+              "handle": "alex"
+            },
+            {
+              "platform": "x",
+              "handle": "alex_example",
+              "show": {
+                "icon": true,
+                "label": true,
+                "handle": false
+              }
+            }
+          ],
+          "website": {
+            "url": "https://alex.dev/",
+            "show": {
+              "icon": false,
+              "label": false
+            }
+          }
+        },
+        "neutral": []
+      },
+      "expect": {
+        "linksShow": {
+          "icon": true,
+          "label": false,
+          "handle": false
+        },
+        "items": [
+          {
+            "platform": "linkedin",
+            "show": {
+              "icon": true,
+              "label": false,
+              "handle": false
+            }
+          },
+          {
+            "platform": "codeberg",
+            "show": {
+              "icon": true,
+              "label": false,
+              "handle": false
+            }
+          },
+          {
+            "platform": "x",
+            "show": {
+              "icon": true,
+              "label": false,
+              "handle": false
+            }
+          }
+        ],
+        "website": {
+          "icon": true,
+          "label": false
+        }
+      }
+    },
+    {
+      "id": "LS-4",
+      "note": "Stored before 1.7.0, the first link with no display of its own (all three), the second the logo alone: all three for every link, so no `show` is written.",
+      "input": {
+        "settings": {
+          "links": [
+            {
+              "platform": "linkedin",
+              "handle": "alex-example"
+            },
+            {
+              "platform": "codeberg",
+              "handle": "alex",
+              "show": {
+                "icon": true,
+                "label": false,
+                "handle": false
+              }
+            }
+          ],
+          "website": null
+        },
+        "neutral": []
+      },
+      "expect": {
+        "linksShow": {
+          "icon": true,
+          "label": true,
+          "handle": true
+        },
+        "items": [
+          {
+            "platform": "linkedin",
+            "show": null
+          },
+          {
+            "platform": "codeberg",
+            "show": null
+          }
+        ],
+        "website": null
+      }
+    },
+    {
+      "id": "LS-5",
+      "note": "No link, and a website that shows the word \"Website\" without the globe: the rule's answer is the website's two parts and its domain, and the website's item keeps what it had.",
+      "input": {
+        "settings": {
+          "links": [],
+          "website": {
+            "url": "https://alex.dev/",
+            "show": {
+              "icon": false,
+              "label": true
+            }
+          }
+        },
+        "neutral": []
+      },
+      "expect": {
+        "linksShow": {
+          "icon": false,
+          "label": true,
+          "handle": true
+        },
+        "items": [],
+        "website": {
+          "icon": false,
+          "label": true
+        }
+      }
+    },
+    {
+      "id": "LS-6",
+      "note": "No link, and a website with no display of its own (both parts): all three, and nothing is written.",
+      "input": {
+        "settings": {
+          "links": [],
+          "website": {
+            "url": "https://alex.dev/"
+          }
+        },
+        "neutral": []
+      },
+      "expect": {
+        "linksShow": {
+          "icon": true,
+          "label": true,
+          "handle": true
+        },
+        "items": [],
+        "website": null
+      }
+    },
+    {
+      "id": "LS-7",
+      "note": "No link and no website: the logo and the name, which is how a new page's links start (ops decision D206 item 3). Nothing is drawn yet; the editor writes this answer at the first link added.",
+      "input": {
+        "settings": {
+          "links": [],
+          "website": null
+        },
+        "neutral": []
+      },
+      "expect": {
+        "linksShow": {
+          "icon": true,
+          "label": true,
+          "handle": false
+        },
+        "items": [],
+        "website": null
+      }
+    },
+    {
+      "id": "LS-8",
+      "note": "`linksShow` is the logo alone and the list holds GitLab, whose own rules do not let a page show its logo: GitLab's item is written with its name too, whatever the choice says, and the other link as chosen. The save never refuses `linksShow` for it.",
+      "input": {
+        "settings": {
+          "links": [
+            {
+              "platform": "gitlab",
+              "handle": "alex-example"
+            },
+            {
+              "platform": "codeberg",
+              "handle": "alex"
+            }
+          ],
+          "website": null,
+          "linksShow": {
+            "icon": true,
+            "label": false,
+            "handle": false
+          }
+        },
+        "neutral": [
+          "gitlab",
+          "stackoverflow",
+          "devto"
+        ]
+      },
+      "expect": {
+        "linksShow": {
+          "icon": true,
+          "label": false,
+          "handle": false
+        },
+        "items": [
+          {
+            "platform": "gitlab",
+            "show": {
+              "icon": true,
+              "label": true,
+              "handle": false
+            }
+          },
+          {
+            "platform": "codeberg",
+            "show": {
+              "icon": true,
+              "label": false,
+              "handle": false
+            }
+          }
+        ],
+        "website": null
+      }
+    },
+    {
+      "id": "LS-9",
+      "note": "`linksShow` is the username alone, beside GitLab and a website: GitLab's item shows its name and the username, the other link the username, and the website its domain alone.",
+      "input": {
+        "settings": {
+          "links": [
+            {
+              "platform": "codeberg",
+              "handle": "alex"
+            },
+            {
+              "platform": "gitlab",
+              "handle": "alex-example"
+            }
+          ],
+          "website": {
+            "url": "https://alex.dev/"
+          },
+          "linksShow": {
+            "icon": false,
+            "label": false,
+            "handle": true
+          }
+        },
+        "neutral": [
+          "gitlab",
+          "stackoverflow",
+          "devto"
+        ]
+      },
+      "expect": {
+        "linksShow": {
+          "icon": false,
+          "label": false,
+          "handle": true
+        },
+        "items": [
+          {
+            "platform": "codeberg",
+            "show": {
+              "icon": false,
+              "label": false,
+              "handle": true
+            }
+          },
+          {
+            "platform": "gitlab",
+            "show": {
+              "icon": false,
+              "label": true,
+              "handle": true
+            }
+          }
+        ],
+        "website": {
+          "icon": false,
+          "label": false
+        }
+      }
+    },
+    {
+      "id": "LS-10",
+      "note": "Stored before 1.7.0, the first link GitLab with the logo and the username, stored before its brand refused its logo: the rule's answer is that stored look, the second link is written with it, and GitLab's item with its name added, which makes all three, so none is written on it.",
+      "input": {
+        "settings": {
+          "links": [
+            {
+              "platform": "gitlab",
+              "handle": "alex-example",
+              "show": {
+                "icon": true,
+                "label": false,
+                "handle": true
+              }
+            },
+            {
+              "platform": "linkedin",
+              "handle": "alex-example"
+            }
+          ],
+          "website": null
+        },
+        "neutral": [
+          "gitlab",
+          "stackoverflow",
+          "devto"
+        ]
+      },
+      "expect": {
+        "linksShow": {
+          "icon": true,
+          "label": false,
+          "handle": true
+        },
+        "items": [
+          {
+            "platform": "gitlab",
+            "show": null
+          },
+          {
+            "platform": "linkedin",
+            "show": {
+              "icon": true,
+              "label": false,
+              "handle": true
+            }
+          }
+        ],
+        "website": null
+      }
+    },
+    {
+      "id": "LS-11",
+      "note": "No link, and a website that shows neither the globe nor the word: its domain alone, and the website's item keeps what it had.",
+      "input": {
+        "settings": {
+          "links": [],
+          "website": {
+            "url": "https://alex.dev/",
+            "show": {
+              "icon": false,
+              "label": false
+            }
+          }
+        },
+        "neutral": []
+      },
+      "expect": {
+        "linksShow": {
+          "icon": false,
+          "label": false,
+          "handle": true
+        },
+        "items": [],
+        "website": {
+          "icon": false,
+          "label": false
+        }
+      }
+    },
+    {
+      "id": "LS-12",
+      "note": "`linksShow` is the logo and the name, with a website and no link: the website's item shows both parts, so nothing is written.",
+      "input": {
+        "settings": {
+          "links": [],
+          "website": {
+            "url": "https://alex.dev/"
+          },
+          "linksShow": {
+            "icon": true,
+            "label": true,
+            "handle": false
+          }
+        },
+        "neutral": []
+      },
+      "expect": {
+        "linksShow": {
+          "icon": true,
+          "label": true,
+          "handle": false
+        },
+        "items": [],
+        "website": null
+      }
+    }
+  ],
+  "addNew": [
+    {
+      "id": "AN-1",
+      "note": "The published page lists all eligible certificates, shows its Certificates section and the GitHub login, and carries `addNew: true`; the 16-or-older tick is stored and full display is open: the new certificate starts On my page in `full`.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": true
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": true
+          },
+          "repositories": {
+            "mode": "all",
+            "hidden": [],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": "full"
+      }
+    },
+    {
+      "id": "AN-2",
+      "note": "The same page without the login: the new certificate starts On my page in `status-only`, without the name or projects.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": false
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": true
+          },
+          "repositories": {
+            "mode": "all",
+            "hidden": [],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": "status-only"
+      }
+    },
+    {
+      "id": "AN-3",
+      "note": "`identity.showLogin` is on but no GitHub login is known at this build, so the page shows none: `status-only`, the display the page has.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": true
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": true
+          },
+          "repositories": {
+            "mode": "all",
+            "hidden": [],
+            "years": true
+          }
+        },
+        "login": null,
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": "status-only"
+      }
+    },
+    {
+      "id": "AN-4",
+      "note": "No live version (never published, hidden, or taken down): the setting is not in effect, and the certificate starts Private.",
+      "input": {
+        "live": null,
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": null
+      }
+    },
+    {
+      "id": "AN-5",
+      "note": "The person switched it off and published: nothing is added.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": true
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": false
+          },
+          "repositories": {
+            "mode": "all",
+            "hidden": [],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": null
+      }
+    },
+    {
+      "id": "AN-6",
+      "note": "A version published before 1.7.0 carries no `addNew`: the rule does not act on it, though the editor shows the switch on. It acts from the next publish, whose confirmation states it.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": true
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible"
+          },
+          "repositories": {
+            "mode": "all",
+            "hidden": [],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": null
+      }
+    },
+    {
+      "id": "AN-7",
+      "note": "The page lists certificates chosen by hand (`selected`), which never stands beside `addNew`: nothing is added.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": true
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "selected",
+            "selected": []
+          },
+          "repositories": {
+            "mode": "all",
+            "hidden": [],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": null
+      }
+    },
+    {
+      "id": "AN-8",
+      "note": "The published page does not show its Certificates section: nothing is added.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": true
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": false
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": true
+          },
+          "repositories": {
+            "mode": "all",
+            "hidden": [],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": null
+      }
+    },
+    {
+      "id": "AN-9",
+      "note": "No stored 16-or-older tick for the person's page: nothing is added.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": true
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": true
+          },
+          "repositories": {
+            "mode": "all",
+            "hidden": [],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": false,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": null
+      }
+    },
+    {
+      "id": "AN-10",
+      "note": "Full display is closed on this plane: nothing is added.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": true
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": true
+          },
+          "repositories": {
+            "mode": "all",
+            "hidden": [],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": false,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": null
+      }
+    },
+    {
+      "id": "AN-11",
+      "note": "Full display is closed, on a page without the login: nothing is added either; the setting acts only while full display is open.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": false
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": true
+          },
+          "repositories": {
+            "mode": "all",
+            "hidden": [],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": false,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": null
+      }
+    },
+    {
+      "id": "AN-12",
+      "note": "The new certificate names a project the page hides (`repositories.hidden`): the setting skips it, and it starts Private (design §8 item 3).",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": true
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": true
+          },
+          "repositories": {
+            "mode": "all",
+            "hidden": [
+              "R_kgDOSMPL0002"
+            ],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": null
+      }
+    },
+    {
+      "id": "AN-13",
+      "note": "The page lists projects chosen by hand, and the new certificate names one that is not among them: skipped.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": true
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": true
+          },
+          "repositories": {
+            "mode": "selected",
+            "selected": [
+              "R_kgDOSMPL0001"
+            ],
+            "hidden": [],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": null
+      }
+    },
+    {
+      "id": "AN-14",
+      "note": "The page lists projects chosen by hand, and every project the new certificate names is among them: `full`.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": true
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": true
+          },
+          "repositories": {
+            "mode": "selected",
+            "selected": [
+              "R_kgDOSMPL0002",
+              "R_kgDOSMPL0001",
+              "R_kgDOSMPL0003"
+            ],
+            "hidden": [],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": "full"
+      }
+    },
+    {
+      "id": "AN-15",
+      "note": "A page without the login whose `repositories` choice hides a project the certificate names: `status-only`. A status-only item shows no project, so nothing is skipped.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": false
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": true
+          },
+          "repositories": {
+            "mode": "all",
+            "hidden": [
+              "R_kgDOSMPL0002"
+            ],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": "status-only"
+      }
+    },
+    {
+      "id": "AN-16",
+      "note": "The new certificate names no repository: `full`.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": true
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": true
+          },
+          "repositories": {
+            "mode": "all",
+            "hidden": [],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": []
+      },
+      "expect": {
+        "display": "full"
+      }
+    },
+    {
+      "id": "AN-17",
+      "note": "In `selected` mode `hidden` is not read, as the builder does not read it there: a project both selected and hidden is listed, and the certificate starts `full`.",
+      "input": {
+        "live": {
+          "identity": {
+            "showLogin": true
+          },
+          "sections": [
+            {
+              "id": "summary",
+              "on": true
+            },
+            {
+              "id": "certificates",
+              "on": true
+            }
+          ],
+          "certificates": {
+            "mode": "all-eligible",
+            "addNew": true
+          },
+          "repositories": {
+            "mode": "selected",
+            "selected": [
+              "R_kgDOSMPL0001",
+              "R_kgDOSMPL0002"
+            ],
+            "hidden": [
+              "R_kgDOSMPL0002"
+            ],
+            "years": true
+          }
+        },
+        "login": "example-contributor",
+        "ageConfirmed": true,
+        "fullDisplayOpen": true,
+        "certificateRepositoryIds": [
+          "R_kgDOSMPL0001",
+          "R_kgDOSMPL0002"
+        ]
+      },
+      "expect": {
+        "display": "full"
       }
     }
   ]
