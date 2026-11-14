@@ -56,7 +56,7 @@
           "platform": "x",
           "handle": "sam_codes",
           "url": "https://x.com/sam_codes",
-          "show": { "icon": true, "label": false, "handle": false }
+          "show": { "icon": true, "label": true, "handle": false }
         }
       ]
     }
