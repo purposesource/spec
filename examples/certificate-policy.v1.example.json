@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "generatedAt": "2026-09-07T00:00:00Z",
   "policyVersion": 1,
-  "phase": "P-M2",
+  "phase": "P-M3",
   "binding": "public claims about this certificate are governed by the enclosed claim-language kit",
-  "claimKitVersion": null,
+  "claimKitVersion": "kit-1",
   "verify": "verify only at purposesource.org/verify",
   "classes": [
     {
@@ -126,23 +126,47 @@
         "FS08-010",
         "FS08-041"
       ]
-    }
-  ],
-  "notIssuable": [
+    },
     {
-      "class": "contributor participation certificate",
       "typ": "contributor",
+      "name": "contributor participation certificate",
+      "kitVariant": "contributor",
+      "attests": "Credit the attribution record has already recorded, and nothing beyond it: the projects of the Purpose Source registry the record credits the holder with, for one closed year. A contributor signed in with GitHub is issued one privately for each closed year the record credits them, and only its holder chooses to show it. It attests no payment to the holder, because contributors are never paid from Purpose Fees for a contribution, and no claim about impact.",
       "variants": [
-        "participation"
+        {
+          "variant": "participation",
+          "label": "contributor to the Purpose Source projects the certificate names, for its period",
+          "issuable": true,
+          "precondition": "an attribution record that credits the contributor for a closed year"
+        }
       ],
-      "notBefore": "P-M3, with the claim flow",
-      "why": "It needs a claimed account, the subject's own certificate opt-in, and an attribution record to attest. None of the three exists at this phase, and a certificate about a person is never issued without that person's opt-in.",
+      "permitted": [
+        "the claim-language kit's contributor lines, word for word, by the person the certificate names and about that certificate only, while it verifies as valid or expired: {projects} is some or all of the projects it credits, by the names the Purpose Source registry lists, and {period} is its period as the certificate writes it",
+        "the volunteer words of the kit, only with a certificate that prints them",
+        "states the share of the amount attributed to the credit that the holder's recorded choices left to the Association, quoting the certificate's own sentence word for word, as a recorded choice",
+        "points a reader at the verification page, or at the certificate's own address under it, so the claim can be checked independently"
+      ],
+      "prohibited": [
+        "saying that you, a project or a contributor was paid any part of the Purpose Fees",
+        "saying that you gave, sent, directed or routed money to a charity or a category",
+        "calling the Purpose Fee or your recorded choices a donation or a gift",
+        "comparing yourself with other contributors by points, position or share",
+        "calling yourself or your code certified, verified, approved or endorsed by Purpose Source",
+        "saying that you or your work supports charities",
+        "calling yourself a volunteer on these projects with a certificate that does not say so",
+        "any unquantified social-impact framing",
+        "any green, climate or sustainability claim",
+        "a restated, shortened or translated pledge",
+        "any verification address other than the one printed on the certificate"
+      ],
       "rules": [
         "CERT-005",
         "MIL-012",
         "FS08-041"
       ]
-    },
+    }
+  ],
+  "notIssuable": [
     {
       "class": "steward certificate",
       "typ": "steward",

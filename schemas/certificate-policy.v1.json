@@ -4,7 +4,7 @@
   "title": "Certificate policy — /certs/policy/latest.json",
   "description": "The one published enumeration of every certificate class, its variants, and the exact claims each permits and prohibits (COM-084, FS08-011). It is the machine-readable half of the policy page: a reader who holds a certificate can look up its `typ` here and read what the holder is allowed to say about it, and a scanner can check a published claim against a document rather than against a marketing page.\n\nTwo properties make this a contract rather than a description. First, `classes[]` is the ISSUABLE set at the phase named in `phase` — a class absent from it cannot be issued, and `notIssuable[]` says which classes those are and what has to exist first. Second, the machine `typ` tokens are the frozen enum of the architecture chapter and are never renamed to match prose: `name` carries the human name, `typ` carries the token, and a consumer switches on the token.\n\nThe policy is not data about the world. Apart from the batch timestamp every artifact carries, it is identical on every plane and in every environment, it holds no counters and no subject data, and it changes only when the rule it encodes changes — which is what `policyVersion` records.",
   "x-psn": {
-    "specVersion": "1.1.0",
+    "specVersion": "1.2.0",
     "phase": "P-M2",
     "artifactPath": "/certs/policy/latest.json",
     "authoritative": true,
@@ -38,7 +38,7 @@
     "policyVersion": {
       "type": "integer",
       "minimum": 1,
-      "description": "The policy's own version, incremented when a permitted or prohibited claim changes. A certificate payload's `claimKitVersion` pins the kit in force at issuance (D17); this number versions the policy that publishes the kit's classes."
+      "description": "The policy's own version. From the public launch it is incremented when a permitted or prohibited claim changes; before the launch the policy is amended in place and this stays 1 (ops decisions D136 item 1 and D218 item 8). A certificate payload's `claimKitVersion` pins the kit in force at issuance (D17); this number versions the policy that publishes the kit's classes."
     },
     "phase": {
       "type": "string",
@@ -98,8 +98,8 @@
           "description": "What the certificate attests, and by implication what it does not. Every certificate attests a fact already recorded at issuance; none is anticipatory (CERT-004)."
         },
         "kitVariant": {
-          "enum": ["supporter", "status-only", "sponsor"],
-          "description": "Which claim-language kit variant governs the class. `status-only` permits coverage-status wording exclusively (CERT-052, MKT-034)."
+          "enum": ["supporter", "status-only", "sponsor", "contributor"],
+          "description": "Which claim-language kit variant governs the class. `status-only` permits coverage-status wording exclusively (CERT-052, MKT-034). `contributor` is the kit's contributor variant, which governs the contributor participation certificate in both of its word sets (the contributor words and, on a certificate that prints them, the volunteer words)."
         },
         "variants": {
           "type": "array",

@@ -1585,6 +1585,21 @@ value inside `v1` is not additive (versioning policy 1).*
   the multipliers were withdrawn before any sale, as the policy the website publishes says. No
   schema change.
 
+### 1.2.0 — unreleased (2026-11-14; ops decisions D115, D212 and D218 item 8, the operator's word on the contributor class)
+
+- Additive. `$defs.certClass.kitVariant` gains `contributor`, the claim-language kit's contributor
+  variant (`claim-kit.v1`'s `variants.contributor`, with its volunteer word set), so that the
+  contributor participation certificate can be listed in `classes[]` once it is issuable. No enum
+  value is removed, and a document valid under 1.1.0 is valid under 1.2.0.
+- The example is the policy amended in place: `phase` P-M3, `claimKitVersion` `kit-1`, and
+  `contributor.participation` moved from `notIssuable[]` to `classes[]`, issuable on an attribution
+  record that credits the contributor for a closed year. The steward certificate and the other
+  entries of `notIssuable[]` are unchanged. `policyVersion` stays 1: until the public launch the
+  policy is amended inside its v1 document and its counter does not move (rule 5; ops decisions
+  D136 item 1 and D218 item 8).
+- Wording. `policyVersion`'s description says so: it is incremented when a permitted or prohibited
+  claim changes from the public launch, and stays 1 before it.
+
 ## claim-kit.v1.json
 
 ### 1.0.0 — unreleased (2026-09-08)
