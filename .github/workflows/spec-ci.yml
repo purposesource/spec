@@ -116,6 +116,12 @@ jobs:
         # links to `32de2f6d...` are held only by this gate. Each rule is proved able to fail first.
         run: npm run check:transfers
 
+      - name: The compliance export's examples keep the file's form and order, and the contract refuses what a line must never hold
+        # FS04-067: purpose-licenses.v1 is one line of purpose-licenses.csv. Its header is the schema's columns, the examples
+        # keep the file's form, one line per Entitlement and the Licences page's order, and the contract refuses an amount,
+        # a payer, a coverage answer and a formula's first character. Each rule is proved able to fail first.
+        run: npm run check:purpose-licenses
+
       - name: The advisory votes' examples keep their hashes, chain and counts, and the contracts refuse what must never be published
         # PS-1777 (ops decision D143): consultation.v1's examples hash to their documents, chain version to version and keep
         # the small-count rule's arithmetic; the index agrees with them; both contracts refuse a person, a written answer, the
