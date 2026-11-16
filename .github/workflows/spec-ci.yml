@@ -109,6 +109,12 @@ jobs:
         # is proved able to fail first (the check's planted documents).
         run: npm run check:fees-account-statement
 
+      - name: The cost-support examples keep their arithmetic, and a month whose pool is below 0 is refused when it is carried wrong
+        # PS-2608 (cost-support.v1 1.8.0, ledger-row.v1 1.7.0): every cost-support example keeps the identities its description
+        # states, a month that carries a pool in has the month before that carried it out, and each rule is proved able to fail
+        # first (the check's planted documents). In npm test since PS-2608 and missing here until PS-2033's landing.
+        run: npm run check:cost-support
+
       - name: The transfers record keeps its link to the frozen cost-support document, its arithmetic and its refusals
         # PS-1904 (D64 item 1): transfers.v1's examples name the month's frozen cost-support document by the SHA-256
         # of its exact bytes and sum to its passedOnMinor, and the contract refuses what must never be published. In
