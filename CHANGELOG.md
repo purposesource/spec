@@ -1155,8 +1155,8 @@ value inside `v1` is not additive (versioning policy 1).*
   /v1/orgs/{co_id}/exports/purpose-licenses.csv`, a file an organisation downloads from its own
   dashboard, behind its session, for an internal register or an auditor's request. FS04-067 makes
   the file "schema-stable (published in spec)", and no schema fixed its columns until now, which is
-  why the exports screen offers no download. The file is never published, and the route that serves
-  it, with the screen's download, is a later change: nothing is served under this contract yet.
+  why the exports screen offers no download. The file is never published, and nothing is served
+  under this contract on production until the operator opens the export (ops decision D211 item 2).
   FS04-067's other file, the SBOM-compatible listing, has no contract here yet.
 - ONE LINE PER ENTITLEMENT, THE LICENCES PAGE'S. The rows are every Entitlement the organisation's
   Licences page lists, which is what `GET /v1/orgs/{co_id}/entitlements` answers (FS04-073), a
