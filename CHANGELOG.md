@@ -5423,6 +5423,12 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   is the number of records, the steps are in order from `started`.
 - Example: `consent-campaign.v1.example.json`, an open campaign of a GPL-3.0 repository: two accounts and one withheld
   contributor pending, a commit identity unreachable, a bot excluded.
+- *(2026-11-16, platform PS-2924; the orchestrator's ORDER of 2026-11-13T09:08Z, item 6, C1)* **In pages**, words only, no
+  member and no constraint changed: the api answers the records a page at a time, at most 100, most commits first, then by
+  login or author name in byte order, then by record id. Each page is the whole document with that page's `records`, the
+  same campaign, the same `counts` and every step; the next page's cursor is the api's own member beside the document
+  (`next`). `counts` and `analysis.contributors` are now said to count the inventory over every page, so a reader checks
+  them against the whole inventory and not against one page's `records`. The example is one page holding every record.
 
 ## vesting-snapshot.v1.json
 
