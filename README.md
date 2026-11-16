@@ -139,7 +139,7 @@ needs a toolchain is not really published.
 | `ledger-chain.v1.json` | `/ledger/chain.json` | first public version |
 | `cost-support.v1.json` | `/ledger/{YYYY}-{MM}.cost-support.json` — one locked month's cost-support table, the bytes its lock froze and its export names by `batch.costSupportSha256`, written once (the path since 1.6.1; served by the edge at `/v1/ledger/{YYYY-MM}.cost-support.json` since `edge-public.v1` 1.25.0) | P-M3 producer, v0 hand-maintained |
 | `fees-account-statement.v1.json` | `/fees-account/{YYYY-MM}.json` — the published statement of the fees account for one locked month: every line the bank booked, with its class, and nothing that identifies a payer or a natural person (statutes Art. 12(1), Art. 20(1)) | P-M3 producer |
-| `transfers.v1.json` | `/transfers/{YYYY-MM}.json` — what became of one locked month's shares, published after the transfers happen: one row per listed recipient, scheduled, held back with its day and a generic ground, or transferred, with the day, the end-to-end identifier, what it paid in the recipient's currency and at which rate, its charges, the mark «Einzelauslösung» and, once it has arrived, the recipient's receipt pinned by its document's SHA-256; it names the month's frozen cost-support document by the SHA-256 of its bytes (ops decision D64 item 1) | P-M3 producer |
+| `transfers.v1.json` | `/transfers/{YYYY-MM}.json` — what became of one locked month's shares, published after the transfers happen: one row per listed recipient, scheduled, held back with its day and a generic ground, paid before two people had signed it off with its debit's day, or transferred, with the day, the end-to-end identifier, what it paid in the recipient's currency and at which rate, its charges, the mark «Einzelauslösung» and, once it has arrived, the recipient's receipt pinned by its document's SHA-256; it names the month's frozen cost-support document by the SHA-256 of its bytes (ops decision D64 item 1) | P-M3 producer |
 | `recipient-list.v1.json` | `/recipient-list/{version}.json` — one released version of the Recipient List (kept by the board, outside the statutes), each entry pending or active, written once | P-M3 producer |
 | `recipient-lists.v1.json` | `/recipient-list/index.json` — every released List version, newest first, with its state (released, recorded, late or void), its proven publication and its notice, and every immediate removal with its published ground | P-M3 producer |
 | `allocation-key.v1.json` | `/allocation-keys/{YYYY-MM}.json` — the board's allocation key for one month, released by two steward approvals before the month and written once, with the exact text they approved | P-M3 producer |
@@ -196,7 +196,11 @@ Association holds back is `held`, with the day and one of four generic grounds, 
 (a recipient struck from the List after the close reads `struck (Art. 7 Abs. 6)`, ops decision D177 item
 3), and each transfer carries the rest of the line the statutes ask for: what it paid in the currency of
 the recipient's account and at which rate, its charges as its debit line booked them, and the mark
-«Einzelauslösung» where one board member alone released it.
+«Einzelauslösung» where one board member alone released it. Since 1.2.0 (2026-11-16) a share that a
+debit made before two people had signed it off paid is `paid-without-signoffs`, with the day the debit was
+booked and its line by the bank's reference and no identifier, as the fees account's statement records
+the debit as an incident (`debit-without-signoffs`): it is owed no further transfer, and it is not a
+transfer.
 
 The `purpose-licenses.v1` row (2026-10-24; FS-04 FS04-067) fixes the columns of the compliance export
 an organisation downloads from its own dashboard for its register or its auditors: one line per
