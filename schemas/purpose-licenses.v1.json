@@ -89,7 +89,7 @@
     "status": {
       "type": "string",
       "enum": ["pending", "active", "grace", "lapsed", "suspended", "revoked"],
-      "description": "The Entitlement's state in the dashboard's words (FS04-024; FS04-073's `status`): `pending`, a purchase not completed yet (`pendingSubstate` says how far it has got); `active`, the term is running; `grace`, the term ended with no settled renewal and its grace window runs, to `graceEndsAt` (COM-042); `lapsed`, the term and any grace window have ended, or an invoice lapsed unpaid before any term started; `suspended`, a chargeback is pending (COM-024); `revoked`, refunded or a chargeback upheld, void from the start. These are not the published record's statuses: `entitlement-record.v1` publishes `active`, `suspended` and `void`, and a reader derives grace and lapse from its dates."
+      "description": "The Entitlement's state in the dashboard's words (FS04-024; FS04-073's `status`): `pending`, a purchase not completed yet (`pendingSubstate` says how far it has got); `active`, the term is running; `grace`, the term ended with no settled renewal and its grace window runs, to `graceEndsAt` (COM-042); `lapsed`, the term and any grace window have ended, or the purchase ended unpaid before any term started (its invoice lapsed unpaid, or its card checkout was cancelled before any payment); `suspended`, a chargeback is pending (COM-024); `revoked`, refunded or a chargeback upheld, void from the start. These are not the published record's statuses: `entitlement-record.v1` publishes `active`, `suspended` and `void`, and a reader derives grace and lapse from its dates."
     },
     "pendingSubstate": {
       "type": "string",
@@ -102,7 +102,7 @@
     "termStart": {
       "type": "string",
       "anyOf": [{ "$ref": "#/$defs/none" }, { "$ref": "#/$defs/day" }],
-      "description": "The first day of the paid term, `YYYY-MM-DD` (FS04-073's `term.start`). Empty exactly when `termEnd` is: a term is both of its dates or none. A row with no term is `pending`, `revoked` (a refund ended a held purchase before any term started) or `lapsed` (an invoice lapsed unpaid before any term started); every `active`, `grace` and `suspended` row has one."
+      "description": "The first day of the paid term, `YYYY-MM-DD` (FS04-073's `term.start`). Empty exactly when `termEnd` is: a term is both of its dates or none. A row with no term is `pending`, `revoked` (a refund ended a held purchase before any term started) or `lapsed` (the purchase ended unpaid before any term started: its invoice lapsed unpaid, or its card checkout was cancelled before any payment); every `active`, `grace` and `suspended` row has one."
     },
     "termEnd": {
       "type": "string",
