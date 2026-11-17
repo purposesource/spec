@@ -5482,6 +5482,22 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 
 ## consent-campaign.v1.json
 
+### 1.1.0 — unreleased (2026-11-17; ops decision D24, FS-09 §6's consent engine, slice 2b; FS09-063, GH-047; platform PS-2969) — pre-release
+
+- Additive. **`trackingIssueUrl`**, optional: the link of the tracking issue the administrators posted in the repository from
+  the text the api prepares for them (`GET …/consent-campaign/issue-text`, the engine only prepares it and the administrator
+  posts it), recorded by `PUT …/consent-campaign/issue` once GitHub confirmed it names an issue of this repository and not a
+  pull request; `https://github.com/{owner}/{name}/issues/{number}`, or null until recorded and once cleared. An api that
+  predates it sends no member, which a reader takes as null.
+- Additive. **The step kind `issue-linked`**: an administrator recorded, replaced or cleared that link. It moves no state, so
+  its `from` and `to` are the same (in the description, which JSON Schema cannot state), and it is always an
+  `administrator`'s (an `if`/`then` on the new kind; no existing step is touched).
+- Words only: `abandoned` and `ended` now also cover an administrator's stop (`POST …/consent-campaign/abandon`), an
+  `abandoned` step by an `administrator` with `ended.reason` null, which the enum already admitted; the `artifactPath` names
+  the two new routes that answer the document; `fsRefs` gain FS09-063 and GH-047.
+- Example: `consent-campaign.v1.issue-linked.example.json`, the open GPL-3.0 campaign of the first example after its
+  administrator recorded the issue's link: the member and the step.
+
 ### 1.0.0 — unreleased (2026-10-24; ops decision D24, FS-09 §6's consent engine, slice 1; platform migration 0109, PS-2051) — pre-release
 
 - New, **pre-release**: a repository's relicensing-consent campaign as its administrators read it, from the api's
