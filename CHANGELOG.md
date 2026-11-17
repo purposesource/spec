@@ -1147,6 +1147,26 @@ value inside `v1` is not additive (versioning policy 1).*
   public-listing statement keeps the number 7. The description now cites "att-1 step 7". No
   member, type, example or count changes.
 
+### 1.1.0 — unreleased (2026-11-16; PS-2962, with the platform rule of PS-2909) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**: what two counts mean moves, so the change is not additive (versioning
+  policy 1). It is made in place inside `v1`, with no later file (D136); no member, type or
+  constraint moves, and every body that validated still validates.
+- The two counts read the records that hold coverage. `entitlementRecords` is the signed
+  entitlement records on the plane that hold coverage: every record except those whose only fact
+  is a threshold registration, that is, records that hold no term (an empty `entitlements` array)
+  and carry the record-level `thresholdRegistration` block (`entitlement-record.v1`). Such a
+  record is published at its own URL like any other, because it carries the under-threshold
+  answer and its proof, and it is in no count of this file; a record that holds a term and the
+  block counts as any payer's does. `recordsWithoutTerm` follows: the waiver stubs among those
+  records. Until this entry both counts took every signed record on the plane, a registrant's
+  included; each description carries a dated *(Changed in place 2026-11-16)* marker saying so.
+- So `lines` + `recordsWithoutTerm` = `entitlementRecords` still holds, and so does the rule
+  `entitlement-records`, because the real plane's `companiesCovered` reads the same records.
+- The example follows the rule: the sample plane's one registrant is in no count, so it carries
+  six entitlement records, one of them without a term; its five lines and its `companiesCovered`
+  of 7 are unchanged. The website's sample builder follows the same rule in its own change.
+
 ## purpose-licenses.v1.json
 
 ### 1.0.0 — unreleased (2026-10-24; FS-04 FS04-067, URS APP-061 and TRN-043)

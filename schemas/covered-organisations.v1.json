@@ -4,7 +4,7 @@
   "title": "Covered organisations — /entitlements/covered-organisations.json",
   "description": "The one public list of organisations holding an Entitlement term (ops decision D44; resolves URS OPEN-34 toward a complete list with names optional, subject to counsel and comms sign-off before real launch). ONE LINE PER ORGANISATION that has a signed entitlement record with at least one term, keyed by its public company id, carrying either the legal name the payer asked to be listed under or the fixed words `Unlisted organisation`, and every term with its lane, scope, published status, dates and certificate id.\n\nWHAT NO LINE CAN CARRY. There is no member for an amount, a revenue band, a domain, a contact or a declaration, and the objects are closed, so an unlisted line cannot leak one by accident. Unlisted is not anonymous and the list says so: the ledger rows keyed by the same company id publish their amounts, an amount can show the band, and a verified domain resolves to the same id through `/entitlements/domain-index.json` (TRN-033: coverage is answerable regardless of naming).\n\nCOMPLETENESS, CHECKABLE BY ANYONE. `completeness` states the counts a reader can recompute from other published artifacts: every line is an entitlement record with a term; every line with a fee-lane term (Project, Portfolio, the Pass) is a company id on at least one published `pool-in` ledger row and every such id has a line — a refunded term keeps its line with status `void` and its row beside a `refund-out` row, a charged-back term keeps its line with status `suspended`; and `stats.json`'s `companiesCovered` is stated beside the rule that derives it. The builder refuses to publish a list whose counts disagree.",
   "x-psn": {
-    "specVersion": "1.0.1",
+    "specVersion": "1.1.0",
     "phase": "P-M2",
     "artifactPath": "/entitlements/covered-organisations.json",
     "authoritative": true,
@@ -84,12 +84,12 @@
         "entitlementRecords": {
           "type": "integer",
           "minimum": 0,
-          "description": "Signed entitlement records on the plane (`/entitlements/{co_id}.jws`)."
+          "description": "The signed entitlement records on the plane (`/entitlements/{co_id}.jws`) that hold coverage: every record except those whose only fact is a threshold registration, that is, records that hold no term (an empty `entitlements` array) and carry the record-level `thresholdRegistration` block (`entitlement-record.v1`). Such a record is published at its own URL like any other, because it carries the under-threshold answer and its proof, and it is in no count of this file. A record that holds a term and the block counts as any payer's does. *(Changed in place 2026-11-16: this counted every signed record on the plane, a registrant's included.)*"
         },
         "recordsWithoutTerm": {
           "type": "integer",
           "minimum": 0,
-          "description": "Records with an empty `entitlements` array — waiver stubs. `lines` + this = `entitlementRecords`."
+          "description": "The records counted in `entitlementRecords` with an empty `entitlements` array — waiver stubs. A record whose only fact is a threshold registration has no term either, and it is not counted here, as it is not in `entitlementRecords`. `lines` + this = `entitlementRecords`. *(Changed in place 2026-11-16: this counted every record on the plane with an empty `entitlements` array, a registrant's included.)*"
         },
         "linesWithFeeLaneTerm": {
           "type": "integer",

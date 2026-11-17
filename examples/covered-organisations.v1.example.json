@@ -125,8 +125,8 @@
   ],
   "completeness": {
     "lines": 5,
-    "entitlementRecords": 7,
-    "recordsWithoutTerm": 2,
+    "entitlementRecords": 6,
+    "recordsWithoutTerm": 1,
     "linesWithFeeLaneTerm": 5,
     "payerIdsOnPoolInRows": 5,
     "companiesCovered": 7,
