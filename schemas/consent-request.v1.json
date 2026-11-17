@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://purposesource.org/spec/schemas/consent-request.v1.json",
+  "title": "consent request — a relicensing-consent campaign as one of its contributors reads it, with their own record",
+  "description": "One repository's relicensing-consent campaign (the consent engine, ops decision D24) as one contributor it lists reads it: what the campaign is about, its state and its counts, the contributor's own consent record in it, and, on the consent page, the sentence they are asked to approve. A repository whose code carries a copyleft licence can relicense its FUTURE releases to the Purpose Source License only with the approval of every contributor of that code, or after the code of those who did not approve is removed or rewritten; a contributor answers for their own contribution, with their own signed-in click. Nothing in the engine contacts anyone.\n\nIT IS NEVER PUBLISHED. The api answers it to the signed-in contributor alone, about their own record: the document of `GET /v1/consents/campaigns/{campaignId}` (the consent page: `campaign`, `record` and `words`) and each item of `GET /v1/me/consents` (the inbox: `campaign`, `record` and `answerable`). A record is found by the caller's GitHub account, never by a login or an id the request names. It names nobody else: the campaign carries no record of anyone and no login, only the counts; the record is the caller's own, and its `login` is theirs as GitHub gave it when the repository's history was analysed.\n\nTHE STATES. A campaign the contributor can read is `open` (accepting answers), `frozen` (a rewrite of the history was detected; the analysis runs again), `completed`, `converted` (relicensed; nothing changes again) or `abandoned` (the request was closed); a campaign still being set up (`draft`, `analyzing`) is not readable, and the inbox lists no `abandoned` one. The caller's record is `pending` (no answer yet), `approved` or `declined`; it is `null` on the page when the campaign does not list the caller's account (or lists it as a bot, or the caller signed in without GitHub). An answer is recorded, and withdrawn back to `pending`, only while the campaign is `open`, which `answerable` says.\n\nTHE WORDS. `words.approve` is the sentence an approval approves, exactly as the page shows it, for this repository; `words.version` names its version and `words.sha256` is the SHA-256 of its UTF-8 bytes, which an approval sends back and the platform records with it, so a record never claims a text the person was not shown. An approval that names any other hash is refused and the page asks again. A decline and a withdrawal carry no words.\n\nWHAT JSON SCHEMA CANNOT STATE, and a reader checks: `campaign.counts` are the campaign's records counted by state, the caller's included; `words.sha256` is the SHA-256 of `words.approve`'s UTF-8 bytes; `answerable` is true exactly when `campaign.state` is `open`; a record's `scope.first` is no later in the history than its `scope.last`.",
+  "x-psn": {
+    "specVersion": "1.0.0",
+    "phase": "P-M3, after the launch (the consent engine's slice 2a). Never published at any phase: the api answers it to the signed-in contributor alone, about their own record.",
+    "artifactPath": "(never published) the api's answer to `GET /v1/consents/campaigns/{campaignId}`, and each item of `GET /v1/me/consents`'s `items`, for the signed-in contributor",
+    "authoritative": true,
+    "producer": "the api (`Consent/ConsentDecisionEndpoints.cs`), from the campaign and the caller's own consent record (platform migrations 0131 and 0164), and the approval sentence in force",
+    "consumers": [
+      "the contributor's consent page and inbox",
+      "the contributor's own tools"
+    ],
+    "fsRefs": [
+      "D24 (the relicensing-consent engine)",
+      "FS09-061, FS09-064 (a contributor's own decision and its revocation), FS04-055 (the inbox)",
+      "GH-046, GH-048, GH-050"
+    ],
+    "vsRefs": [
+      "VS-05"
+    ],
+    "changelog": "CHANGELOG.md#consent-requestv1json"
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "campaign",
+    "record"
+  ],
+  "properties": {
+    "campaign": {
+      "$ref": "#/$defs/campaign"
+    },
+    "record": {
+      "description": "The caller's own consent record in the campaign, or null when the campaign lists none for their account.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/record"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "words": {
+      "$ref": "#/$defs/words"
+    },
+    "answerable": {
+      "description": "On an inbox item: whether an answer can be recorded or withdrawn now, which is while the campaign is `open`.",
+      "type": "boolean"
+    }
+  },
+  "oneOf": [
+    {
+      "description": "The consent page's document: with the words, without `answerable`.",
+      "required": [
+        "words"
+      ],
+      "not": {
+        "required": [
+          "answerable"
+        ]
+      }
+    },
+    {
+      "description": "An inbox item: with `answerable`, without the words.",
+      "required": [
+        "answerable"
+      ],
+      "not": {
+        "required": [
+          "words"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "instant": {
+      "description": "A UTC instant, RFC 3339.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "sha": {
+      "description": "A git commit id: forty lower-case hexadecimal characters.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "campaign": {
+      "description": "The campaign: its repository, the licence it relicenses from, its state and its records counted by state. No record of anybody, and no login.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "repoNodeId",
+        "nameWithOwner",
+        "inboundSpdx",
+        "state",
+        "stateAt",
+        "counts"
+      ],
+      "properties": {
+        "id": {
+          "description": "The campaign's id: `cmp_` and a lower-case ULID.",
+          "type": "string",
+          "pattern": "^cmp_[0-9a-hjkmnp-tv-z]{26}$"
+        },
+        "repoNodeId": {
+          "description": "The repository's GitHub node id, in either of GitHub's forms.",
+          "type": "string",
+          "pattern": "^(R_[A-Za-z0-9_-]{6,118}|MDEwOlJlcG9zaXRvcnk[A-Za-z0-9+/=]{1,96})$"
+        },
+        "nameWithOwner": {
+          "description": "The repository's `owner/name` as GitHub gave it when the campaign started: a label, and the name the approval sentence names.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9-]{0,38}/[A-Za-z0-9._-]{1,100}$"
+        },
+        "inboundSpdx": {
+          "description": "The licence the campaign relicenses from, as GitHub's SPDX identifier when the campaign started.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9.+-]{0,63}$"
+        },
+        "state": {
+          "description": "The campaign's state. A campaign still being set up (`draft`, `analyzing`) is never answered.",
+          "enum": [
+            "open",
+            "frozen",
+            "completed",
+            "converted",
+            "abandoned"
+          ]
+        },
+        "stateAt": {
+          "description": "When the campaign entered its current state.",
+          "$ref": "#/$defs/instant"
+        },
+        "counts": {
+          "description": "The campaign's records counted by state, the caller's included.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "pending",
+            "approved",
+            "declined",
+            "unreachable",
+            "excluded"
+          ],
+          "properties": {
+            "pending": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "approved": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "declined": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unreachable": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "excluded": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "record": {
+      "description": "The caller's own consent record: who (their login), how much and which code, as the analysis listed it, and their answer.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "login",
+        "commits",
+        "linesAdded",
+        "linesDeleted",
+        "scope",
+        "state",
+        "stateAt"
+      ],
+      "properties": {
+        "id": {
+          "description": "The record's id: `cons_` and a lower-case ULID. A withdrawal names it.",
+          "type": "string",
+          "pattern": "^cons_[0-9a-hjkmnp-tv-z]{26}$"
+        },
+        "login": {
+          "description": "The caller's GitHub login as GitHub gave it when the repository's history was analysed.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[^\\s]+$"
+        },
+        "commits": {
+          "description": "The caller's commits on the analysed history, counted exactly.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "linesAdded": {
+          "description": "GitHub's own figure, approximate; null where GitHub gave none.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "linesDeleted": {
+          "description": "GitHub's own figure, approximate; null where GitHub gave none.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "scope": {
+          "description": "The caller's oldest (`first`) and newest (`last`) commit on the analysed history: the code an answer is about.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "first",
+            "last"
+          ],
+          "properties": {
+            "first": {
+              "$ref": "#/$defs/sha"
+            },
+            "last": {
+              "$ref": "#/$defs/sha"
+            }
+          }
+        },
+        "state": {
+          "description": "`pending` (no answer, or an answer withdrawn), `approved` or `declined`.",
+          "enum": [
+            "pending",
+            "approved",
+            "declined"
+          ]
+        },
+        "stateAt": {
+          "description": "When the record entered its state: the listing for a record never answered, else the newest answer or withdrawal.",
+          "$ref": "#/$defs/instant"
+        }
+      }
+    },
+    "words": {
+      "description": "The approval sentence in force for this repository: its version, the SHA-256 of its UTF-8 bytes, and the sentence itself exactly as shown.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "sha256",
+        "approve"
+      ],
+      "properties": {
+        "version": {
+          "description": "The sentence's version label, recorded with an approval.",
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$"
+        },
+        "sha256": {
+          "description": "The lower-case hex SHA-256 of `approve`'s UTF-8 bytes, which an approval sends back.",
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "approve": {
+          "description": "The sentence an approval approves, with the repository's `owner/name` in it, exactly as the page shows it.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    }
+  }
+}

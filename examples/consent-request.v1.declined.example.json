@@ -1,0 +1,31 @@
+{
+  "campaign": {
+    "id": "cmp_01jfc0ns3nt0000000000000a1",
+    "repoNodeId": "R_kgDOexample1",
+    "nameWithOwner": "example-org/copyleft-tool",
+    "inboundSpdx": "GPL-3.0",
+    "state": "open",
+    "stateAt": "2026-11-17T09:00:00Z",
+    "counts": {
+      "pending": 2,
+      "approved": 3,
+      "declined": 1,
+      "unreachable": 1,
+      "excluded": 1
+    }
+  },
+  "record": {
+    "id": "cons_01jfc0ns3nt0000000000000r1",
+    "login": "example-contributor",
+    "commits": 14,
+    "linesAdded": 820,
+    "linesDeleted": 96,
+    "scope": {
+      "first": "0a1b2c3d4e5f60718293a4b5c6d7e8f901234567",
+      "last": "4f2c9e1b7a6d3c0e8f5b2a9d6c3e0f7b4a1d8c5e"
+    },
+    "state": "declined",
+    "stateAt": "2026-11-17T10:30:05Z"
+  },
+  "answerable": true
+}

@@ -1,0 +1,23 @@
+{
+  "campaign": {
+    "id": "cmp_01jfc0ns3nt0000000000000a1",
+    "repoNodeId": "R_kgDOexample1",
+    "nameWithOwner": "example-org/copyleft-tool",
+    "inboundSpdx": "GPL-3.0",
+    "state": "open",
+    "stateAt": "2026-11-17T09:00:00Z",
+    "counts": {
+      "pending": 2,
+      "approved": 3,
+      "declined": 1,
+      "unreachable": 1,
+      "excluded": 1
+    }
+  },
+  "record": null,
+  "words": {
+    "version": "draft-0",
+    "sha256": "df8cb2927c4605dfd7b313fc7311902842e0febcfb02d499d3a4ceea8173f15c",
+    "approve": "I approve that my contributions to example-org/copyleft-tool are licensed under the Purpose Source License 1.0 in its future releases. Versions already released keep their licence."
+  }
+}
