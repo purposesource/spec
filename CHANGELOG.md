@@ -1425,6 +1425,18 @@ value inside `v1` is not additive (versioning policy 1).*
 - No other member, rule or enum moves. Every payload valid under 1.7.0 still validates and means
   the same, and every example keeps its bytes.
 
+### 1.8.1 — unreleased (2026-11-16; ops decision D218 item 8)
+
+- Wording on an existing member. `claims` said that corporate types embed the kit as an integral
+  page with the binding statement on the certificate face (CERT-053). Buyers keep their own words
+  (D218 item 8): the kit's company sentences stay published as optional ready-made sentences that
+  bind nothing, so a payment or status certificate encloses no kit page and prints a non-binding
+  line where the binding statement stood. The description now says so, and that only a contributor
+  certificate encloses its kit. No constraint moved; `fsRefs` gain D218.
+- `examples/certificate.v1.example.json`, a payment certificate, carries no `claims` block: its
+  `binding` was the sentence a buyer's certificate no longer prints. Every payload valid under 1.8.0
+  still validates.
+
 ## certificate-record.v1.json
 
 ### 1.0.0 — unreleased
@@ -1598,7 +1610,17 @@ value inside `v1` is not additive (versioning policy 1).*
   policy is amended inside its v1 document and its counter does not move (rule 5; ops decisions
   D136 item 1 and D218 item 8).
 - Wording. `policyVersion`'s description says so: it is incremented when a permitted or prohibited
-  claim changes from the public launch, and stays 1 before it.
+  claim changes from the public launch, and stays 1 before it. The schema's own description ends the
+  same way: the policy changes only when the rule it encodes changes, which `policyVersion` counts
+  from the public launch.
+- Wording (2026-11-18; ops decision D218 item 8, buyers keep their own words). Only a contributor
+  certificate encloses the claim-language kit and binds its holder to it; a payment or status
+  certificate binds no kit text. `binding` says which certificate prints the CERT-053 statement,
+  `permitted` that the kit is binding on a contributor certificate and optional on a payment or
+  status certificate, `prohibited` that it binds only a contributor certificate's holder,
+  `kitVariant` that the variant words the class and only the contributor variant binds its holder,
+  and the schema's own description that a holder reads what the kit offers or requires. No
+  constraint moved: this entry is completed in place rather than followed by a patch release.
 
 ## claim-kit.v1.json
 
@@ -1846,6 +1868,11 @@ value inside `v1` is not additive (versioning policy 1).*
   "SAMPLE — ", and two self-test cases prove that rule able to fail. The schema's description and the `variants`
   comment now say kit-1 carries the variant instead of naming the deleted example. No constraint moved, so the file
   stays 1.3.0: an unreleased pre-release entry, completed in place.
+- *(2026-11-18; ops decision D218 item 8, buyers keep their own words.)* Wording. `$defs.variant.binding` gains a
+  description: the statement is printed only by a certificate that encloses this kit, which since D218 item 8 is a
+  contributor certificate. A payment or status certificate encloses no kit and binds no kit text
+  (`certificate-policy.v1.json` 1.2.0). The `const` stays, so kit-1 keeps its bytes; no constraint moved, and the
+  file stays 1.3.0, its entry completed in place.
 
 ## ct-segment.v1.json
 

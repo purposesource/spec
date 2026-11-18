@@ -4,14 +4,14 @@
   "title": "Certificate JWS payload profile (v1)",
   "description": "The signed payload of a certificate. Header is fixed: `{\"alg\":\"ES256\",\"kid\":\"psn-{env}-{yyyy}-{n}\",\"typ\":\"application/psn-cert+jws\",\"cty\":\"application/json\"}`; the payload is canonicalised with RFC 8785 (JCS) before signing, the compact serialisation IS the certificate, and `SHA-256(compact JWS string)` is the hash that enters the transparency log (FS08-050). Keys are born non-exportable inside the movement's own Key Vault and only one principal may sign (FS-00 §6.4, FS-00 §3).\n\nVERIFICATION ORDER (published in the Trust Center, CERT-025): resolve `kid` in the JWKS → verify ES256 over the compact JWS → check `SHA-256(jws)` appears in the transparency log → fetch the certificate record for live status. Steps 1–2 work fully offline with a JWKS copy. A signature that verifies while its hash is ABSENT from the log renders UNVERIFIED — that is the rogue-issuance detector, not a soft warning (CERT-030).\n\nFUNDING TRUTH (CERT-002/013, D14, COM-066): `amountMinor` + `cur` appear ONLY where money actually moved, and never without `amountKind`, which distinguishes a fee paid from an impact figure routed from a documented donation. One payload never conflates them. A waived organisation that funded nothing can only ever hold `license-status.waiver`.\n\nMATERIALITY (CERT-014/054, D15): a per-contributor monetary figure enters the payload only if it meets the published floor for the attested period; otherwise the payload carries `impactBelowFloor: true` and no figure at all, so a template cannot leak a gated number it never received (FS08-091). No field can express a cross-contributor ranking (CERT-015 by construction).\n\nAt P-M2 only `supporter.entitlement` and `license-status.*` are issuable, by an operator-run signing script with the same profile (FS08-040/041). Impact figures do not exist before the first disbursed ledger row (NEV-017).",
   "x-psn": {
-    "specVersion": "1.8.0",
+    "specVersion": "1.8.1",
     "phase": "P-M2 (supporter.entitlement + license-status.* only)",
     "artifactPath": "(compact JWS; embedded in the PDF and in the certificate record's `jws` field)",
     "authoritative": true,
     "producer": "FS-08 signer (P-M2: operator script tools/cert-sign, VS-27)",
     "consumers": ["verify page (client-side validation, VS-25)", "offline verifiers with a JWKS copy", "transparency-log auditors"],
     "signature": { "alg": "ES256", "typHeader": "application/psn-cert+jws", "ctyHeader": "application/json", "canonicalisation": "RFC 8785 (JCS) before signing" },
-    "fsRefs": ["FS-00 §6.4", "FS-08 §6 (FS08-050…FS08-053)", "FS-08 §2 (FS08-010)", "FS-08 §10", "CERT-010…CERT-015", "D17", "D181"],
+    "fsRefs": ["FS-00 §6.4", "FS-08 §6 (FS08-050…FS08-053)", "FS-08 §2 (FS08-010)", "FS-08 §10", "CERT-010…CERT-015", "D17", "D181", "D218"],
     "vsRefs": ["VS-27", "VS-29", "VS-30"],
     "changelog": "CHANGELOG.md#certificatev1json"
   },
@@ -133,7 +133,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["kitVersion", "permitted", "prohibited", "binding"],
-      "description": "The machine-readable claim-language kit block (CERT-050). Corporate types embed the kit as an integral page of the rendered PDF including the binding statement on the certificate face (CERT-053). `license-status` certificates carry the STATUS-ONLY kit variant: coverage-status wording exclusively, with no supporter or impact phrasing anywhere (CERT-052, MKT-034).",
+      "description": "The machine-readable claim-language kit block (CERT-050). Only a contributor certificate encloses its kit, as an integral page of the rendered PDF with the binding statement on the certificate face (CERT-053). A payment or status certificate binds no kit text (ops decision D218 item 8, 2026-11-16: buyers keep their own words, and the kit's company sentences are optional ready-made sentences that bind nothing): its rendered PDF encloses no kit page and prints a non-binding line in the binding statement's place, so this block, where such a payload carries it, binds nothing. `license-status` wording is coverage-status wording exclusively, with no supporter or impact phrasing anywhere (CERT-052, MKT-034).",
       "properties": {
         "kitVersion": { "type": "string", "pattern": "^kit-[0-9]+$" },
         "permitted": { "type": "array", "minItems": 1, "items": { "type": "string", "maxLength": 500 } },

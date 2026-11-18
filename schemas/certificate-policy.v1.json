@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://purposesource.org/spec/schemas/certificate-policy.v1.json",
   "title": "Certificate policy — /certs/policy/latest.json",
-  "description": "The one published enumeration of every certificate class, its variants, and the exact claims each permits and prohibits (COM-084, FS08-011). It is the machine-readable half of the policy page: a reader who holds a certificate can look up its `typ` here and read what the holder is allowed to say about it, and a scanner can check a published claim against a document rather than against a marketing page.\n\nTwo properties make this a contract rather than a description. First, `classes[]` is the ISSUABLE set at the phase named in `phase` — a class absent from it cannot be issued, and `notIssuable[]` says which classes those are and what has to exist first. Second, the machine `typ` tokens are the frozen enum of the architecture chapter and are never renamed to match prose: `name` carries the human name, `typ` carries the token, and a consumer switches on the token.\n\nThe policy is not data about the world. Apart from the batch timestamp every artifact carries, it is identical on every plane and in every environment, it holds no counters and no subject data, and it changes only when the rule it encodes changes — which is what `policyVersion` records.",
+  "description": "The one published enumeration of every certificate class, its variants, and the exact claims each permits and prohibits (COM-084, FS08-011). It is the machine-readable half of the policy page: a reader who holds a certificate can look up its `typ` here and read what the kit offers or requires for it, and a scanner can check a published claim against a document rather than against a marketing page.\n\nTwo properties make this a contract rather than a description. First, `classes[]` is the ISSUABLE set at the phase named in `phase` — a class absent from it cannot be issued, and `notIssuable[]` says which classes those are and what has to exist first. Second, the machine `typ` tokens are the frozen enum of the architecture chapter and are never renamed to match prose: `name` carries the human name, `typ` carries the token, and a consumer switches on the token.\n\nThe policy is not data about the world. Apart from the batch timestamp every artifact carries, it is identical on every plane and in every environment, it holds no counters and no subject data, and it changes only when the rule it encodes changes, which `policyVersion` counts from the public launch.",
   "x-psn": {
     "specVersion": "1.2.0",
     "phase": "P-M2",
@@ -48,7 +48,7 @@
     "binding": {
       "type": "string",
       "minLength": 20,
-      "description": "The CERT-053 statement that the certificate artifact carries on its face: public claims about it are governed by the claim-language kit."
+      "description": "The CERT-053 statement a certificate that encloses the claim-language kit carries on its face. Since ops decision D218 item 8 that is the contributor participation certificate only; a payment or status certificate encloses no kit and does not print it."
     },
     "claimKitVersion": {
       "type": ["string", "null"],
@@ -99,7 +99,7 @@
         },
         "kitVariant": {
           "enum": ["supporter", "status-only", "sponsor", "contributor"],
-          "description": "Which claim-language kit variant governs the class. `status-only` permits coverage-status wording exclusively (CERT-052, MKT-034). `contributor` is the kit's contributor variant, which governs the contributor participation certificate in both of its word sets (the contributor words and, on a certificate that prints them, the volunteer words)."
+          "description": "Which claim-language kit variant words the class; only the contributor variant binds its holder. `status-only` permits coverage-status wording exclusively (CERT-052, MKT-034). `contributor` is the kit's contributor variant, which governs the contributor participation certificate in both of its word sets (the contributor words and, on a certificate that prints them, the volunteer words)."
         },
         "variants": {
           "type": "array",
@@ -110,13 +110,13 @@
           "type": "array",
           "minItems": 1,
           "items": { "type": "string", "minLength": 10 },
-          "description": "The wording the holder may publish. A claim outside this list is outside the kit, and the kit is contractually binding (CERT-053)."
+          "description": "The wording the kit offers the holder. On a contributor certificate the kit is contractually binding, and a claim outside this list is outside it (CERT-053). A payment or status certificate binds no kit text: its holder may use its own words, and this list is optional (ops decision D218 item 8)."
         },
         "prohibited": {
           "type": "array",
           "minItems": 1,
           "items": { "type": "string", "minLength": 5 },
-          "description": "The wording the holder may not publish, stated as prohibitions so a reviewer can match against them (FS08-070)."
+          "description": "The wording the holder may not publish, stated as prohibitions so a reviewer can match against them (FS08-070). It binds only a contributor certificate's holder (ops decision D218 item 8)."
         },
         "rules": { "$ref": "#/$defs/ruleIds" }
       }
