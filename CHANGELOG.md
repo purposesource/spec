@@ -1101,6 +1101,16 @@ creating one.
   the signer (`EntitlementRecordValidation.IsHostname`) refused a final dot from the start.
 - `maxLength` 253 is unchanged.
 
+### 1.3.0 — unreleased (2026-11-17; ops decision D192 item 4, PS-2606)
+
+- Additive. The record gains the OPTIONAL member `dissolution` `{ at, successorCoId? }`, present only for an
+  organisation the commercial register shows dissolved, or absorbed by another in a merger, as two of the
+  Association's stewards recorded it from the register extract (D192 item 4). `at` (a `date-time`, required) is when
+  that act took effect on the platform; `successorCoId` (a `$defs.coId`) names a merger's successor registered on
+  the platform. Closed (`additionalProperties: false`). No term moves to a successor, and cov-v1 does not read the
+  member: coverage is still read from the terms and their dates alone. Every record that validated still validates.
+  Nothing has been published against this file (policy 5), so the minor moves in place.
+
 ## covered-organisations.v1.json
 
 ### 1.0.0 — unreleased (2026-09-15; ops decision D44)
