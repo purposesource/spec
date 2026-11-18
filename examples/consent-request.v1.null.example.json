@@ -16,8 +16,8 @@
   },
   "record": null,
   "words": {
-    "version": "draft-0",
-    "sha256": "df8cb2927c4605dfd7b313fc7311902842e0febcfb02d499d3a4ceea8173f15c",
-    "approve": "I approve that my contributions to example-org/copyleft-tool are licensed under the Purpose Source License 1.0 in its future releases. Versions already released keep their licence."
+    "version": "example",
+    "sha256": "50a2e22c856d4982dff891b8371f1c1c85f8bb1227e3746aed32eede85e84e95",
+    "approve": "Sample approval sentence for example-org/copyleft-tool. The api serves the sentence in force; this example is not it."
   }
 }
