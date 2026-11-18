@@ -3441,10 +3441,13 @@ reasoning: no month export has ever been published with a row in it.
   attempt's identifier, through migration 0107's classes; the identifier is read to match the attempt and never published).
   The schema's first `allOf` block still keeps what a transfer has to `transferred`; its `else` now holds the new status to
   its day, admits its line, and refuses the rest.
-- **Not stated in this version:** the mark «Einzelauslösung» on such a share (the Association's records hold no check of a
-  transfer day for a debit made this way, so the row carries none); a month whose only payments are such debits, which has
-  no executed transfer and so no record, as the path says; and a payment made this way that came back from the receiving
-  bank, which stays `paid-without-signoffs`.
+- **Not stated in this version:** the mark «Einzelauslösung» on such a share. The Association's records do not hold how
+  many board members released such a debit at the bank, so the row carries no mark. While the bank has set up no mandate
+  for the transfer run on the fees account, the statutes have every debit of it released by two (Art. 19 Abs. 1 and 6).
+  Once the bank sets one up, the steward's incident act records the bank's release, and a release by one board member
+  alone carries the mark beside this status (an additive change). Also not stated: a month whose only payments are such
+  debits, which has no executed transfer and so no record, as the path says; and a payment made this way that came back
+  from the receiving bank, which stays `paid-without-signoffs`.
 - `check:transfers` holds the new status: a new example, `examples/transfers.v1.paid-without-signoffs.example.json`
   (December 2027, linked to `cost-support.v1.released-hold.example.json` by its bytes' SHA-256: two shares transferred on
   3 January 2028, one paid on 4 January before two people had signed it off, and one scheduled), and a counter that fails
@@ -6558,7 +6561,7 @@ which kind of change each entry was.
 - Minor, and **pre-release**, with the record it serves: `getTransfersRecord` answers `transfers.v1` 1.2.0, whose `status`
   gains `paid-without-signoffs`. No operation, status code, error code, cache class or parameter moved, and the route still
   names nobody.
-- The description says what 1.2.0 adds: a share that a debit made before two people had signed it off paid, with the day
+- The description says what 1.2.0 adds: a share paid by a debit made before two people had signed it off, with the day
   that debit was booked and its line by the bank's reference, and no identifier, as the fees account's statement records
   the debit as an incident (`debit-without-signoffs`) and its line carries none; the share is owed no further transfer and
   is not a transfer as the Association's records make one. A row now changes in six cases, and the cache paragraph names

@@ -196,8 +196,8 @@ Association holds back is `held`, with the day and one of four generic grounds, 
 (a recipient struck from the List after the close reads `struck (Art. 7 Abs. 6)`, ops decision D177 item
 3), and each transfer carries the rest of the line the statutes ask for: what it paid in the currency of
 the recipient's account and at which rate, its charges as its debit line booked them, and the mark
-«Einzelauslösung» where one board member alone released it. Since 1.2.0 (2026-11-16) a share that a
-debit made before two people had signed it off paid is `paid-without-signoffs`, with the day the debit was
+«Einzelauslösung» where one board member alone released it. Since 1.2.0 (2026-11-16) a share paid by a
+debit made before two people had signed it off is `paid-without-signoffs`, with the day the debit was
 booked and its line by the bank's reference and no identifier, as the fees account's statement records
 the debit as an incident (`debit-without-signoffs`): it is owed no further transfer, and it is not a
 transfer.
