@@ -99,7 +99,7 @@
         },
         "kitVariant": {
           "enum": ["supporter", "status-only", "sponsor", "contributor"],
-          "description": "Which claim-language kit variant words the class; only the contributor variant binds its holder. `status-only` permits coverage-status wording exclusively (CERT-052, MKT-034). `contributor` is the kit's contributor variant, which governs the contributor participation certificate in both of its word sets (the contributor words and, on a certificate that prints them, the volunteer words)."
+          "description": "Which claim-language kit variant words the class; only the contributor variant binds its holder. `status-only` offers coverage-status wording only (CERT-052, MKT-034). `contributor` is the kit's contributor variant, which governs the contributor participation certificate in both of its word sets (the contributor words and, on a certificate that prints them, the volunteer words)."
         },
         "variants": {
           "type": "array",

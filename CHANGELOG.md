@@ -1621,6 +1621,9 @@ value inside `v1` is not additive (versioning policy 1).*
   `kitVariant` that the variant words the class and only the contributor variant binds its holder,
   and the schema's own description that a holder reads what the kit offers or requires. No
   constraint moved: this entry is completed in place rather than followed by a patch release.
+- Wording (later on 2026-11-18; ops decision D218 item 8). `kitVariant` says the `status-only`
+  variant offers coverage-status wording only, where it said the variant permits that wording
+  exclusively. No constraint moved, and the entry stays completed in place.
 
 ## claim-kit.v1.json
 
@@ -1873,6 +1876,13 @@ value inside `v1` is not additive (versioning policy 1).*
   contributor certificate. A payment or status certificate encloses no kit and binds no kit text
   (`certificate-policy.v1.json` 1.2.0). The `const` stays, so kit-1 keeps its bytes; no constraint moved, and the
   file stays 1.3.0, its entry completed in place.
+- *(Later on 2026-11-18; ops decision D218 item 8.)* Wording. The description's first sentence names the binding
+  statement that a certificate enclosing the kit prints on its face, since D218 item 8 the contributor participation
+  certificate only, and `consumers` says the renderer embeds the kit as an integral PDF page carrying the binding
+  statement on a contributor participation certificate, while a payment or status certificate encloses no kit. They
+  also say the licence-status class offers coverage-status wording only, the checkout statement offers the kit at
+  purchase, and a published claim is checked against the document that words it. No constraint moved and kit-1
+  keeps its bytes, so the file stays 1.3.0, its entry completed in place.
 
 ## ct-segment.v1.json
 
