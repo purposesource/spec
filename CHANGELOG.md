@@ -112,6 +112,10 @@ The compliance export (2026-10-24; FS-04 FS04-067, URS APP-061) adds one more, w
 with one line per Entitlement its Licences page lists, never published — forty-five schemas in all, the forty-fourth being
 `org-webhook-event.v1.json` (2026-11-11), whose section is below and which these paragraphs had not counted.
 
+The consent engine's second slice (2026-11-17; ops decision D24, FS09-064, PS-2968) adds one more, with its own section below:
+`consent-request.v1.json`, a relicensing-consent campaign as one of its contributors reads it, with their own record and the
+sentence they are asked to approve, never published — forty-six schemas in all.
+
 ### Contracts published beyond the initially-scoped ten
 
 Seven schemas were added because another repository's acceptance test names a schema
@@ -5449,6 +5453,29 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   same campaign, the same `counts` and every step; the next page's cursor is the api's own member beside the document
   (`next`). `counts` and `analysis.contributors` are now said to count the inventory over every page, so a reader checks
   them against the whole inventory and not against one page's `records`. The example is one page holding every record.
+
+## consent-request.v1.json
+
+### 1.0.0 — unreleased (2026-11-17; ops decision D24, FS-09 §6's consent engine, slice 2a; FS09-064, FS04-055; platform migration 0164, PS-2968) — pre-release
+
+- New, **pre-release**: a relicensing-consent campaign as one contributor it lists reads it, from the api's
+  `GET /v1/consents/campaigns/{campaignId}` (the consent page: `campaign`, `record` and `words`) and each item of
+  `GET /v1/me/consents` (the inbox: `campaign`, `record` and `answerable`). NEVER PUBLISHED: the api answers it to the
+  signed-in contributor alone, about their own record, found by their GitHub account.
+- The campaign carries no record of anybody and no login: its repository, the licence it relicenses from, its state
+  (`open`, `frozen`, `completed`, `converted` or `abandoned`; a campaign still being set up is never answered) and its
+  records counted by state. The record is the caller's own: their login as the analysis listed it, their commits, GitHub's
+  approximate line figures, the scope of their code, and their answer (`pending`, `approved` or `declined`), or null when
+  the campaign does not list their account.
+- `words` is the approval sentence in force for the repository, exactly as the page shows it, with its version and the
+  SHA-256 of its UTF-8 bytes, which an approval sends back and the platform records with it: a record never claims a text
+  the person was not shown. A document carries `words` (the page) or `answerable` (an inbox item), never both.
+- What JSON Schema cannot state is in the description: the counts include the caller's record, `words.sha256` is the
+  SHA-256 of `words.approve`, and `answerable` is true exactly while the campaign is `open`.
+- Examples, one per state of the caller's record: `consent-request.v1.example.json` (pending, the page),
+  `consent-request.v1.approved.example.json` (approved, the page), `consent-request.v1.declined.example.json` (declined,
+  an inbox item of an open campaign) and `consent-request.v1.null.example.json` (the page for an account the campaign does
+  not list).
 
 ## vesting-snapshot.v1.json
 
