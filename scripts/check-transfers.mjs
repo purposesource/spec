@@ -43,7 +43,8 @@
  *               transfer that goes back to `scheduled` or `held` says why in a note, and a transfer that
  *               stays keeps its day, identifier, what it paid, its rate, its charges and its release
  *               mark unless a later attempt replaced it; a share paid before two people had signed it
- *               off was `scheduled` before, and stays so on its day (1.2.0);
+ *               off was `scheduled` (or, 1.3.0, `held`) before, and stays so on its day (1.2.0) until it is
+ *               owed again, `scheduled` or `held`, once that debit's return is recorded (1.3.0);
  *     charges   (g) a transferred row's `chargesMinor` is the amount of the fees account's `transfer-out`
  *               line that carries its `endToEndId`, less the share, wherever a `fees-account-statement.v1`
  *               document carries that line. No statement example covers the record's month, so the rule
@@ -326,13 +327,18 @@ const regenerationProblems = (earlier, later, at) => {
         found.push(`${where}: receipt ${entry.ref} was withdrawn`);
       }
     }
-    // 1.2.0: only a scheduled share is paid before two people had signed it off, and the statement keeps that class once
-    // given, so the share stays so, on the day its debit was booked.
-    if (before.status === PAID_WITHOUT_SIGNOFFS && (after.status !== PAID_WITHOUT_SIGNOFFS || after.date !== before.date)) {
-      found.push(`${where}: was paid before two people had signed it off on ${before.date}, and became ${after.status}${after.date ? ` on ${after.date}` : ''}: such a share stays so, on its day`);
+    // 1.2.0: a share owed is paid before two people had signed it off, and the statement keeps that class once given, so the
+    // share stays so, on the day its debit was booked; 1.3.0: a held share too (a returned transfer's attempt paid by hand),
+    // and it is owed again, scheduled or held, once that debit's return is recorded.
+    const owed = ['scheduled', 'held'];
+    if (before.status === PAID_WITHOUT_SIGNOFFS && after.status === PAID_WITHOUT_SIGNOFFS && after.date !== before.date) {
+      found.push(`${where}: was paid before two people had signed it off on ${before.date}, and was re-dated ${after.date}: such a share stays so, on its day`);
     }
-    if (after.status === PAID_WITHOUT_SIGNOFFS && before.status !== PAID_WITHOUT_SIGNOFFS && before.status !== 'scheduled') {
-      found.push(`${where}: went from ${before.status} to ${PAID_WITHOUT_SIGNOFFS}, and only a scheduled share is paid that way`);
+    if (before.status === PAID_WITHOUT_SIGNOFFS && after.status !== PAID_WITHOUT_SIGNOFFS && !owed.includes(after.status)) {
+      found.push(`${where}: was paid before two people had signed it off on ${before.date}, and became ${after.status}: such a share stays so, or is owed again once its debit's return is recorded`);
+    }
+    if (after.status === PAID_WITHOUT_SIGNOFFS && before.status !== PAID_WITHOUT_SIGNOFFS && !owed.includes(before.status)) {
+      found.push(`${where}: went from ${before.status} to ${PAID_WITHOUT_SIGNOFFS}, and only a share owed is paid that way`);
     }
     if (before.status === 'transferred' && after.status !== 'transferred' && after.note === undefined) {
       found.push(`${where}: went back from transferred to ${after.status} with no note saying why`);
@@ -547,16 +553,14 @@ const regenMustFlag = [
   ['a row gone', edit(later, (d) => { d.transfers = d.transfers.filter((r) => r.recipientId !== HEALTH_RETURNED); })],
 ];
 /* 1.2.0's regeneration plants, each an earlier and a later record: a share paid before two people had signed it off was
-   scheduled, and stays so on its day. */
+   owed, and stays so on its day until its debit's return is recorded (1.3.0). */
 const paidEarlyRegenMustFlag = [
-  ['a share paid before two people had signed it off, scheduled again', mainPaidEarly, aMinuteOn(main)],
   ['a share paid before two people had signed it off, re-dated', mainPaidEarly, aMinuteOn(mainPaidEarly, (d) => { row(d, EDUCATION_RETRIED).date = '2027-12-01'; })],
   ['a share paid before two people had signed it off, then transferred', mainPaidEarly, aMinuteOn(later)],
   ['a transfer that became a share paid before two people had signed it off, with a note', main, aMinuteOn(main, (d) => {
     payingWithoutSignoffs(row(d, EDUCATION_SENT), '2027-12-01');
     row(d, EDUCATION_SENT).note = 'SAMPLE note.';
   })],
-  ['a held share that became a share paid before two people had signed it off', edit(main, (d) => { holding(row(d, EDUCATION_RETRIED), GROUNDS[2], '2027-12-01'); }), aMinuteOn(mainPaidEarly)],
 ];
 const chargesMustFlag = [
   ['charges one minor unit above what the debit line booked', edit(main, (d) => { row(d, HEALTH_RECEIPTED).chargesMinor += 1; }), plantedStatement(main)],
@@ -583,6 +587,8 @@ const mustPass = [
   ['the record with a share paid before two people had signed it off', paidEarly, null],
   ['a scheduled share whose prepared attempt was paid before two people had signed it off', mainPaidEarly, main],
   ['a share paid before two people had signed it off, regenerated as it stands', aMinuteOn(mainPaidEarly), mainPaidEarly],
+  ['a share paid before two people had signed it off, owed again once its debit\'s return is recorded (1.3.0)', aMinuteOn(main), mainPaidEarly],
+  ['a held share that became a share paid before two people had signed it off (1.3.0)', aMinuteOn(mainPaidEarly), edit(main, (d) => { holding(row(d, EDUCATION_RETRIED), GROUNDS[2], '2027-12-01'); })],
   ['a share paid before two people had signed it off on the day of the lock', edit(main, (d) => { payingWithoutSignoffs(row(d, EDUCATION_RETRIED), '2027-12-01'); }), null],
   ['a share struck from its recipient after the close, held', edit(main, (d) => { holding(row(d, EDUCATION_RETRIED)); }), null],
   ['a share held back on the day of the lock', edit(main, (d) => { holding(row(d, EDUCATION_RETRIED), GROUNDS[2], '2027-12-01'); }), null],

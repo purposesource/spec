@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.27.0
+  version: 1.27.1
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -179,7 +179,7 @@ tags:
   - name: fees-account
     description: "The statement of the fees account: for each locked month from the account's opening month, its opening and closing balances and every line the bank booked on it, with its class, and nothing that identifies a payer or a natural person."
   - name: transfers
-    description: "The month's transfers: for each locked month with an executed transfer, every listed recipient's share and whether it has been transferred, is held back or was paid before two people had signed it off, with the day, the transfer's identifier, what it paid and at which rate, its charges, the mark «Einzelauslösung» and the recipient's receipt by its reference once there is one, linked to the month's frozen cost-support document by its hash, and nothing that names a person or an account."
+    description: "The month's transfers: for each locked month with an executed transfer or a share paid before two people had signed it off, every listed recipient's share and whether it has been transferred, is held back or was paid before two people had signed it off, with the day, the transfer's identifier, what it paid and at which rate, its charges, the mark «Einzelauslösung» and the recipient's receipt by its reference once there is one, linked to the month's frozen cost-support document by its hash, and nothing that names a person or an account."
   - name: badges
     description: README badges — the shields.io endpoint body, and the SVG badges the edge draws for a repository, its README cards included, and for a certificate.
   - name: cards
@@ -3858,15 +3858,17 @@ paths:
         `batch.costSupportSha256`. JSON Schema can neither compare two documents nor sum across
         items, so the schema states in words the link and the arithmetic a reader checks.
 
-        One document per locked month with at least one executed transfer, never before the
-        month's ledger export is published; before a month's first transfer its shares are the
-        `disburse` rows of its export. An open month, a locked month with no executed transfer
-        and a month its producer withholds have no document and answer `404`, and a month
+        One document per locked month with at least one executed transfer or one share paid
+        before two people had signed it off, never before the month's ledger export is
+        published; before then its shares are the `disburse` rows of its export. An open month,
+        a locked month with neither and a month its producer withholds have no document and
+        answer `404`, and a month
         withheld after its record was published keeps that document as published.
 
         Regenerated, not written once. A month's rows are fixed from the first publication, and
         a row changes in six cases only: its share is transferred; its share is paid by a debit
-        made before two people had signed it off, and stays so; its transfer comes back
+        made before two people had signed it off, and stays so until that debit's return is
+        recorded, when it is owed again; its transfer comes back
         from the receiving bank before it reached the recipient, with a note saying so, so the
         share is owed again until it is sent again, unless its recipient is struck; the share
         is held back, or its hold ends; an attempt of a share that is not transferred is

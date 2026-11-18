@@ -200,7 +200,8 @@ the recipient's account and at which rate, its charges as its debit line booked 
 debit made before two people had signed it off is `paid-without-signoffs`, with the day the debit was
 booked and its line by the bank's reference and no identifier, as the fees account's statement records
 the debit as an incident (`debit-without-signoffs`): it is owed no further transfer, and it is not a
-transfer.
+transfer. Since 1.3.0 (2026-11-18) any attempt of the share counts, an abandoned or returned one too, a
+month with such a share has a record, and the share is owed again once the debit's return is recorded.
 
 The `purpose-licenses.v1` row (2026-10-24; FS-04 FS04-067) fixes the columns of the compliance export
 an organisation downloads from its own dashboard for its register or its auditors: one line per
