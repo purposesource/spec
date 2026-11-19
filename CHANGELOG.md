@@ -3415,6 +3415,50 @@ reasoning: no month export has ever been published with a row in it.
   alone); it admits a share held under each ground, charges below 0 and a transfer two board members released (17
   admissions).
 
+### 1.2.0 — unreleased (2026-11-16; the orchestrator's answer of 2026-11-04T16:49Z on PS-1906, reading 8, with the operator's word of 2026-11-04T17:42Z on its sentence; PS-2945) — pre-release
+
+- Minor, and **pre-release** under versioning policy 5: `status` gains `paid-without-signoffs`. Every 1.1.0 document stays
+  valid and reads the same; no example moves, and one is added.
+- **Why.** A debit of the fees account made before two people had signed it off in the Association's records is recorded on
+  the fees account's statement as an incident, never hidden (`fees-account-statement.v1` class `debit-without-signoffs`).
+  When such a debit pays a share's prepared transfer, the transfer is never marked executed, so 1.1.0 could publish the
+  share only as `scheduled`, which it defines as "the money has not reached the recipient": once a payment made by hand had
+  reached the recipient, the record would say the opposite for good, while the statement shows the debit.
+- **The status.** A share is `paid-without-signoffs` where a booked debit line of the fees account carries the identifier of
+  the share's newest attempt, prepared and not yet executed, and the statement's current class of that line is
+  `debit-without-signoffs`, a class that no later class replaces once given. The row carries `date`, required: the day the
+  statement booked that debit (Europe/Zurich, never before the lock's day); and `evidence`, the line by the bank's own
+  reference for its entry where the bank gave one, one `bank-line` entry and nothing else. The share is owed no further
+  transfer. It carries no `endToEndId`, as the statement's incident line carries none, and none of `paidAmountMinor`,
+  `paidCurrency`, `rate`, `rateDate`, `chargesMinor`, `singleRelease`, `receiptRef`, `heldOn` or `ground`: it is not a
+  transfer as the Association's records make one, and no impact figure is drawn from it. The class reads as the operator
+  gave it on 2026-11-04: "a debit made before two people had signed it off in the Association's records".
+- **Regenerated.** A row now changes in six cases: the new one is a `scheduled` share becoming `paid-without-signoffs`, and
+  it stays so. `generatedAt` takes the instant the store recorded the debit line that paid such a share.
+- **Amended descriptions:** the document's (a paragraph of its own, the first paragraph's list of what a row says, and the
+  regeneration case), `generatedAt`, `transfers`, `status`, `date`, `endToEndId`, `receiptRef`, `evidence`, `evidenceLink`
+  and its `kind`, and `x-psn`'s `phase` and `producer` (the current class of each booked debit line that carries an
+  attempt's identifier, through migration 0107's classes; the identifier is read to match the attempt and never published).
+  The schema's first `allOf` block still keeps what a transfer has to `transferred`; its `else` now holds the new status to
+  its day, admits its line, and refuses the rest.
+- **Not stated in this version:** the mark «Einzelauslösung» on such a share. The Association's records do not hold how
+  many board members released such a debit at the bank, so the row carries no mark. While the bank has set up no mandate
+  for the transfer run on the fees account, the statutes have every debit of it released by two (Art. 19 Abs. 1 and 6).
+  Once the bank sets one up, the steward's incident act records the bank's release, and a release by one board member
+  alone carries the mark beside this status (an additive change). Also not stated: a month whose only payments are such
+  debits, which has no executed transfer and so no record, as the path says; and a payment made this way that came back
+  from the receiving bank, which stays `paid-without-signoffs`.
+- `check:transfers` holds the new status: a new example, `examples/transfers.v1.paid-without-signoffs.example.json`
+  (December 2027, linked to `cost-support.v1.released-hold.example.json` by its bytes' SHA-256: two shares transferred on
+  3 January 2028, one paid on 4 January before two people had signed it off, and one scheduled), and a counter that fails
+  when no example shows the status. Its day is held to the lock's day and to the record's own day; the regeneration rule
+  holds that only a `scheduled` share becomes `paid-without-signoffs` and that it stays so on its day, each held to planted
+  pairs that fail when the rule is removed. The contract refuses a status near the new one and the new status without its
+  day or with an identifier, what a transfer paid, its currency, a rate with its day, charges, the release mark, a receipt
+  (with its reference, and as evidence alone), a day held or a ground (92 refusals with and without `format`, 4 by
+  `format` alone); it admits the status with its line, without one where the bank gave no reference, and with a note
+  (19 admissions).
+
 ## fees-account-statement.v1.json
 
 ### 1.0.0 — unreleased (2026-10-21; statutes Art. 12 para. 1 and Art. 20 para. 1; the payout design's §11.2)
@@ -5438,6 +5482,22 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 
 ## consent-campaign.v1.json
 
+### 1.1.0 — unreleased (2026-11-17; ops decision D24, FS-09 §6's consent engine, slice 2b; FS09-063, GH-047; platform PS-2969) — pre-release
+
+- Additive. **`trackingIssueUrl`**, optional: the link of the tracking issue the administrators posted in the repository from
+  the text the api prepares for them (`GET …/consent-campaign/issue-text`, the engine only prepares it and the administrator
+  posts it), recorded by `PUT …/consent-campaign/issue` once GitHub confirmed it names an issue of this repository and not a
+  pull request; `https://github.com/{owner}/{name}/issues/{number}`, or null until recorded and once cleared. An api that
+  predates it sends no member, which a reader takes as null.
+- Additive. **The step kind `issue-linked`**: an administrator recorded, replaced or cleared that link. It moves no state, so
+  its `from` and `to` are the same (in the description, which JSON Schema cannot state), and it is always an
+  `administrator`'s (an `if`/`then` on the new kind; no existing step is touched).
+- Words only: `abandoned` and `ended` now also cover an administrator's stop (`POST …/consent-campaign/abandon`), an
+  `abandoned` step by an `administrator` with `ended.reason` null, which the enum already admitted; the `artifactPath` names
+  the two new routes that answer the document; `fsRefs` gain FS09-063 and GH-047.
+- Example: `consent-campaign.v1.issue-linked.example.json`, the open GPL-3.0 campaign of the first example after its
+  administrator recorded the issue's link: the member and the step.
+
 ### 1.0.0 — unreleased (2026-10-24; ops decision D24, FS-09 §6's consent engine, slice 1; platform migration 0109, PS-2051) — pre-release
 
 - New, **pre-release**: a repository's relicensing-consent campaign as its administrators read it, from the api's
@@ -6509,6 +6569,21 @@ which kind of change each entry was.
   `rowCount` 0, `locked` false, `lockedAt` null and its export's address. Its summary and every other member are
   unchanged. `check:openapi-examples` validates the same 85 examples.
 - `coverage/waiver-certificate-vectors.json` names this version, `specVersion` 1.26.1, as `check:certificate-vectors`
+  requires of it. No vector, certificate or key set moved; the website's generator (`scripts/waiver-certificate-vectors.mjs`)
+  names the same version in the website's change beside this one, so it writes these bytes again, byte for byte.
+
+### 1.27.0 — unreleased (2026-11-16; `transfers.v1` 1.2.0; PS-2945) — **pre-release** change under versioning policy 5
+
+- Minor, and **pre-release**, with the record it serves: `getTransfersRecord` answers `transfers.v1` 1.2.0, whose `status`
+  gains `paid-without-signoffs`. No operation, status code, error code, cache class or parameter moved, and the route still
+  names nobody.
+- The description says what 1.2.0 adds: a share paid by a debit made before two people had signed it off, with the day
+  that debit was booked and its line by the bank's reference, and no identifier, as the fees account's statement records
+  the debit as an incident (`debit-without-signoffs`) and its line carries none; the share is owed no further transfer and
+  is not a transfer as the Association's records make one. A row now changes in six cases, and the cache paragraph names
+  the new one. The tag `transfers` says the same in brief.
+- The route's two examples are unchanged; `check:openapi-examples` validates the same 85 examples.
+- `coverage/waiver-certificate-vectors.json` names this version, `specVersion` 1.27.0, as `check:certificate-vectors`
   requires of it. No vector, certificate or key set moved; the website's generator (`scripts/waiver-certificate-vectors.mjs`)
   names the same version in the website's change beside this one, so it writes these bytes again, byte for byte.
 

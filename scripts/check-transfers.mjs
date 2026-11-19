@@ -32,7 +32,8 @@
  *     rows      one row per recipient, in `recipientId` order; an `endToEndId` names the record's month
  *               and its recipient (the last 12 characters of the ULID); a transfer is not dated, and a
  *               share not held, before the day of the lock, nor after the day of the record's own
- *               `generatedAt` (Europe/Zurich); a transfer paid in the record's currency pays the share
+ *               `generatedAt` (Europe/Zurich), and nor is a share paid before two people had signed it
+ *               off (`paid-without-signoffs`, 1.2.0); a transfer paid in the record's currency pays the share
  *               and states no rate, and one paid in another currency states its rate (1.1.0);
  *               `receiptRef` is the reference of one of the row's receipts; a row names at most one bank
  *               line and each receipt once;
@@ -41,7 +42,8 @@
  *               regenerated: the same rows (recipient, category, amount), no receipt withdrawn, a
  *               transfer that goes back to `scheduled` or `held` says why in a note, and a transfer that
  *               stays keeps its day, identifier, what it paid, its rate, its charges and its release
- *               mark unless a later attempt replaced it;
+ *               mark unless a later attempt replaced it; a share paid before two people had signed it
+ *               off was `scheduled` before, and stays so on its day (1.2.0);
  *     charges   (g) a transferred row's `chargesMinor` is the amount of the fees account's `transfer-out`
  *               line that carries its `endToEndId`, less the share, wherever a `fees-account-statement.v1`
  *               document carries that line. No statement example covers the record's month, so the rule
@@ -57,7 +59,9 @@
  *   with an identifier, a day of transfer or evidence, a ground or a day held on any other status, a
  *   transfer without its day, its identifier, what it paid, its currency or its charges, a rate
  *   without its day and a day without its rate, a rate that is no decimal string and a rate's day
- *   that is no day, a release mark that is not `true`, each of what a transfer paid, its currency,
+ *   that is no day, a release mark that is not `true`, a share paid before two people had signed it
+ *   off without its day, or with an identifier, what a transfer paid, its currency, a rate, charges,
+ *   the release mark, a receipt, a day held or a ground (1.2.0), each of what a transfer paid, its currency,
  *   its rate with its day, its charges and its release mark on a share that is not transferred, a
  *   scheduled share with a day, a receipt or evidence, a receipt reference without its
  *   receipt and a receipt without its reference, a receipt without its document's hash and a bank
@@ -69,7 +73,9 @@
  *   a share held under each of the four grounds, with or without a note, a transfer whose bank gave no
  *   reference and whose receipt has not arrived, a transfer with two receipts, charges below 0, a
  *   transfer released by two board members, a bank reference of the full 35 characters, the ninth
- *   attempt, a note on a transfer, and a month whose only transfer came back.
+ *   attempt, a note on a transfer, a month whose only transfer came back, and a share paid before two
+ *   people had signed it off, with its debit line, without one where the bank gave no reference, and
+ *   with a note (1.2.0).
  *
  *   A COST-SUPPORT DOCUMENT'S OWN ROWS (`cost-support.v1` 1.6.0). A document written by hand may
  *   carry rows of its own in `transfers[]`, and from 1.6.0 on it can state each as this record states
@@ -132,6 +138,9 @@ const NOTE_LABEL = 'EndToEndId ';
 
 /** The identifier a `disburse` row's note carries after its label, or null for a note that carries none. */
 const identifierOf = (note) => (typeof note === 'string' && note.startsWith(NOTE_LABEL) ? note.slice(NOTE_LABEL.length) : null);
+
+/** The status of a share a debit made before two people had signed it off paid (1.2.0; `fees-account-statement.v1` `debit-without-signoffs`). */
+const PAID_WITHOUT_SIGNOFFS = 'paid-without-signoffs';
 
 /** What a transfer stated that stays fixed while its attempt does: the debit line and the payment file never change. */
 const FIXED_ON_A_TRANSFER = ['date', 'endToEndId', 'paidAmountMinor', 'paidCurrency', 'rate', 'rateDate', 'chargesMinor', 'singleRelease'];
@@ -279,6 +288,10 @@ const rowProblems = (record, at) => {
         found.push(`${where}: paid ${row.paidAmountMinor} in the record's own currency, and the share is ${row.amountMinor}`);
       }
     }
+    if (row.status === PAID_WITHOUT_SIGNOFFS) {
+      if (row.date < lockDay) found.push(`${where}: paid before two people had signed it off on ${row.date}, before the lock's day ${lockDay}`);
+      if (row.date > ownDay) found.push(`${where}: paid before two people had signed it off on ${row.date}, after the record's own day ${ownDay}`);
+    }
     if (row.status === 'held') {
       if (row.heldOn < lockDay) found.push(`${where}: held on ${row.heldOn}, before the lock's day ${lockDay}`);
       if (row.heldOn > ownDay) found.push(`${where}: held on ${row.heldOn}, after the record's own day ${ownDay}`);
@@ -312,6 +325,14 @@ const regenerationProblems = (earlier, later, at) => {
       if (!kept.has(`${entry.ref}|${entry.sha256}`) && after.status === 'transferred' && attemptOf(after.endToEndId) === attemptOf(before.endToEndId)) {
         found.push(`${where}: receipt ${entry.ref} was withdrawn`);
       }
+    }
+    // 1.2.0: only a scheduled share is paid before two people had signed it off, and the statement keeps that class once
+    // given, so the share stays so, on the day its debit was booked.
+    if (before.status === PAID_WITHOUT_SIGNOFFS && (after.status !== PAID_WITHOUT_SIGNOFFS || after.date !== before.date)) {
+      found.push(`${where}: was paid before two people had signed it off on ${before.date}, and became ${after.status}${after.date ? ` on ${after.date}` : ''}: such a share stays so, on its day`);
+    }
+    if (after.status === PAID_WITHOUT_SIGNOFFS && before.status !== PAID_WITHOUT_SIGNOFFS && before.status !== 'scheduled') {
+      found.push(`${where}: went from ${before.status} to ${PAID_WITHOUT_SIGNOFFS}, and only a scheduled share is paid that way`);
     }
     if (before.status === 'transferred' && after.status !== 'transferred' && after.note === undefined) {
       found.push(`${where}: went back from transferred to ${after.status} with no note saying why`);
@@ -363,6 +384,7 @@ let againstExport = 0;
 let laterAttempt = 0;
 let returned = 0;
 let held = 0;
+let paidWithoutSignoffs = 0;
 let converted = 0;
 let singleReleased = 0;
 let withReceipt = 0;
@@ -375,6 +397,7 @@ for (const { name, doc } of records) {
   if (doc.transfers.some((row) => row.status === 'scheduled' && attemptOf(row.endToEndId) > 1)) laterAttempt += 1;
   if (doc.transfers.some((row) => row.status !== 'transferred' && row.note !== undefined)) returned += 1;
   if (doc.transfers.some((row) => row.status === 'held')) held += 1;
+  if (doc.transfers.some((row) => row.status === PAID_WITHOUT_SIGNOFFS)) paidWithoutSignoffs += 1;
   if (doc.transfers.some((row) => row.rate !== undefined)) converted += 1;
   if (doc.transfers.some((row) => row.singleRelease === true)) singleReleased += 1;
   if (doc.transfers.some((row) => row.receiptRef !== undefined)) withReceipt += 1;
@@ -408,6 +431,7 @@ if (againstExport === 0) problems.push('no transfers.v1 example has its month\'s
 if (laterAttempt === 0) problems.push('no transfers.v1 example shows a scheduled share under a later attempt\'s identifier');
 if (returned === 0) problems.push('no transfers.v1 example shows a transfer that came back');
 if (held === 0) problems.push('no transfers.v1 example shows a held share');
+if (paidWithoutSignoffs === 0) problems.push('no transfers.v1 example shows a share paid before two people had signed it off');
 if (converted === 0) problems.push('no transfers.v1 example shows a transfer paid in another currency, with its rate');
 if (singleReleased === 0) problems.push('no transfers.v1 example shows a transfer one board member alone released');
 if (withReceipt === 0) problems.push('no transfers.v1 example shows a receipt');
@@ -417,12 +441,14 @@ if (pairs === 0) problems.push('no two transfers.v1 examples of one month — th
 
 const main = readJson(join(EXAMPLE_DIR, 'transfers.v1.example.json'));
 const later = readJson(join(EXAMPLE_DIR, 'transfers.v1.returned.example.json'));
+const paidEarly = readJson(join(EXAMPLE_DIR, 'transfers.v1.paid-without-signoffs.example.json'));
 let identityPlants = 0;
 const edit = (doc, change) => {
   const copy = clone(doc);
   change(copy);
   return copy;
 };
+const shifted = (at, seconds) => new Date(instant(at) + seconds * 1000).toISOString().replace(/\.000Z$/, 'Z');
 const row = (doc, recipient) => {
   const found = doc.transfers.find((r) => r.recipientId === recipient);
   if (!found) throw new Error(`no row for ${recipient} in the example the plants edit`);
@@ -440,6 +466,16 @@ const holding = (target, ground = GROUNDS[0], heldOn = '2027-12-02') => {
   for (const member of ['date', 'endToEndId', 'receiptRef', 'evidence', ...FIXED_ON_A_TRANSFER]) delete target[member];
   Object.assign(target, { status: 'held', heldOn, ground });
 };
+
+/** A share as `paid-without-signoffs` (1.2.0), with its debit's day and line and nothing else a transfer, an attempt or a hold has. */
+const payingWithoutSignoffs = (target, date, ref = 'SMPL-2027-12-02-0031') => {
+  for (const member of ['endToEndId', 'receiptRef', 'evidence', 'heldOn', 'ground', ...FIXED_ON_A_TRANSFER]) delete target[member];
+  Object.assign(target, { status: PAID_WITHOUT_SIGNOFFS, date, evidence: [{ kind: 'bank-line', ref }] });
+};
+/** The first record with its scheduled share's prepared attempt paid on 2 December before two people had signed it off. */
+const mainPaidEarly = edit(main, (d) => { payingWithoutSignoffs(row(d, EDUCATION_RETRIED), '2027-12-02'); });
+/** `doc` regenerated a minute later, edited by `change`. */
+const aMinuteOn = (doc, change = () => {}) => edit(doc, (d) => { d.generatedAt = shifted(d.generatedAt, 60); change(d); });
 
 /** The month's export example, its `disburse` notes edited by `change` (planted exports for the (d) rule). */
 const credit = exportsOf.find(({ doc }) => doc.month === main.month);
@@ -459,7 +495,6 @@ const plantedStatement = (record) => [{
   },
 }];
 
-const shifted = (at, seconds) => new Date(instant(at) + seconds * 1000).toISOString().replace(/\.000Z$/, 'Z');
 const linkMustFlag = [
   ['a link one character off', edit(main, (d) => { d.costSupportSha256 = `${d.costSupportSha256.slice(0, -1)}d`; })],
   ['rows that sum one minor unit off', edit(main, (d) => { row(d, EDUCATION_SENT).amountMinor += 1; })],
@@ -490,6 +525,9 @@ const rowsMustFlag = [
   ['two bank lines', edit(main, (d) => { row(d, EDUCATION_SENT).evidence.push({ kind: 'bank-line', ref: 'SMPL-2027-12-01-0099' }); })],
   ['one receipt named twice', edit(main, (d) => { const r = row(d, HEALTH_RECEIPTED); r.evidence.push(clone(r.evidence[1])); })],
   ['a record dated before its lock', edit(main, (d) => { d.generatedAt = shifted(d.lockedAt, -1); })],
+  ['a share paid before two people had signed it off, dated before the lock\'s day', edit(paidEarly, (d) => { row(d, EDUCATION_RETRIED).date = '2028-01-02'; })],
+  ['a share paid before two people had signed it off, dated after the record\'s own day', edit(paidEarly, (d) => { row(d, EDUCATION_RETRIED).date = '2028-01-06'; })],
+  ['a share paid before two people had signed it off, naming two bank lines', edit(paidEarly, (d) => { row(d, EDUCATION_RETRIED).evidence.push({ kind: 'bank-line', ref: 'SMPL-2028-01-04-0004' }); })],
 ];
 const regenMustFlag = [
   ['a receipt withdrawn', edit(later, (d) => { const r = row(d, HEALTH_RECEIPTED); delete r.receiptRef; r.evidence = r.evidence.filter((e) => e.kind !== 'recipient-receipt'); })],
@@ -507,6 +545,18 @@ const regenMustFlag = [
   ['a transfer whose release mark went with no later attempt', edit(later, (d) => { delete row(d, EDUCATION_SENT).singleRelease; })],
   ['a later record dated before the earlier one', edit(later, (d) => { d.generatedAt = shifted(main.generatedAt, -1); })],
   ['a row gone', edit(later, (d) => { d.transfers = d.transfers.filter((r) => r.recipientId !== HEALTH_RETURNED); })],
+];
+/* 1.2.0's regeneration plants, each an earlier and a later record: a share paid before two people had signed it off was
+   scheduled, and stays so on its day. */
+const paidEarlyRegenMustFlag = [
+  ['a share paid before two people had signed it off, scheduled again', mainPaidEarly, aMinuteOn(main)],
+  ['a share paid before two people had signed it off, re-dated', mainPaidEarly, aMinuteOn(mainPaidEarly, (d) => { row(d, EDUCATION_RETRIED).date = '2027-12-01'; })],
+  ['a share paid before two people had signed it off, then transferred', mainPaidEarly, aMinuteOn(later)],
+  ['a transfer that became a share paid before two people had signed it off, with a note', main, aMinuteOn(main, (d) => {
+    payingWithoutSignoffs(row(d, EDUCATION_SENT), '2027-12-01');
+    row(d, EDUCATION_SENT).note = 'SAMPLE note.';
+  })],
+  ['a held share that became a share paid before two people had signed it off', edit(main, (d) => { holding(row(d, EDUCATION_RETRIED), GROUNDS[2], '2027-12-01'); }), aMinuteOn(mainPaidEarly)],
 ];
 const chargesMustFlag = [
   ['charges one minor unit above what the debit line booked', edit(main, (d) => { row(d, HEALTH_RECEIPTED).chargesMinor += 1; }), plantedStatement(main)],
@@ -530,6 +580,10 @@ const mustPass = [
     for (const member of ['heldOn', 'ground']) delete r[member];
     r.status = 'scheduled';
   }), main],
+  ['the record with a share paid before two people had signed it off', paidEarly, null],
+  ['a scheduled share whose prepared attempt was paid before two people had signed it off', mainPaidEarly, main],
+  ['a share paid before two people had signed it off, regenerated as it stands', aMinuteOn(mainPaidEarly), mainPaidEarly],
+  ['a share paid before two people had signed it off on the day of the lock', edit(main, (d) => { payingWithoutSignoffs(row(d, EDUCATION_RETRIED), '2027-12-01'); }), null],
   ['a share struck from its recipient after the close, held', edit(main, (d) => { holding(row(d, EDUCATION_RETRIED)); }), null],
   ['a share held back on the day of the lock', edit(main, (d) => { holding(row(d, EDUCATION_RETRIED), GROUNDS[2], '2027-12-01'); }), null],
   ['every share still scheduled but one', edit(main, (d) => {
@@ -588,6 +642,9 @@ for (const [what, doc] of rowsMustFlag) {
 }
 for (const [what, doc] of regenMustFlag) {
   if (regenerationProblems(main, doc, 'planted').length === 0) problems.push(`the regeneration rule passes ${what}`);
+}
+for (const [what, before, doc] of paidEarlyRegenMustFlag) {
+  if (regenerationProblems(before, doc, 'planted').length === 0) problems.push(`the regeneration rule passes ${what}`);
 }
 for (const [what, doc, statements] of chargesMustFlag) {
   if (chargesProblems(doc, 'planted', statements).length === 0) problems.push(`the charges rule passes ${what}`);
@@ -688,12 +745,31 @@ const refuse = [
   ['no source', edit(main, (d) => { delete d.source; })],
   ['the source registry-v0', edit(main, (d) => { d.source = 'registry-v0'; })],
   ['a month that is no month', edit(main, (d) => { d.month = '2027-13'; })],
+  ['a status near paid-without-signoffs', edit(paidEarly, (d) => { row(d, EDUCATION_RETRIED).status = 'paid without signoffs'; })],
+  ['a share paid before two people had signed it off with no day', edit(paidEarly, (d) => { delete row(d, EDUCATION_RETRIED).date; })],
+  ['a share paid before two people had signed it off with an identifier', edit(paidEarly, (d) => { row(d, EDUCATION_RETRIED).endToEndId = 'psn-202712-cgyag0hmkcxb'; })],
+  ['a share paid before two people had signed it off with what a transfer paid', edit(paidEarly, (d) => { row(d, EDUCATION_RETRIED).paidAmountMinor = 14046; })],
+  ['a share paid before two people had signed it off with the currency a transfer paid in', edit(paidEarly, (d) => { row(d, EDUCATION_RETRIED).paidCurrency = 'CHF'; })],
+  ['a share paid before two people had signed it off with a rate and its day', edit(paidEarly, (d) => { Object.assign(row(d, EDUCATION_RETRIED), { rate: '1.0612', rateDate: '2028-01-03' }); })],
+  ['a share paid before two people had signed it off with charges', edit(paidEarly, (d) => { row(d, EDUCATION_RETRIED).chargesMinor = 0; })],
+  ['a share paid before two people had signed it off with the release mark', edit(paidEarly, (d) => { row(d, EDUCATION_RETRIED).singleRelease = true; })],
+  ['a share paid before two people had signed it off with a receipt', edit(paidEarly, (d) => {
+    const r = row(d, EDUCATION_RETRIED);
+    r.receiptRef = 'rct_01kmrb4x7e2q9w5n3t8v6y0zhf';
+    r.evidence.push({ kind: 'recipient-receipt', ref: 'rct_01kmrb4x7e2q9w5n3t8v6y0zhf', sha256: '2'.repeat(64) });
+  })],
+  ['a share paid before two people had signed it off with a receipt as evidence alone', edit(paidEarly, (d) => {
+    row(d, EDUCATION_RETRIED).evidence.push({ kind: 'recipient-receipt', ref: 'rct_01kmrb4x7e2q9w5n3t8v6y0zhf', sha256: '2'.repeat(64) });
+  })],
+  ['a share paid before two people had signed it off with a day held', edit(paidEarly, (d) => { row(d, EDUCATION_RETRIED).heldOn = '2028-01-04'; })],
+  ['a share paid before two people had signed it off with a ground', edit(paidEarly, (d) => { row(d, EDUCATION_RETRIED).ground = GROUNDS[3]; })],
 ];
 /* Refused only where `format` is asserted: a calendar date that does not exist keeps the pattern's shape. */
 const refuseByFormatOnly = [
   ['the 30th of February', edit(main, (d) => { row(d, EDUCATION_SENT).date = '2028-02-30'; })],
   ['a share held on the 30th of February', edit(main, (d) => { holding(row(d, EDUCATION_RETRIED), GROUNDS[2], '2028-02-30'); })],
   ['a rate of the 30th of February', edit(main, (d) => { row(d, HEALTH_RECEIPTED).rateDate = '2028-02-30'; })],
+  ['a share paid before two people had signed it off on the 30th of February', edit(paidEarly, (d) => { row(d, EDUCATION_RETRIED).date = '2028-02-30'; })],
 ];
 for (const [what, doc] of refuse) {
   if (transfersSchema(doc)) problems.push(`transfers.v1: admits ${what}`);
@@ -726,6 +802,8 @@ const admit = [
   ['a single row', edit(main, (d) => { d.transfers = d.transfers.slice(0, 1); })],
   ['a fixture plane', edit(main, (d) => { d.source = 'fixture'; })],
   ['a production plane', edit(main, (d) => { d.source = 'platform'; })],
+  ['a share paid before two people had signed it off whose bank gave no reference', edit(paidEarly, (d) => { delete row(d, EDUCATION_RETRIED).evidence; })],
+  ['a share paid before two people had signed it off, with a note', edit(paidEarly, (d) => { row(d, EDUCATION_RETRIED).note = 'SAMPLE note.'; })],
 ];
 for (const [what, doc] of admit) {
   if (!transfersSchema(doc)) problems.push(`transfers.v1: refuses ${what} — ${JSON.stringify(transfersSchema.errors?.[0] ?? {})}`);
@@ -838,11 +916,12 @@ fail(
   `transfers record: ${records.length} example(s), ${rows} row(s), each linked to a cost-support example by its bytes' SHA-256 ` +
     `with the rows summing to its passedOnMinor (${againstExport} also held to the month's export's disburse rows; ` +
     `${laterAttempt} with a later attempt scheduled, ${returned} with a transfer that came back, ${held} with a held share, ` +
+    `${paidWithoutSignoffs} with a share paid before two people had signed it off, ` +
     `${converted} with a transfer paid in another currency, ${singleReleased} with a transfer one board member released, ` +
     `${withReceipt} with a receipt; ${pairs} regeneration pair(s)); cost-support.v1 identity (4) is met by all ${identityChecked} ` +
     `cost-support example(s) and gives the restated verdict on ${identityPlants} planted pairs; the link rules flag ` +
     `${linkMustFlag.length} plants and ${exportsMustFlag.length} planted exports, the row rules ${rowsMustFlag.length}, the ` +
-    `regeneration rule ${regenMustFlag.length} and the charges rule ${chargesMustFlag.length}, and ${mustPass.length} pass; ` +
+    `regeneration rule ${regenMustFlag.length + paidEarlyRegenMustFlag.length} and the charges rule ${chargesMustFlag.length}, and ${mustPass.length} pass; ` +
     `${refuse.length} refusals stand with and without format, ${refuseByFormatOnly.length} by format alone, and ${admit.length} admissions; ` +
     `a cost-support.v1 document's own transfer rows (1.6.0): ${costSupportRefuse.length} refusals with and without format, ` +
     `${costSupportRefuseByFormatOnly.length} by format alone, and ${costSupportAdmit.length} admissions`,

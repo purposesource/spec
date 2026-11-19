@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Purpose Source Network — public read API
-  version: 1.26.1
+  version: 1.27.0
   summary: Keyless, unauthenticated read access to every published artifact of the Purpose Source Network.
   description: |
     Every route here is **unauthenticated, keyless and CORS-open for GET**. There is no
@@ -179,7 +179,7 @@ tags:
   - name: fees-account
     description: "The statement of the fees account: for each locked month from the account's opening month, its opening and closing balances and every line the bank booked on it, with its class, and nothing that identifies a payer or a natural person."
   - name: transfers
-    description: "The month's transfers: for each locked month with an executed transfer, every listed recipient's share and whether it has been transferred or is held back, with the day, the transfer's identifier, what it paid and at which rate, its charges, the mark «Einzelauslösung» and the recipient's receipt by its reference once there is one, linked to the month's frozen cost-support document by its hash, and nothing that names a person or an account."
+    description: "The month's transfers: for each locked month with an executed transfer, every listed recipient's share and whether it has been transferred, is held back or was paid before two people had signed it off, with the day, the transfer's identifier, what it paid and at which rate, its charges, the mark «Einzelauslösung» and the recipient's receipt by its reference once there is one, linked to the month's frozen cost-support document by its hash, and nothing that names a person or an account."
   - name: badges
     description: README badges — the shields.io endpoint body, and the SVG badges the edge draws for a repository, its README cards included, and for a certificate.
   - name: cards
@@ -3834,16 +3834,22 @@ paths:
         own record once they happen (ops decision D64 item 1; statutes Art. 6e para. 1 item 6
         and Finanzreglement § 4 Abs. 4 and 5, the charges in part): one row per listed recipient
         the month's allocation gave a share to, in `recipientId` order, with its category, its
-        share as allocated and whether it has been transferred, is held back or is still to be
-        transferred. Once it has been transferred, the day the fees account's statement booked
+        share as allocated and whether it has been transferred, is held back, is still to be
+        transferred, or was paid by a debit made before two people had signed it off in the
+        Association's records. Once it has been transferred, the day the fees account's statement booked
         the debit, the transfer's end-to-end identifier, what it paid in the currency of the
         recipient's account and the rate it was converted at, its charges as its debit line
         booked them, the mark «Einzelauslösung» where one board member alone released it and,
         as soon as it has arrived, the recipient's receipt, by its reference and the SHA-256 of
         its document; while it is held back, the day it was held and one of four generic
         grounds, never the cause behind it (a recipient struck from the List after the month's
-        close reads `struck (Art. 7 Abs. 6)`, ops decision D177 item 3). The fees account's
-        booked statement and the recipients' receipts govern what the record restates.
+        close reads `struck (Art. 7 Abs. 6)`, ops decision D177 item 3); once a debit made
+        before two people had signed it off paid it (`paid-without-signoffs`, which the fees
+        account's statement records as an incident, class `debit-without-signoffs`), the day
+        that debit was booked and its line by the bank's reference, and no identifier, as the
+        statement's line carries none: the share is owed no further transfer, and it is not a
+        transfer as the Association's records make one. The fees account's booked statement and
+        the recipients' receipts govern what the record restates.
 
         The month lock hashes the month's cost-support document before the allocation exists,
         and that document is never edited, so it cannot say who was paid. This record says it,
@@ -3859,7 +3865,8 @@ paths:
         withheld after its record was published keeps that document as published.
 
         Regenerated, not written once. A month's rows are fixed from the first publication, and
-        a row changes in five cases only: its share is transferred; its transfer comes back
+        a row changes in six cases only: its share is transferred; its share is paid by a debit
+        made before two people had signed it off, and stays so; its transfer comes back
         from the receiving bank before it reached the recipient, with a note saying so, so the
         share is owed again until it is sent again, unless its recipient is struck; the share
         is held back, or its hold ends; an attempt of a share that is not transferred is
@@ -3878,8 +3885,9 @@ paths:
         fixed form, so no member can carry one. The schema states every rule in full.
 
         Cached 300 s, like the fees account's statement: a month's record is rewritten when one
-        of its transfers is executed or comes back, a share is held back or its hold ends, an
-        attempt is prepared or abandoned, or a receipt arrives, and a month asked for before its
+        of its transfers is executed or comes back, a debit made before two people had signed it
+        off pays a share, a share is held back or its hold ends, an attempt is prepared or
+        abandoned, or a receipt arrives, and a month asked for before its
         record is written is not held as `404` for longer than that.
       tags: [transfers]
       x-psn-phase: P-M3

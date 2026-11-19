@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2028-01-05T06:05:00Z",
+  "source": "sample",
+  "month": "2027-12",
+  "lockedAt": "2028-01-03T09:10:00Z",
+  "costSupportSha256": "6343842a32ad2615c232a83404b116d96608d82d5ab3c4c1564c60fc413bee6d",
+  "currency": "CHF",
+  "transfers": [
+    {
+      "recipientId": "rcp_0svacmgratb4f4q0syghrz8ym4",
+      "category": "education",
+      "amountMinor": 14046,
+      "status": "transferred",
+      "date": "2028-01-03",
+      "endToEndId": "psn-202712-q0syghrz8ym4",
+      "paidAmountMinor": 14046,
+      "paidCurrency": "CHF",
+      "chargesMinor": 0,
+      "evidence": [
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2028-01-03-0021"
+        }
+      ]
+    },
+    {
+      "recipientId": "rcp_8jf9xfejcgadg7cgyag0hmkcxb",
+      "category": "education",
+      "amountMinor": 14046,
+      "status": "paid-without-signoffs",
+      "date": "2028-01-04",
+      "evidence": [
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2028-01-04-0003"
+        }
+      ]
+    },
+    {
+      "recipientId": "rcp_f5cc8xgz81c00nrve04pdahejb",
+      "category": "health",
+      "amountMinor": 14046,
+      "status": "transferred",
+      "date": "2028-01-03",
+      "endToEndId": "psn-202712-rve04pdahejb",
+      "paidAmountMinor": 14046,
+      "paidCurrency": "CHF",
+      "chargesMinor": 0,
+      "evidence": [
+        {
+          "kind": "bank-line",
+          "ref": "SMPL-2028-01-03-0022"
+        }
+      ]
+    },
+    {
+      "recipientId": "rcp_tg8g3ps3smxzdpy1zt0zesjnx9",
+      "category": "health",
+      "amountMinor": 14046,
+      "status": "scheduled",
+      "endToEndId": "psn-202712-y1zt0zesjnx9"
+    }
+  ]
+}
