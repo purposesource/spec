@@ -3459,6 +3459,30 @@ reasoning: no month export has ever been published with a row in it.
   `format` alone); it admits the status with its line, without one where the bank gave no reference, and with a note
   (19 admissions).
 
+### 1.3.0 — unreleased (2026-11-18; the orchestrator's answer of 2026-11-18T16:48Z on PS-2945, follow-up 1; PS-3181) — pre-release
+
+- Minor, and **pre-release** under versioning policy 5: what `paid-without-signoffs` means, and when a month has a document,
+  change; no member, type, pattern or enum value moves, so every 1.2.0 document validates under 1.3.0 and the reverse.
+- **Any attempt.** A share is `paid-without-signoffs` where a booked debit line of the fees account whose current class is
+  `debit-without-signoffs` carries the identifier of ANY attempt of it, while no attempt of it stands executed: the newest,
+  prepared or signed, as in 1.2.0, or an earlier one abandoned or returned since, which 1.2.0 did not read. The money left
+  the account with that debit whatever became of the attempt. A held share (a returned transfer's attempt paid by hand) can
+  so become `paid-without-signoffs`, as a scheduled one could.
+- **Owed again.** Such a share stays `paid-without-signoffs` until the return of that debit is recorded: a booked credit of
+  the fees account that the Association's records name as that debit's return (`fees-account-statement.v1` class
+  `outflow-refund`). The money came back, so the share is owed again, `scheduled` or `held`, and the debit stays on the
+  statement as the incident it was. 1.2.0 kept the share `paid-without-signoffs` for good ("Not stated in this version",
+  its point (c)).
+- **The path.** A locked month with a share paid that way has a document though none of its transfers was executed; the
+  first run after the share is paid renders it. A month whose only such share is owed again keeps the document it had.
+- **`generatedAt`** counts, for each share shown `paid-without-signoffs`, the later of the instant the store recorded the
+  debit line and the instant that line was recorded as the incident, and the same two instants of such a debit whose
+  return is recorded since. The instant of the return itself is among THE CASES IT CANNOT DATE.
+- **Amended descriptions:** the document's (THE PATH, PAID BEFORE TWO PEOPLE HAD SIGNED IT OFF and REGENERATED),
+  `generatedAt`'s and `status`'s. `check-transfers` moves with it: a share paid that way may become `scheduled` or `held`
+  again, and a `held` share may become one, each now among the cases it passes; one re-dated while it stays so, or one that
+  becomes `transferred` at once, is still flagged.
+
 ## fees-account-statement.v1.json
 
 ### 1.0.0 — unreleased (2026-10-21; statutes Art. 12 para. 1 and Art. 20 para. 1; the payout design's §11.2)
@@ -6584,6 +6608,16 @@ which kind of change each entry was.
   the new one. The tag `transfers` says the same in brief.
 - The route's two examples are unchanged; `check:openapi-examples` validates the same 85 examples.
 - `coverage/waiver-certificate-vectors.json` names this version, `specVersion` 1.27.0, as `check:certificate-vectors`
+  requires of it. No vector, certificate or key set moved; the website's generator (`scripts/waiver-certificate-vectors.mjs`)
+  names the same version in the website's change beside this one, so it writes these bytes again, byte for byte.
+
+### 1.27.1 — unreleased (2026-11-18; `transfers.v1` 1.3.0; PS-3181) — **pre-release** change under versioning policy 5
+
+- Patch: wording, with the record it serves. `getTransfersRecord` answers `transfers.v1` 1.3.0: a locked month with a share
+  paid before two people had signed it off has a document though none of its transfers was executed, and such a share
+  stays so until that debit's return is recorded, when it is owed again. The route's description and the tag `transfers`
+  say so. No operation, status code, error code, cache class, parameter or example moved.
+- `coverage/waiver-certificate-vectors.json` names this version, `specVersion` 1.27.1, as `check:certificate-vectors`
   requires of it. No vector, certificate or key set moved; the website's generator (`scripts/waiver-certificate-vectors.mjs`)
   names the same version in the website's change beside this one, so it writes these bytes again, byte for byte.
 
