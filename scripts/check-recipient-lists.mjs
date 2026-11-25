@@ -398,6 +398,9 @@ function contractProblems(ajv, listDocs, indexDoc) {
     ['recipient-list.v1', listSchema, 'a document without source', withList((d) => { delete d.source; })],
     ['recipient-list.v1', listSchema, 'a platform document with a SAMPLE decisionRef', withList((d) => { onPlatform(d); d.decisionRef = 'SAMPLE-MINUTE-1'; })],
     ['recipient-list.v1', listSchema, 'a fixture document naming production in decisionRef', withList((d) => { d.decisionRef = 'Minute https://purposesource.org/m/1'; })],
+    // The dashboard's name and its former one are both production's (ops decision D245).
+    ['recipient-list.v1', listSchema, "a fixture document naming production's dashboard in decisionRef", withList((d) => { d.decisionRef = 'Minute https://my.purposesource.org/m/1'; })],
+    ['recipient-list.v1', listSchema, "a fixture document naming the dashboard's former name in decisionRef", withList((d) => { d.decisionRef = 'Minute https://app.purposesource.org/m/1'; })],
     ['recipient-list.v1', listSchema, 'a platform document whose entries are marked sample', withList((d) => { onPlatform(d); active(d).sample = true; })],
     ['recipient-list.v1', listSchema, 'a fixture document with an entry not marked sample', withList((d) => { delete active(d).sample; })],
     ['recipient-list.v1', listSchema, 'a sample mark of false', withList((d) => { active(d).sample = false; })],
@@ -407,6 +410,8 @@ function contractProblems(ajv, listDocs, indexDoc) {
     ['recipient-lists.v1', indexSchema, 'a void entry carrying publishBatchId', withIndex((d) => { entryWith(d, 'void').publishBatchId = entryWith(d, 'recorded').publishBatchId; })],
     ['recipient-lists.v1', indexSchema, 'a late entry carrying noticeGivenAt', withIndex((d) => { entryWith(d, 'late').noticeGivenAt = entryWith(d, 'late').publishedAt; })],
     ['recipient-lists.v1', indexSchema, 'a fixture index naming production in a url', withIndex((d) => { d.versions[0].url = `https://api.purposesource.org/v1/recipient-list/${d.versions[0].version}.json`; })],
+    ['recipient-lists.v1', indexSchema, "a fixture index naming production's dashboard in a url", withIndex((d) => { d.versions[0].url = `https://my.purposesource.org/v1/recipient-list/${d.versions[0].version}.json`; })],
+    ['recipient-lists.v1', indexSchema, "a fixture index naming the dashboard's former name in a url", withIndex((d) => { d.versions[0].url = `https://app.purposesource.org/v1/recipient-list/${d.versions[0].version}.json`; })],
   ];
   for (const [contract, validate, what, doc] of refusals) {
     if (validate(doc)) problems.push(`schemas/${contract}.json: must refuse ${what}`);
@@ -415,6 +420,8 @@ function contractProblems(ajv, listDocs, indexDoc) {
   const admissions = [
     ['recipient-list.v1', listSchema, 'a platform version with no sample marks', withList(onPlatform)],
     ['recipient-lists.v1', indexSchema, 'an index before the first release', withIndex((d) => { d.versions = []; d.removals = []; })],
+    ['recipient-list.v1', listSchema, "a fixture document naming dev's dashboard in decisionRef", withList((d) => { d.decisionRef = 'Minute https://dev-my.purposesource.org/m/1'; })],
+    ['recipient-lists.v1', indexSchema, "a fixture index naming dev's dashboard in a url", withIndex((d) => { d.versions[0].url = `https://dev-my.purposesource.org/v1/recipient-list/${d.versions[0].version}.json`; })],
   ];
   for (const [contract, validate, what, doc] of admissions) {
     if (!validate(doc)) problems.push(`schemas/${contract}.json: must admit ${what} (${JSON.stringify(validate.errors?.[0] ?? {})})`);

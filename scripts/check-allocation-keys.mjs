@@ -486,24 +486,47 @@ const menu = readJson(join(EXAMPLE_DIR, MENU_EXAMPLE));
 const listDocs = names.filter((n) => LIST_EXAMPLE.test(n)).map((name) => ({ name, doc: readJson(join(EXAMPLE_DIR, name)) }));
 const listIndexDocs = names.filter((n) => LIST_INDEX_EXAMPLE.test(n)).map((name) => ({ name, doc: readJson(join(EXAMPLE_DIR, name)) }));
 
-/** The key's contract refuses what reader check (5) needs present, proved on copies of the first example. */
-function contractProblems(keyDoc) {
+/**
+ * The key's contract refuses what reader check (5) needs present, proved on copies of the first example; and
+ * both contracts refuse, on a non-production plane, production's dashboard under its name and its former one
+ * (ops decision D245), and admit dev's.
+ */
+function contractProblems(keyDoc, indexDoc) {
   const { ajv } = createValidatorWithAllSchemas();
   const validate = ajv.getSchema('https://purposesource.org/spec/schemas/allocation-key.v1.json');
   if (!validate) return ['schemas/allocation-key.v1.json: did not resolve by $id'];
+  const validateIndex = ajv.getSchema('https://purposesource.org/spec/schemas/allocation-keys.v1.json');
+  if (!validateIndex) return ['schemas/allocation-keys.v1.json: did not resolve by $id'];
   const withKey = (mutate) => {
     const doc = structuredClone(keyDoc);
     mutate(doc);
     return doc;
   };
+  const withIndex = (mutate) => {
+    const doc = structuredClone(indexDoc);
+    mutate(doc);
+    return doc;
+  };
   const firstWeighted = Object.keys(keyDoc.weights ?? {})[0];
   const refusals = [
-    ['a key without listVersion', withKey((d) => { delete d.listVersion; })],
-    ['a key without weights', withKey((d) => { delete d.weights; })],
-    ['a weight below 1', withKey((d) => { d.weights[firstWeighted] = 0; })],
-    ['a weight named by anything but an rcp_ id', withKey((d) => { d.weights['cat-health'] = 1; })],
+    ['allocation-key.v1', validate, 'a key without listVersion', withKey((d) => { delete d.listVersion; })],
+    ['allocation-key.v1', validate, 'a key without weights', withKey((d) => { delete d.weights; })],
+    ['allocation-key.v1', validate, 'a weight below 1', withKey((d) => { d.weights[firstWeighted] = 0; })],
+    ['allocation-key.v1', validate, 'a weight named by anything but an rcp_ id', withKey((d) => { d.weights['cat-health'] = 1; })],
+    ['allocation-key.v1', validate, "a fixture key naming production's dashboard in decisionRef", withKey((d) => { d.decisionRef = 'Minute https://my.purposesource.org/m/1'; })],
+    ['allocation-key.v1', validate, "a fixture key naming the dashboard's former name in decisionRef", withKey((d) => { d.decisionRef = 'Minute https://app.purposesource.org/m/1'; })],
+    ['allocation-keys.v1', validateIndex, "a fixture index naming production's dashboard in a url", withIndex((d) => { d.keys[0].url = `https://my.purposesource.org/v1/allocation-keys/${d.keys[0].effectiveMonth}.json`; })],
+    ['allocation-keys.v1', validateIndex, "a fixture index naming the dashboard's former name in a url", withIndex((d) => { d.keys[0].url = `https://app.purposesource.org/v1/allocation-keys/${d.keys[0].effectiveMonth}.json`; })],
+    ['allocation-keys.v1', validateIndex, "a fixture index naming production's dashboard in decisionRef", withIndex((d) => { d.keys[0].decisionRef = 'Minute https://my.purposesource.org/m/1'; })],
   ];
-  return refusals.filter(([, doc]) => validate(doc)).map(([what]) => `schemas/allocation-key.v1.json: must refuse ${what}`);
+  const admissions = [
+    ['allocation-key.v1', validate, "a fixture key naming dev's dashboard in decisionRef", withKey((d) => { d.decisionRef = 'Minute https://dev-my.purposesource.org/m/1'; })],
+    ['allocation-keys.v1', validateIndex, "a fixture index naming dev's dashboard in a url", withIndex((d) => { d.keys[0].url = `https://dev-my.purposesource.org/v1/allocation-keys/${d.keys[0].effectiveMonth}.json`; })],
+  ];
+  return [
+    ...refusals.filter(([, check, , doc]) => check(doc)).map(([contract, , what]) => `schemas/${contract}.json: must refuse ${what}`),
+    ...admissions.filter(([, check, , doc]) => !check(doc)).map(([contract, check, what]) => `schemas/${contract}.json: must admit ${what} (${JSON.stringify(check.errors?.[0] ?? {})})`),
+  ];
 }
 
 const problems = [];
@@ -514,7 +537,7 @@ if (listIndexDocs.length === 0) problems.push('no recipient-lists.v1 example —
 if (problems.length === 0) {
   problems.push(...selfTest(keyDocs, indexDocs, menu, listDocs, listIndexDocs));
   problems.push(...allProblems(keyDocs, indexDocs, menu, listDocs, listIndexDocs).map((p) => `[${p.rule}] ${p.message}`));
-  problems.push(...contractProblems(keyDocs[0].doc));
+  problems.push(...contractProblems(keyDocs[0].doc, indexDocs[0].doc));
 }
 
 const entries = indexDocs.reduce((sum, { doc }) => sum + (doc.keys ?? []).length, 0);
