@@ -3829,6 +3829,16 @@ reasoning: no month export has ever been published with a row in it.
   pending entry binds only the new member. Every document valid under 1.2.0 is valid under 1.3.0,
   and both examples validate unchanged.
 
+### 1.4.0 — unreleased (2026-11-25; ops decision D245) — **pre-release** change under versioning policy 5
+
+- Tightening, the same as `allocation-key.v1` 1.3.0: `$defs.productionAddress` gains
+  `://my.purposesource.org`, the dashboard's new name, and keeps `://app.purposesource.org`, its
+  former one, which stays production's and redirects to it. A `sample` or `fixture` version whose
+  `decisionRef` names either is refused; `://dev-my.purposesource.org` is not a marker. Nothing has
+  been published under this file, and both examples are unchanged and valid.
+  `check:recipient-lists` proves the two refusals, and that a version naming dev's dashboard is
+  admitted.
+
 ## recipient-lists.v1.json
 
 ### 1.0.0 — unreleased (2026-10-01; PS-870 items 5, 7 and 8)
@@ -3885,7 +3895,32 @@ List documents are written once. `v1.3` sorts after `v1.2`, so the example's ord
 gate are unchanged. The API description's copy of the example moved with it (`edge-public.v1`
 1.7.0).*
 
+### 1.1.0 — unreleased (2026-11-25; ops decision D245) — **pre-release** change under versioning policy 5
+
+- Tightening, the same as `recipient-list.v1` 1.4.0: `$defs.productionAddress` gains
+  `://my.purposesource.org`, the dashboard's new name, and keeps `://app.purposesource.org`, its
+  former one. A `sample` or `fixture` index whose versions' `url` names either is refused;
+  `://dev-my.purposesource.org` is not a marker. Nothing has been published under this file, and
+  the example is unchanged and valid. `check:recipient-lists` proves the two refusals, and that a
+  `url` on dev's dashboard is admitted.
+
 ## allocation-key.v1.json
+
+### 1.3.0 — unreleased (2026-11-25; ops decision D245) — pre-release
+
+- **Pre-release tightening (versioning rule 5).** The dashboard moves from `app.purposesource.org`
+  to `my.purposesource.org` (D245 item 1), and the old name stays production's for good and
+  redirects to the new one (item 2). The platform's production-marker check therefore names six
+  origin markers: `://my.purposesource.org` beside the five it had, `://app.purposesource.org`
+  kept. `$defs.productionAddress` gains `my` beside `api`, `www` and `app`, matched as before (any
+  case, either slash optionally written `\/`), and the descriptions of `decisionRef` and
+  `$defs.productionAddress` name the six. A `sample` or `fixture` key whose `decisionRef` names
+  `://my.purposesource.org` is now refused, so the contract keeps refusing what the platform's
+  check refuses once its list holds the new name (the same move in platform).
+  `://dev-my.purposesource.org`, dev's dashboard, contains no marker and stays admitted.
+- Nothing has been published under this file, and the example is unchanged and valid.
+  `check:allocation-keys` proves that a fixture key naming the dashboard under either name is
+  refused and one naming dev's dashboard is admitted.
 
 ### 1.2.1 — unreleased (2026-11-07; PS-2767; statutes Art. 6g(1)) — wording only
 
@@ -4027,6 +4062,16 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
   fail before trusting it.
 
 ## allocation-keys.v1.json
+
+### 1.2.0 — unreleased (2026-11-25; ops decision D245) — pre-release
+
+- **Pre-release tightening (versioning rule 5),** the same as `allocation-key.v1` 1.3.0:
+  `$defs.productionAddress` gains `://my.purposesource.org`, the dashboard's new name, and keeps
+  `://app.purposesource.org`, its former one, which stays production's and redirects to it. A
+  `sample` or `fixture` index entry whose `url` or `decisionRef` names either is refused;
+  `://dev-my.purposesource.org` is not a marker. Nothing has been published under this file, and
+  both examples are unchanged and valid. `check:allocation-keys` proves the refusals, and that an
+  entry naming dev's dashboard is admitted.
 
 ### 1.1.0 — unreleased (2026-09-29; pre-release: `decisionRef`'s grammar)
 
@@ -5393,6 +5438,13 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 - `check:links` (new) holds the table to what its shape cannot say and runs every golden case
   through `scripts/lib/link-rules.mjs`, the gate's own reading of the steps (not the platform's
   pipeline), proving each rule able to fail first.
+
+*Dated note, 2026-11-25 (ops decision D245): the dashboard moves to `my.purposesource.org`, and
+dev's to `dev-my.purposesource.org`; the old names stay ours. Two golden cases are added, W051 and
+W052, which refuse both new names as `own_domain`, and W042 keeps refusing the old
+`app.purposesource.org`. The table does not change (`website.ownDomains` holds the apex, which
+covers every name under it), so `tableSha256` stays; the golden file's own SHA-256 moves, and the
+platform's and the website's vendored copies and pins move with it.*
 
 ## contributor-page-about.v1.json
 

@@ -7,7 +7,7 @@
   "specBaseUrl": "https://purposesource.org/spec",
   "schemaBaseUrl": "https://purposesource.org/spec/schemas",
   "apiBaseUrl": "https://api.purposesource.org",
-  "appBaseUrl": "https://app.purposesource.org",
+  "appBaseUrl": "https://my.purposesource.org",
   "codename": "psn",
   "issuer": "https://api.purposesource.org",
   "verifyStatement": "verify only at purposesource.org/verify",

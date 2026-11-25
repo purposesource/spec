@@ -249,6 +249,8 @@
     { "id": "W047", "input": "https://alice.dev/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "expect": { "refused": "too_long" }, "tags": ["length"] },
     { "id": "W048", "input": "https://%78.com/alice", "expect": { "refused": "character_not_allowed" }, "tags": ["percent-host"] },
     { "id": "W049", "input": "https://%D0%B0pple.com/", "expect": { "refused": "character_not_allowed" }, "tags": ["percent-host", "idn"] },
-    { "id": "W050", "input": "https://alice.d%65v/", "expect": { "refused": "character_not_allowed" }, "tags": ["percent-host"] }
+    { "id": "W050", "input": "https://alice.d%65v/", "expect": { "refused": "character_not_allowed" }, "tags": ["percent-host"] },
+    { "id": "W051", "input": "https://my.purposesource.org/contributor", "expect": { "refused": "own_domain" }, "tags": ["lookalike"] },
+    { "id": "W052", "input": "https://dev-my.purposesource.org/", "expect": { "refused": "own_domain" }, "tags": ["lookalike"] }
   ]
 }

@@ -4,7 +4,7 @@
   "title": "Allocation-key index — /allocation-keys/index.json",
   "description": "Every allocation key the board has released, newest first, each with the one fact its own document cannot carry: what became of its publication. A key's document (`allocation-key.v1`, at `/allocation-keys/{YYYY-MM}.json`) is written once, at its release; whether its publication before the month was then recorded, and on which date, is established afterwards by a steward's record act, and this index is where that is published.\n\nONE ENTRY PER RELEASED MONTH, NEWEST FIRST. A month is released at most once, ever, so `effectiveMonth` is unique across `keys` and orders it, descending. An entry never leaves the index: a key that came too late or was voided keeps its line with that status, because a release is a published fact whatever became of it. Before the first release the document is published all the same, with `keys` empty.\n\nREGENERATED, NOT WRITTEN ONCE. Unlike the key documents it lists, this document is rendered again whenever a release or a record act changes it, and its `generatedAt` moves with them.\n\nWHAT A READER CHECKS AGAINST THE KEY DOCUMENTS, stated here because JSON Schema cannot relate two documents: each entry's `bodySha256`, `decisionRef` and `releasedAt` equal the document at `url`, and `url` names that entry's `effectiveMonth`. And against the publish log: a `publishBatchId` is a batch of `/meta/publish-log.json` whose `etags` name the key's path, and `publishedOn` is that batch's `publishedAt` as a Europe/Zurich calendar date. An entry that disagrees with its key document is a defect to report, and the key document governs it.\n\nWHAT THIS INDEX IS AUTHORITATIVE FOR. The key itself is published by its own document, and the board's resolution named by `decisionRef` governs both (`allocation-key.v1`). What only this index publishes is what became of each release — its status and its proven publication date — and for that it is the one published record.",
   "x-psn": {
-    "specVersion": "1.1.0",
+    "specVersion": "1.2.0",
     "phase": "P-M3 (producer: `jobs.index-build`). Nothing is published under this contract yet: no key has been released, and production's policy switch stays off until the operator's go.",
     "artifactPath": "/allocation-keys/index.json — regenerated; served by the edge at /v1/allocation-keys/index.json",
     "authoritative": true,
@@ -121,8 +121,8 @@
     },
     "productionAddress": {
       "type": "string",
-      "pattern": ":\\\\?/\\\\?/((([Aa][Pp][Ii]|[Ww][Ww][Ww]|[Aa][Pp][Pp])\\.)?[Pp][Uu][Rr][Pp][Oo][Ss][Ee][Ss][Oo][Uu][Rr][Cc][Ee]\\.[Oo][Rr][Gg]|[Pp][Uu][Rr][Pp][Oo][Ss][Ee][Ss][Oo][Uu][Rr][Cc][Ee]\\.[Pp][Aa][Gg][Ee][Ss]\\.[Dd][Ee][Vv])",
-      "description": "Text naming one of production's addresses, exactly as on `allocation-key.v1`: any of the five origin markers of the platform's production-marker check (`://purposesource.org`, `://api.purposesource.org`, `://www.purposesource.org`, `://app.purposesource.org`, `://purposesource.pages.dev`), anywhere in the text, ASCII letters in any case, each slash optionally written `\\/`. `https://dev-api.purposesource.org/…` contains none of them."
+      "pattern": ":\\\\?/\\\\?/((([Aa][Pp][Ii]|[Ww][Ww][Ww]|[Aa][Pp][Pp]|[Mm][Yy])\\.)?[Pp][Uu][Rr][Pp][Oo][Ss][Ee][Ss][Oo][Uu][Rr][Cc][Ee]\\.[Oo][Rr][Gg]|[Pp][Uu][Rr][Pp][Oo][Ss][Ee][Ss][Oo][Uu][Rr][Cc][Ee]\\.[Pp][Aa][Gg][Ee][Ss]\\.[Dd][Ee][Vv])",
+      "description": "Text naming one of production's addresses, exactly as on `allocation-key.v1`: any of the six origin markers of the platform's production-marker check (`://purposesource.org`, `://api.purposesource.org`, `://www.purposesource.org`, `://app.purposesource.org`, `://my.purposesource.org`, `://purposesource.pages.dev`), anywhere in the text, ASCII letters in any case, each slash optionally written `\\/`. `https://dev-api.purposesource.org/…` contains none of them."
     }
   }
 }
