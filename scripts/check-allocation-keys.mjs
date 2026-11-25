@@ -30,8 +30,9 @@
  *                weights (the allocator splits a category equally, so unequal ones would be
  *                published and not applied);
  *     derive     `key` is the largest remainder of 10000 over each category's sum of the weights
- *                of `listVersion`'s ACTIVE entries, less those the List index shows removed before
- *                `releasedAt`, ties to the ascending category id, a category at 0 left out;
+ *                of `listVersion`'s entries ACTIVE IN `effectiveMonth` (status `active`, `activeFrom`
+ *                at or before it), less those the List index shows removed before `releasedAt`,
+ *                ties to the ascending category id, a category at 0 left out;
  *     version    the List index lists `listVersion`, released before the key and taking effect at
  *                or before `effectiveMonth`, and no version the index shows `released` or
  *                `recorded` (so not closed late or void when the key was released) was released
@@ -235,16 +236,18 @@ function agreementProblems(keyDocs, indexDocs) {
 
 /**
  * Reader check (5): the key derived from the weights over the List version it names.
- * For each category k, W_k sums the weights of `listVersion`'s active entries in k, leaving out
- * every entry the List index shows removed before the key's release; the key is the largest
- * remainder of 10000 over the W_k, ties to the ascending category id, and a category at 0 is
- * left out. An entry's category slug `s` counts for `cat-s`, the list's own `fundId`.
+ * For each category k, W_k sums the weights of `listVersion`'s entries in k active in the key's
+ * `month` (status `active`, `activeFrom` at or before it: an entry active only from a later month
+ * counts for nothing, as a pending one), leaving out every entry the List index shows removed
+ * before the key's release; the key is the largest remainder of 10000 over the W_k, ties to the
+ * ascending category id, and a category at 0 is left out. An entry's category slug `s` counts for
+ * `cat-s`, the list's own `fundId`.
  */
-function deriveKey(list, weights, removedIds) {
+function deriveKey(list, weights, removedIds, month) {
   const fundOf = new Map((list.categories ?? []).map((row) => [row.slug, row.fundId ?? `cat-${row.slug}`]));
   const sums = new Map();
   for (const entry of list.recipients ?? []) {
-    if (entry.status !== 'active' || removedIds.has(entry.recipientId)) continue;
+    if (entry.status !== 'active' || !(entry.activeFrom <= month) || removedIds.has(entry.recipientId)) continue;
     const category = fundOf.get(entry.category) ?? `cat-${entry.category}`;
     sums.set(category, (sums.get(category) ?? 0) + (weights[entry.recipientId] ?? 0));
   }
@@ -297,10 +300,10 @@ function listProblems(keyDocs, listDocs, listIndexDocs) {
         (index.removals ?? []).filter((r) => Date.parse(r.removedAt) < Date.parse(doc.releasedAt)).map((r) => r.recipientId),
       ),
     );
-    const expected = deriveKey(list, weights, removedIds);
+    const expected = deriveKey(list, weights, removedIds, doc.effectiveMonth);
     derived += 1;
     if (!sameEntries(expected, doc.key)) {
-      add('derive', `key ${JSON.stringify(doc.key)} is not the key its weights give over ${list.version}'s active entries less ${removedIds.size} removal(s) before ${doc.releasedAt}: ${JSON.stringify(expected)}`);
+      add('derive', `key ${JSON.stringify(doc.key)} is not the key its weights give over ${list.version}'s entries active in ${doc.effectiveMonth} less ${removedIds.size} removal(s) before ${doc.releasedAt}: ${JSON.stringify(expected)}`);
     }
   }
   if (derived === 0 && keyDocs.length > 0) {
@@ -395,6 +398,10 @@ function selfTest(keyDocs, indexDocs, menu, listDocs, listIndexDocs) {
     doc.approvedBody = canonical(body);
     doc.bodySha256 = sha256Hex(doc.approvedBody);
   };
+  const monthAfter = (month) => {
+    const [year, number] = month.split('-').map(Number);
+    return number === 12 ? `${year + 1}-01` : `${year}-${String(number + 1).padStart(2, '0')}`;
+  };
   const firstCategory = (doc) => Object.keys(doc.key)[0];
   const firstListed = (doc) => keyList.doc.recipients.map((entry) => entry.recipientId).find((id) => id in doc.weights);
 
@@ -440,6 +447,12 @@ function selfTest(keyDocs, indexDocs, menu, listDocs, listIndexDocs) {
     ['derive', [firstKey], [firstIndex], listDocs.map(({ name, doc }) => {
       const copy = clone(doc);
       if (copy.version === keyList.doc.version) copy.recipients.find((entry) => entry.status === 'active').status = 'pending';
+      return { name, doc: copy };
+    }), listIndexDocs],
+    // An entry active only from the month after the key's counts for nothing in it, as a pending one.
+    ['derive', [firstKey], [firstIndex], listDocs.map(({ name, doc }) => {
+      const copy = clone(doc);
+      if (copy.version === keyList.doc.version) copy.recipients.find((entry) => entry.status === 'active').activeFrom = monthAfter(firstKey.doc.effectiveMonth);
       return { name, doc: copy };
     }), listIndexDocs],
     ['version', breakKey((d) => {

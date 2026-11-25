@@ -3906,6 +3906,29 @@ gate are unchanged. The API description's copy of the example moved with it (`ed
 
 ## allocation-key.v1.json
 
+### 1.4.0 — unreleased (2026-11-25; PS-1601) — pre-release
+
+- **Pre-release (versioning rule 5).** No key has been released on any plane, so what `key`
+  means narrows in place, with a minor bump.
+- `key` now counts, in each category's W_k, only the entries of `listVersion` active IN
+  `effectiveMonth`: status `active` and `activeFrom` at or before `effectiveMonth`. A version may
+  activate an entry from a month after its own `effectiveFrom` (`recipient-list.v1`'s `activeFrom`
+  is never before it, and may be later), and a month's allocation counts an entry only from its
+  `activeFrom`. Counted from the key's month, such an entry gave its category a share that is not
+  paid in the months before its `activeFrom`, so the published key and the shares applied in those
+  months differed with no cause the close could name. Such an entry now counts for nothing in the
+  key, as a pending one does, and `weights` still names it. The description also names the third
+  way a month's counted entries can differ from the key's: in a later month the key governs, an
+  entry of `listVersion` whose `activeFrom` is after `effectiveMonth`. And while no entry of
+  `listVersion` is active in `effectiveMonth`, no key is released for that month.
+- Reader check (5) reads the same: `key` is derived from `weights` over `listVersion`'s entries
+  active in `effectiveMonth`. `check:allocation-keys` derives the key that way, and a new
+  self-test case moves one active entry's `activeFrom` to the month after the key's and requires
+  `derive` to fire.
+- No member, type, pattern or example changes. Every entry of the List example `v1` is active from
+  2027-01, the example key's month, so the example key, its approved text and its hash
+  (`e5337e2c…`) stand, and `allocation-keys.v1` and the API description's examples are unchanged.
+
 ### 1.3.0 — unreleased (2026-11-25; ops decision D245) — pre-release
 
 - **Pre-release tightening (versioning rule 5).** The dashboard moves from `app.purposesource.org`
