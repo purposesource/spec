@@ -25,17 +25,5 @@
   "factRefs": {
     "entId": "ent_01jh0y4e1np5s9zb7t2x6v8a1d"
   },
-  "supersedes": null,
-  "claims": {
-    "kitVersion": "kit-1",
-    "permitted": [
-      "holds a Project Entitlement of the Purpose Source Network; Purpose Fee amount: $400; period: 2027; categories: environment, health"
-    ],
-    "prohibited": [
-      "we support charity",
-      "we give back",
-      "any unquantified social-impact framing"
-    ],
-    "binding": "public claims about this certificate are governed by the enclosed claim-language kit"
-  }
+  "supersedes": null
 }
